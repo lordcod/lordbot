@@ -1,0 +1,2 @@
+import nextcord
+token = "j"
