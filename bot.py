@@ -15,20 +15,35 @@ import os
 from config import *
 import requests
 import io
-import loggering
 import recaptcha
-
-logger = loggering.get_logger()
 
 DEFAULT_PREFIX = '.'
 
-
+def generate_message(content):
+    message = {}
+    try:
+        content = orjson.loads(content)
+        
+        message['embeds'] = []
+        if "embeds" in content and type(content["embeds"]) == dict:
+            for em in content["embeds"]:
+                nextcord.Embed.from_dict(em)
+        
+        if "content" in message:
+            message['content'] = content['content']
+        
+        if "flags" in message:
+            message['flag'] = nextcord.MessageFlags()
+            message['flag'].value = content["flags"]
+    except orjson.JSONDecodeError:
+        message['content'] = content
+    return message
 
 bot = commands.Bot(command_prefix=DEFAULT_PREFIX,intents=nextcord.Intents.all())
 
 @bot.event
 async def on_ready():
-    logger.info(f"The bot is registered as {bot.user}")
+    print(f"The bot is registered as {bot.user}")
 
 @bot.command()
 async def say(ctx:commands.Context, *, message: str=None):
@@ -37,45 +52,22 @@ async def say(ctx:commands.Context, *, message: str=None):
         data = io.BytesIO(await attach.read())
         files.append(nextcord.File(data, attach.filename))
     
-    try:
-        message = orjson.loads(message)
-        
-        embeds = []
-        if "embeds" in message and type(message["embeds"]) == dict:
-            for em in message["embeds"]:
-                nextcord.Embed.from_dict(em)
-        
-        if "content" in message:
-            content = message['content']
-        else:
-            content = None
-        
-        if "flags" in message:
-            flag = nextcord.MessageFlags()
-            flag.value = message["flags"]
-        else:
-            flag = None
-        
-        await ctx.send(content=content,embeds=embeds,files=files,flags=flag)
-    except orjson.JSONDecodeError:
-        await ctx.send(message,files=files)
+    res = generate_message(message)
+    ctx.send(**res,files=files)
+    
     await ctx.message.delete()
 
 @bot.event
 async def on_disconnect():
-    logger.info("Bot is disconnect")
-
-# @bot.event
-# async def on_error(event,*args, **kwargs):
-#     logger.error(f"[HANDLER][on_error][{event}]: ARG:{args} KWARG:{kwargs}")
+    print("Bot is disconnect")
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
-    logger.error(f"[HANDLER][on_command_error][{ctx.command.name}]: {error}")
+    print(f"[HANDLER][on_command_error][{ctx.command.name}]: {error}")
 
 @bot.event
 async def on_application_command_error(interaction: nextcord.Interaction, error):
-    logger.error(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
+    print(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
 
 forum_messages = {
     1162708314761740309 : {'title':'Привет друг!)','description':"""
@@ -102,7 +94,7 @@ async def on_thread_create(thread:nextcord.Thread):
 
 @bot.event
 async def on_interaction(interaction:nextcord.Interaction):
-    logger.debug(interaction.type)
+    print(interaction.type)
     await bot.process_application_commands(interaction)
 
 @bot.event
@@ -144,8 +136,7 @@ async def fav_activiti(interaction: nextcord.Interaction, arg: str):
 
 @bot.slash_command(name="activiti")
 async def activiti(interaction:nextcord.Interaction,
-    voice:nextcord.VoiceChannel=nextcord.SlashOption(
-        name="voice",),
+    voice:nextcord.VoiceChannel=nextcord.SlashOption(name="voice"),
     act=nextcord.SlashOption(
         name="activiti",
         autocomplete=True,
@@ -167,7 +158,7 @@ async def activiti(interaction:nextcord.Interaction,
 @bot.command()
 async def captcha(ctx:commands.Context):
     data,text = recaptcha.generator(random.randint(3,7))
-    logger.debug(f"Captcha text: {text}")
+    print(f"Captcha text: {text}")
     image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
     await ctx.send(file=image_file)
     for i in range(3,0,-1):
@@ -182,7 +173,7 @@ async def captcha(ctx:commands.Context):
         await ctx.send(f"Вы не прошли captcha")
 
 if __name__ == "__main__":
-    for filename in os.listdir("./cogs"):
+    for filename in os.listdir("./lordbot/cogs"):
         if filename.endswith(".py"):
             fmp = filename[:-3]
             bot.load_extension(f"cogs.{fmp}")
