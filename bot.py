@@ -11,6 +11,8 @@ translator = googletrans.Translator()
 
 DEFAULT_PREFIX = '.'
 
+bot = commands.Bot(command_prefix=DEFAULT_PREFIX,intents=nextcord.Intents.all())
+
 def generate_message(content):
     message = {}
     try:
@@ -31,36 +33,6 @@ def generate_message(content):
         message['content'] = content
     return message
 
-bot = commands.Bot(command_prefix=DEFAULT_PREFIX,intents=nextcord.Intents.all())
-
-@bot.event
-async def on_ready():
-    print(f"The bot is registered as {bot.user}")
-
-@bot.command()
-async def say(ctx:commands.Context, *, message: str=None):
-    files = []
-    for attach in ctx.message.attachments:
-        data = io.BytesIO(await attach.read())
-        files.append(nextcord.File(data, attach.filename))
-    
-    res = generate_message(message)
-    ctx.send(**res,files=files)
-    
-    await ctx.message.delete()
-
-@bot.event
-async def on_disconnect():
-    print("Bot is disconnect")
-
-@bot.event
-async def on_command_error(ctx: commands.Context, error):
-    print(f"[HANDLER][on_command_error][{ctx.command.name}]: {error}")
-
-@bot.event
-async def on_application_command_error(interaction: nextcord.Interaction, error):
-    print(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
-
 
 forum_messages = {
     'channel_id':{'embed'}
@@ -73,6 +45,30 @@ laung_table = {
     1095713596790550592:'ru'
 }
 
+
+@bot.event
+async def on_ready():
+    print(f"The bot is registered as {bot.user}")
+
+@bot.event
+async def on_disconnect():
+    print("Bot is disconnect")
+
+
+@bot.event
+async def on_command_error(ctx: commands.Context, error):
+    print(f"[HANDLER][on_command_error][{ctx.command.name}]: {error}")
+
+@bot.event
+async def on_application_command_error(interaction: nextcord.Interaction, error):
+    print(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
+
+
+@bot.event
+async def on_interaction(interaction:nextcord.Interaction):
+    print(interaction.type)
+    await bot.process_application_commands(interaction)
+
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
     if thread.parent.id not in forum_messages:
@@ -80,11 +76,6 @@ async def on_thread_create(thread:nextcord.Thread):
 
     mes = forum_messages[thread.parent.id]
     await thread.send(embed=nextcord.Embed(**mes))
-
-@bot.event
-async def on_interaction(interaction:nextcord.Interaction):
-    print(interaction.type)
-    await bot.process_application_commands(interaction)
 
 @bot.event
 async def on_member_update(before:nextcord.Member,after:nextcord.Member):
@@ -134,6 +125,8 @@ async def on_message(message: nextcord.Message):
     
     await bot.process_commands(message)
 
+
+
 async def acc_activiti(interaction: nextcord.Interaction, arg: str):
     list = {}
     if interaction.guild is None:
@@ -150,7 +143,6 @@ async def acc_activiti(interaction: nextcord.Interaction, arg: str):
         if act.lower().startswith(arg.lower()):
             get_near[act]=list[act]
     await interaction.response.send_autocomplete(get_near)
-
 
 @bot.slash_command(name="activiti")
 @application_checks.guild_only()
@@ -174,6 +166,19 @@ async def activiti(interaction:nextcord.Interaction,
     emb = nextcord.Embed(title="**Активность успешно создана!**",color=0xfff8dc,description="Однако некоторые виды активностей могут быть недоступны для вашего сервера, если уровень бустов не соответствует требованиям активности.")
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
+
+@bot.command()
+async def say(ctx:commands.Context, *, message: str=None):
+    files = []
+    for attach in ctx.message.attachments:
+        data = io.BytesIO(await attach.read())
+        files.append(nextcord.File(data, attach.filename))
+    
+    res = generate_message(message)
+    ctx.send(**res,files=files)
+    
+    await ctx.message.delete()
+
 @bot.command()
 async def captcha(ctx:commands.Context):
     data,text = recaptcha.generator(random.randint(3,7))
@@ -189,6 +194,7 @@ async def captcha(ctx:commands.Context):
         await ctx.send("<a:congratulation:1164962077052522677> Congratulations you have passed the captcha")
         role = ctx.guild.get_role(role_captcha_id)
         await ctx.author.add_roles(role)
+
 
 if __name__ == "__main__":
     for filename in os.listdir("./lordbot/cogs"):
