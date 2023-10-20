@@ -1,11 +1,9 @@
-import googletrans
-translate = googletrans.Translator()
+import translators as ts
 
-text = "이 문장은 한글로 쓰여졌습니다"
+text = "이 문장은 한글로 쓰여졌습니다."
 
-laungs = googletrans.LANGUAGES
-detect = translate.detect(text)
-tanslators = translate.translate(text,dest='ru')
+lang = 'ru'
 
-print(detect.lang)
-print(tanslators) 
+res = ts.translate_text(query_text=text,translator='google',to_language=lang)
+ts
+print(type(res))

@@ -2,10 +2,9 @@ from nextcord.ext import commands
 import nextcord
 from typing import *
 
-class JoinDistanceConverter(commands.MemberConverter):
-        async def convert(self, ctx, argument):
-            member = await super().convert(ctx, argument)
-            return member.joined_at - member.created_at
+class JoinDistanceConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        return 34
 
 class proba(commands.Cog):
     def __init__(self, bot):
@@ -13,7 +12,7 @@ class proba(commands.Cog):
 
     @commands.command()
     async def con(self,ctx:commands.Context,arg:JoinDistanceConverter):
-        is_new = arg.delta.days < 100
+        is_new = arg < 100
         if is_new:
             await ctx.send("Hey you're pretty new!")
         else:

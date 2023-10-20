@@ -3,19 +3,11 @@ from nextcord.ext import (commands,application_checks,tasks)
 from nextcord import utils
 from nextcord.utils import get
 
-import asyncio
-import orjson
-import random
-import datetime as dtt
-import pickle
-import time
-import threading
-import sys
-import os
+import asyncio,orjson,random,googletrans,datetime as dtt,\
+pickle,time,threading,os,aiohttp,io,recaptcha,translators as ts
 from config import *
-import requests
-import io
-import recaptcha
+
+translator = googletrans.Translator()
 
 DEFAULT_PREFIX = '.'
 
@@ -69,20 +61,17 @@ async def on_command_error(ctx: commands.Context, error):
 async def on_application_command_error(interaction: nextcord.Interaction, error):
     print(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
 
+
 forum_messages = {
-    1162708314761740309 : {'title':'Привет друг!)','description':"""
-• Избегаем мета-вопросов
-• Если вопрос касается непосредственно твоего кода:
-> Опубликой полный вывод ошибки с терминала,
-> Фрагмент кода, на который эта ошибка ссылается! 
-• Объясни как можно подробней свою проблему.
-                            """
-    },
+    'channel_id':{'embed'}
 }
 auto_reactions = {
-    1160838344356413496:['✅','❌']
+    'channel_id':['reaction']
 }
-laung_table = {}
+laung_table = {
+    'channel_id':'lang',
+    1095713596790550592:'ru'
+}
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
@@ -118,6 +107,32 @@ async def on_message(message: nextcord.Message):
         reacts = auto_reactions[message.channel.id]
         for rea in reacts:
             await message.add_reaction(rea)
+    
+    if message.channel.id in laung_table:
+        lang = laung_table[message.channel.id]
+        detect = translator.detect(message.content)
+        if detect.lang != lang:
+            result = translator.translate(message.content,dest=lang)
+            embed = nextcord.Embed(
+                title="Перевод",
+                description=f'### {result.text}',
+                color=0xa17fe0
+            )
+            embed._fields = [
+                {
+                    'name':f'Переведено c {result.src}',
+                    'value':f'',
+                    'inline':True
+                },
+                {
+                    'name':f'Переведено на {result.dest}',
+                    'value':f'',
+                    'inline':True
+                },
+            ]
+            embed.set_footer(text='by LordBot',icon_url=bot.user.avatar.url)
+            await message.channel.send(embed=embed)
+    
     await bot.process_commands(message)
 
 async def fav_activiti(interaction: nextcord.Interaction, arg: str):
