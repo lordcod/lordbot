@@ -111,7 +111,6 @@ async def on_message(message: nextcord.Message):
     if message.channel.id in laung_table:
         lang = laung_table[message.channel.id]
         result = translator.translate(message.content,dest=lang)
-        print(result)
         if result.src != lang:
             embed = nextcord.Embed(
                 title="Перевод",
@@ -120,17 +119,17 @@ async def on_message(message: nextcord.Message):
             )
             embed._fields = [
                 {
-                    'name':f'Переведено c {result.src}',
+                    'name':f'Переведено c {laungs[result.src]}',
                     'value':f'',
                     'inline':True
                 },
                 {
-                    'name':f'Переведено на {result.dest}',
+                    'name':f'Переведено на {laungs[result.dest]}',
                     'value':f'',
                     'inline':True
                 },
             ]
-            embed.set_footer(text='by LordBot',icon_url=bot.user.avatar.url)
+            embed.set_footer(text='Powered by LordBot',icon_url=bot.user.avatar.url)
             await message.channel.send(embed=embed)
     
     await bot.process_commands(message)
@@ -138,7 +137,8 @@ async def on_message(message: nextcord.Message):
 async def acc_activiti(interaction: nextcord.Interaction, arg: str):
     list = {}
     if interaction.guild is None:
-        interaction.guild.premium_subscription_count = 0
+        await interaction.response.send_autocomplete(list)
+        return
     for act in activities_list:
         if interaction.guild.premium_subscription_count >= act['boost_level']:
             list[act['label']]=str(act['id']) 
