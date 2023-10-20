@@ -137,6 +137,8 @@ async def on_message(message: nextcord.Message):
 
 async def acc_activiti(interaction: nextcord.Interaction, arg: str):
     list = {}
+    if interaction.guild is None:
+        interaction.guild.premium_subscription_count = 0
     for act in activities_list:
         if interaction.guild.premium_subscription_count >= act['boost_level']:
             list[act['label']]=str(act['id']) 
@@ -149,7 +151,9 @@ async def acc_activiti(interaction: nextcord.Interaction, arg: str):
             get_near[act]=list[act]
     await interaction.response.send_autocomplete(get_near)
 
+
 @bot.slash_command(name="activiti")
+@application_checks.guild_only()
 async def activiti(interaction:nextcord.Interaction,
     voice:nextcord.VoiceChannel=nextcord.SlashOption(name="voice"),
     act=nextcord.SlashOption(
