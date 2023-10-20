@@ -14,9 +14,8 @@ class main(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @commands.is_owner()
-    async def subo(self,ctx:commands.Context,member:nextcord.Member|str,*,command:str):
+    async def subo(self,ctx:commands.Context,member:nextcord.Member,*,command:str):
         ctx.message.author = member
-        command = self.bot.user.mention+command
         await self.bot.process_with_str(ctx.message,command)
 
     @commands.command()

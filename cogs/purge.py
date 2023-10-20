@@ -16,7 +16,7 @@ class purges(commands.Cog):
     @commands.group(invoke_without_command=True)
     async def purge(self,ctx: commands.Context, limit: int):
         deleted = await ctx.channel.purge(limit=limit)
-        await ctx.send(f'Deleted {len(deleted)} message(s)')
+        await ctx.send(f'Deleted {len(deleted)} message(s)',delete_after=5.0)
 
     @commands.command()
     async def user(self,ctx: commands.Context,member: nextcord.Member,limit: int):
@@ -31,7 +31,7 @@ class purges(commands.Cog):
                 await message.delete()
                 deleted += 1
         
-        await ctx.send(f'Deleted {deleted} message(s)')
+        await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
     @commands.command()
     async def between(self,ctx: commands.Context, message_start:nextcord.Message, messsage_finish:nextcord.Message=None):
@@ -50,7 +50,7 @@ class purges(commands.Cog):
             if message == message_start:
                 break
         
-        await ctx.send(f'Deleted {deleted} message(s)')
+        await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
     @commands.command()
     async def type(self,ctx: commands.Context,content_type: str,limit: int):
@@ -69,7 +69,7 @@ class purges(commands.Cog):
                     deleted += 1
                     await message.delete()
         
-        await ctx.send(f'Deleted {deleted} message(s)')
+        await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
 
 

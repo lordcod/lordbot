@@ -197,7 +197,7 @@ async def captcha(ctx:commands.Context):
 
 
 if __name__ == "__main__":
-    for filename in os.listdir("./lordbot/cogs"):
+    for filename in os.listdir("./cogs"):
         if filename.endswith(".py"):
             fmp = filename[:-3]
             bot.load_extension(f"cogs.{fmp}")
