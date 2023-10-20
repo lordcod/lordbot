@@ -4,7 +4,7 @@ from nextcord import utils
 from nextcord.utils import get
 
 import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha,translators as ts
+pickle,time,threading,os,aiohttp,io,recaptcha
 from config import *
 
 translator = googletrans.Translator()
@@ -110,9 +110,9 @@ async def on_message(message: nextcord.Message):
     
     if message.channel.id in laung_table:
         lang = laung_table[message.channel.id]
-        detect = translator.detect(message.content)
-        if detect.lang != lang:
-            result = translator.translate(message.content,dest=lang)
+        result = translator.translate(message.content,dest=lang)
+        print(result)
+        if result.src != lang:
             embed = nextcord.Embed(
                 title="Перевод",
                 description=f'### {result.text}',
@@ -135,7 +135,7 @@ async def on_message(message: nextcord.Message):
     
     await bot.process_commands(message)
 
-async def fav_activiti(interaction: nextcord.Interaction, arg: str):
+async def acc_activiti(interaction: nextcord.Interaction, arg: str):
     list = {}
     for act in activities_list:
         if interaction.guild.premium_subscription_count >= act['boost_level']:
@@ -155,7 +155,7 @@ async def activiti(interaction:nextcord.Interaction,
     act=nextcord.SlashOption(
         name="activiti",
         autocomplete=True,
-        autocomplete_callback=fav_activiti,),
+        autocomplete_callback=acc_activiti,),
 ):
     try:
         inv = await voice.create_invite(
@@ -176,16 +176,15 @@ async def captcha(ctx:commands.Context):
     print(f"Captcha text: {text}")
     image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
     await ctx.send(file=image_file)
-    for i in range(3,0,-1):
-        def check(mes:nextcord.Message):
-            return mes.channel==ctx.channel and mes.author==ctx.author
-        mes:nextcord.Message = await bot.wait_for("message",check=check)
-        if mes.content.lower() == text.lower():
-            await ctx.send("Вы прошли капчу")
-            await ctx.author.add_roles(ctx.guild.get_role(role_captcha_id))
-            break
-    else:
-        await ctx.send(f"Вы не прошли captcha")
+    
+    def check(mes:nextcord.Message):
+        return mes.channel==ctx.channel and mes.author==ctx.author
+    mes:nextcord.Message = await bot.wait_for("message",check=check)
+    
+    if mes.content.lower() == text.lower():
+        await ctx.send("<a:congratulation:1164962077052522677> Congratulations you have passed the captcha")
+        role = ctx.guild.get_role(role_captcha_id)
+        await ctx.author.add_roles(role)
 
 if __name__ == "__main__":
     for filename in os.listdir("./lordbot/cogs"):
