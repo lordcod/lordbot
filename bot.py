@@ -125,31 +125,13 @@ async def on_message(message: nextcord.Message):
     
     await bot.process_commands(message)
 
-
-
-async def acc_activiti(interaction: nextcord.Interaction, arg: str):
-    if interaction.guild is None:
-        await interaction.response.send_autocomplete([])
-        return
-    
-    list = [act['label'] for act in activities_list[:25]]
-    if not arg:
-        await interaction.response.send_autocomplete(list)
-        return
-    get_near = []
-    for act in list:
-        if act.lower().startswith(arg.lower()):
-            get_near.append(act)
-    await interaction.response.send_autocomplete(get_near)
-
 @bot.slash_command(name="activiti")
 @application_checks.guild_only()
 async def activiti(interaction:nextcord.Interaction,
     voice:nextcord.VoiceChannel=nextcord.SlashOption(name="voice"),
     act=nextcord.SlashOption(
         name="activiti",
-        autocomplete=True,
-        autocomplete_callback=acc_activiti,),
+        choices=[activ['label'] for activ in activities_list]),
 ):
     activiti = utils.find(lambda a: a['label']==act,activities_list)
     try:
@@ -164,10 +146,8 @@ async def activiti(interaction:nextcord.Interaction,
     view.add_item(nextcord.ui.Button(label="Activiti",emoji="<:rocket:1154866304864497724>",url=inv.url))
     emb = nextcord.Embed(title="**Активность успешно создана!**",color=0xfff8dc,description="Однако некоторые виды активностей могут быть недоступны для вашего сервера, если уровень бустов не соответствует требованиям активности.")
     emb._fields = [
-        {'name':'Debugger:','value':'','inline':False},
-        {'name':'label','value':activiti['label'],'inline':True},
-        {'name':'id','value':activiti['id'],'inline':True},
-        {'name':'max_user','value':activiti['max_user'],'inline':True},
+        {'name':'Название','value':activiti['label'],'inline':True},
+        {'name':'Максимальное кол-во участников','value':activiti['max_user'],'inline':True},
     ]
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
