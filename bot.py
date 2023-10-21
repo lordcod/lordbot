@@ -104,7 +104,7 @@ async def on_message(message: nextcord.Message):
         result = translator.translate(message.content,dest=lang)
         if result.src != lang:
             embed = nextcord.Embed(
-                title="Перевод",
+                title="Авто-Перевод",
                 description=f'### {result.text}',
                 color=0xa17fe0
             )
@@ -128,13 +128,11 @@ async def on_message(message: nextcord.Message):
 
 
 async def acc_activiti(interaction: nextcord.Interaction, arg: str):
-    list = {}
     if interaction.guild is None:
-        await interaction.response.send_autocomplete(list)
+        await interaction.response.send_autocomplete([])
         return
-    for act in activities_list:
-        if interaction.guild.premium_subscription_count >= act['boost_level']:
-            list[act['label']]=str(act['id']) 
+    
+    list = {act['label']:str(act['id']) for act in activities_list[:25]}
     if not arg:
         await interaction.response.send_autocomplete(list)
         return
@@ -156,7 +154,7 @@ async def activiti(interaction:nextcord.Interaction,
     try:
         inv = await voice.create_invite(
             target_type=nextcord.InviteTarget.embedded_application,
-            target_application_id=int(act)
+            target_application_id=act
         )
     except:
         await interaction.response.send_message(content="This activity is unavailable or does not work")
