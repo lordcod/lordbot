@@ -125,13 +125,24 @@ async def on_message(message: nextcord.Message):
     
     await bot.process_commands(message)
 
-@bot.slash_command(name="activiti")
+
+@bot.slash_command(
+    name="activiti",
+    description="Create an activity)",
+)
 @application_checks.guild_only()
 async def activiti(interaction:nextcord.Interaction,
-    voice:nextcord.VoiceChannel=nextcord.SlashOption(name="voice"),
+    voice:nextcord.VoiceChannel=nextcord.SlashOption(
+        required=True,
+        name="voice",
+        description="Select the voice channel in which the activity will work!"
+    ),
     act=nextcord.SlashOption(
+        required=True,
         name="activiti",
-        choices=[activ['label'] for activ in activities_list]),
+        description="Select the activity you want to use!",
+        choices=[activ['label'] for activ in activities_list],
+    ),
 ):
     activiti = utils.find(lambda a: a['label']==act,activities_list)
     try:
