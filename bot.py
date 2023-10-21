@@ -4,7 +4,7 @@ from nextcord import utils
 from nextcord.utils import get
 
 import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha
+pickle,time,threading,os,aiohttp,io,recaptcha,langs
 from config import *
 
 translator = googletrans.Translator()
@@ -41,8 +41,9 @@ auto_reactions = {
     'channel_id':['reaction']
 }
 laung_table = {
-    'channel_id':'lang',
-    1095713596790550592:'ru'
+    'channel_id':{#option
+        
+    },
 }
 
 
@@ -110,12 +111,12 @@ async def on_message(message: nextcord.Message):
             )
             embed._fields = [
                 {
-                    'name':f'Переведено c {laungs[result.src]}',
+                    'name':f'Переведено c {googletrans.LANGUAGES[result.src]}',
                     'value':f'',
                     'inline':True
                 },
                 {
-                    'name':f'Переведено на {laungs[result.dest]}',
+                    'name':f'Переведено на {googletrans.LANGUAGES[result.dest]}',
                     'value':f'',
                     'inline':True
                 },
@@ -175,21 +176,26 @@ async def say(ctx:commands.Context, *, message: str=None):
     
     await ctx.message.delete()
 
+lang = 'ru'
+
 @bot.command()
 async def captcha(ctx:commands.Context):
     data,text = recaptcha.generator(random.randint(3,7))
-    print(f"Captcha text: {text}")
     image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
-    await ctx.send(file=image_file)
-    
-    def check(mes:nextcord.Message):
-        return mes.channel==ctx.channel and mes.author==ctx.author
-    mes:nextcord.Message = await bot.wait_for("message",check=check)
+    await ctx.send(content=langs.captcha.enter[lang],file=image_file)
+    try:
+        check = lambda m: m.channel==ctx.channel and m.author==ctx.author
+        mes:nextcord.Message = await bot.wait_for("message",timeout=30,check=check)
+    except asyncio.TimeoutError:
+        await ctx.send(content=langs.captcha.failed[lang])
+        return
     
     if mes.content.lower() == text.lower():
-        await ctx.send("<a:congratulation:1164962077052522677> Congratulations you have passed the captcha")
+        await ctx.send(f"<a:congratulation:1164962077052522677>{langs.captcha.congratulation[lang]}")
         role = ctx.guild.get_role(role_captcha_id)
         await ctx.author.add_roles(role)
+    else:
+        await ctx.send(content=langs.captcha.failed[lang])
 
 
 if __name__ == "__main__":
