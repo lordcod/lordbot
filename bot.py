@@ -132,14 +132,14 @@ async def acc_activiti(interaction: nextcord.Interaction, arg: str):
         await interaction.response.send_autocomplete([])
         return
     
-    list = {act['label']:str(act['id']) for act in activities_list[:25]}
+    list = [act['label'] for act in activities_list[:25]]
     if not arg:
         await interaction.response.send_autocomplete(list)
         return
-    get_near = {}
+    get_near = []
     for act in list:
         if act.lower().startswith(arg.lower()):
-            get_near[act]=list[act]
+            get_near.append(act)
     await interaction.response.send_autocomplete(get_near)
 
 @bot.slash_command(name="activiti")
@@ -151,10 +151,11 @@ async def activiti(interaction:nextcord.Interaction,
         autocomplete=True,
         autocomplete_callback=acc_activiti,),
 ):
+    activiti = utils.find(lambda a: a['label']==act,activities_list)
     try:
         inv = await voice.create_invite(
             target_type=nextcord.InviteTarget.embedded_application,
-            target_application_id=act
+            target_application_id=activiti['id']
         )
     except:
         await interaction.response.send_message(content="This activity is unavailable or does not work")
@@ -162,6 +163,12 @@ async def activiti(interaction:nextcord.Interaction,
     view = nextcord.ui.View(timeout=None)
     view.add_item(nextcord.ui.Button(label="Activiti",emoji="<:rocket:1154866304864497724>",url=inv.url))
     emb = nextcord.Embed(title="**Активность успешно создана!**",color=0xfff8dc,description="Однако некоторые виды активностей могут быть недоступны для вашего сервера, если уровень бустов не соответствует требованиям активности.")
+    emb._fields = [
+        {'name':'Debugger:','value':'','inline':False},
+        {'name':'label','value':activiti['label'],'inline':True},
+        {'name':'id','value':activiti['id'],'inline':True},
+        {'name':'max_user','value':activiti['max_user'],'inline':True},
+    ]
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
 

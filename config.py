@@ -10,33 +10,22 @@ role_captcha_id = 1148662572485181512
 activities_list = [
     {'id':880218394199220334,'label':'Watch Together','max_user':'Unlimited'},
     {'id':755827207812677713,'label':'Poker Night','max_user':'25'},
-    {'id':773336526917861400,'label':'Betrayal.io','max_user':'Unlimited'},
-    {'id':814288819477020702,'label':'Fishington.io','max_user':'Unlimited'},
     {'id':832012774040141894,'label':'Chess In The Park','max_user':'Unlimited'},
     {'id':902271654783242291,'label':'Sketch Heads','max_user':'16'},
     {'id':879863686565621790,'label':'Letter League','max_user':'8'},
-    {'id':879863976006127627,'label':'Word Snacks','max_user':'8'},
-    {'id':852509694341283871,'label':'SpellCast','max_user':'100'},
     {'id':832013003968348200,'label':'Checkers In The Park','max_user':'Unlimited'},
     {'id':832025144389533716,'label':'Blazing 8s','max_user':'8'},
     {'id':945737671223947305,'label':'Putt Party','max_user':'Unlimited'},
     {'id':903769130790969345,'label':'Land-io','max_user':'16'},
     {'id':947957217959759964,'label':'Bobble League','max_user':'8'},
-    {'id':976052223358406656,'label':'Ask Away','max_user':'10'},
     {'id':950505761862189096,'label':'Know What I Meme','max_user':'9'},
-    {'id':1006584476094177371,'label':'Bash Out','max_user':'16'},
-
     {'id':1007373802981822582,'label':'Gartic Phone','max_user':'16'},
     {'id':1039835161136746497,'label':'Color Together','max_user':'100'},
+    {'id':1070087967294631976,'label':'Jamspace Whiteboard','max_user':'Unlimited'},
     {'id':1037680572660727838,'label':'Chef Showdown','max_user':'15'},
-    {'id':1000100849122553977,'label':'Bobble Land: Scrappies','max_user':'4'},
-    {'id':1070087967294631976,'label':'Jamspace','max_user':'Unlimited'},
-    {'id':1001529884625088563,'label':'Guestbook','max_user':'Unlimited'},
-    {'id':1011683823555199066,'label':'Project K','max_user':'Unlimited'},
-    
     {'id':1107689944685748377,'label':'Bobble Bash','max_user':'8'},
-    {'id':1107689944685748377,'label':'Whiteboard','max_user':'Unlimited'},
 ]
+
 laungs = {
     "af": "afrikaans",
     "sq": "albanian",
