@@ -1,24 +1,19 @@
 import nextcord
 from nextcord.ext import commands
 
-content_type_list = {
-    "pdf":["application/pdf"],
-    "zip":["application/zip"],
-    "audio":["audio/mpeg","audio/ogg"],
-    "image":["image/avif","image/jpeg","image/png","image/svg+xml"],
-    "text":["text/plain""text/css","text/csv","text/html","text/javascript(.js)","text/xml"],
-}
 
 class purges(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group(invoke_without_command=True)
+    @commands.has_permissions(manage_messages=True)
     async def purge(self,ctx: commands.Context, limit: int):
         deleted = await ctx.channel.purge(limit=limit)
         await ctx.send(f'Deleted {len(deleted)} message(s)',delete_after=5.0)
 
-    @commands.command()
+    @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def user(self,ctx: commands.Context,member: nextcord.Member,limit: int):
         if limit > 100:
             raise CommandError("The maximum number of messages to delete is `100`")
@@ -33,7 +28,8 @@ class purges(commands.Cog):
         
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
-    @commands.command()
+    @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def between(self,ctx: commands.Context, message_start:nextcord.Message, messsage_finish:nextcord.Message=None):
         if not messsage_finish:
             messsage_finish = (await message_start.channel.history(limit=1).flatten())[0]
@@ -52,7 +48,8 @@ class purges(commands.Cog):
         
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
-    @commands.command()
+    @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def type(self,ctx: commands.Context,content_type: str,limit: int):
         if limit > 100:
             raise CommandError("The maximum number of messages to delete is `100`")

@@ -152,6 +152,7 @@ async def on_member_update(before:nextcord.Member,after:nextcord.Member):
     elif remove:
         print(f'У {before.name} удалили роль {remove[0].name}')
 
+
 @bot.event
 async def on_message(message: nextcord.Message):
     if message.author.bot:
