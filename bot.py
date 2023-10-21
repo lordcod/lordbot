@@ -4,7 +4,7 @@ from nextcord import utils
 from nextcord.utils import get,find
 
 import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha,langs
+pickle,time,threading,os,aiohttp,io,recaptcha,languages
 from config import *
 
 translator = googletrans.Translator()
@@ -33,9 +33,58 @@ def generate_message(content):
         message['content'] = content
     return message
 
-lang = 'ru'
+class GuildDateBases:
+    def __init__(self,base:dict):
+        self.base = base
 
-guilds = {
+    def __call__(self,guild_id):
+        self.guild_id = guild_id
+        self.get_guild(guild_id)
+        return self 
+
+    def get_guild(self,guild_id):
+        if guild_id in self.base:
+            return self.base[guild_id]
+        else:
+            self.base[guild_id] = {}
+            return self.base[guild_id]
+    
+    def get_afm(self,channel_id):
+        if not self.guild_id:
+            return None
+        service = 'auto_forum_messages'
+        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
+            return self.base[self.guild_id][service][channel_id]
+        else:
+            return False
+    
+    def get_ar(self,channel_id):
+        if not self.guild_id:
+            return None
+        service = 'auto_reactions'
+        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
+            return self.base[self.guild_id][service][channel_id]
+        else:
+            return False
+    
+    def get_at(self,channel_id):
+        if not self.guild_id:
+            return None
+        service = 'auto_translate'
+        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
+            return self.base[self.guild_id][service][channel_id]
+        else:
+            return False
+
+    def get_lang(self):
+        if not self.guild_id:
+            return None
+        if 'language' in self.base[self.guild_id]:
+            return self.base[self.guild_id]['language']
+        else:
+            return 'ru'
+
+guilds = GuildDateBases({
     'exemple':{
         'auto_forum_messages' : {
             'channel_id':{'embed'}
@@ -46,15 +95,18 @@ guilds = {
         'auto_translate' : {
             'channel_id':'laung',
         },
+        'language':'en'
+    },
+    1095713596790550589:{
+        'auto_reactions' : {
+            1095713596790550592:['<:pwease:1163469696717291671>'],
+        },
+        'auto_translate' : {
+            1095713596790550592:'ru'
+        },
+        'language':'ru'
     }
-}
-
-def get_guild(guild_id):
-    if guild_id in guilds:
-        return guilds[guild_id]
-    else:
-        guilds[guild_id] = {}
-        return get_guild(guild_id)
+})
 
 @bot.event
 async def on_ready():
@@ -81,11 +133,11 @@ async def on_interaction(interaction:nextcord.Interaction):
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
-    guild_base = get_guild(thread.guild.id)
-    if 'auto_forum_messages' in guild_base and thread.parent.id in guild_base['forum_messages']:
+    guild_base = guilds(message.guild.id)
+    emb = guild_base.get_afm(thread.id)
+    if not emb:
         return
     
-    mes = guild_base['forum_messages'][thread.parent.id]
     await thread.send(embed=nextcord.Embed(**mes))
 
 @bot.event
@@ -105,33 +157,36 @@ async def on_message(message: nextcord.Message):
     if message.author.bot:
         return
     
-    if message.channel.id in auto_reactions:
-        reacts = auto_reactions[message.channel.id]
+    guild_base = guilds(message.guild.id)
+    reacts = guild_base.get_ar(message.channel.id)
+    trans_lang = guild_base.get_at(message.channel.id)
+    lang = guilds(message.guild.id).get_lang()
+    
+    if reacts:
         for rea in reacts:
             await message.add_reaction(rea)
     
-    if message.channel.id in laung_table:
-        lang = laung_table[message.channel.id]
-        result = translator.translate(message.content,dest=lang)
-        if result.src != lang:
+    if trans_lang:
+        result = translator.translate(message.content,dest=trans_lang)
+        if result.src != trans_lang:
             embed = nextcord.Embed(
-                title="Авто-Перевод",
+                title="",
                 description=f'### {result.text}',
                 color=0xa17fe0
             )
             embed._fields = [
                 {
-                    'name':f'Переведено c {googletrans.LANGUAGES[result.src]}',
+                    'name':f'{languages.auto_translate.field_name_from[lang]} {googletrans.LANGUAGES[result.src]}',
                     'value':f'',
                     'inline':True
                 },
                 {
-                    'name':f'Переведено на {googletrans.LANGUAGES[result.dest]}',
+                    'name':f'{languages.auto_translate.field_name_to[lang]} {googletrans.LANGUAGES[result.dest]}',
                     'value':f'',
                     'inline':True
                 },
             ]
-            embed.set_footer(text='Powered by LordBot',icon_url=bot.user.avatar.url)
+            embed.set_footer(text='Performed with LordBot',icon_url=bot.user.avatar.url)
             await message.channel.send(embed=embed)
     
     await bot.process_commands(message)
@@ -155,6 +210,7 @@ async def activiti(interaction:nextcord.Interaction,
         choices=[activ['label'] for activ in activities_list],
     ),
 ):
+    lang = guilds(interaction.guild_id).get_lang()
     activiti = utils.find(lambda a: a['label']==act,activities_list)
     try:
         inv = await voice.create_invite(
@@ -162,14 +218,14 @@ async def activiti(interaction:nextcord.Interaction,
             target_application_id=activiti['id']
         )
     except:
-        await interaction.response.send_message(content=langs.activiti.failed[lang])
+        await interaction.response.send_message(content=languages.activiti.failed[lang])
         return
     view = nextcord.ui.View(timeout=None)
     view.add_item(nextcord.ui.Button(label="Activiti",emoji="<:rocket:1154866304864497724>",url=inv.url))
-    emb = nextcord.Embed(title=f"**{langs.activiti.embed_title[lang]}**",color=0xfff8dc,description=langs.activiti.embed_description[lang])
+    emb = nextcord.Embed(title=f"**{languages.activiti.embed_title[lang]}**",color=0xfff8dc,description=languages.activiti.embed_description[lang])
     emb._fields = [
-        {'name':langs.activiti.fields_label[lang],'value':activiti['label'],'inline':True},
-        {'name':langs.activiti.fields_max_user[lang],'value':activiti['max_user'],'inline':True},
+        {'name':languages.activiti.fields_label[lang],'value':activiti['label'],'inline':True},
+        {'name':languages.activiti.fields_max_user[lang],'value':activiti['max_user'],'inline':True},
     ]
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
@@ -186,26 +242,25 @@ async def say(ctx:commands.Context, *, message: str=None):
     
     await ctx.message.delete()
 
-
-
 @bot.command()
 async def captcha(ctx:commands.Context):
+    lang = guilds(ctx.guild.id).get_lang()
     data,text = recaptcha.generator(random.randint(3,7))
     image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
-    await ctx.send(content=langs.captcha.enter[lang],file=image_file)
+    await ctx.send(content=languages.captcha.enter[lang],file=image_file)
     try:
         check = lambda m: m.channel==ctx.channel and m.author==ctx.author
         mes:nextcord.Message = await bot.wait_for("message",timeout=30,check=check)
     except asyncio.TimeoutError:
-        await ctx.send(content=langs.captcha.failed[lang])
+        await ctx.send(content=languages.captcha.failed[lang])
         return
     
     if mes.content.lower() == text.lower():
-        await ctx.send(f"<a:congratulation:1164962077052522677>{langs.captcha.congratulation[lang]}")
+        await ctx.send(f"<a:congratulation:1164962077052522677>{languages.captcha.congratulation[lang]}")
         role = ctx.guild.get_role(role_captcha_id)
         await ctx.author.add_roles(role)
     else:
-        await ctx.send(content=langs.captcha.failed[lang])
+        await ctx.send(content=languages.captcha.failed[lang])
 
 
 if __name__ == "__main__":

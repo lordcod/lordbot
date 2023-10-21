@@ -1,7 +1,7 @@
 exemple = {
-        'ru':'',
-        'en':''
-    }
+    'ru':'',
+    'en':''
+}
 
 class captcha():
     congratulation = {
@@ -37,4 +37,18 @@ class activiti():
     fields_max_user = {
         'ru':'Максимальное кол-во пользователей',
         'en':'Maximum number of users'
+    }
+
+class auto_translate:
+    title = {
+        'ru':'Авто перевод',
+        'en':'Automatic translation'
+    }
+    field_name_from = {
+        'ru':'Переведено c',
+        'en':'Translated from'
+    }
+    field_name_to = {
+        'ru':'Переведено на',
+        'en':'Translated to'
     }
