@@ -1,7 +1,7 @@
 import nextcord
 from nextcord.ext import (commands,application_checks,tasks)
 from nextcord import utils
-from nextcord.utils import get
+from nextcord.utils import get,find
 
 import asyncio,orjson,random,googletrans,datetime as dtt,\
 pickle,time,threading,os,aiohttp,io,recaptcha,langs
@@ -33,19 +33,28 @@ def generate_message(content):
         message['content'] = content
     return message
 
+lang = 'ru'
 
-forum_messages = {
-    'channel_id':{'embed'}
-}
-auto_reactions = {
-    'channel_id':['reaction']
-}
-laung_table = {
-    'channel_id':{#option
-        
-    },
+guilds = {
+    'exemple':{
+        'auto_forum_messages' : {
+            'channel_id':{'embed'}
+        },
+        'auto_reactions' : {
+            'channel_id':['reaction']
+        },
+        'auto_translate' : {
+            'channel_id':'laung',
+        },
+    }
 }
 
+def get_guild(guild_id):
+    if guild_id in guilds:
+        return guilds[guild_id]
+    else:
+        guilds[guild_id] = {}
+        return get_guild(guild_id)
 
 @bot.event
 async def on_ready():
@@ -72,10 +81,11 @@ async def on_interaction(interaction:nextcord.Interaction):
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
-    if thread.parent.id not in forum_messages:
+    guild_base = get_guild(thread.guild.id)
+    if 'auto_forum_messages' in guild_base and thread.parent.id in guild_base['forum_messages']:
         return
-
-    mes = forum_messages[thread.parent.id]
+    
+    mes = guild_base['forum_messages'][thread.parent.id]
     await thread.send(embed=nextcord.Embed(**mes))
 
 @bot.event
@@ -152,14 +162,14 @@ async def activiti(interaction:nextcord.Interaction,
             target_application_id=activiti['id']
         )
     except:
-        await interaction.response.send_message(content="This activity is unavailable or does not work")
+        await interaction.response.send_message(content=langs.activiti.failed[lang])
         return
     view = nextcord.ui.View(timeout=None)
     view.add_item(nextcord.ui.Button(label="Activiti",emoji="<:rocket:1154866304864497724>",url=inv.url))
-    emb = nextcord.Embed(title="**Активность успешно создана!**",color=0xfff8dc,description="Однако некоторые виды активностей могут быть недоступны для вашего сервера, если уровень бустов не соответствует требованиям активности.")
+    emb = nextcord.Embed(title=f"**{langs.activiti.embed_title[lang]}**",color=0xfff8dc,description=langs.activiti.embed_description[lang])
     emb._fields = [
-        {'name':'Название','value':activiti['label'],'inline':True},
-        {'name':'Максимальное кол-во участников','value':activiti['max_user'],'inline':True},
+        {'name':langs.activiti.fields_label[lang],'value':activiti['label'],'inline':True},
+        {'name':langs.activiti.fields_max_user[lang],'value':activiti['max_user'],'inline':True},
     ]
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
@@ -176,7 +186,7 @@ async def say(ctx:commands.Context, *, message: str=None):
     
     await ctx.message.delete()
 
-lang = 'ru'
+
 
 @bot.command()
 async def captcha(ctx:commands.Context):
