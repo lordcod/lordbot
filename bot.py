@@ -116,7 +116,6 @@ async def on_ready():
 async def on_disconnect():
     print("Bot is disconnect")
 
-
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
     print(f"[HANDLER][on_command_error][{ctx.command.name}]: {error}")
@@ -124,6 +123,7 @@ async def on_command_error(ctx: commands.Context, error):
 @bot.event
 async def on_application_command_error(interaction: nextcord.Interaction, error):
     print(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
+    print(interaction.id)
 
 
 @bot.event
