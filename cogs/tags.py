@@ -28,7 +28,6 @@ class tags(commands.Cog):
         if tag not in tags:
             tags.append(tag)
         await ctx.channel.edit(applied_tags=tags)
-        await ctx.send("Ok",delete_after=5)
     
     @tag.command()
     async def remove(self,ctx: commands.Context,*,tag_name):
@@ -41,8 +40,7 @@ class tags(commands.Cog):
         if tag in tags:
             tags.remove(tag)
         await ctx.channel.edit(applied_tags=tags)
-        await ctx.send("Ok",delete_after=5)
-        
+
 
 
 def setup(bot):
