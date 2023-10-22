@@ -5,7 +5,7 @@ import nextcord
 import aiohttp
 import logging
 import time
-import json
+import orjson
 
 app = Flask(__name__)
 log = logging.getLogger('werkzeug')
@@ -20,7 +20,7 @@ api = 'https://discord.com/api/v10'
 redirect_uri = f'{lord}/link-role-callback'
 client_id = '1095713975532007434'
 client_secret = 'Dq0HY3D3sAxauD2_HxEsIxzZoyBT5_4H'
-scope = 'role_connections.write+guilds+identify+applications.commands.permissions.update'
+scope = 'role_connections.write+guilds+identify+applications.commands.permissions.update+guilds.join'
 url_auth = f"https://discord.com/api/oauth2/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={scope}"
 token = "MTA5NTcxMzk3NTUzMjAwNzQzNA.GdoeFJ.RuUbalItmQArVDmqcKLLK_2eImRpt-glwLyarI"
 
@@ -35,6 +35,7 @@ async def getOAuthTokens(code):
         'code': code,
         'redirect_uri': redirect_uri
     } 
+    data = orjson.dumps(data)
     headers={'Content-Type':'application/x-www-form-urlencoded'}
     url = f'{api}/oauth2/token'
     async with aiohttp.ClientSession() as session:
@@ -50,6 +51,7 @@ async def updateTokens(tokens):
         'refresh_token': tokens['refresh_token'],
         'redirect_uri': redirect_uri
     }
+    data = orjson.dumps(data)
     headers={'Content-Type': 'application/x-www-form-urlencoded'}
     url = f'{api}/oauth2/token'
     async with aiohttp.ClientSession() as session:
@@ -58,8 +60,8 @@ async def updateTokens(tokens):
         return json
 
 async def getUserDate(tokens):
-    headers={"Authorization": "Bearer "+tokens['access_token']}
     url = f'{api}/users/@me'
+    headers={"Authorization": "Bearer "+tokens['access_token']}
     async with aiohttp.ClientSession() as session:
         res = await session.get(url,headers=headers)
         json = await res.json()
@@ -111,8 +113,9 @@ async def isBotGuild(guild_id):
     return False
 
 async def addGuild(guild_id,user_id,tokens):
-    url=f'{api}/guilds/{guild_id}/members/{user_id}',
-    data=json.dumps({'access_token':tokens['access_token']}),
+    url=f'{api}/guilds/{guild_id}/members/{user_id}'
+    data={'access_token':tokens['access_token']}
+    data = orjson.dumps(data)
     headers={"Authorization": f'Bot {token}',"Content-Type": "application/json"}
     async with aiohttp.ClientSession() as session:
         res = await session.put(url,data=data,headers=headers)
@@ -120,7 +123,7 @@ async def addGuild(guild_id,user_id,tokens):
         return json
 
 async def editPermissionCommand(guild_id,command_id,value,tokens):
-    url = f'{api}/applications/{client_id}/guilds/{guild_id}/commands/{guild_id}/permissions'
+    url = f'{api}/applications/{client_id}/guilds/{guild_id}/commands/{command_id}/permissions'
     headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -131,8 +134,9 @@ async def editPermissionCommand(guild_id,command_id,value,tokens):
             {'id': guild_id, 'type': 1, 'permission': value}
         ]
     }
+    data = orjson.dumps(data)
     async with aiohttp.ClientSession() as session:
-        res = await session.put(url,data=json.dumps(data),headers=headers)
+        res = await session.put(url,data=data,headers=headers)
         print(await res.json())
 
 
@@ -164,8 +168,21 @@ async def home():
         del session['tokens']
         return redirect(url_auth)
     
-    
     return '1'
+
+@app.route("/<guild_id>/<command_id>/<value>")
+async def epc(guild_id,command_id,value):
+    tokens = session['tokens']
+    await editPermissionCommand(guild_id,command_id,value,tokens)
+    return '1'
+    pass
+
+@app.route("/add/<guild_id>")
+async def add(guild_id):
+    tokens = session['tokens']
+    user = await getUserDate(tokens)
+    ag = await addGuild(guild_id,user['id'],tokens)
+    return ag
 
 if __name__ == "__main__":
     app.run("0.0.0.0")

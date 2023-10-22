@@ -1,7 +1,6 @@
 import nextcord
 from nextcord.ext import commands
-from importer import inimport
-langs = inimport('languages')
+import languages as langs
 
 print(langs.exemple)
 class purges(commands.Cog):
