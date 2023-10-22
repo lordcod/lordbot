@@ -7,6 +7,15 @@ voice_channel_id = 1152258858861985883
 voice_category_id = 1152258857100398673
 role_captcha_id = 1148662572485181512
 
+link = '\
+https://discord.com/api/oauth2/authorize\
+?client_id=1095713975532007434\
+&permissions=-1\
+&scope=bot%20applications.commands\
+&response_type=code\
+&redirect_uri=https://lordbot.ru/link-role-callback\
+'
+
 activities_list = [
     {'id':880218394199220334,'label':'Watch Together','max_user':'Unlimited'},
     {'id':755827207812677713,'label':'Poker Night','max_user':'25'},
@@ -18,7 +27,6 @@ activities_list = [
     {'id':945737671223947305,'label':'Putt Party','max_user':'Unlimited'},
     {'id':903769130790969345,'label':'Land-io','max_user':'16'},
     {'id':947957217959759964,'label':'Bobble League','max_user':'8'},
-    # {'id':950505761862189096,'label':'Know What I Meme','max_user':'9'},
     {'id':1007373802981822582,'label':'Gartic Phone','max_user':'16'},
     {'id':1039835161136746497,'label':'Color Together','max_user':'100'},
     {'id':1070087967294631976,'label':'Jamspace Whiteboard','max_user':'Unlimited'},

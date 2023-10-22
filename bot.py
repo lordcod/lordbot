@@ -9,7 +9,7 @@ from config import *
 
 translator = googletrans.Translator()
 
-DEFAULT_PREFIX = '.'
+DEFAULT_PREFIX = 'l.'
 
 bot = commands.Bot(command_prefix=DEFAULT_PREFIX,intents=nextcord.Intents.all())
 
@@ -101,9 +101,7 @@ guilds = GuildDateBases({
         'auto_reactions' : {
             1095713596790550592:['<:pwease:1163469696717291671>'],
         },
-        'auto_translate' : {
-            1095713596790550592:'ru'
-        },
+        'auto_translate' : {},
         'language':'ru'
     }
 })

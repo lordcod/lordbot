@@ -1,7 +1,6 @@
 import nextcord
 from nextcord.ext import commands
 
-
 class purges(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -47,27 +46,6 @@ class purges(commands.Cog):
                 break
         
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
-
-    @purge.command()
-    @commands.has_permissions(manage_messages=True)
-    async def type(self,ctx: commands.Context,content_type: str,limit: int):
-        if limit > 100:
-            raise CommandError("The maximum number of messages to delete is `100`")
-        elif content_type not in content_type_list:
-            raise CommandError("The content type parameter is specified incorrectly")
-        cto = content_type_list[content_type]
-        
-        deleted = 0
-        async for message in ctx.channel.history(limit=250):
-            if deleted >= limit:
-                break
-            for attach in message.attachments:
-                if attach.content_type in cto:
-                    deleted += 1
-                    await message.delete()
-        
-        await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
-
 
 
 
