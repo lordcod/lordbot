@@ -1,6 +1,9 @@
 import nextcord
 from nextcord.ext import commands
+from importer import inimport
+langs = inimport('languages')
 
+print(langs.exemple)
 class purges(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -47,7 +50,21 @@ class purges(commands.Cog):
         
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
-
+    @purge.command()
+    @commands.has_permissions(manage_messages=True)
+    async def attachment(self,ctx:commands.Context,limit: int):
+        if limit > 100:
+            raise CommandError("The maximum number of messages to delete is `100`")
+        
+        deleted = 0
+        async for message in ctx.channel.history(limit=250):
+            if deleted >= limit:
+                break
+            if message.author == member:
+                await message.delete()
+                deleted += 1
+        
+        await ctx.send(f'Deleted {len(deleted)} message(s)',delete_after=5.0)
 
 def setup(bot):
     bot.add_cog(purges(bot))
