@@ -109,6 +109,7 @@ guilds = GuildDateBases({
 @bot.event
 async def on_ready():
     print(f"The bot is registered as {bot.user}")
+    g = bot.get_guild(1119351219769593976).create_integration
 
 @bot.event
 async def on_disconnect():
