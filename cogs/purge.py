@@ -2,7 +2,6 @@ import nextcord
 from nextcord.ext import commands
 import languages as langs
 
-print(langs.exemple)
 class purges(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

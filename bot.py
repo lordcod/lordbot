@@ -4,7 +4,7 @@ from nextcord import utils
 from nextcord.utils import get,find
 
 import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha,languages
+pickle,time,threading,os,aiohttp,io,recaptcha,languages,re
 from config import *
 
 translator = googletrans.Translator()
@@ -106,6 +106,23 @@ guilds = GuildDateBases({
     }
 })
 
+def check_invite(content):
+    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)(\w+)(\/|\s|$|\?)(.*)*'
+    pattern = re.fullmatch(regex_string,content)
+    if pattern:
+        return pattern.groups()[1]
+
+async def get_webhook(channel: nextcord.TextChannel) -> nextcord.Webhook:
+    if channel.type.value not in [0,2,5,13]:
+        raise ArithmeticError("Channel error")
+    webhooks = await channel.webhooks()
+    for wh in webhooks:
+        if wh.user==bot.user:
+            return wh
+    else:
+        wh = await channel.create_webhook(name=bot.user.global_name,avatar=bot.user.avatar)
+        return wh
+
 @bot.event
 async def on_ready():
     print(f"The bot is registered as {bot.user}")
@@ -188,6 +205,25 @@ async def on_message(message: nextcord.Message):
             embed.set_footer(text='Performed with LordBot',icon_url=bot.user.avatar.url)
             await message.channel.send(embed=embed)
     
+    invite_code = check_invite(message.content)
+    if invite_code:
+        await message.delete()
+        try:
+            invite = await bot.fetch_invite(invite_code)
+            translate = languages.invites(invite)
+            wh = await get_webhook(message.channel)
+            name = message.author.global_name if message.author.name == message.author.display_name else message.author.display_name
+            icon_url = invite.guild.icon.url if invite.guild.icon else None
+            
+            embed = nextcord.Embed(title=f'Приглашение на {invite.guild.name}',url=invite.url,
+                                color=0x3829df,description=translate.description[lang])
+            embed.set_author(icon_url=icon_url,
+                            name=invite.guild.name)
+            embed.set_footer(text=f'Приглашающий: {invite.inviter.global_name}',icon_url=invite.inviter.avatar.url)
+            
+            await wh.send(username=name,avatar_url=message.author.avatar.url,embed=embed)
+        except (nextcord.errors.NotFound,AttributeError):
+            pass
     await bot.process_commands(message)
 
 

@@ -1,7 +1,55 @@
+import nextcord
+from datetime import datetime
+
 exemple = {
     'ru':'',
     'en':''
 }
+
+class invites():
+    def __init__(self,invite):
+        self.invite = invite
+    
+    @property
+    def description(self):
+        guild = self.invite.guild
+        invite = self.invite 
+        return {
+        'ru' : f"### **{self.channel_type['emoji'][invite.channel.type.value]}{invite.channel.name}**"
+        }
+    
+    channel_type = {
+        'emoji':{
+            0:'<:channel_text:1166001040198484178>',
+            1:'<:channel_text:1166001040198484178>',
+            2:'<:channel_voice:1166001038772404284>',
+            3:'<:category:1166001036553621534>',
+            4:'<:category:1166001036553621534>',
+            5:'<:channel_announce:1166092338242785370>',
+            10:'<:thread:1166096258511937666>',
+            11:'<:thread:1166096258511937666>',
+            12:'<:thread:1166096258511937666>',
+            13:'<:channel_stage:1166092341317226566> ',
+            14:'<:category:1166001036553621534>',
+            15:'<:channel_forum:1166094701020070009> ',
+            16:'<:channel_forum:1166094701020070009> ',
+        },
+        'name':{
+            0:'Text channel',
+            1: 'Private Messages',
+            2: 'Voice channel',
+            3:'Group in private messages',
+            4: 'Category',
+            5:'Announcement',
+            10:'Announcement branch',
+            11: 'Open branches',
+            12:'Closed branches',
+            13:'Scene',
+            14:'Catalog',
+            15:'Forum',
+            16: 'Forum',
+        }
+    }
 
 class captcha():
     congratulation = {
@@ -39,7 +87,7 @@ class activiti():
         'en':'Maximum number of users'
     }
 
-class auto_translate:
+class auto_translate():
     title = {
         'ru':'Авто перевод',
         'en':'Automatic translation'
