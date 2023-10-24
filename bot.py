@@ -107,14 +107,17 @@ guilds = GuildDateBases({
 })
 
 def check_invite(content):
-    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)(\w+)(\/|\s|$|\?)(.*)*'
+    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)(.+)(\/|\s|$|\?)(.*)*'
     pattern = re.fullmatch(regex_string,content)
     if pattern:
         return pattern.groups()[1]
 
+class ErrorTypeChannel(Exception):
+    pass
+
 async def get_webhook(channel: nextcord.TextChannel) -> nextcord.Webhook:
     if channel.type.value not in [0,2,5,13]:
-        raise ArithmeticError("Channel error")
+        raise ErrorTypeChannel("Channel error")
     webhooks = await channel.webhooks()
     for wh in webhooks:
         if wh.user==bot.user:
@@ -206,24 +209,34 @@ async def on_message(message: nextcord.Message):
             await message.channel.send(embed=embed)
     
     invite_code = check_invite(message.content)
+    print(invite_code)
     if invite_code:
         try:
             invite = await bot.fetch_invite(invite_code)
             translate = languages.invites(invite)
             wh = await get_webhook(message.channel)
             name = message.author.global_name if message.author.name == message.author.display_name else message.author.display_name
-            icon_url = invite.guild.icon.url if invite.guild.icon else None
+            guild_icon = invite.guild.icon.url if invite.guild.icon else None
             
             embed = nextcord.Embed(title=f'Приглашение на {invite.guild.name}',url=invite.url,
-                                color=0x3829df,description=translate.description[lang])
-            embed.set_author(icon_url=icon_url,
-                            name=invite.guild.name)
-            embed.set_footer(text=f'Приглашающий: {invite.inviter.global_name}',icon_url=invite.inviter.avatar.url)
+                                    color=0x3829df,description=translate.description[lang])
+            embed.set_author(name=invite.guild.name,
+                            icon_url=guild_icon)
+            if hasattr(invite.inviter,'name'):
+                embed.set_footer(text=f'Приглашающий: {invite.inviter.global_name}',icon_url=invite.inviter.avatar.url)
+            else:
+                embed.set_footer(text="Cistom Invite Link",icon_url=guild_icon)
+            
+            if translate.is_guild:
+                embed.add_field(name="Основная информация",value=translate.field_guild[lang])
             
             await message.delete()
             await wh.send(username=name,avatar_url=message.author.avatar.url,embed=embed)
-        except (nextcord.errors.NotFound,AttributeError):
+        except (nextcord.errors.NotFound,ErrorTypeChannel):
+            print('Pass')
             pass
+        except Exception as err:
+            print(f'Error: {err}')
     await bot.process_commands(message)
 
 

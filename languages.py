@@ -1,5 +1,7 @@
 import nextcord
 from datetime import datetime
+from nextcord.utils import format_dt
+from formatting import nftd
 
 exemple = {
     'ru':'',
@@ -12,10 +14,34 @@ class invites():
     
     @property
     def description(self):
-        guild = self.invite.guild
         invite = self.invite 
         return {
-        'ru' : f"### **{self.channel_type[invite.channel.type.value]}{invite.channel.name}**"
+        'ru' : f"### **{self.channel_type[invite.channel.type.value]}{nftd(invite.channel.name)}**"
+        }
+    
+    @property
+    def is_guild(self):
+        return hasattr(self.invite.guild,'owner') 
+    
+    @property
+    def field_guild(self):
+        invite = self.invite 
+        guild = invite.guild
+        return {
+            'ru':f"""
+                <:owner:1166002519315599500> Владелец: {guild.owner.mention}
+                <:verified:1166001046468964406> Уровень проверки: Средний
+                <:paint:1166001043562307674> Создан: {format_dt(guild.created_at,'f')} ({format_dt(guild.created_at,'R')})
+                <:channel_text:1166001040198484178> Всего {len(guild.channels)} каналов
+                <:text1:1166001701912846346> <:channel_text:1166001040198484178> Текстовые каналы: {len(guild.text_channels)}
+                <:text1:1166001701912846346> <:channel_voice:1166001038772404284> Голосовые каналы: {len(guild.voice_channels)}
+                <:text1:1166001701912846346> <:channel_forum:1166094701020070009> Форум: {len(guild.forum_channels)}
+                <:text1:1166001701912846346> <:channel_stage:1166092341317226566> Трибуны: {len(guild.stage_channels)}
+                <:text2:1166001699295592528> <:category:1166001036553621534> Категории: {len(guild.categories)}
+                <:member:1166001035182080161> Всего {guild.member_count} пользователя
+                <:text1:1166001701912846346>Ботов: {len(guild.bots)}
+                <:text2:1166001699295592528>Участников: {len(guild.humans)}
+            """.replace("    ", "")
         }
     
     channel_type = {
