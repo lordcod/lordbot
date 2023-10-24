@@ -148,7 +148,7 @@ async def on_interaction(interaction:nextcord.Interaction):
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
-    guild_base = guilds(message.guild.id)
+    guild_base = guilds(thread.guild.id)
     emb = guild_base.get_afm(thread.id)
     if not emb:
         return
@@ -207,7 +207,6 @@ async def on_message(message: nextcord.Message):
     
     invite_code = check_invite(message.content)
     if invite_code:
-        await message.delete()
         try:
             invite = await bot.fetch_invite(invite_code)
             translate = languages.invites(invite)
@@ -221,6 +220,7 @@ async def on_message(message: nextcord.Message):
                             name=invite.guild.name)
             embed.set_footer(text=f'Приглашающий: {invite.inviter.global_name}',icon_url=invite.inviter.avatar.url)
             
+            await message.delete()
             await wh.send(username=name,avatar_url=message.author.avatar.url,embed=embed)
         except (nextcord.errors.NotFound,AttributeError):
             pass
