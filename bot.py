@@ -107,7 +107,7 @@ guilds = GuildDateBases({
 })
 
 def check_invite(content):
-    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)(.+)(\/|\s|$|\?)(.*)*'
+    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)([a-zA-Z0-9_-]+)(\/|\s|\?|$)'
     pattern = re.fullmatch(regex_string,content)
     if pattern:
         return pattern.groups()[1]
@@ -180,6 +180,7 @@ async def on_message(message: nextcord.Message):
     reacts = guild_base.get_ar(message.channel.id)
     trans_lang = guild_base.get_at(message.channel.id)
     lang = guilds(message.guild.id).get_lang()
+    invite_code = check_invite(message.content)
     
     if reacts:
         for rea in reacts:
@@ -208,14 +209,12 @@ async def on_message(message: nextcord.Message):
             embed.set_footer(text='Performed with LordBot',icon_url=bot.user.avatar.url)
             await message.channel.send(embed=embed)
     
-    invite_code = check_invite(message.content)
-    print(invite_code)
     if invite_code:
         try:
             invite = await bot.fetch_invite(invite_code)
             translate = languages.invites(invite)
             wh = await get_webhook(message.channel)
-            name = message.author.global_name if message.author.name == message.author.display_name else message.author.display_name
+            name = message.author.global_name if message.author.global_name and message.author.name == message.author.display_name else message.author.display_name
             guild_icon = invite.guild.icon.url if invite.guild.icon else None
             
             embed = nextcord.Embed(title=f'Приглашение на {invite.guild.name}',url=invite.url,
@@ -237,6 +236,8 @@ async def on_message(message: nextcord.Message):
             pass
         except Exception as err:
             print(f'Error: {err}')
+    
+    
     await bot.process_commands(message)
 
 
