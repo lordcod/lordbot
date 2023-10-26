@@ -46,20 +46,20 @@ class invites():
         invite = self.invite 
         guild = invite.guild
         return {
-            'ru':f"""
-                {Emoji.owner} Владелец: {guild.owner.mention}
-                {Emoji.verified} Уровень проверки: Средний
-                {Emoji.create} Создан: {format_dt(guild.created_at,'f')} ({format_dt(guild.created_at,'R')})
-                {Emoji.channel_text} Всего {len(guild.channels)} каналов
-                {Emoji.text1}{Emoji.channel_text} Текстовые каналы: {len(guild.text_channels)}
-                {Emoji.text1}{Emoji.channel_voice}  Голосовые каналы: {len(guild.voice_channels)}
-                {Emoji.text1}{Emoji.channel_forum}  Форум: {len(guild.forum_channels)}
-                {Emoji.text1}{Emoji.channel_stage}  Трибуны: {len(guild.stage_channels)}
-                {Emoji.text2}{Emoji.category}  Категории: {len(guild.categories)}
-                {Emoji.member} Всего {guild.member_count} пользователя
-                {Emoji.text1} Ботов: {len(guild.bots)}
-                {Emoji.text2} Участников: {len(guild.humans)}
-            """.replace("    ", "")
+            'ru':(
+                f'{Emoji.owner} Владелец: {guild.owner.mention}\n'
+                f'{Emoji.verified} Уровень проверки: Средний\n'
+                f'{Emoji.create} Создан: {format_dt(guild.created_at,"f")} ({format_dt(guild.created_at,"R")})\n'
+                f'{Emoji.channel_text} Всего {len(guild.channels)} каналов\n'
+                f'{Emoji.text1}{Emoji.channel_text} Текстовые каналы: {len(guild.text_channels)}\n'
+                f'{Emoji.text1}{Emoji.channel_voice}  Голосовые каналы: {len(guild.voice_channels)}\n'
+                f'{Emoji.text1}{Emoji.channel_forum}  Форум: {len(guild.forum_channels)}\n'
+                f'{Emoji.text1}{Emoji.channel_stage}  Трибуны: {len(guild.stage_channels)}\n'
+                f'{Emoji.text2}{Emoji.category}  Категории: {len(guild.categories)}\n'
+                f'{Emoji.member} Всего {guild.member_count} пользователя\n'
+                f'{Emoji.text1} Ботов: {len(guild.bots)}\n'
+                f'{Emoji.text2} Участников: {len(guild.humans)}'
+            )
         }
     
     channel_type = {
