@@ -8,6 +8,24 @@ exemple = {
     'en':''
 }
 
+class Emoji():
+    congratulation = '<a:congratulation:1165684808844845176>'
+    owner = '<:owner:1166002519315599500>'
+    verified = '<:verified:1166001046468964406>'
+    create = '<:paint:1166001043562307674>'
+    channel_text = '<:channel_text:1166001040198484178>'
+    channel_voice = '<:channel_voice:1166001038772404284>'
+    channel_forum = '<:channel_forum:1166094701020070009>'
+    channel_stage = '<:channel_stage:1166092341317226566>'
+    category = '<:category:1166001036553621534>'
+    text1 = '<:text1:1166001701912846346>'
+    text2 = '<:text2:1166001699295592528>'
+    member = '<:member:1166001035182080161>'
+    
+    
+
+
+
 class invites():
     def __init__(self,invite):
         self.invite = invite
@@ -29,18 +47,18 @@ class invites():
         guild = invite.guild
         return {
             'ru':f"""
-                <:owner:1166002519315599500> Владелец: {guild.owner.mention}
-                <:verified:1166001046468964406> Уровень проверки: Средний
-                <:paint:1166001043562307674> Создан: {format_dt(guild.created_at,'f')} ({format_dt(guild.created_at,'R')})
-                <:channel_text:1166001040198484178> Всего {len(guild.channels)} каналов
-                <:text1:1166001701912846346> <:channel_text:1166001040198484178> Текстовые каналы: {len(guild.text_channels)}
-                <:text1:1166001701912846346> <:channel_voice:1166001038772404284> Голосовые каналы: {len(guild.voice_channels)}
-                <:text1:1166001701912846346> <:channel_forum:1166094701020070009> Форум: {len(guild.forum_channels)}
-                <:text1:1166001701912846346> <:channel_stage:1166092341317226566> Трибуны: {len(guild.stage_channels)}
-                <:text2:1166001699295592528> <:category:1166001036553621534> Категории: {len(guild.categories)}
-                <:member:1166001035182080161> Всего {guild.member_count} пользователя
-                <:text1:1166001701912846346>Ботов: {len(guild.bots)}
-                <:text2:1166001699295592528>Участников: {len(guild.humans)}
+                {Emoji.owner} Владелец: {guild.owner.mention}
+                {Emoji.verified} Уровень проверки: Средний
+                {Emoji.create} Создан: {format_dt(guild.created_at,'f')} ({format_dt(guild.created_at,'R')})
+                {Emoji.channel_text} Всего {len(guild.channels)} каналов
+                {Emoji.text1}{Emoji.channel_text} Текстовые каналы: {len(guild.text_channels)}
+                {Emoji.text1}{Emoji.channel_voice}  Голосовые каналы: {len(guild.voice_channels)}
+                {Emoji.text1}{Emoji.channel_forum}  Форум: {len(guild.forum_channels)}
+                {Emoji.text1}{Emoji.channel_stage}  Трибуны: {len(guild.stage_channels)}
+                {Emoji.text2}{Emoji.category}  Категории: {len(guild.categories)}
+                {Emoji.member} Всего {guild.member_count} пользователя
+                {Emoji.text1}Ботов: {len(guild.bots)}
+                {Emoji.text2}Участников: {len(guild.humans)}
             """.replace("    ", "")
         }
     

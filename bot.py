@@ -305,9 +305,7 @@ async def captcha(ctx:commands.Context):
         return
     
     if mes.content.lower() == text.lower():
-        await ctx.send(f"<a:congratulation:1164962077052522677>{languages.captcha.congratulation[lang]}")
-        role = ctx.guild.get_role(role_captcha_id)
-        await ctx.author.add_roles(role)
+        await ctx.send(f"{languages.Emoji.congratulation}{languages.captcha.congratulation[lang]}")
     else:
         await ctx.send(content=languages.captcha.failed[lang])
 
