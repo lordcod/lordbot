@@ -156,7 +156,7 @@ async def on_thread_create(thread:nextcord.Thread):
     if not emb:
         return
     
-    await thread.send(embed=nextcord.Embed(**mes))
+    await thread.send(embed=nextcord.Embed(**emb))
 
 @bot.event
 async def on_member_update(before:nextcord.Member,after:nextcord.Member):
