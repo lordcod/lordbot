@@ -97,7 +97,7 @@ guilds = GuildDateBases({
         },
         'language':'en'
     },
-    1095713596790550589:{
+    1165681101294030898:{
         'auto_reactions' : {
             1095713596790550592:['<:pwease:1163469696717291671>'],
         },
@@ -218,7 +218,7 @@ async def on_message(message: nextcord.Message):
             guild_icon = invite.guild.icon.url if invite.guild.icon else None
             
             embed = nextcord.Embed(title=f'Приглашение на {invite.guild.name}',url=invite.url,
-                                    color=0x3829df,description=translate.description[lang])
+                                    color=0x3829df,description=translate.description)
             embed.set_author(name=invite.guild.name,
                             icon_url=guild_icon)
             if hasattr(invite.inviter,'name'):
