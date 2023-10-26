@@ -57,8 +57,8 @@ class invites():
                 {Emoji.text1}{Emoji.channel_stage}  Трибуны: {len(guild.stage_channels)}
                 {Emoji.text2}{Emoji.category}  Категории: {len(guild.categories)}
                 {Emoji.member} Всего {guild.member_count} пользователя
-                {Emoji.text1}Ботов: {len(guild.bots)}
-                {Emoji.text2}Участников: {len(guild.humans)}
+                {Emoji.text1} Ботов: {len(guild.bots)}
+                {Emoji.text2} Участников: {len(guild.humans)}
             """.replace("    ", "")
         }
     
