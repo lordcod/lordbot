@@ -295,28 +295,27 @@ async def captcha(ctx:commands.Context):
         await ctx.send(content=languages.captcha.failed[lang])
 
 class CustomList(menus.Main):
-    async def previous(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=self.value[self.index],view=self)
+    dem = nextcord.Embed(title='Описание',description='Нашего персонала')
     
-    async def backward(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=self.value[self.index],view=self)
+    async def callback(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        gem = self.dem
+        gem._fields = [self.value[self.index]]
+        await interaction.message.edit(embed=gem,view=self)
     
-    async def forward(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=self.value[self.index],view=self)
     
-    async def next(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=self.value[self.index],view=self)
 
 @bot.command()
 async def test(ctx:commands.Context):
     lister = [
-        nextcord.Embed(title='Hello',description='World'),
-        nextcord.Embed(title='Who',description='Prince'),
-        nextcord.Embed(title='Goodby',description='Color'),
+        {'name':'LordCode','value':'Лучший разраб'},
+        {'name':'Shashlychok','value':'Делает сайты'},
+        {'name':'Koof','value':'Просто лучший'},
     ]
     cl = CustomList(lister)
+    gem = cl.dem
+    gem._fields = [lister[0]]
     cl.custom_emoji(previous='<:previous:1167518761687994459>',backward='<:backward:1167518764657557605>',forward='<:forward:1167518766033285180>',next='<:next:1167518766951841803>')
-    await ctx.send(embed=lister[0],view=cl)
+    await ctx.send(embed=gem,view=cl)
 
 if __name__ == "__main__":
     for filename in os.listdir("./cogs"):

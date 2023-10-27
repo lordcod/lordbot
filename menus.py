@@ -31,6 +31,9 @@ class Main(ui.View):
             self.button_forward.disabled = True
             self.button_next.disabled = True
     
+    async def callback(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        pass
+    
     async def previous(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
         pass
     
@@ -56,21 +59,25 @@ class Main(ui.View):
         self.index = 0
         await self.handler_disable()
         await self.previous(button,interaction)
+        await self.callback(button,interaction)
         
     @ui.button(emoji='◀️',style=nextcord.ButtonStyle.grey,disabled=True)
     async def button_backward(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         self.index -= 1
         await self.handler_disable()
         await self.backward(button,interaction)
+        await self.callback(button,interaction)
     
     @ui.button(emoji='▶',style=nextcord.ButtonStyle.grey,custom_id='12girni3')
     async def button_forward(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         self.index += 1
         await self.handler_disable()
         await self.forward(button,interaction)
+        await self.callback(button,interaction)
     
     @ui.button(emoji='⏭',style=nextcord.ButtonStyle.grey)
     async def button_next(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         self.index = self.len
         await self.handler_disable()
         await self.next(button,interaction)
+        await self.callback(button,interaction)
