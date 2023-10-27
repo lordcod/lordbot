@@ -62,13 +62,29 @@ class invites():
     }
     
     @property
+    def title(self):
+        invite = self.invite 
+        return {
+            'ru':f'Приглашение на {escape_markdown(invite.guild.name)}',
+            'en':f'Invitation to {escape_markdown(invite.guild.name)}'
+        }
+    
+    @property
     def description(self):
         invite = self.invite 
-        return f"### **{self.channel_type[invite.channel.type.value]}{escape_markdown(invite.channel.name,True)}**"
+        return f"### **{self.channel_type[invite.channel.type.value]}{escape_markdown(invite.channel.name)}**"
     
     @property
     def is_guild(self):
         return hasattr(self.invite.guild,'owner') 
+    
+    @property
+    def footer(self):
+        invite = self.invite 
+        return {
+            'ru':f'Приглашающий: {invite.inviter.global_name}',
+            'en':f'Inviter: {invite.inviter.global_name}'
+        }
     
     @property
     def field_guild(self):

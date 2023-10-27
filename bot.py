@@ -82,27 +82,14 @@ class GuildDateBases:
         if 'language' in self.base[self.guild_id]:
             return self.base[self.guild_id]['language']
         else:
-            return 'ru'
+            return self.base['default']['language']
 
 guilds = GuildDateBases({
-    'exemple':{
-        'auto_forum_messages' : {
-            'channel_id':{'embed'}
-        },
-        'auto_reactions' : {
-            'channel_id':['reaction']
-        },
-        'auto_translate' : {
-            'channel_id':'laung',
-        },
-        'language':'en'
-    },
-    1165681101294030898:{
-        'auto_reactions' : {
-            1095713596790550592:['<:pwease:1163469696717291671>'],
-        },
+    'default':{
+        'auto_forum_messages' : {},
+        'auto_reactions' : {},
         'auto_translate' : {},
-        'language':'ru'
+        'language':'en'
     }
 })
 
@@ -134,6 +121,7 @@ async def on_ready():
 async def on_disconnect():
     print("Bot is disconnect")
 
+
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
     print(f"[HANDLER][on_command_error][{ctx.command.name}]: {error}")
@@ -152,11 +140,11 @@ async def on_interaction(interaction:nextcord.Interaction):
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
     guild_base = guilds(thread.guild.id)
-    emb = guild_base.get_afm(thread.id)
-    if not emb:
+    afm = guild_base.get_afm(thread.id)
+    if not afm:
         return
     
-    await thread.send(embed=nextcord.Embed(**emb))
+    await thread.send(embed=nextcord.Embed(**afm))
 
 @bot.event
 async def on_member_update(before:nextcord.Member,after:nextcord.Member):
@@ -217,12 +205,12 @@ async def on_message(message: nextcord.Message):
             name = message.author.global_name if message.author.global_name and message.author.name == message.author.display_name else message.author.display_name
             guild_icon = invite.guild.icon.url if invite.guild.icon else None
             
-            embed = nextcord.Embed(title=f'Приглашение на {invite.guild.name}',url=invite.url,
+            embed = nextcord.Embed(title=translate.title[lang],url=invite.url,
                                     color=0x3829df,description=translate.description)
             embed.set_author(name=invite.guild.name,
                             icon_url=guild_icon)
             if hasattr(invite.inviter,'name'):
-                embed.set_footer(text=f'Приглашающий: {invite.inviter.global_name}',icon_url=invite.inviter.avatar.url)
+                embed.set_footer(text=translate.footer[lang],icon_url=invite.inviter.avatar.url)
             else:
                 embed.set_footer(text="Cistom Invite Link",icon_url=guild_icon)
             
@@ -232,10 +220,7 @@ async def on_message(message: nextcord.Message):
             await message.delete()
             await wh.send(username=name,avatar_url=message.author.avatar.url,embed=embed)
         except (nextcord.errors.NotFound,ErrorTypeChannel):
-            print('Pass')
             pass
-        except Exception as err:
-            print(f'Error: {err}')
     
     
     await bot.process_commands(message)
@@ -311,25 +296,27 @@ async def captcha(ctx:commands.Context):
 
 class CustomList(menus.Main):
     async def previous(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(content=self.value[self.index],view=self)
+        await interaction.message.edit(embed=self.value[self.index],view=self)
     
     async def backward(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(content=self.value[self.index],view=self)
+        await interaction.message.edit(embed=self.value[self.index],view=self)
     
     async def forward(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(content=self.value[self.index],view=self)
+        await interaction.message.edit(embed=self.value[self.index],view=self)
     
     async def next(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(content=self.value[self.index],view=self)
+        await interaction.message.edit(embed=self.value[self.index],view=self)
 
 @bot.command()
 async def test(ctx:commands.Context):
-    lister = 'Дойти Докончить Конфирмация Переадресовать Потасовка Потрудиться Сенбернар Соавторство Соискатель Фирма'.split(' ')
+    lister = [
+        nextcord.Embed(title='Hello',description='World'),
+        nextcord.Embed(title='Who',description='Prince'),
+        nextcord.Embed(title='Goodby',description='Color'),
+    ]
     cl = CustomList(lister)
-    cl.custom_emoji(previous='<:serverowner:1165684816751120476>')
-    cl.remove_item(cl.button_previous)
-    cl.remove_item(cl.button_next)
-    await ctx.send(content=lister[0],view=cl)
+    cl.custom_emoji(previous='<:previous:1167518761687994459>',backward='<:backward:1167518764657557605>',forward='<:forward:1167518766033285180>',next='<:next:1167518766951841803>')
+    await ctx.send(embed=lister[0],view=cl)
 
 if __name__ == "__main__":
     for filename in os.listdir("./cogs"):
