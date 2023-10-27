@@ -1,7 +1,6 @@
 import nextcord
 from datetime import datetime
-from nextcord.utils import format_dt
-from formatting import nftd
+from nextcord.utils import format_dt,escape_markdown
 
 exemple = {
     'ru':'',
@@ -65,7 +64,7 @@ class invites():
     @property
     def description(self):
         invite = self.invite 
-        return f"### **{self.channel_type[invite.channel.type.value]}{nftd(invite.channel.name)}**"
+        return f"### **{self.channel_type[invite.channel.type.value]}{escape_markdown(invite.channel.name,True)}**"
     
     @property
     def is_guild(self):
