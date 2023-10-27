@@ -4,7 +4,7 @@ from nextcord import utils
 from nextcord.utils import get,find
 
 import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha,languages,re
+pickle,time,threading,os,aiohttp,io,recaptcha,languages,re,menus
 from config import *
 
 translator = googletrans.Translator()
@@ -146,8 +146,8 @@ async def on_application_command_error(interaction: nextcord.Interaction, error)
 
 @bot.event
 async def on_interaction(interaction:nextcord.Interaction):
-    print(interaction.type)
     await bot.process_application_commands(interaction)
+    await asyncio.sleep(2.5)
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
@@ -270,7 +270,7 @@ async def activiti(interaction:nextcord.Interaction,
         await interaction.response.send_message(content=languages.activiti.failed[lang])
         return
     view = nextcord.ui.View(timeout=None)
-    view.add_item(nextcord.ui.Button(label="Activiti",emoji="<:rocket:1154866304864497724>",url=inv.url))
+    view.add_item(nextcord.ui.Button(label="Activiti",emoji=languages.Emoji.roketa,url=inv.url))
     emb = nextcord.Embed(title=f"**{languages.activiti.embed_title[lang]}**",color=0xfff8dc,description=languages.activiti.embed_description[lang])
     emb._fields = [
         {'name':languages.activiti.fields_label[lang],'value':activiti['label'],'inline':True},
@@ -309,6 +309,27 @@ async def captcha(ctx:commands.Context):
     else:
         await ctx.send(content=languages.captcha.failed[lang])
 
+class CustomList(menus.Main):
+    async def previous(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.message.edit(content=self.value[self.index],view=self)
+    
+    async def backward(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.message.edit(content=self.value[self.index],view=self)
+    
+    async def forward(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.message.edit(content=self.value[self.index],view=self)
+    
+    async def next(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.message.edit(content=self.value[self.index],view=self)
+
+@bot.command()
+async def test(ctx:commands.Context):
+    lister = 'Дойти Докончить Конфирмация Переадресовать Потасовка Потрудиться Сенбернар Соавторство Соискатель Фирма'.split(' ')
+    cl = CustomList(lister)
+    cl.custom_emoji(previous='<:serverowner:1165684816751120476>')
+    cl.remove_item(cl.button_previous)
+    cl.remove_item(cl.button_next)
+    await ctx.send(content=lister[0],view=cl)
 
 if __name__ == "__main__":
     for filename in os.listdir("./cogs"):

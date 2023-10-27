@@ -23,10 +23,7 @@ class Emoji():
     member = '<:member:1166001035182080161>'
     channel_announce = '<:channel_announce:1166092338242785370>'
     thread = '<:thread:1166096258511937666>'
-    
-    
-
-
+    roketa = '<a:rocketa:1165684783754522704>'
 
 class invites():
     def __init__(self,invite):
