@@ -2,8 +2,6 @@ import nextcord
 from nextcord import ui,utils
 from typing import Union
 
-sym =  '   '
-
 class Main(ui.View):
     def __init__(self,value:list):
         super().__init__(timeout=None)
