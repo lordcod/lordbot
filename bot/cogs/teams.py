@@ -3,7 +3,7 @@ from nextcord.ext import commands
 from bot.resources import check
 
 class teams(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command(name="shutdown")
@@ -21,17 +21,22 @@ class teams(commands.Cog):
 
     @commands.command()
     @check.team_only()
-    async def load_extension(ctx:commands.Context,name):
-        bot.load_extension(f"cogs.{name}")
+    async def load_extension(self,ctx:commands.Context,name):
+        self.bot.load_extension(f"bot.cogs.{name}")
 
     @commands.command()
     @check.team_only()
-    async def unload_extension(ctx:commands.Context,name):
-        bot.unload_extension(f"cogs.{name}")
+    async def unload_extension(self,ctx:commands.Context,name):
+        self.bot.unload_extension(f"bot.cogs.{name}")
 
-
-
-
+    @commands.command()
+    @check.team_only()
+    async def extensions(self,ctx:commands.Context):
+        exts = self.bot.extensions
+        name_exts = []
+        for ext in exts.values():
+            name_exts.append(ext.__name__)
+        await ctx.send(name_exts)
 
 def setup(bot):
     bot.add_cog(teams(bot))
