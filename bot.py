@@ -1,10 +1,9 @@
 import nextcord
 from nextcord.ext import (commands,application_checks,tasks)
-from nextcord import utils
 from nextcord.utils import get,find
 
 import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha,languages,re,menus
+pickle,time,threading,os,aiohttp,io,recaptcha,languages,re,menus,utils
 from config import *
 
 translator = googletrans.Translator()
@@ -13,25 +12,6 @@ DEFAULT_PREFIX = 'l.'
 
 bot = commands.Bot(command_prefix=DEFAULT_PREFIX,intents=nextcord.Intents.all())
 
-def generate_message(content):
-    message = {}
-    try:
-        content = orjson.loads(content)
-        
-        message['embeds'] = []
-        if "embeds" in content and type(content["embeds"]) == dict:
-            for em in content["embeds"]:
-                nextcord.Embed.from_dict(em)
-        
-        if "content" in message:
-            message['content'] = content['content']
-        
-        if "flags" in message:
-            message['flag'] = nextcord.MessageFlags()
-            message['flag'].value = content["flags"]
-    except orjson.JSONDecodeError:
-        message['content'] = content
-    return message
 
 class GuildDateBases:
     def __init__(self,base:dict):
@@ -93,25 +73,8 @@ guilds = GuildDateBases({
     }
 })
 
-def check_invite(content):
-    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)([a-zA-Z0-9_-]+)(\/|\s|\?|$)'
-    pattern = re.fullmatch(regex_string,content)
-    if pattern:
-        return pattern.groups()[1]
 
-class ErrorTypeChannel(Exception):
-    pass
 
-async def get_webhook(channel: nextcord.TextChannel) -> nextcord.Webhook:
-    if channel.type.value not in [0,2,5,13]:
-        raise ErrorTypeChannel("Channel error")
-    webhooks = await channel.webhooks()
-    for wh in webhooks:
-        if wh.user==bot.user:
-            return wh
-    else:
-        wh = await channel.create_webhook(name=bot.user.global_name,avatar=bot.user.avatar)
-        return wh
 
 @bot.event
 async def on_ready():
@@ -121,10 +84,9 @@ async def on_ready():
 async def on_disconnect():
     print("Bot is disconnect")
 
-
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
-    print(f"[HANDLER][on_command_error][{ctx.command.name}]: {error}")
+    print(error)
 
 @bot.event
 async def on_application_command_error(interaction: nextcord.Interaction, error):
@@ -135,7 +97,6 @@ async def on_application_command_error(interaction: nextcord.Interaction, error)
 @bot.event
 async def on_interaction(interaction:nextcord.Interaction):
     await bot.process_application_commands(interaction)
-    await asyncio.sleep(2.5)
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
@@ -166,9 +127,11 @@ async def on_message(message: nextcord.Message):
     
     guild_base = guilds(message.guild.id)
     reacts = guild_base.get_ar(message.channel.id)
+    
     trans_lang = guild_base.get_at(message.channel.id)
     lang = guilds(message.guild.id).get_lang()
-    invite_code = check_invite(message.content)
+    
+    invite_code = utils.check_invite(message.content)
     
     if reacts:
         for rea in reacts:
@@ -201,7 +164,7 @@ async def on_message(message: nextcord.Message):
         try:
             invite = await bot.fetch_invite(invite_code)
             translate = languages.invites(invite)
-            wh = await get_webhook(message.channel)
+            wh = await utils.get_webhook(message.channel)
             name = message.author.global_name if message.author.global_name and message.author.name == message.author.display_name else message.author.display_name
             guild_icon = invite.guild.icon.url if invite.guild.icon else None
             
@@ -271,7 +234,7 @@ async def say(ctx:commands.Context, *, message: str=None):
         data = io.BytesIO(await attach.read())
         files.append(nextcord.File(data, attach.filename))
     
-    res = generate_message(message)
+    res = utils.generate_message(message)
     ctx.send(**res,files=files)
     
     await ctx.message.delete()
@@ -315,6 +278,14 @@ async def test(ctx:commands.Context):
     gem._fields = [lister[0]]
     cl.custom_emoji(previous='<:previous:1167518761687994459>',backward='<:backward:1167518764657557605>',forward='<:forward:1167518766033285180>',next='<:next:1167518766951841803>')
     await ctx.send(embed=gem,view=cl)
+
+@bot.command()
+async def load_extension(ctx:commands.Context,name):
+    bot.load_extension(f"cogs.{name}")
+
+@bot.command()
+async def unload_extension(ctx:commands.Context,name):
+    bot.unload_extension(f"cogs.{name}")
 
 if __name__ == "__main__":
     for filename in os.listdir("./cogs"):

@@ -1,3 +1,4 @@
+react = {'bite':{}}
 from nextcord.ext import commands
 
 class test(commands.Cog):
