@@ -301,8 +301,7 @@ class CustomList(menus.Main):
         gem = self.dem
         gem._fields = [self.value[self.index]]
         await interaction.message.edit(embed=gem,view=self)
-    
-    
+
 
 @bot.command()
 async def test(ctx:commands.Context):
