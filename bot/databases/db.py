@@ -36,10 +36,10 @@ class RequstsDB:
         guild = cursor.fetchone()
         
         connection.commit()
-        if guild:
-            return dict(zip(table,guild))
+        if not guild:
+            return None
         
-        return None
+        return dict(zip(table,guild))
     
     def insert(guild_id):
         cursor = connection.cursor()
