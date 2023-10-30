@@ -7,7 +7,7 @@ import pickle,time,threading,os,aiohttp,io,re
 
 from bot.databases.db import GuildDateBases
 from bot.misc import (utils,env)
-from bot.resources import (info,languages)
+from bot.resources import (info,languages,errors)
 from bot.views import buttons
 
 translator = googletrans.Translator()
@@ -76,7 +76,7 @@ async def on_message(message: nextcord.Message):
     trans_lang = guild_base.get_at(message.channel.id)
     lang = guilds(message.guild.id).get_lang()
     
-    invite_code = utils.check_invite(message.content)
+    invite_code = await utils.check_invite(message.content)
     
     if reacts:
         for rea in reacts:
@@ -127,7 +127,7 @@ async def on_message(message: nextcord.Message):
             
             await message.delete()
             await wh.send(username=name,avatar_url=message.author.avatar.url,embed=embed)
-        except (nextcord.errors.NotFound,ErrorTypeChannel):
+        except (nextcord.errors.NotFound,errors.ErrorTypeChannel):
             pass
     
     
