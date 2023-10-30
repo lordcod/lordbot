@@ -1,22 +1,3 @@
-token = 'MTExOTM1MTIxOTc2OTU5Mzk3Ng.GeflqK.G0CwF8QzU5WJiWgxz2NpUBw6JlouQhMWbppmlY'
-client_id = 1119351219769593976
-
-anprim_bot = "MTE2Mzc0NjE1Njk0NjM5OTI5Mg.GrHWFF.TU_tCmdsDL5bqSd2XzSN3OE04UAw4LB2DB9c2I"
-castle_bot = "MTE2Mzc0NzQxOTg2ODExOTA0MA.GA6nMN.oGDmsgTtQX-40ov51airPeziHflOg7Z2_XNSt0"
-
-voice_channel_id = 1152258858861985883
-voice_category_id = 1152258857100398673
-role_captcha_id = 1148662572485181512
-
-link = '\
-https://discord.com/api/oauth2/authorize\
-?client_id=1095713975532007434\
-&permissions=-1\
-&scope=bot%20applications.commands\
-&response_type=code\
-&redirect_uri=https://lordbot.ru/link-role-callback\
-'
-
 activities_list = [
     {'id':880218394199220334,'label':'Watch Together','max_user':'Unlimited'},
     {'id':755827207812677713,'label':'Poker Night','max_user':'25'},
@@ -34,3 +15,13 @@ activities_list = [
     {'id':1037680572660727838,'label':'Chef Showdown','max_user':'15'},
     {'id':1107689944685748377,'label':'Bobble Bash','max_user':'8'},
 ]
+DEFAULT_PREFIX = 'l.'
+
+invite_link = '\
+https://discord.com/api/oauth2/authorize\
+?client_id=1095713975532007434\
+&permissions=-1\
+&scope=bot%20applications.commands\
+&response_type=code\
+&redirect_uri=https://lordbot.ru/link-role-callback\
+'
