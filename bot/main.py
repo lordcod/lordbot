@@ -1,68 +1,21 @@
 import nextcord
 from nextcord.ext import (commands,application_checks,tasks)
-from nextcord.utils import get,find
+from nextcord.utils import (get,find)
 
-import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha,languages,re,menus,utils
-from config import *
+import asyncio,orjson,random,googletrans,datetime as dtt
+import pickle,time,threading,os,aiohttp,io,re
+
+from bot.databases.db import GuildDateBases
+from bot.misc import (info,utils,env,languages)
+from bot.views import menus
 
 translator = googletrans.Translator()
 
-DEFAULT_PREFIX = 'l.'
-
-bot = commands.Bot(command_prefix=DEFAULT_PREFIX,intents=nextcord.Intents.all())
 
 
-class GuildDateBases:
-    def __init__(self,base:dict):
-        self.base = base
+bot = commands.Bot(command_prefix=info.DEFAULT_PREFIX,intents=nextcord.Intents.all())
 
-    def __call__(self,guild_id):
-        self.guild_id = guild_id
-        self.get_guild(guild_id)
-        return self 
 
-    def get_guild(self,guild_id):
-        if guild_id in self.base:
-            return self.base[guild_id]
-        else:
-            self.base[guild_id] = {}
-            return self.base[guild_id]
-    
-    def get_afm(self,channel_id):
-        if not self.guild_id:
-            return None
-        service = 'auto_forum_messages'
-        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
-            return self.base[self.guild_id][service][channel_id]
-        else:
-            return False
-    
-    def get_ar(self,channel_id):
-        if not self.guild_id:
-            return None
-        service = 'auto_reactions'
-        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
-            return self.base[self.guild_id][service][channel_id]
-        else:
-            return False
-    
-    def get_at(self,channel_id):
-        if not self.guild_id:
-            return None
-        service = 'auto_translate'
-        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
-            return self.base[self.guild_id][service][channel_id]
-        else:
-            return False
-
-    def get_lang(self):
-        if not self.guild_id:
-            return None
-        if 'language' in self.base[self.guild_id]:
-            return self.base[self.guild_id]['language']
-        else:
-            return self.base['default']['language']
 
 guilds = GuildDateBases({
     'default':{
@@ -204,7 +157,7 @@ async def activiti(interaction:nextcord.Interaction,
         required=True,
         name="activiti",
         description="Select the activity you want to use!",
-        choices=[activ['label'] for activ in activities_list],
+        choices=[activ['label'] for activ in info.activities_list],
     ),
 ):
     lang = guilds(interaction.guild_id).get_lang()
@@ -242,7 +195,7 @@ async def say(ctx:commands.Context, *, message: str=None):
 @bot.command()
 async def captcha(ctx:commands.Context):
     lang = guilds(ctx.guild.id).get_lang()
-    data,text = recaptcha.generator(random.randint(3,7))
+    data,text = await recaptcha.generator(random.randint(3,7))
     image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
     await ctx.send(content=languages.captcha.enter[lang],file=image_file)
     try:
@@ -287,9 +240,9 @@ async def load_extension(ctx:commands.Context,name):
 async def unload_extension(ctx:commands.Context,name):
     bot.unload_extension(f"cogs.{name}")
 
-if __name__ == "__main__":
-    for filename in os.listdir("./cogs"):
-        if filename.endswith(".py"):
+def start_bot():
+    for filename in os.listdir("./bot/cogs"):
+        if filename.endswith(".py") and not filename.startswith("__init__"):
             fmp = filename[:-3]
-            bot.load_extension(f"cogs.{fmp}")
-    bot.run(token)
+            bot.load_extension(f"bot.cogs.{fmp}")
+    bot.run(env.Tokens.token)
