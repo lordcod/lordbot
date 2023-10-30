@@ -2,8 +2,7 @@ import nextcord
 from nextcord.ext import (commands,application_checks,tasks)
 from nextcord.utils import (get,find)
 
-import asyncio,orjson,random,googletrans,datetime as dtt
-import pickle,time,threading,os,aiohttp,io,re
+import googletrans,os
 
 from bot.databases.db import GuildDateBases
 from bot.misc import (utils,env)
@@ -13,15 +12,6 @@ from bot.views import buttons
 translator = googletrans.Translator()
 
 bot = commands.Bot(command_prefix=info.DEFAULT_PREFIX,intents=nextcord.Intents.all())
-
-guilds = GuildDateBases({
-    'default':{
-        'auto_forum_messages' : {},
-        'auto_reactions' : {},
-        'auto_translate' : {},
-        'language':'en'
-    }
-})
 
 @bot.event
 async def on_ready():
@@ -46,9 +36,9 @@ async def on_interaction(interaction:nextcord.Interaction):
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
-    guild_base = guilds(thread.guild.id)
-    afm = guild_base.get_afm(thread.id)
-    if not afm:
+    guild_base = GuildDateBases(thread.guild.id)
+    afm = guild_base.forum_messages
+    if thread.parent_id not in afm:
         return
     
     await thread.send(embed=nextcord.Embed(**afm))
@@ -65,25 +55,24 @@ async def on_member_update(before:nextcord.Member,after:nextcord.Member):
     elif remove:
         print(f'У {before.name} удалили роль {remove[0].name}')
 
-@bot.event
+
 async def on_message(message: nextcord.Message):
     if message.author.bot:
         return
     
-    guild_base = guilds(message.guild.id)
-    reacts = guild_base.get_ar(message.channel.id)
-    
-    trans_lang = guild_base.get_at(message.channel.id)
-    lang = guilds(message.guild.id).get_lang()
+    guild_base = GuildDateBases(message.guild.id)
+    reacts = guild_base.reactions
+    trans_lang = guild_base.auto_translate
+    lang = guild_base.language
     
     invite_code = await utils.check_invite(message.content)
     
-    if reacts:
-        for rea in reacts:
+    if message.channel.id in reacts:
+        for rea in reacts[message.channel.id]:
             await message.add_reaction(rea)
     
-    if trans_lang:
-        result = translator.translate(message.content,dest=trans_lang)
+    if message.channel.id in trans_lang:
+        result = translator.translate(message.content,dest=trans_lang[message.channel.id])
         if result.src != trans_lang:
             embed = nextcord.Embed(
                 title="",
@@ -152,8 +141,8 @@ async def activiti(interaction:nextcord.Interaction,
         choices=[activ['label'] for activ in info.activities_list],
     ),
 ):
-    lang = guilds(interaction.guild_id).get_lang()
-    activiti = utils.find(lambda a: a['label']==act,activities_list)
+    lang = GuildDateBases(interaction.guild_id).language
+    activiti = utils.find(lambda a: a['label']==act,info.activities_list)
     try:
         inv = await voice.create_invite(
             target_type=nextcord.InviteTarget.embedded_application,
