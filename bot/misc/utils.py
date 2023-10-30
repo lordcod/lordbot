@@ -6,8 +6,8 @@ from PIL import Image
 
 async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:
     if channel.type.value not in [0,2,5,13]:
-    
         raise  errors.ErrorTypeChannel("Channel error")
+    
     webhooks = await channel.webhooks()
     for wh in webhooks:
         if wh.user==user:
