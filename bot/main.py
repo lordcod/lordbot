@@ -6,16 +6,13 @@ import asyncio,orjson,random,googletrans,datetime as dtt
 import pickle,time,threading,os,aiohttp,io,re
 
 from bot.databases.db import GuildDateBases
-from bot.misc import (info,utils,env,languages)
-from bot.views import menus
+from bot.misc import (utils,env)
+from bot.resources import (info,languages)
+from bot.views import buttons
 
 translator = googletrans.Translator()
 
-
-
 bot = commands.Bot(command_prefix=info.DEFAULT_PREFIX,intents=nextcord.Intents.all())
-
-
 
 guilds = GuildDateBases({
     'default':{
@@ -25,9 +22,6 @@ guilds = GuildDateBases({
         'language':'en'
     }
 })
-
-
-
 
 @bot.event
 async def on_ready():
@@ -45,7 +39,6 @@ async def on_command_error(ctx: commands.Context, error):
 async def on_application_command_error(interaction: nextcord.Interaction, error):
     print(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
     print(interaction.id)
-
 
 @bot.event
 async def on_interaction(interaction:nextcord.Interaction):
@@ -71,7 +64,6 @@ async def on_member_update(before:nextcord.Member,after:nextcord.Member):
         print(f'У {before.name} добавили роль {add[0].name}')
     elif remove:
         print(f'У {before.name} удалили роль {remove[0].name}')
-
 
 @bot.event
 async def on_message(message: nextcord.Message):
@@ -179,66 +171,6 @@ async def activiti(interaction:nextcord.Interaction,
     ]
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
-
-@bot.command()
-async def say(ctx:commands.Context, *, message: str=None):
-    files = []
-    for attach in ctx.message.attachments:
-        data = io.BytesIO(await attach.read())
-        files.append(nextcord.File(data, attach.filename))
-    
-    res = utils.generate_message(message)
-    ctx.send(**res,files=files)
-    
-    await ctx.message.delete()
-
-@bot.command()
-async def captcha(ctx:commands.Context):
-    lang = guilds(ctx.guild.id).get_lang()
-    data,text = await recaptcha.generator(random.randint(3,7))
-    image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
-    await ctx.send(content=languages.captcha.enter[lang],file=image_file)
-    try:
-        check = lambda m: m.channel==ctx.channel and m.author==ctx.author
-        mes:nextcord.Message = await bot.wait_for("message",timeout=30,check=check)
-    except asyncio.TimeoutError:
-        await ctx.send(content=languages.captcha.failed[lang])
-        return
-    
-    if mes.content.lower() == text.lower():
-        await ctx.send(f"{languages.Emoji.congratulation}{languages.captcha.congratulation[lang]}")
-    else:
-        await ctx.send(content=languages.captcha.failed[lang])
-
-class CustomList(menus.Main):
-    dem = nextcord.Embed(title='Описание',description='Нашего персонала')
-    
-    async def callback(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        gem = self.dem
-        gem._fields = [self.value[self.index]]
-        await interaction.message.edit(embed=gem,view=self)
-
-
-@bot.command()
-async def test(ctx:commands.Context):
-    lister = [
-        {'name':'LordCode','value':'Лучший разраб'},
-        {'name':'Shashlychok','value':'Делает сайты'},
-        {'name':'Koof','value':'Просто лучший'},
-    ]
-    cl = CustomList(lister)
-    gem = cl.dem
-    gem._fields = [lister[0]]
-    cl.custom_emoji(previous='<:previous:1167518761687994459>',backward='<:backward:1167518764657557605>',forward='<:forward:1167518766033285180>',next='<:next:1167518766951841803>')
-    await ctx.send(embed=gem,view=cl)
-
-@bot.command()
-async def load_extension(ctx:commands.Context,name):
-    bot.load_extension(f"cogs.{name}")
-
-@bot.command()
-async def unload_extension(ctx:commands.Context,name):
-    bot.unload_extension(f"cogs.{name}")
 
 def start_bot():
     for filename in os.listdir("./bot/cogs"):

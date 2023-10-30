@@ -3,9 +3,6 @@ from captcha.image import ImageCaptcha
 from io import BytesIO
 from PIL import Image
 
-class ErrorTypeChannel(Exception):
-    pass
-
 async def get_webhook(channel: nextcord.TextChannel) -> nextcord.Webhook:
     if channel.type.value not in [0,2,5,13]:
         raise ErrorTypeChannel("Channel error")
