@@ -1,68 +1,18 @@
 import nextcord
 from nextcord.ext import (commands,application_checks,tasks)
-from nextcord.utils import get,find
+from nextcord.utils import (get,find)
 
-import asyncio,orjson,random,googletrans,datetime as dtt,\
-pickle,time,threading,os,aiohttp,io,recaptcha,languages,re,menus,utils
-from config import *
+import asyncio,orjson,random,googletrans,datetime as dtt
+import pickle,time,threading,os,aiohttp,io,re
+
+from bot.databases.db import GuildDateBases
+from bot.misc import (utils,env)
+from bot.resources import (info,languages,errors)
+from bot.views import buttons
 
 translator = googletrans.Translator()
 
-DEFAULT_PREFIX = 'l.'
-
-bot = commands.Bot(command_prefix=DEFAULT_PREFIX,intents=nextcord.Intents.all())
-
-
-class GuildDateBases:
-    def __init__(self,base:dict):
-        self.base = base
-
-    def __call__(self,guild_id):
-        self.guild_id = guild_id
-        self.get_guild(guild_id)
-        return self 
-
-    def get_guild(self,guild_id):
-        if guild_id in self.base:
-            return self.base[guild_id]
-        else:
-            self.base[guild_id] = {}
-            return self.base[guild_id]
-    
-    def get_afm(self,channel_id):
-        if not self.guild_id:
-            return None
-        service = 'auto_forum_messages'
-        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
-            return self.base[self.guild_id][service][channel_id]
-        else:
-            return False
-    
-    def get_ar(self,channel_id):
-        if not self.guild_id:
-            return None
-        service = 'auto_reactions'
-        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
-            return self.base[self.guild_id][service][channel_id]
-        else:
-            return False
-    
-    def get_at(self,channel_id):
-        if not self.guild_id:
-            return None
-        service = 'auto_translate'
-        if service in self.base[self.guild_id] and channel_id in self.base[self.guild_id][service]:
-            return self.base[self.guild_id][service][channel_id]
-        else:
-            return False
-
-    def get_lang(self):
-        if not self.guild_id:
-            return None
-        if 'language' in self.base[self.guild_id]:
-            return self.base[self.guild_id]['language']
-        else:
-            return self.base['default']['language']
+bot = commands.Bot(command_prefix=info.DEFAULT_PREFIX,intents=nextcord.Intents.all())
 
 guilds = GuildDateBases({
     'default':{
@@ -72,9 +22,6 @@ guilds = GuildDateBases({
         'language':'en'
     }
 })
-
-
-
 
 @bot.event
 async def on_ready():
@@ -92,7 +39,6 @@ async def on_command_error(ctx: commands.Context, error):
 async def on_application_command_error(interaction: nextcord.Interaction, error):
     print(f"[HANDLER][on_application_command_error][{interaction.application_command}]: {error}")
     print(interaction.id)
-
 
 @bot.event
 async def on_interaction(interaction:nextcord.Interaction):
@@ -119,7 +65,6 @@ async def on_member_update(before:nextcord.Member,after:nextcord.Member):
     elif remove:
         print(f'У {before.name} удалили роль {remove[0].name}')
 
-
 @bot.event
 async def on_message(message: nextcord.Message):
     if message.author.bot:
@@ -131,7 +76,7 @@ async def on_message(message: nextcord.Message):
     trans_lang = guild_base.get_at(message.channel.id)
     lang = guilds(message.guild.id).get_lang()
     
-    invite_code = utils.check_invite(message.content)
+    invite_code = await utils.check_invite(message.content)
     
     if reacts:
         for rea in reacts:
@@ -182,7 +127,7 @@ async def on_message(message: nextcord.Message):
             
             await message.delete()
             await wh.send(username=name,avatar_url=message.author.avatar.url,embed=embed)
-        except (nextcord.errors.NotFound,ErrorTypeChannel):
+        except (nextcord.errors.NotFound,errors.ErrorTypeChannel):
             pass
     
     
@@ -204,7 +149,7 @@ async def activiti(interaction:nextcord.Interaction,
         required=True,
         name="activiti",
         description="Select the activity you want to use!",
-        choices=[activ['label'] for activ in activities_list],
+        choices=[activ['label'] for activ in info.activities_list],
     ),
 ):
     lang = guilds(interaction.guild_id).get_lang()
@@ -227,69 +172,9 @@ async def activiti(interaction:nextcord.Interaction,
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
 
-@bot.command()
-async def say(ctx:commands.Context, *, message: str=None):
-    files = []
-    for attach in ctx.message.attachments:
-        data = io.BytesIO(await attach.read())
-        files.append(nextcord.File(data, attach.filename))
-    
-    res = utils.generate_message(message)
-    ctx.send(**res,files=files)
-    
-    await ctx.message.delete()
-
-@bot.command()
-async def captcha(ctx:commands.Context):
-    lang = guilds(ctx.guild.id).get_lang()
-    data,text = recaptcha.generator(random.randint(3,7))
-    image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
-    await ctx.send(content=languages.captcha.enter[lang],file=image_file)
-    try:
-        check = lambda m: m.channel==ctx.channel and m.author==ctx.author
-        mes:nextcord.Message = await bot.wait_for("message",timeout=30,check=check)
-    except asyncio.TimeoutError:
-        await ctx.send(content=languages.captcha.failed[lang])
-        return
-    
-    if mes.content.lower() == text.lower():
-        await ctx.send(f"{languages.Emoji.congratulation}{languages.captcha.congratulation[lang]}")
-    else:
-        await ctx.send(content=languages.captcha.failed[lang])
-
-class CustomList(menus.Main):
-    dem = nextcord.Embed(title='Описание',description='Нашего персонала')
-    
-    async def callback(self,button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        gem = self.dem
-        gem._fields = [self.value[self.index]]
-        await interaction.message.edit(embed=gem,view=self)
-
-
-@bot.command()
-async def test(ctx:commands.Context):
-    lister = [
-        {'name':'LordCode','value':'Лучший разраб'},
-        {'name':'Shashlychok','value':'Делает сайты'},
-        {'name':'Koof','value':'Просто лучший'},
-    ]
-    cl = CustomList(lister)
-    gem = cl.dem
-    gem._fields = [lister[0]]
-    cl.custom_emoji(previous='<:previous:1167518761687994459>',backward='<:backward:1167518764657557605>',forward='<:forward:1167518766033285180>',next='<:next:1167518766951841803>')
-    await ctx.send(embed=gem,view=cl)
-
-@bot.command()
-async def load_extension(ctx:commands.Context,name):
-    bot.load_extension(f"cogs.{name}")
-
-@bot.command()
-async def unload_extension(ctx:commands.Context,name):
-    bot.unload_extension(f"cogs.{name}")
-
-if __name__ == "__main__":
-    for filename in os.listdir("./cogs"):
-        if filename.endswith(".py"):
+def start_bot():
+    for filename in os.listdir("./bot/cogs"):
+        if filename.endswith(".py") and not filename.startswith("__init__"):
             fmp = filename[:-3]
-            bot.load_extension(f"cogs.{fmp}")
-    bot.run(token)
+            bot.load_extension(f"bot.cogs.{fmp}")
+    bot.run(env.Tokens.token)
