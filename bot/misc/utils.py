@@ -1,17 +1,19 @@
-import nextcord,string,random,re
+import nextcord,string,random,re,orjson
 from captcha.image import ImageCaptcha
+from bot.resources import errors
 from io import BytesIO
 from PIL import Image
 
-async def get_webhook(channel: nextcord.TextChannel) -> nextcord.Webhook:
+async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:
     if channel.type.value not in [0,2,5,13]:
-        raise ErrorTypeChannel("Channel error")
+    
+        raise  errors.ErrorTypeChannel("Channel error")
     webhooks = await channel.webhooks()
     for wh in webhooks:
-        if wh.user==bot.user:
+        if wh.user==user:
             return wh
     else:
-        wh = await channel.create_webhook(name=bot.user.global_name,avatar=bot.user.avatar)
+        wh = await channel.create_webhook()
         return wh
 
 async def generate_message(content):
