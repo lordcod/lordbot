@@ -5,13 +5,8 @@ from bs4 import BeautifulSoup
 from hashlib import md5
 
 api = 'https://api.music.yandex.net'
-token = 'y0_AgAAAAA8S1W0AAG8XgAAAADrChJ46-a4hy0gTUesY2pHjjc3tpPbYw'
+token = 'y0_AgAAAAA8S1W0AAG8XgAAAADrChJ46-a4hy0gTUesY2pHjjc3tpPbYw8'
 headers = {'Authorization': f'OAuth {token}'}
-search = f'{api}/search'
-track_id = 1
-down = f'{api}/tracks/{track_id}/download-info'
-
-
 SIGN_SALT = 'XGRlBW9FXlekgbPrRHuSiA'
 
 class Downald_info:
@@ -41,53 +36,89 @@ class Downald_info:
         
         return f'https://{host}/get-mp3/{sign}/{ts}{path}'
 
+class yandex_music_requests:
+    @staticmethod
+    async def download_track(downloadInfoUrl):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(downloadInfoUrl) as res:
+                data = await res.read()
+                Bs_data = BeautifulSoup(data, "xml")
+                link = Downald_info(Bs_data).link
+                return link
+    
+    @staticmethod
+    async def download_info(track_id,bitrateInKbps=192):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'{api}/tracks/{track_id}/download-info',headers=headers) as res:
+                js = await res.json()
+                print(js)
+                results = js['result']
+                for res in results:
+                    if res['bitrateInKbps'] == bitrateInKbps:
+                        diu = res['downloadInfoUrl']
+                        return diu
+                    raise Exception('bitrateInKbps error')
+    
+    @staticmethod
+    async def search(text):
+        params = {
+            'text':text,
+            'nocorrect':'False',
+            'type':'all',
+            'page':'0',
+            'playlist-in-best': 'True'
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'{api}/search',headers=headers,params=params) as res:
+                js = await res.json()
+                print(js)
+                track_id = js['result']['best']['result']['id']
+                album_id = js['result']['best']['result']['albums'][0]['id']
+                ids = f'{track_id}:{album_id}'
+                return track_id
 
-async def download_track(downloadInfoUrl):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(downloadInfoUrl) as res:
-            data = await res.read()
-            Bs_data = BeautifulSoup(data, "xml")
-            link = Downald_info(Bs_data).link
-            return link
+class track_method_yandex_music(yandex_music_requests):
+    track = None
+    
+    def __init__(self,id) -> None:
+        self.track = id
+    
+    async def download_link(self) -> str:
+        if self.track is None:
+            return None
+        uri = await self.download_info(self.track)
+        link = await self.download_track(uri)
+        return link
+
+    async def download_bytes(self) -> bytes:
+        if self.track is None:
+            return None
+        link = await self.download_link()
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(link) as res:
+                data = await res.read()
+                return data
+    
+    async def download(self,name) -> None:
+        if self.track is None:
+            return None
+        bytes = await self.download_bytes()
+        with open(name,'wb') as file:
+            file.write(bytes)
+    
+    @classmethod
+    async def search(cls,text):
+        ids = await super().search(text)
+        return cls(ids)
+
+class track:
+    pass
 
 
-async def download_info(track_id,bitrateInKbps=192):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'{api}/tracks/{track_id}/download-info',headers=headers) as res:
-            js = await res.json()
-            results = js['result']
-            for res in results:
-                if res['bitrateInKbps'] == bitrateInKbps:
-                    diu = res['downloadInfoUrl']
-                    return diu
-                raise Exception('bitrateInKbps error')
+async def main():
+    track = await track_method_yandex_music.search('не по любви')
+    print(track.track)
+    await track.download('audio.mp3')
 
-
-async def search(text):
-    params = {
-        'text':text,
-        'nocorrect':'False',
-        'type':'all',
-        'page':'0',
-        'playlist-in-best': 'True'
-    }
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'{api}/search',headers=headers,params=params) as res:
-            js = await res.json()
-            track_id = js['result']['best']['result']['id']
-            album_id = js['result']['best']['result']['albums'][0]['id']
-            ids = f'{track_id}:{album_id}'
-            return ids
-
-async def main(text):
-    print('0/3')
-    id = await search(text)
-    print('1/3')
-    diu = await download_info(id)
-    print('2/3')
-    track_link = await download_track(diu)
-    print('3/3')
-    print(track_link)
-
-
-asyncio.run(main(input()))
+asyncio.run(main())
