@@ -9,7 +9,7 @@ import re
 
 path = 'ffmpeg'
 
-cl = yandex_music.Client('y0_AgAAAAA8S1W0AAG8XgAAAADrChJ46-a4hy0gTUesY2pHjjc3tpPbYw8').init()
+cl = yandex_music.Client().init()
 
 ydl_opts = {
     'format': 'bestaudio/best',

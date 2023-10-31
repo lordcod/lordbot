@@ -1,5 +1,8 @@
 import nextcord
 from nextcord.ext import commands
+import io
+from bot.misc import utils
+from bot.resources import errors
 
 class moderations(commands.Cog):
     def __init__(self, bot):
@@ -28,7 +31,7 @@ class moderations(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def user(self,ctx: commands.Context,member: nextcord.Member,limit: int):
         if limit > 100:
-            raise CommandError("The maximum number of messages to delete is `100`")
+            raise commands.CommandError("The maximum number of messages to delete is `100`")
         
         deleted = 0
         async for message in ctx.channel.history(limit=250):
@@ -46,7 +49,7 @@ class moderations(commands.Cog):
         if not messsage_finish:
             messsage_finish = (await message_start.channel.history(limit=1).flatten())[0]
         if message_start.channel != messsage_finish.channel:
-            raise CommandError("Channel error")
+            raise commands.CommandError("Channel error")
         deleted = 0
         finder = False
         async for message in message_start.channel.history(limit=250):
