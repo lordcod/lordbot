@@ -11,7 +11,6 @@ import re
 
 path = 'ffmpeg'
 
-
 ydl_opts = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -79,8 +78,7 @@ class Voice(commands.Cog):
             found = finder.groups()[1]
             tracks = await yandex_music_requests.get_list(found)
             track = tracks[0]
-            mes = await ctx.send("Download track")
-        
+        mes = await ctx.send("Download track")
         
         track_byte = await track.download_bytes()
         byio = io.BytesIO(track_byte)
