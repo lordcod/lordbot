@@ -7,7 +7,7 @@ import googletrans,os
 from bot.databases.db import GuildDateBases
 from bot.misc import (utils,env)
 from bot.resources import (info,languages,errors)
-from bot.views import buttons
+from bot.views import views
 
 translator = googletrans.Translator()
 
