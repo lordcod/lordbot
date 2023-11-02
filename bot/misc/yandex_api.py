@@ -34,7 +34,7 @@ class Album:
         self.id:int = data['id']
         self.title:str = data['title']
         self.type:str = data['metaType']
-        self.year:int = data['year']
+        # self.year:int = data['year']
         # self.release_date:str = data['releaseDate']
         self.image:str = data['ogImage']
         self.artists:List[Artist] = [Artist(artist) for artist in data['artists']]
@@ -150,7 +150,7 @@ class yandex_music_requests:
     ) -> List[Union[Artist, Album, Track, Playlist]]:
         params = {'with-positions': 'True',f'{object_type}-ids': ids}
 
-        url = f'{api}/{object_type}s' + ('/list' if object_type == 'playlist' else '')
+        url = f"{api}/{object_type}s{'/list' if object_type == 'playlist' else ''}"
         
         async with aiohttp.ClientSession() as session:
             async with session.get(url,params=params) as res:

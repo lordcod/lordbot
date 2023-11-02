@@ -1,23 +1,46 @@
-from typing import Literal
-import sqlite3
+import psycopg2
 import orjson
 
 
+host = 'postgresql.879043c3234e.hosting.myjino.ru'
+port = 5432
+password = 'nVR*6#1P%hyR*4l0'
+user = 'j5191558_bot'
+db_name = 'j5191558_main'
 
 
-connection = sqlite3.connect('bot/databases/gdb.db')
-cursor = connection.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS guilds (
-        id INTEGER,
-        forum_messages TEXT DEFAULT '{}',
-        reactions TEXT DEFAULT '{}',
-        auto_translate TEXT DEFAULT '{}',
-        language TEXT DEFAULT 'en',
-        PRIMARY KEY("id")
+try:
+    connection = psycopg2.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=db_name
     )
-''')
-connection.commit()
+    connection.autocommit = True
+except Exception as err:
+    print(type(err))
+    print(err)
+
+with connection.cursor() as cursor:
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS guilds (
+            id INTEGER PRIMARY KEY,
+            forum_messages BYTEA DEFAULT '{}',
+            reactions BYTEA DEFAULT '{}',
+            auto_translate BYTEA DEFAULT '{}',
+            language TEXT DEFAULT 'en'
+        )
+    ''')
+
+def decode(data):
+    new_data = {}
+    for d in data:
+        try:
+            dejson = orjson.loads(data[d])
+            new_data[d] = dejson
+        except:
+            new_data[d] = data[d]
+    return new_data
 
 table = (
     'id',
@@ -27,58 +50,49 @@ table = (
     'language'
 )
 
-
 class RequstsDB:
     def get(guild_id):
-        cursor = connection.cursor()
-        
-        cursor.execute('SELECT * FROM guilds WHERE id = ?', (guild_id,))
-        guild = cursor.fetchone()
-        
-        connection.commit()
-        if not guild:
-            return None
-        
-        return dict(zip(table,guild))
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM guilds WHERE id = %s', (guild_id,))
+            
+            guild = cursor.fetchone()
+            
+            if not guild:
+                return None
+            return guild
     
     def insert(guild_id):
-        cursor = connection.cursor()
-        
-        cursor.execute('INSERT INTO guilds (id) VALUES (?)', (guild_id,))
-        
-        connection.commit()
+        with connection.cursor() as cursor:
+            cursor.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
+            
+            connection.commit()
     
     def update(guild_id,arg,value):
         if not RequstsDB.get(guild_id):
             RequstsDB.insert(guild_id)
-        
-        cursor = connection.cursor()
-        
-        cursor.execute(f'UPDATE guilds SET {arg} = ? WHERE id = ?', (value, guild_id))
-        
-        connection.commit()
+        with connection.cursor() as cursor:
+            cursor.execute(f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value, guild_id))
+            
+            connection.commit()
     
     def delete(guild_id):
-        cursor = connection.cursor()
-        
-        cursor.execute('DELETE FROM guilds WHERE id = ?', (guild_id,))
-        
-        connection.commit()
+        with connection.cursor() as cursor:
+            cursor.execute('DELETE FROM guilds WHERE id = %s', (guild_id,))
+            
+            connection.commit()
     
     def drop_table():
-        cursor = connection.cursor()
-        
-        cursor.execute('DROP TABLE guilds')
-        
-        connection.commit()
+        with connection.cursor() as cursor:
+            cursor.execute('DROP TABLE guilds')
+            
+            connection.commit()
     
-    def update_kwargs(guild_id,**kwargs):
+    def update_from_kwargs(guild_id,**kwargs):
         if not RequstsDB.get(guild_id):
             RequstsDB.insert(guild_id)
         
         for kw in kwargs:
             RequstsDB.update(guild_id,kw,kwargs[kw])
-
 
 class GuildDateBases:
     def __init__(self,guild_id):
@@ -92,6 +106,9 @@ class GuildDateBases:
         if not gdb:
             RequstsDB.insert(self.guild_id)
             gdb = RequstsDB.get(self.guild_id)
+        
+        gdb = dict(zip(table,gdb))
+        gdb = decode(gdb)
         return gdb
     
     def _get_atr_service(self, service):
@@ -148,3 +165,5 @@ class GuildDateBases:
         service = 'language'
         self._set_atr_service(service,value)
 
+
+connection.close()

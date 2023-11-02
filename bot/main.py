@@ -61,19 +61,19 @@ async def on_message(message: nextcord.Message):
         return
     
     guild_base = GuildDateBases(message.guild.id)
-    reacts = guild_base.reactions
-    trans_lang = guild_base.auto_translate
+    reactions = guild_base.reactions
+    auto_translate = guild_base.auto_translate
     lang = guild_base.language
     
     invite_code = await utils.check_invite(message.content)
     
-    if message.channel.id in reacts:
-        for rea in reacts[message.channel.id]:
-            await message.add_reaction(rea)
+    if message.channel.id in reactions:
+        for react in reactions[message.channel.id]:
+            await message.add_reaction(react)
     
-    if message.channel.id in trans_lang:
-        result = translator.translate(message.content,dest=trans_lang[message.channel.id])
-        if result.src != trans_lang:
+    if message.channel.id in auto_translate:
+        result = translator.translate(message.content,dest=auto_translate[message.channel.id])
+        if result.src != auto_translate:
             embed = nextcord.Embed(
                 title="",
                 description=f'### {result.text}',
@@ -166,4 +166,4 @@ def start_bot():
         if filename.endswith(".py") and not filename.startswith("__init__"):
             fmp = filename[:-3]
             bot.load_extension(f"bot.cogs.{fmp}")
-    bot.run(env.Tokens.token)
+    bot.run(env.castle_token)

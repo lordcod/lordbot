@@ -2,12 +2,8 @@ import nextcord
 from datetime import datetime
 from nextcord.utils import format_dt,escape_markdown
 
-exemple = {
-    'ru':'',
-    'en':''
-}
 
-class Emoji():
+class Emoji:
     congratulation = '<a:congratulation:1165684808844845176>'
     owner = '<:owner:1166002519315599500>'
     verified = '<:verified:1166001046468964406>'
@@ -24,7 +20,7 @@ class Emoji():
     thread = '<:thread:1166096258511937666>'
     roketa = '<a:rocketa:1165684783754522704>'
 
-class invites():
+class invites:
     def __init__(self,invite):
         self.invite = invite
     
@@ -72,7 +68,7 @@ class invites():
     @property
     def description(self):
         invite = self.invite 
-        return f"### **{self.channel_type[invite.channel.type.value]}{escape_markdown(invite.channel.name)}**"
+        return f"{'###'} **{self.channel_type[invite.channel.type.value]}{escape_markdown(invite.channel.name)}**"
     
     @property
     def is_guild(self):
@@ -121,7 +117,7 @@ class invites():
             )
         }
 
-class captcha():
+class captcha:
     congratulation = {
         'ru':'Поздравляю, вы ввели капчу!',
         'en':'Congratulations you have passed the captcha!'
@@ -135,7 +131,7 @@ class captcha():
         'en':'Captcha failed'
     }
 
-class activiti():
+class activiti:
     failed = {
         'ru':'Это действие недоступно или не работает',
         'en':'This activity is unavailable or does not work'
@@ -157,7 +153,7 @@ class activiti():
         'en':'Maximum number of users'
     }
 
-class auto_translate():
+class auto_translate:
     title = {
         'ru':'Авто перевод',
         'en':'Automatic translation'
