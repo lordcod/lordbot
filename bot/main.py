@@ -36,8 +36,8 @@ async def on_interaction(interaction:nextcord.Interaction):
 
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
-    guild_base = GuildDateBases(thread.guild.id)
-    afm = guild_base.forum_messages
+    guild_data = GuildDateBases(thread.guild.id)
+    afm = guild_data.forum_messages
     if thread.parent_id not in afm:
         return
     
@@ -55,15 +55,15 @@ async def on_member_update(before:nextcord.Member,after:nextcord.Member):
     elif remove:
         print(f'У {before.name} удалили роль {remove[0].name}')
 
-
+@bot.event
 async def on_message(message: nextcord.Message):
     if message.author.bot:
         return
     
-    guild_base = GuildDateBases(message.guild.id)
-    reactions = guild_base.reactions
-    auto_translate = guild_base.auto_translate
-    lang = guild_base.language
+    guild_data = GuildDateBases(message.guild.id)
+    reactions = guild_data.reactions
+    auto_translate = guild_data.auto_translate
+    lang = guild_data.language
     
     invite_code = await utils.check_invite(message.content)
     
@@ -128,7 +128,8 @@ async def on_message(message: nextcord.Message):
     description="Create an activity)",
 )
 @application_checks.guild_only()
-async def activiti(interaction:nextcord.Interaction,
+async def activiti(
+    interaction:nextcord.Interaction,
     voice:nextcord.VoiceChannel=nextcord.SlashOption(
         required=True,
         name="voice",
@@ -140,7 +141,7 @@ async def activiti(interaction:nextcord.Interaction,
         description="Select the activity you want to use!",
         choices=[activ['label'] for activ in info.activities_list],
     ),
-):
+) -> None:
     lang = GuildDateBases(interaction.guild_id).language
     activiti = utils.find(lambda a: a['label']==act,info.activities_list)
     try:
@@ -161,9 +162,23 @@ async def activiti(interaction:nextcord.Interaction,
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
 
+@bot.slash_command(
+    name='suggest',
+    description='Suggest an idea for a server!',
+    description_localizations={
+        'ru':'Предложите идею для сервера!'
+    }
+)
+async def suggest(
+    interaction:nextcord.Interaction
+):
+    channel = bot.get_channel(1161741800638267523)
+    await interaction.response.send_modal(modal=views.IdeaModal(channel))
+
+
 def start_bot():
     for filename in os.listdir("./bot/cogs"):
         if filename.endswith(".py") and not filename.startswith("__init__"):
             fmp = filename[:-3]
             bot.load_extension(f"bot.cogs.{fmp}")
-    bot.run(env.castle_token)
+    bot.run(env.token_lord_the_tester)
