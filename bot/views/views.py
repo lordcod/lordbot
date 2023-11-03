@@ -62,3 +62,4 @@ class IdeaModal(nextcord.ui.Modal):
         await mes.add_reaction("<a:tickmark:1165684814557495326>")
         await mes.add_reaction("<a:cross:1165684812250611732>")
         await mes.create_thread(name="Discussion")
+
