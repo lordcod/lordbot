@@ -18,48 +18,39 @@ class IdeaModal(nextcord.ui.Modal):
             timeout=5 * 60,  # 5 minutes
         )
         self.channel = channel
-        self.info = nextcord.ui.TextInput(
-            label="Information",
-            placeholder="The ideas are completely anonymous!",
-            required=False,
-            min_length=0,
-            max_length=2,
-        )
-        self.add_item(self.info)
-        
-        self.name = nextcord.ui.TextInput(
-            label="Your name?",
-            placeholder='It is not necessary to specify the name!',
-            required=False,
-            min_length=2,
-            max_length=50,
-        )
-        self.add_item(self.name)
 
         self.idea = nextcord.ui.TextInput(
-            label="Tell us your idea",
+            label="Расскажите нам о своей идее",
             style=nextcord.TextInputStyle.paragraph,
-            placeholder="Try to describe your idea in as much detail as possible with usage examples.",
+            placeholder="Постарайтесь описать свою идею как можно более подробно с примерами использования.",
             min_length=10,
             max_length=1800,
         )
         self.add_item(self.idea)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        username = self.name.value
         idea = self.idea.value
         embed = nextcord.Embed(
-            title='A new idea!',
-            description='Whether there will be an idea or not is up to you!'
+            title='Новая идея!',
+            description='Будет идея или нет, зависит от вас!',
+            color=0x7cc0d8
         )
-        if username:
-            embed.add_field(
-                name='Who came up with the idea',
-                value=username
-            )
-        embed.add_field(name='Idea',value=idea)
+        embed.add_field(name='Идея:',value=idea)
         mes = await self.channel.send(embed=embed)
-        await mes.add_reaction("<a:tickmark:1165684814557495326>")
-        await mes.add_reaction("<a:cross:1165684812250611732>")
-        await mes.create_thread(name="Discussion")
+        await mes.add_reaction("<a:tickmark:1170029771040759969>")
+        await mes.add_reaction("<a:cross:1170029921314279544>")
+        await mes.create_thread(name="Обсуждение")
+
+class PersistentView(nextcord.ui.View):
+    def __init__(self,bot):
+        self.bot = bot
+        super().__init__(timeout=None)
+
+    @nextcord.ui.button(
+        label="Предложить", style=nextcord.ButtonStyle.green, custom_id="persistent_view:sug"
+    )
+    async def green(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        channel = self.bot.get_channel(1170031835728859208)
+        await interaction.response.send_modal(modal=IdeaModal(channel))
+
 

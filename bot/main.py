@@ -15,6 +15,8 @@ bot = commands.Bot(command_prefix=info.DEFAULT_PREFIX,intents=nextcord.Intents.a
 
 @bot.event
 async def on_ready():
+    bot.add_view(views.PersistentView(bot))
+    bot.persistent_views_added = True
     print(f"The bot is registered as {bot.user}")
 
 @bot.event
@@ -161,19 +163,12 @@ async def activiti(
     ]
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
+@bot.command()
+@commands.has_permissions(manage_guild=True)
+async def add_emoji(ctx: commands.Context, name):
+    em = ctx.message.attachments[0]
+    await ctx.guild.create_custom_emoji(name=name,image=em)
 
-@bot.slash_command(
-    name='suggest',
-    description='Suggest an idea for a server!',
-    description_localizations={
-        'ru':'Предложите идею для сервера!'
-    }
-)
-async def suggest(
-    interaction:nextcord.Interaction
-):
-    channel = bot.get_channel(1161741800638267523)
-    await interaction.response.send_modal(modal=views.IdeaModal(channel))
 
 
 def start_bot():
@@ -181,4 +176,6 @@ def start_bot():
         if filename.endswith(".py") and not filename.startswith("__init__"):
             fmp = filename[:-3]
             bot.load_extension(f"bot.cogs.{fmp}")
-    bot.run(env.token_lord_the_tester)
+    
+    bot.persistent_views_added = False
+    bot.run(env.castle_token)
