@@ -13,7 +13,7 @@ async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:
         if wh.user==user:
             return wh
     else:
-        wh = await channel.create_webhook()
+        wh = await channel.create_webhook(name=user.name)
         return wh
 
 async def generate_message(content):
@@ -43,18 +43,11 @@ async def check_invite(content):
         return pattern.groups()[1]
 
 async def generator_captcha(num):
-    text = "".join([random.choice(string.ascii_uppercase) for i in range(num)])
-    image = ImageCaptcha(width = 280, height = 90)
+    text = "".join([random.choice(string.ascii_uppercase) for _ in range(num)])
     captcha_image = ImageCaptcha(
         width=400,
         height=220,
-        fonts=[
-            'SF-Pro',
-            'SF-Compact-Rounded-Black',
-            'SF-Pro-UltraLightItalic',
-            'Neoneon'
-        ],
         font_sizes=(40,70,100)
     )
-    data:BytesIO = image.generate(text)
+    data:BytesIO = captcha_image.generate(text)
     return data,text

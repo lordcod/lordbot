@@ -20,18 +20,16 @@ class Emoji:
     thread = '<:thread:1166096258511937666>'
     roketa = '<a:rocketa:1165684783754522704>'
 
+
 class invites:
-    def __init__(self,invite):
-        self.invite = invite
-    
     verification_level = {
         'ru':[
-            "нет",
-            "низкий",
-            "средний",
-            "высокий",
-            "высочайший"
-        ],
+                "нет",
+                "низкий",
+                "средний",
+                "высокий",
+                "высочайший"
+            ],
         'en':[
             'none',
             'low',
@@ -56,31 +54,21 @@ class invites:
         15:Emoji.channel_forum,
         16:Emoji.channel_forum,
     }
-    
-    @property
-    def title(self):
-        invite = self.invite 
-        return {
-            'ru':f'Приглашение на {escape_markdown(invite.guild.name)}',
-            'en':f'Invitation to {escape_markdown(invite.guild.name)}'
+
+    title = {
+            'ru':f'Приглашение на',
+            'en':f'Invitation to'
         }
     
-    @property
-    def description(self):
-        invite = self.invite 
-        return f"{'###'} **{self.channel_type[invite.channel.type.value]}{escape_markdown(invite.channel.name)}**"
-    
-    @property
-    def is_guild(self):
-        return hasattr(self.invite.guild,'owner') 
-    
-    @property
-    def footer(self):
-        invite = self.invite 
-        return {
-            'ru':f'Приглашающий: {invite.inviter.global_name}',
-            'en':f'Inviter: {invite.inviter.global_name}'
+    footer = {
+            'ru':'Приглашающий:',
+            'en':'Inviter:'
         }
+    
+    custom_invite = {
+        'en':'Custom Invite Link',
+        'ru':'Пользовательская ссылка для приглашения'
+    }
     
     @property
     def field_guild(self):

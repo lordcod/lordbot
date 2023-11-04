@@ -1,7 +1,6 @@
 import nextcord
 from nextcord.ext import (commands,application_checks,tasks)
-from nextcord.utils import (get,find)
-
+from nextcord.utils import (get,find,escape_markdown)
 import googletrans,os
 
 from bot.databases.db import GuildDateBases
@@ -99,25 +98,32 @@ async def on_message(message: nextcord.Message):
     if invite_code:
         try:
             invite = await bot.fetch_invite(invite_code)
-            translate = languages.invites(invite)
-            wh = await utils.get_webhook(message.channel)
-            name = message.author.global_name if message.author.global_name and message.author.name == message.author.display_name else message.author.display_name
-            guild_icon = invite.guild.icon.url if invite.guild.icon else None
+            wh = await utils.get_webhook(message.channel,bot.user)
             
-            embed = nextcord.Embed(title=translate.title[lang],url=invite.url,
-                                    color=0x3829df,description=translate.description)
-            embed.set_author(name=invite.guild.name,
-                            icon_url=guild_icon)
+            embed = nextcord.Embed(
+                title=f'{languages.invites.title[lang]} {invite.guild.name}',
+                url=invite.url,
+                color=0x3829df,
+                description=f"### **{languages.invites.channel_type[invite.channel.type.value]}{escape_markdown(invite.channel.name)}**"
+            )
+            embed.set_author(
+                name=invite.guild.name,
+                icon_url=invite.guild.icon
+            )
+            nextcord.Member.display_name
             if hasattr(invite.inviter,'name'):
-                embed.set_footer(text=translate.footer[lang],icon_url=invite.inviter.avatar.url)
+                embed.set_footer(
+                    text=f'{languages.invites.footer[lang]} {invite.inviter.display_name}',
+                    icon_url=invite.inviter.avatar
+                )
             else:
-                embed.set_footer(text="Cistom Invite Link",icon_url=guild_icon)
-            
-            if translate.is_guild:
-                embed.add_field(name="Основная информация",value=translate.field_guild[lang])
+                embed.set_footer(
+                    text=languages.invites.custom_invite[lang],
+                    icon_url=invite.guild.icon
+                )
             
             await message.delete()
-            await wh.send(username=name,avatar_url=message.author.avatar.url,embed=embed)
+            await wh.send(username=message.author.global_name,avatar_url=message.author.avatar.url,embed=embed)
         except (nextcord.errors.NotFound,errors.ErrorTypeChannel):
             pass
     
@@ -127,7 +133,7 @@ async def on_message(message: nextcord.Message):
 
 @bot.slash_command(
     name="activiti",
-    description="Create an activity)",
+    description="Create an activity",
 )
 @application_checks.guild_only()
 async def activiti(
@@ -170,7 +176,6 @@ async def add_emoji(ctx: commands.Context, name):
     await ctx.guild.create_custom_emoji(name=name,image=em)
 
 
-
 def start_bot():
     for filename in os.listdir("./bot/cogs"):
         if filename.endswith(".py") and not filename.startswith("__init__"):
@@ -178,4 +183,4 @@ def start_bot():
             bot.load_extension(f"bot.cogs.{fmp}")
     
     bot.persistent_views_added = False
-    bot.run(env.castle_token)
+    bot.run(env.token_lord_the_tester)

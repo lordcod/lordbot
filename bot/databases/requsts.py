@@ -2,6 +2,7 @@ import psycopg2
 import ujson as json
 import threading
 import asyncio
+import re
 
 
 host = 'postgresql.879043c3234e.hosting.myjino.ru'
@@ -25,18 +26,23 @@ except Exception as err:
 
 with connection.cursor() as cursor:
     cursor.execute('''
-        DROP TABLE IF EXISTS guilds 
+        SELECT
+        	column_name,
+        	ordinal_position,
+        	data_type,
+        	column_default
+        FROM
+        	information_schema.columns
+        WHERE
+        	table_name = 'guilds';
     ''')
+    ret = cursor.fetchall()
+    
+    pattern = "'(.*)'::([a-zA-Z0-9]*)"
+    req = ret[2][3]
+    fm = re.fullmatch(pattern,req)
+    print(fm.groups())
 
-with connection.cursor() as cursor:
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS guilds (
-            id INT8 PRIMARY KEY,
-            forum_messages JSON DEFAULT '{}',
-            reactions JSON DEFAULT '{}',
-            auto_translate JSON DEFAULT '{}',
-            language TEXT DEFAULT 'en'
-        )
-    ''')
 
 print("Finish")
+connection.close()
