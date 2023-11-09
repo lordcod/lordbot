@@ -26,22 +26,10 @@ except Exception as err:
 
 with connection.cursor() as cursor:
     cursor.execute('''
-        SELECT
-        	column_name,
-        	ordinal_position,
-        	data_type,
-        	column_default
-        FROM
-        	information_schema.columns
-        WHERE
-        	table_name = 'guilds';
+        ALTER TABLE guilds
+        ADD economy_settings JSON;
     ''')
-    ret = cursor.fetchall()
-    
-    pattern = "'(.*)'::([a-zA-Z0-9]*)"
-    req = ret[2][3]
-    fm = re.fullmatch(pattern,req)
-    print(fm.groups())
+
 
 
 print("Finish")

@@ -62,9 +62,9 @@ async def on_message(message: nextcord.Message):
         return
     
     guild_data = GuildDateBases(message.guild.id)
-    reactions = guild_data.reactions
-    auto_translate = guild_data.auto_translate
-    lang = guild_data.language
+    reactions = guild_data.get('reactions',{})
+    auto_translate = guild_data.get('auto_translate',{})
+    lang = guild_data.get('language','en')
     
     invite_code = await utils.check_invite(message.content)
     
