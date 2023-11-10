@@ -259,7 +259,7 @@ class Economy(commands.Cog):
         account["balance"] -= sum
         
         await ctx.send(f"You passed {member.mention}, **{sum}$** ")
-    
+
 
 def setup(bot):
     bot.add_cog(Economy(bot))

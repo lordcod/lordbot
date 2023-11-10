@@ -1,7 +1,7 @@
 import nextcord
 from nextcord.interactions import Interaction
 from nextcord.utils import MISSING
-from bot.misc.utils import clord
+from bot.misc.utils import clord,alphabet
 from bot.views import menus
 from bot.databases.db import GuildDateBases
 from bot.misc.yandex_api import Track
@@ -62,3 +62,4 @@ class Settings(nextcord.ui.Modal):
         print(economy_settings)
         gdb.set('economic_settings',economy_settings)
         print(gdb.get('economic_settings',{}))
+

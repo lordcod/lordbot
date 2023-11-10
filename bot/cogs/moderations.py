@@ -1,8 +1,11 @@
 import nextcord
-from nextcord.ext import commands
+from nextcord.ext import commands,application_checks
 import io
 from bot.misc import utils
 from bot.resources import errors
+from bot.views import views
+
+
 
 class moderations(commands.Cog):
     def __init__(self, bot):
@@ -10,7 +13,7 @@ class moderations(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def say(ctx:commands.Context, *, message: str=None):
+    async def say(self, ctx:commands.Context, *, message: str=None):
         files = []
         for attach in ctx.message.attachments:
             data = io.BytesIO(await attach.read())
