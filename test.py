@@ -16,6 +16,123 @@ if __name__ == "__main__":
     print(obj(5))  # prints 5
 
 
+@bot.event
+async def on_command_error(ctx: commands.Context, error):
+    # Ошибки пользователя
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("The user does not have enough rights")
+    elif isinstance(error, commands.MissingRole):
+        await ctx.send("You don't have the right role to execute the command")
+    elif isinstance(error, commands.MissingAnyRole):
+        await ctx.send("You don't have the right or the right roles to execute the command")
+    # Ошибки бота
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send("The bot doesn't have enough rights")
+    elif isinstance(error, commands.BotMissingRole):
+        await ctx.send("The bot does not have the necessary role to execute the command")
+    elif isinstance(error, commands.BotMissingAnyRole):
+        await ctx.send("The bot does not have the necessary or necessary roles to execute the command")
+    # Ошибки пользователя
+    elif isinstance(error, commands.CommandNotFound):
+        await ctx.send("There is no such command", delete_after=5.0)
+    elif isinstance(error, commands.CommandOnCooldown):
+        embed = nextcord.Embed(
+            title='The command is on hold',
+            description=f'Repeat after {error.retry_after :.0f} seconds',
+            colour=nextcord.Color.red()
+        )
+        await ctx.send(embed=embed, delete_after=5.0)
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send("This command is intended for the bot owner", delete_after=5.0)
+    elif isinstance(error, commands.CheckFailure):
+        await ctx.send("You don't fulfill all the conditions", delete_after=5.0)
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send(f"Incorrect arguments\nTo learn more about the team, use `{bot.command_prefix}help {ctx.command.name}`", delete_after=10.0)
+    # Ошибки в коде(наверное)
+    elif isinstance(error, commands.MissingFlagArgument):
+        print("Error MissingFlagArgument")
+    elif isinstance(error, commands.MissingRequiredFlag):
+        print("Error MissingRequiredFlag")
+    elif isinstance(error, commands.MissingMessageContentIntentWarning):
+        print("Error MissingMessageContentIntentWarning")
+    elif isinstance(error, commands.MissingFlagArgument):
+        print("Error MissingFlagArgument")
+    elif isinstance(error, nextcord.errors.Forbidden):
+        print("Error Forbidden")
+    else:
+        print(f"Offer Error {error}")
+
+
+
+async def getRandomQuote(lang='en'):
+    url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
+    async with aiohttp.ClientSession() as session:
+        try:
+            res = await session.post(url)
+            json = await res.json()
+            return json
+        except:
+            return await getRandomQuote(lang)
+
+
+
+@bot.message_command(name="Translate",default_member_permissions=8)
+async def reping(inters: nextcord.Interaction, message: nextcord.Message):
+    local = find(lambda lan:lan['locale']==inters.locale,languages)
+    result = translator.translate(text=message.content, dest=local['google_language'])
+    view = nextcord.ui.View(timeout=None)
+    select = nextcord.ui.Select(
+        placeholder="Will choose the appropriate language:",
+        min_values=1,
+        max_values=1,
+        options=[
+            nextcord.SelectOption(
+                label=lang['native_name'],
+                description=lang['language_name'],
+                emoji=lang['flag'],
+                value=lang['google_language']
+            )
+            for lang in languages[:25]
+        ]
+    )
+    
+    async def _callback(_inter: nextcord.Interaction):
+        result = translator.translate(text=message.content, dest=select.values[0])
+        await _inter.response.send_message(content=result.text,ephemeral=True)
+    select.callback = _callback
+    
+    view.add_item(select)
+    await inters.response.send_message(content=result.text,view=view,ephemeral=True)
+
+
+
+
+@bot.slash_command(name="random-quote")
+async def random_quote(
+inter: nextcord.Interaction, 
+lang=nextcord.SlashOption(
+    name='language',
+    description='Select the language in which you want to see the quote',
+    choices={lag['native_name']:lag['google_language'] for lag in languages[:25]})
+):
+    await inter.response.defer(ephemeral=True)
+    match lang:
+        case 'ru':
+            quote = await getRandomQuote(lang)
+        case 'en':
+            quote = await getRandomQuote(lang)
+        case _:
+            quote = await getRandomQuote('en')
+            qt = translator.translate(quote['quoteText'],dest=lang)
+            qa = translator.translate(quote['quoteAuthor'],dest=lang)
+            quote['quoteText'] = qt.text
+            quote['quoteAuthor'] = qa.text
+    
+    await inter.edit_original_message(content=f"*{quote['quoteText']}*\n\n**{quote['quoteAuthor']}**")
+
+
+
+
     @commands.command(name="roulette",aliases=["rou"])
     @work_economy()
     @commands.cooldown(rate=1, per=6.75, type=commands.BucketType.user)
