@@ -173,10 +173,11 @@ async def add_emoji(ctx: commands.Context, name):
     em = ctx.message.attachments[0]
     await ctx.guild.create_custom_emoji(name=name,image=em)
 
-@bot.slash_command(guild_ids=[1165681101294030898])
-async def settings(interaction:nextcord.Interaction):
-    await interaction.response.send_modal(views.Settings())
-
+@bot.command()
+async def settings(ctx: commands.Context):
+    view = nextcord.ui.View()
+    view.add_item(views.SetDropdown())
+    await ctx.send(view=view)
 
 def start_bot():
     for filename in os.listdir("./bot/cogs"):

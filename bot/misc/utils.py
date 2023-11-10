@@ -20,19 +20,15 @@ def is_builtin_class_instance(obj):
     return obj in (str, int, float, bool)
 
 def clord(value,cls,default=None):
-        print('MISC',1)
         if type(value) == cls:
             return value
-        print('MISC',2)
-        print(is_builtin_class_instance(cls))
+        
         if not is_builtin_class_instance(cls):
             return default
-        print('MISC',3)
+        
         try:
-            print('MISC',4)
             return cls(value)
         except:
-            print('MISC',5)
             return default
 
 async def generate_message(content):
