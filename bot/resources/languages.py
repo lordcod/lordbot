@@ -19,6 +19,10 @@ class Emoji:
     channel_announce = '<:channel_announce:1166092338242785370>'
     thread = '<:thread:1166096258511937666>'
     roketa = '<a:rocketa:1165684783754522704>'
+    bagmoney = '<:bagmoney:1165684767019245610>'
+    bank = '<:bank:1165684762279673948> '
+    money = '<:money:1165684764775297187>'
+    award = '<a:award:1165684769829421209>'
 
 
 class invites:

@@ -14,8 +14,6 @@ bot = commands.Bot(command_prefix=info.DEFAULT_PREFIX,intents=nextcord.Intents.a
 
 @bot.event
 async def on_ready():
-    bot.add_view(views.PersistentView(bot))
-    bot.persistent_views_added = True
     print(f"The bot is registered as {bot.user}")
 
 @bot.event
@@ -175,6 +173,10 @@ async def add_emoji(ctx: commands.Context, name):
     em = ctx.message.attachments[0]
     await ctx.guild.create_custom_emoji(name=name,image=em)
 
+@bot.slash_command(guild_ids=[1165681101294030898])
+async def settings(interaction:nextcord.Interaction):
+    await interaction.response.send_modal(views.Settings())
+
 
 def start_bot():
     for filename in os.listdir("./bot/cogs"):
@@ -182,5 +184,4 @@ def start_bot():
             fmp = filename[:-3]
             bot.load_extension(f"bot.cogs.{fmp}")
     
-    bot.persistent_views_added = False
     bot.run(env.token_lord_the_tester)

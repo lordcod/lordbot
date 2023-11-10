@@ -3,46 +3,39 @@ from nextcord.ext import commands
 from typing import Any, Dict,Union
 from random import randint
 from time import time as tick
-from bot.databases.db import GuildDateBases
+from bot.databases.db import EconomyMembedDB,colums,GuildDateBases
 from bot.resources.errors import NotActivateEconomy
+from bot.resources.languages import Emoji
 
 timeout_rewards = {"daily": 86400,"weekly": 604800,"monthly": 2592000}
 
-class EconomyGuildDB():
-    def __init__(self,guild_id) -> None:
+class MemberDB:
+    def __init__(self, guild_id: int, member_id: int) -> None:
         self.guild_id = guild_id
-    
-    def economy_settings(
-        self
-    ) -> Dict[str,int]:
-        gdb = GuildDateBases(self.guild_id)
-        return gdb.get('economy_settings',{})
-    
-    def get_economy_db(
-        self,
-    ) -> Dict[int,Dict[str,int]]:
-        gdb = GuildDateBases(self.guild_id)
-        return gdb.get('economy',{})
-    
-    def get_member_account(
-        self,
-        member_id: int
-    ) -> Dict[str,int]:
-        ed = self.get_economy_db()
+        self.member_id = member_id
+        data = EconomyMembedDB.get(guild_id,member_id)
+        colums_name = [cl[0] for cl in colums['economic']][2:]
         
-        if member_id not in ed:
-            ed[member_id] = {
-                "balance":0,
-                "daily":0,
-                "weekly":0,
-                "monthly":0
-            }
-        
-        return ed[member_id]
+        if not data:
+            EconomyMembedDB.insert(guild_id,member_id)
+            data = EconomyMembedDB.get(guild_id,member_id)
+        data = list(data)[2:]
+        data = dict(zip(colums_name,data))
+        self.data = data
     
-    def __setattr__(self, __name: str, __value: Any) -> None:
-        pass
-
+    def get(self,__name,__default=None):
+        try:
+            return self.__getitem__(__name)
+        except:
+            return __default
+    
+    def __getitem__(self, item):
+        return self.data[item]
+    
+    def __setitem__(self, key, value):
+        self.data[key] = value
+        
+        EconomyMembedDB.update_list(self.guild_id,self.member_id,self.data)
 
 
 class Economy(commands.Cog):
@@ -51,105 +44,69 @@ class Economy(commands.Cog):
     
     def work_economy():
         def wrapped(ctx: commands.Context):
-            gsdb = EconomyGuildDB(ctx.guild.id)().get_economy_settings(guild_id=ctx.guild.id)
-            if not gsdb:
+            settings = GuildDateBases(ctx.guild.id).get('economic_settings')
+            if not settings:
                 raise NotActivateEconomy("Economy is not enabled on the server")
             return True
         return commands.check(wrapped)
     
-    @commands.command(name='daily')
-    @work_economy()
-    async def daily(self,ctx: commands.Context):
-        account = EconomyGuildDB(ctx.guild.id).get_member_account(ctx.author.id)
-        economy_settings = EconomyGuildDB(ctx.guild.id).get_economy_settings(ctx.guild.id)
-        
+    
+    async def handler_rewards(self,ctx: commands.Context):
         time = tick()
-        balance = account.get('balance',0)
+        account = MemberDB(ctx.guild.id,ctx.author.id)
+        eco_sets = GuildDateBases(ctx.guild.id).get('economic_settings',{})
+        award = eco_sets.get(ctx.command.name,0)
         
-        if (time-account.get(ctx.command.name)) >= 0:
+        if award <= 0:
+            await ctx.send("Unfortunately this reward is not available if you are the server administrator change the reward")
+            return
+        
+        if (time-account.get(ctx.command.name,0)) >= 0:
+            wait_long = time+timeout_rewards.get(ctx.command.name)
+            
             embed = nextcord.Embed(
                 title="You have received a gift",
-                description=f"In size {economy_settings.get(ctx.command.name)} come through <t:{time.time()+timeout_rewards.get(ctx.command.name):.0f}:R>",
+                description=f"In size {award} come through <t:{wait_long :.0f}:R>",
                 color = 0xF5740E
             )
             
-            account[ctx.command.name] = time+timeout_rewards.get(ctx.command.name)
-            account['balance'] = balance+economy_settings.get(ctx.command.name)
-            await ctx.send(embed=embed)
+            account[ctx.command.name] = wait_long
+            account['balance'] += award
         else:
-                embed = nextcord.Embed(
-                    title="The reward is not available",
-                    description=f'Try again after <t:{account.get(ctx.command.name) :.0f}:R>'
-                )
-                embed.color = 0xF50E85
-                
-                await ctx.send(embed=embed)
+            embed = nextcord.Embed(
+                title="The reward is not available",
+                description=f'Try again after <t:{account.get(ctx.command.name) :.0f}:R>',
+                color = 0xF50E85
+            )
+        await ctx.send(embed=embed)
+    
+    @commands.command(name='daily')
+    @work_economy()
+    async def daily(self,ctx: commands.Context):
+        await self.handler_rewards(ctx)
     
     @commands.command(name='weekly')
     @work_economy()
     async def weekly(self,ctx: commands.Context):
-        account = EconomyGuildDB(ctx.guild.id).get_member_account(ctx.author.id)
-        economy_settings = EconomyGuildDB(ctx.guild.id).get_economy_settings(ctx.guild.id)
-        
-        time = tick()
-        balance = account.get('balance',0)
-        
-        if (time-account.get(ctx.command.name)) >= 0:
-            embed = nextcord.Embed(
-                title="You have received a gift",
-                description=f"In size {economy_settings.get(ctx.command.name)} come through <t:{time.time()+timeout_rewards.get(ctx.command.name):.0f}:R>",
-                color = 0xF5740E
-            )
-            
-            account[ctx.command.name] = time+timeout_rewards.get(ctx.command.name)
-            account['balance'] = balance+economy_settings.get(ctx.command.name)
-            await ctx.send(embed=embed)
-        else:
-                embed = nextcord.Embed(
-                    title="The reward is not available",
-                    description=f'Try again after <t:{account.get(ctx.command.name) :.0f}:R>'
-                )
-                embed.color = 0xF50E85
-                
-                await ctx.send(embed=embed)
+        await self.handler_rewards(ctx)
     
     @commands.command(name='monthly')
     @work_economy()
     async def monthly(self,ctx: commands.Context):
-        account = EconomyGuildDB(ctx.guild.id).get_member_account(ctx.author.id)
-        economy_settings = EconomyGuildDB(ctx.guild.id).get_economy_settings(ctx.guild.id)
-        
-        time = tick()
-        balance = account.get('balance',0)
-        
-        if (time-account.get(ctx.command.name)) >= 0:
-            embed = nextcord.Embed(
-                title="You have received a gift",
-                description=f"In size {economy_settings.get(ctx.command.name)} come through <t:{time.time()+timeout_rewards.get(ctx.command.name):.0f}:R>",
-                color = 0xF5740E
-            )
-            
-            account[ctx.command.name] = time+timeout_rewards.get(ctx.command.name)
-            account['balance'] = balance+economy_settings.get(ctx.command.name)
-            await ctx.send(embed=embed)
-        else:
-                embed = nextcord.Embed(
-                    title="The reward is not available",
-                    description=f'Try again after <t:{account.get(ctx.command.name) :.0f}:R>'
-                )
-                embed.color = 0xF50E85
-                
-                await ctx.send(embed=embed)
+        await self.handler_rewards(ctx)
+    
     
     @commands.command(name="balance",aliases=["bal"])
     @work_economy()
-    async def balance(self,ctx:commands.Context, user: nextcord.Member = None):
-        if not user:
-            user = ctx.author
+    async def balance(self,ctx:commands.Context, member: nextcord.Member = None):
+        if not member:
+            print('No member')
+            member = ctx.author
         
-        account = EconomyGuildDB(ctx.guild.id).get_member_account(ctx.author.id)
         time = tick()
+        account = MemberDB(ctx.guild.id,member.id)
         balance = account.get('balance',0)
+        bank = account.get('bank',0)
         
         description = ""
         if account.get('daily',0) < time:
@@ -159,7 +116,7 @@ class Economy(commands.Cog):
         if account.get('monthly',0) < time:
             description = f"{description}— Ежемесячный бонус (\{self.bot.command_prefix}monthly)\n"
         if description:
-            description = f"<a:award:1135909374112579724>Доступные награды:\n{description}"
+            description = f"{Emoji.award}Доступные награды:\n{description}"
         
         embed = nextcord.Embed(
             title="Баланс",
@@ -168,17 +125,141 @@ class Economy(commands.Cog):
             timestamp=ctx.message.created_at
         )
         embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar.url)
-        embed.set_author(name=user.name, icon_url=user.avatar.url)
-    
-        embed.add_field(name="<:money:1135902853060362240>Наличные:",
-                        value=balance['balance'], inline=True)
-        embed.add_field(name="<:bank:1135902850703175731>В банке:",
-                        value=balance['bank'], inline=True)
-        embed.add_field(name="<:bagmoney:1135902854696157245>Общий баланс:",
-                        value=balance['bank']+balance['balance'], inline=False)
+        embed.set_author(name=member.name, icon_url=member.avatar.url)
+        
+        embed.add_field(
+            name=f"{Emoji.money}Наличные:",
+            value=balance, 
+            inline=True
+        )
+        embed.add_field(
+            name=f"{Emoji.bank}В банке:",
+            value=bank,
+            inline=True
+        )
+        embed.add_field(
+            name=f"{Emoji.bagmoney}Общий баланс:",
+            value=balance+bank,
+            inline=False
+        )
         
         await ctx.send(embed=embed)
+    
+    @commands.command(name="pay")
+    @work_economy()
+    async def pay(self,ctx: commands.Context, member: nextcord.Member, sum: int):
+        from_account = MemberDB(ctx.guild.id,ctx.author.id)
+        to_account = MemberDB(ctx.guild.id,member.id)
+        
+        if sum <= 0:
+            await ctx.send(content="Specify the amount more **0**")
+            return
+        elif (from_account.get('balance',0)-sum) < 0:
+            await ctx.send(content=f"Not enough funds to check your balance use `{self.bot.command_prefix}bal`")
+            return
+        
+        embed = nextcord.Embed(
+                title="Transfer of currency", 
+                color=nextcord.Colour(0x14db6b),
+                description=f"You were given **{sum}$**"
+            )
+        embed.set_author(name=f'{member.display_name} это вам!', icon_url=member.display_avatar)
+        embed.set_footer(text=f'От {ctx.author.display_name}', icon_url=ctx.author.display_avatar)
+        
+        await ctx.send(embed=embed)
+        
+        from_account["balance"] = from_account["balance"] - sum
+        to_account["balance"] = to_account["balance"] + sum
+    
+    
+    
+    @commands.command(name="deposit",aliases=["dep"])
+    @work_economy()
+    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
+    async def dep(self,ctx: commands.Context, sum: str):
+        account = MemberDB(ctx.guild.id,ctx.author.id)
+        balance = account.get('balance',0)
+    
+        if not sum.isdigit():
+            if sum == "all":
+                sum = balance
+            else:
+                await ctx.send(f"You have entered an invalid argument, use the command so `{self.bot.command_prefix}deposit sum`")
+                return
+        sum = int(sum)
+    
+        if sum <= 0:
+            await ctx.send(content="Specify the amount more `0`")
+            return
+        if (balance - sum) < 0:
+            await ctx.send(content=f"Not enough funds to check your balance use `{self.bot.command_prefix}bal`")
+            return
+        account['balance'] = account['balance'] - sum
+        account['bank'] = account['bank'] + sum
 
+        embed = nextcord.Embed(
+            title="Transfer of currency", 
+            colour=nextcord.Colour(0x9aecce), 
+            description=f"You have transferred **{sum}$** to the bank account"
+        )
+        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar)
+    
+        await ctx.send(embed=embed)
+    
+    @commands.command(name="withdraw",aliases=["wd"])
+    @work_economy()
+    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
+    async def withdraw(self,ctx: commands.Context, sum: str):
+        account = MemberDB(ctx.guild.id,ctx.author.id)
+        bank = account.get('bank',0)
+    
+        if not sum.isdigit():
+            if sum == "all":
+                sum = bank
+            else:
+                await ctx.send(f"You have entered an invalid argument, use the command so `{self.bot.command_prefix}deposit sum`")
+                return
+        sum = int(sum)
+    
+        if sum <= 0:
+            await ctx.send(content="Specify the amount more `0`")
+            return
+        if (bank - sum) < 0:
+            await ctx.send(content=f"Not enough funds to check your balance use `{self.bot.command_prefix}bal`")
+            return
+        account['balance'] = account['balance'] + sum
+        account['bank'] = account['bank'] - sum
+
+        embed = nextcord.Embed(
+            title="Transfer of currency", 
+            colour=nextcord.Colour(0x9aecce), 
+            description=f"You have transferred {sum}$ to the account"
+        )
+        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar)
+    
+        await ctx.send(embed=embed)
+    
+    
+    @commands.command(name="gift")
+    @work_economy()
+    @commands.has_permissions(administrator=True)
+    async def gift(self,ctx: commands.Context, member: nextcord.Member, sum: int):
+        account = MemberDB(ctx.guild.id,member.id)
+        
+        account["balance"] += sum
+        
+        await ctx.send(f"You passed {member.mention}, **{sum}$** ")
+    
+    @commands.command(name="take")
+    @work_economy()
+    @commands.has_permissions(administrator=True)
+    async def take(self,ctx: commands.Context, member: nextcord.Member = None, sum: int = None):
+        account = MemberDB(ctx.guild.id,member.id)
+        
+        account["balance"] -= sum
+        
+        await ctx.send(f"You passed {member.mention}, **{sum}$** ")
+    
 
 def setup(bot):
     bot.add_cog(Economy(bot))

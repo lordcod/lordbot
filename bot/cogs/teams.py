@@ -23,11 +23,13 @@ class teams(commands.Cog):
     @check.team_only()
     async def load_extension(self,ctx:commands.Context,name):
         self.bot.load_extension(f"bot.cogs.{name}")
+        await ctx.send(f'Service **{name}** successfully enabled')
 
     @commands.command()
     @check.team_only()
     async def unload_extension(self,ctx:commands.Context,name):
         self.bot.unload_extension(f"bot.cogs.{name}")
+        await ctx.send(f'Service **{name}** successfully shut down')
 
     @commands.command()
     @check.team_only()

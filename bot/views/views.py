@@ -1,7 +1,11 @@
 import nextcord
+from nextcord.interactions import Interaction
+from nextcord.utils import MISSING
+from bot.misc.utils import clord
 from bot.views import menus
+from bot.databases.db import GuildDateBases
 from bot.misc.yandex_api import Track
-from typing import List
+from typing import Any, Coroutine, List, Optional
 
 class CustomList(menus.Main):
     dem = nextcord.Embed(title='Описание',description='Нашего персонала')
@@ -11,46 +15,50 @@ class CustomList(menus.Main):
         gem._fields = [self.value[self.index]]
         await interaction.message.edit(embed=gem,view=self)
 
-class IdeaModal(nextcord.ui.Modal):
-    def __init__(self,channel: nextcord.TextChannel):
-        super().__init__(
-            "Idea",
-            timeout=5 * 60,  # 5 minutes
+
+class Settings(nextcord.ui.Modal):
+    def __init__(self) -> None:
+        super().__init__("Rewards", timeout=300)
+        
+        self.daily = nextcord.ui.TextInput(
+            label='Daily',
+            placeholder='Enter the value for the daily reward',
+            required=False,
+            max_length=5
         )
-        self.channel = channel
-
-        self.idea = nextcord.ui.TextInput(
-            label="Расскажите нам о своей идее",
-            style=nextcord.TextInputStyle.paragraph,
-            placeholder="Постарайтесь описать свою идею как можно более подробно с примерами использования.",
-            min_length=10,
-            max_length=1800,
+        self.weekly = nextcord.ui.TextInput(
+            label='Daily',
+            placeholder='Enter the value for the weekly reward',
+            required=False,
+            max_length=5
         )
-        self.add_item(self.idea)
-
-    async def callback(self, interaction: nextcord.Interaction) -> None:
-        idea = self.idea.value
-        embed = nextcord.Embed(
-            title='Новая идея!',
-            description='Будет идея или нет, зависит от вас!',
-            color=0x7cc0d8
+        self.monthly = nextcord.ui.TextInput(
+            label='Daily',
+            placeholder='Enter the value for the monthly reward',
+            required=False,
+            max_length=5
         )
-        embed.add_field(name='Идея:',value=idea)
-        mes = await self.channel.send(embed=embed)
-        await mes.add_reaction("<a:tickmark:1170029771040759969>")
-        await mes.add_reaction("<a:cross:1170029921314279544>")
-        await mes.create_thread(name="Обсуждение")
-
-class PersistentView(nextcord.ui.View):
-    def __init__(self,bot):
-        self.bot = bot
-        super().__init__(timeout=None)
-
-    @nextcord.ui.button(
-        label="Предложить", style=nextcord.ButtonStyle.green, custom_id="persistent_view:sug"
-    )
-    async def green(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        channel = self.bot.get_channel(1170031835728859208)
-        await interaction.response.send_modal(modal=IdeaModal(channel))
-
-
+        
+        self.add_item(self.daily)
+        self.add_item(self.weekly)
+        self.add_item(self.monthly)
+    
+    
+    async def callback(self, interaction: Interaction) -> Coroutine[Any, Any, None]:
+        daily = clord(self.daily.value,int)
+        weekly = clord(self.weekly.value,int)
+        monthly = clord(self.monthly.value,int)
+        
+        gdb = GuildDateBases(interaction.guild_id)
+        economy_settings = gdb.get('economic_settings',{})
+        
+        if daily:
+            economy_settings['daily'] = daily
+        if weekly:
+            economy_settings['weekly'] = weekly
+        if monthly:
+            economy_settings['monthly'] = monthly
+        
+        print(economy_settings)
+        gdb.set('economic_settings',economy_settings)
+        print(gdb.get('economic_settings',{}))

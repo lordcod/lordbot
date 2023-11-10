@@ -24,19 +24,37 @@ try:
 except Exception as err:
     print(err)
 
-with connection.cursor() as cursor:
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS guilds (
-            id INT8 PRIMARY KEY,
-            forum_messages JSON DEFAULT '{}',
-            reactions JSON DEFAULT '{}',
-            auto_translate JSON DEFAULT '{}',
-            language TEXT DEFAULT 'en',
-            economy JSON DEFAULT '{}',
-            economy_settings JSON
-        )
+def registrated_table():
+    with connection.cursor() as cursor:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS guilds (
+                id INT8 PRIMARY KEY,
+                forum_messages JSON DEFAULT '{}',
+                reactions JSON DEFAULT '{}',
+                auto_translate JSON DEFAULT '{}',
+                language TEXT DEFAULT 'en',
+                economic_settings JSON DEFAULT '{}'
+            )
     ''')
 
+    with connection.cursor() as cursor:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS economic (
+                guild_id INT8 NOT NULL,
+                member_id INT8 NOT NULL,
+                balance INT8 DEFAULT '0',
+                bank INT8 DEFAULT '0',
+                daily INT8 DEFAULT '0',
+                weekly INT8 DEFAULT '0',
+                monthly INT8 DEFAULT '0'
+            )
+        ''')
+
+
+colums = {
+    'guilds':{},
+    'economic':{}
+}
 
 def get_info():
     query = """
@@ -55,10 +73,29 @@ def get_info():
         
         info = cursor.fetchall()
         
-        return info
+        colums['guilds'] = list(info)
+    
+    query = """
+        SELECT
+            column_name,
+            ordinal_position,
+            data_type,
+            column_default
+        FROM
+            information_schema.columns
+        WHERE
+            table_name = 'economic';
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        
+        info = cursor.fetchall()
+        
+        colums['economic'] = list(info)
 
-colums = {info[0]:list(info[1:]) for info in get_info()}
-colums_name = colums.keys()
+registrated_table()
+get_info()
+
 
 class Json:
     def loads(data):
@@ -85,14 +122,17 @@ class Formating:
                 return data
         return wrapped
     
+    @on_error
     def loads(data: Dict[str,Any]):
         new_data = {}
         for key in data:
+            value = data[key]
             if key.isdigit:
-                new_data[int(key)] = data[key]
+                new_data[int(key)] = value
             else:
-                new_data[key] = data[key]
+                new_data[key] = value
     
+    @on_error
     def dumps(data: Dict[Union[str,int],Any]):
         new_data = {}
         for key in data:
@@ -101,6 +141,46 @@ class Formating:
                 new_data[str(key)] = data[key]
             else:
                 new_data[key] = data[key]
+
+
+class EconomyMembedDB:
+    def get(guild_id,member_id):
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM economic WHERE guild_id = %s AND member_id = %s', (guild_id,member_id))
+            
+            guild = cursor.fetchone()
+            
+            return guild
+    
+    def insert(guild_id,member_id):
+        with connection.cursor() as cursor:
+            cursor.execute('INSERT INTO economic (guild_id,member_id) VALUES (%s,%s)', (guild_id,member_id))
+    
+    def update(guild_id,member_id,arg,value):
+        if not EconomyMembedDB.get(guild_id,member_id):
+            EconomyMembedDB.insert(guild_id,member_id)
+        
+        with connection.cursor() as cursor:
+            cursor.execute(f'UPDATE economic SET {arg} = %s WHERE guild_id = %s AND member_id = %s', (value, guild_id, member_id))
+            
+            connection.commit()
+    
+    def update_list(guild_id,member_id,args):
+        for arg in args:
+            value = args[arg]
+            EconomyMembedDB.update(guild_id,member_id,arg,value)
+    
+    def delete(guild_id,member_id):
+        with connection.cursor() as cursor:
+            cursor.execute('DELETE FROM economic WHERE guild_id = %s AND member_id = %s', (guild_id,member_id))
+            
+            connection.commit()
+    
+    def delete_guild(guild_id):
+        with connection.cursor() as cursor:
+            cursor.execute('DELETE FROM economic WHERE guild_id = %s', (guild_id,))
+            
+            connection.commit()
 
 class RequstsDB:
     def get(guild_id):
@@ -157,20 +237,11 @@ class GuildDateBases:
     def create_guild(cls,guild_id: int):
         cls.__init__(guild_id)
     
-    def init(self) -> None:
-        if not RequstsDB.get(self.guild_id):
-            RequstsDB.insert(self.guild_id)
-    
     def __init__(self,guild_id) -> None:
+        if not RequstsDB.get(guild_id):
+            RequstsDB.insert(guild_id)
         self.guild_id = guild_id
-        self.init()
 
-    @property
-    def data(self):
-        gdb = RequstsDB.get(self.guild_id)
-        gdb = dict(zip(colums_name,gdb))
-        return gdb
-    
     def get(self, service, default=None):
         data = RequstsDB.get_from_service(self.guild_id,service)
         data = data[0]
@@ -184,14 +255,9 @@ class GuildDateBases:
         value = Json.dumps(value)
         RequstsDB.update(self.guild_id,service,value)
     
-    def __getattribute__(self, __name: str) -> Any:
-        return object.__getattribute__(self, __name)
-    
     def __getattr__(self, item):
         return None
-    
-    def __setattr__(self, key, value):
-        return object.__setattr__(self, key, value)
+
 
 def db_forever():
     loop = asyncio.new_event_loop()
@@ -201,6 +267,7 @@ def db_forever():
     finally:
         connection.close()
         loop.close()
+        exit()
 
 thread = threading.Thread(target=db_forever,name='DataBase')
 thread.start()
