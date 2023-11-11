@@ -19,8 +19,9 @@ class moderations(commands.Cog):
             data = io.BytesIO(await attach.read())
             files.append(nextcord.File(data, attach.filename))
         
-        res = utils.generate_message(message)
-        ctx.send(**res,files=files)
+        res = await utils.generate_message(message)
+        
+        await ctx.send(**res,files=files)
         
         await ctx.message.delete()
 

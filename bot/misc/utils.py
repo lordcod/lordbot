@@ -41,19 +41,43 @@ def clord(value,cls,default=None):
 async def generate_message(content):
     message = {}
     try:
-        content = orjson.loads(content)
+        content: dict = orjson.loads(content)
         
-        message['embeds'] = []
-        if "embeds" in content and type(content["embeds"]) == dict:
-            for em in content["embeds"]:
-                nextcord.Embed.from_dict(em)
+        message['content'] = content.get('plainText',None)
+        embed = nextcord.Embed(
+            title=content.get('title',None),
+            description=content.get('description',None),
+            color=content.get('color',None),
+            url=content.get('url',None),
+        )
         
-        if "content" in message:
-            message['content'] = content['content']
+        thumbnail = content.get('thumbnail')
+        if thumbnail:
+            embed.set_thumbnail(thumbnail)
         
-        if "flags" in message:
-            message['flag'] = nextcord.MessageFlags()
-            message['flag'].value = content["flags"]
+        author = content.get('author',{})
+        if author:
+            embed.set_author(
+                name=author.get('name',None),
+                url=author.get('url',None),
+                icon_url=author.get('icon_url',None),
+            )
+        
+        footer = content.get('footer',None)
+        if footer:
+            embed.set_footer(
+                text=footer.get('text'),
+                icon_url=footer.get('icon_url'),
+            )
+        
+        fields = content.get('fields',[])
+        for field in fields:
+            embed.add_field(
+                name=field.get('name',None),
+                value=field.get('value',None),
+                inline=field.get('inline',None)
+            )
+        message['embed'] = embed
     except orjson.JSONDecodeError:
         message['content'] = content
     return message

@@ -42,11 +42,14 @@ async def on_interaction(interaction:nextcord.Interaction):
 @bot.event
 async def on_thread_create(thread:nextcord.Thread):
     guild_data = GuildDateBases(thread.guild.id)
-    afm = guild_data.forum_messages
-    if thread.parent_id not in afm:
+    afm = guild_data.get('thread_messages',{})
+    thread_data = afm.get(thread.parent_id,None)
+    if not thread_data:
         return
     
-    await thread.send(embed=nextcord.Embed(**afm))
+    content = thread_data.get('content','')
+    content = utils.generate_message(content)
+    await thread.send(**content)
 
 @bot.event
 async def on_member_update(before:nextcord.Member,after:nextcord.Member):

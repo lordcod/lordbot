@@ -132,6 +132,7 @@ class Formating:
                 new_data[int(key)] = value
             else:
                 new_data[key] = value
+        return new_data
     
     @on_error
     def dumps(data: Dict[Union[str,int],Any]):
@@ -142,6 +143,7 @@ class Formating:
                 new_data[str(key)] = data[key]
             else:
                 new_data[key] = data[key]
+        return new_data
 
 
 class EconomyMembedDB:
@@ -248,11 +250,13 @@ class GuildDateBases:
         data = data[0]
         data = Json.loads(data)
         data = Formating.loads(data)
+        
         if data is None:
             return default
         return data
     
     def set(self, service, value):
+        value = Formating.dumps(value)
         value = Json.dumps(value)
         RequstsDB.update(self.guild_id,service,value)
     
