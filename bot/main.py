@@ -173,7 +173,7 @@ async def add_emoji(ctx: commands.Context, name):
     em = ctx.message.attachments[0]
     await ctx.guild.create_custom_emoji(name=name,image=em)
 
-@bot.command()
+@bot.command(aliases=["set","setting"])
 async def settings(ctx: commands.Context):
     view = nextcord.ui.View()
     view.add_item(views.SetDropdown())

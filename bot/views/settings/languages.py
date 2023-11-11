@@ -1,0 +1,35 @@
+import nextcord
+from bot.resources.languages import Languages_self as AllLangs
+
+
+
+class DropDown(nextcord.ui.Select):
+    def __init__(self):
+        options = [
+            nextcord.SelectOption(
+                label=data.get('native_name'), value=data.get('discord_language'), emoji=data.get('flag',None)
+            )
+            for data in AllLangs[:24]
+        ]
+
+        super().__init__(
+            placeholder="Выберите язык для сервера:",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+    
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        value = self.values[0]
+        await interaction.response.send_message(f'Selected language: {value}',ephemeral=True)
+
+class Languages(nextcord.ui.View):
+    type = 'view'
+    content = {}
+    
+    def __init__(self,) -> None:
+        super().__init__()
+        
+        self._lang = DropDown()
+        
+        self.add_item(self._lang)

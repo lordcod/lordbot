@@ -4,6 +4,7 @@ from bot.resources.languages import Emoji
 from . import settings
 
 
+
 class SetDropdown(nextcord.ui.Select):
     def __init__(self):
         options = [
@@ -36,7 +37,7 @@ class SetDropdown(nextcord.ui.Select):
         value = self.values[0]
         view = getattr(settings,value)
         view = view()
-        if view.types == 'modal':
+        if view.type == 'modal':
             await interaction.response.send_modal(view)
-        if view.types == 'view':
-            await interaction.response.send_message(view=view,ephemeral=True)
+        if view.type == 'view':
+            await interaction.response.send_message(**view.content,view=view,ephemeral=True)
