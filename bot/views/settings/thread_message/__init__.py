@@ -1,17 +1,21 @@
 import nextcord
 from bot.databases.db import GuildDateBases
+from bot.resources.languages import channel_type
 from .addtional import ViewBuilder
 
 class DropDown(nextcord.ui.Select):
-    def __init__(self,guild_id):
-        self.gdb = GuildDateBases(guild_id)
+    def __init__(self,guild):
+        self.gdb = GuildDateBases(guild.id)
         self.forum_message = forum_message  = self.gdb.get('thread_messages',{})
+        channels = [guild.get_channel(key)  for key in forum_message]
         
         options = [
             nextcord.SelectOption(
-                label=f'<#{key}>',
+                label=chnl.name,
+                emoji=channel_type[chnl.type.value],
+                value=chnl.id
             )
-            for key in forum_message
+            for chnl in channels
         ]
     
         super().__init__(
@@ -26,7 +30,21 @@ class DropDown(nextcord.ui.Select):
             self.add_option(label='Нет настроек в данном модуле!')
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        await interaction.response.send_message('Ok')
+        value = self.values[0]
+        value = int(value)
+        
+        channel = await interaction.guild.fetch_channel(value)
+        channel_data = self.forum_message.get(value,{})
+        
+        embed = nextcord.Embed(
+            title="Авто-сообщения",
+            description=(
+                f"Канал: {channel.mention}\n"
+                f"Сообщение:\n {channel_data.get('content')}"
+            )
+        )
+        
+        await interaction.response.send_message(embed=embed,ephemeral=True)
 
 class AutoThreadMessage(nextcord.ui.View):
     type = 'view'
@@ -39,6 +57,6 @@ class AutoThreadMessage(nextcord.ui.View):
         
         self.add_item(self.auto)
         
-    @nextcord.ui.button(label='Добавить')
+    @nextcord.ui.button(label='Добавить',type=nextcord.ButtonStyle.green)
     async def addtion(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.send_message(view=ViewBuilder(),ephemeral=True)

@@ -70,6 +70,22 @@ class Emoji:
     auto_translate = '<:autotranslate:1172862657586544750>'
     thread_message = '<:threadmessage:1172862656030453770>'
 
+channel_type = {
+    0:Emoji.channel_text,
+    1:Emoji.channel_text,
+    2:Emoji.channel_voice,
+    3:Emoji.category,
+    4:Emoji.category,
+    5:Emoji.channel_announce,
+    10:Emoji.thread,
+    11:Emoji.thread,
+    12:Emoji.thread,
+    13:Emoji.channel_stage,
+    14:Emoji.category,
+    15:Emoji.channel_forum,
+    16:Emoji.channel_forum,
+}
+
 
 class invites:
     verification_level = {
@@ -89,22 +105,6 @@ class invites:
         ]
     }
     
-    channel_type = {
-        0:Emoji.channel_text,
-        1:Emoji.channel_text,
-        2:Emoji.channel_voice,
-        3:Emoji.category,
-        4:Emoji.category,
-        5:Emoji.channel_announce,
-        10:Emoji.thread,
-        11:Emoji.thread,
-        12:Emoji.thread,
-        13:Emoji.channel_stage,
-        14:Emoji.category,
-        15:Emoji.channel_forum,
-        16:Emoji.channel_forum,
-    }
-
     title = {
             'ru':f'Приглашение на',
             'en':f'Invitation to'

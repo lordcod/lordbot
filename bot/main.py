@@ -48,7 +48,7 @@ async def on_thread_create(thread:nextcord.Thread):
         return
     
     content = thread_data.get('content','')
-    content = utils.generate_message(content)
+    content = await utils.generate_message(content)
     await thread.send(**content)
 
 @bot.event
