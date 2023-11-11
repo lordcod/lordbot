@@ -10,7 +10,13 @@ from bot.views import views
 
 translator = googletrans.Translator()
 
-bot = commands.Bot(command_prefix=info.DEFAULT_PREFIX,intents=nextcord.Intents.all())
+
+
+def get_command_prefixs(bot: commands.Bot, msg: nextcord.Message):
+    prefix = utils.get_prefix(msg.guild.id)
+    return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
+
+bot = commands.Bot(command_prefix=get_command_prefixs,intents=nextcord.Intents.all())
 
 @bot.event
 async def on_ready():

@@ -27,7 +27,7 @@ except Exception as err:
 with connection.cursor() as cursor:
     cursor.execute('''
         ALTER TABLE guilds
-        ADD economy_settings JSON;
+        RENAME COLUMN forum_messages TO thread_messages;
     ''')
 
 

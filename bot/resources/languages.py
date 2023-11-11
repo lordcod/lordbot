@@ -66,6 +66,9 @@ class Emoji:
     languages = '<:languages:1172611417170526319>'
     prefix = '<:prefix:1172611415392124998>' 
     colour = '<:colour:1172611412519043102>'
+    reactions = '<:reactions:1172862660442853497>'
+    auto_translate = '<:autotranslate:1172862657586544750>'
+    thread_message = '<:threadmessage:1172862656030453770>'
 
 
 class invites:

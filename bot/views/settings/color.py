@@ -3,7 +3,7 @@ import nextcord
 
 class Color(nextcord.ui.Modal):
     type = 'modal'
-    def __init__(self) -> None:
+    def __init__(self, guild_id) -> None:
         super().__init__("Rewards", timeout=300)
         
         self.color = nextcord.ui.TextInput(

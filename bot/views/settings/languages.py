@@ -27,7 +27,7 @@ class Languages(nextcord.ui.View):
     type = 'view'
     content = {}
     
-    def __init__(self,) -> None:
+    def __init__(self, guild_id) -> None:
         super().__init__()
         
         self._lang = DropDown()

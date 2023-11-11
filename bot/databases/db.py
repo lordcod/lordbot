@@ -29,11 +29,12 @@ def registrated_table():
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS guilds (
                 id INT8 PRIMARY KEY,
-                forum_messages JSON DEFAULT '{}',
+                thread_messages JSON DEFAULT '{}',
                 reactions JSON DEFAULT '{}',
                 auto_translate JSON DEFAULT '{}',
                 language TEXT DEFAULT 'en',
-                economic_settings JSON DEFAULT '{}'
+                economic_settings JSON DEFAULT '{}',
+                prefix TEXT DEFAULT 'l.'
             )
     ''')
 

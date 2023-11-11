@@ -44,8 +44,9 @@ class Economy(commands.Cog):
     
     def work_economy():
         def wrapped(ctx: commands.Context):
-            settings = GuildDateBases(ctx.guild.id).get('economic_settings')
-            if not settings:
+            es = GuildDateBases(ctx.guild.id).get('economic_settings')
+            operate = es.get('operate',False)
+            if not operate:
                 raise NotActivateEconomy("Economy is not enabled on the server")
             return True
         return commands.check(wrapped)
@@ -100,7 +101,6 @@ class Economy(commands.Cog):
     @work_economy()
     async def balance(self,ctx:commands.Context, member: nextcord.Member = None):
         if not member:
-            print('No member')
             member = ctx.author
         
         time = tick()
@@ -110,11 +110,11 @@ class Economy(commands.Cog):
         
         description = ""
         if account.get('daily',0) < time:
-            description = f"{description}— Ежедневный бонус (\{self.bot.command_prefix}daily)\n"
+            description = f"{description}— Ежедневный бонус ({self.bot.command_prefix}daily)\n"
         if account.get('weekly',0) < time:
-            description = f"{description}— Еженедельный бонус (\{self.bot.command_prefix}weekly)\n"
+            description = f"{description}— Еженедельный бонус ({self.bot.command_prefix}weekly)\n"
         if account.get('monthly',0) < time:
-            description = f"{description}— Ежемесячный бонус (\{self.bot.command_prefix}monthly)\n"
+            description = f"{description}— Ежемесячный бонус ({self.bot.command_prefix}monthly)\n"
         if description:
             description = f"{Emoji.award}Доступные награды:\n{description}"
         

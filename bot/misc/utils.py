@@ -3,6 +3,13 @@ from captcha.image import ImageCaptcha
 from bot.resources import errors
 from io import BytesIO
 from PIL import Image
+from bot.databases.db import GuildDateBases
+
+
+def get_prefix(guild_id):
+    gdb = GuildDateBases(guild_id)
+    prefix = gdb.get('prefix')
+    return prefix
 
 async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:
     if channel.type.value not in [0,2,5,13]:
