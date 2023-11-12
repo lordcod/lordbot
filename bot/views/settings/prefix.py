@@ -14,7 +14,7 @@ class Prefix(nextcord.ui.Modal):
         self.prefix = nextcord.ui.TextInput(
             label='Префикс:',
             placeholder=prefix,
-            max_length=3
+            max_length=7
         )
         self.add_item(self.prefix)
     

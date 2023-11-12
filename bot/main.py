@@ -26,9 +26,12 @@ async def on_ready():
 async def on_disconnect():
     print("Bot is disconnect")
 
+
+
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
-    print(error)
+    CommandError = utils.CallbackCommandError(ctx,error)
+    await CommandError.process()
 
 @bot.event
 async def on_application_command_error(interaction: nextcord.Interaction, error):
@@ -177,7 +180,7 @@ async def activiti(
     await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
 @bot.command()
-@commands.has_permissions(manage_guild=True)
+@commands.has_permissions(manage_emojis=True)
 async def add_emoji(ctx: commands.Context, name):
     em = ctx.message.attachments[0]
     await ctx.guild.create_custom_emoji(name=name,image=em)

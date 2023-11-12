@@ -1,7 +1,8 @@
 import nextcord
 from bot.databases.db import GuildDateBases
 from bot.resources.languages import channel_type
-from .addtional import ViewBuilder
+from .addptional import ViewBuilder
+from .thread import ThreadData
 
 class DropDown(nextcord.ui.Select):
     def __init__(self,guild):
@@ -38,13 +39,10 @@ class DropDown(nextcord.ui.Select):
         
         embed = nextcord.Embed(
             title="Авто-сообщения",
-            description=(
-                f"Канал: {channel.mention}\n"
-                f"Сообщение:\n {channel_data.get('content')}"
-            )
+            description=f"Канал: {channel.mention}"
         )
         
-        await interaction.response.send_message(embed=embed,ephemeral=True)
+        await interaction.response.send_message(embed=embed,view=ThreadData(channel,channel_data),ephemeral=True)
 
 class AutoThreadMessage(nextcord.ui.View):
     type = 'view'
@@ -56,7 +54,7 @@ class AutoThreadMessage(nextcord.ui.View):
         self.auto = DropDown(guild_id)
         
         self.add_item(self.auto)
-        
-    @nextcord.ui.button(label='Добавить',type=nextcord.ButtonStyle.green)
+    
+    @nextcord.ui.button(label='Добавить',style=nextcord.ButtonStyle.green)
     async def addtion(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.send_message(view=ViewBuilder(),ephemeral=True)
