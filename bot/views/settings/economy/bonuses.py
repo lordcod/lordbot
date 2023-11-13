@@ -1,6 +1,7 @@
 import nextcord
 from bot.misc.utils import clord
 from bot.databases.db import GuildDateBases
+from .. import economy
 
 
 class Modal(nextcord.ui.Modal):
@@ -73,3 +74,9 @@ class Bonus(nextcord.ui.View):
         self.bonus = DropDown(guild_id)
         
         self.add_item(self.bonus)
+    
+    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red,row=1)
+    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        view = economy.Economy(interaction.guild_id)
+        await interaction.message.edit(**view.content,view=view)
+    

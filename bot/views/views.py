@@ -52,7 +52,7 @@ class SetDropdown(nextcord.ui.Select):
             'Languages':settings.Languages(interaction.guild_id),
             'Prefix':settings.Prefix(interaction.guild_id),
             'Reactions':settings.AutoReactions(interaction.guild),
-            'Auto_Translate':settings.AutoTranslate(interaction.guild_id),
+            # 'Auto_Translate':settings.AutoTranslate(interaction.guild_id),
             'Thread_Message':settings.AutoThreadMessage(interaction.guild),
         }
         view = lister[value]

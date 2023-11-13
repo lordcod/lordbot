@@ -2,6 +2,7 @@ import nextcord
 from .bonuses import Bonus
 from bot.resources.languages import Emoji
 from bot.databases.db import GuildDateBases
+from bot.views import views
 
 class DropDown(nextcord.ui.Select):
     def __init__(self):
@@ -24,10 +25,7 @@ class DropDown(nextcord.ui.Select):
             'Bonus':Bonus(interaction.guild_id)
         }
         view = lists[value]
-        if view.type == 'modal':
-            await interaction.response.send_modal(view)
-        if view.type == 'view':
-            await interaction.response.send_message(**view.content,view=view,ephemeral=True)
+        await interaction.message.edit(**view.content,view=view)
 
 class Economy(nextcord.ui.View):
     type = 'view'
@@ -52,13 +50,18 @@ class Economy(nextcord.ui.View):
         else:
             self.economy_On.disabled = False
     
-    @nextcord.ui.button(label='Включить',style=nextcord.ButtonStyle.green,disabled=True)
+    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red,row=1)
+    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.message.edit(embed=None,view=views.SettingsView())
+    
+    
+    @nextcord.ui.button(label='Включить',style=nextcord.ButtonStyle.green,row=2,disabled=True)
     async def economy_On(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         es = self.es
         es['operate'] = True
         self.gdb.set('economic_settings',es)
     
-    @nextcord.ui.button(label='Выключить',style=nextcord.ButtonStyle.red,disabled=True)
+    @nextcord.ui.button(label='Выключить',style=nextcord.ButtonStyle.red,row=2,disabled=True)
     async def economy_Off(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         es = self.es
         es['operate'] = False
