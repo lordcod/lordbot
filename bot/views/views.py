@@ -1,3 +1,4 @@
+from typing import Optional
 import nextcord
 
 from bot.resources.languages import Emoji
@@ -50,7 +51,7 @@ class SetDropdown(nextcord.ui.Select):
             'Color': settings.Color(interaction.guild_id),
             'Languages':settings.Languages(interaction.guild_id),
             'Prefix':settings.Prefix(interaction.guild_id),
-            'Reactions':settings.AutoReactions(interaction.guild_id),
+            'Reactions':settings.AutoReactions(interaction.guild),
             'Auto_Translate':settings.AutoTranslate(interaction.guild_id),
             'Thread_Message':settings.AutoThreadMessage(interaction.guild),
         }
@@ -58,4 +59,10 @@ class SetDropdown(nextcord.ui.Select):
         if view.type == 'modal':
             await interaction.response.send_modal(view)
         if view.type == 'view':
-            await interaction.response.send_message(**view.content,view=view,ephemeral=True)
+            await interaction.message.edit(**view.content,view=view)
+
+class SettingsView(nextcord.ui.View):
+    def __init__(self) -> None:
+        super().__init__()
+        
+        self.add_item(SetDropdown())

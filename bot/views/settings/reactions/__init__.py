@@ -1,22 +1,22 @@
 import nextcord
 from bot.databases.db import GuildDateBases
 from bot.resources.languages import channel_type
-from .addptional import ViewBuilder
+from .addres import ViewBuilder
+from .datas import ReactData
 from bot.views import views
-from .thread import ThreadData
+
 
 class DropDown(nextcord.ui.Select):
     is_option = False
     
     def __init__(self,guild):
         self.gdb = GuildDateBases(guild.id)
-        self.forum_message = forum_message  = self.gdb.get('thread_messages',{})
-        channels = [guild.get_channel(key) for key in forum_message]
+        self.reactions = self.gdb.get('reactions',{})
+        channels = [guild.get_channel(key)  for key in self.reactions]
         
         if len(channels) <= 0:
             self.is_option = True
             return
-        
         options = [
             nextcord.SelectOption(
                 label=chnl.name,
@@ -27,36 +27,32 @@ class DropDown(nextcord.ui.Select):
         ]
     
         super().__init__(
-            placeholder="Настройки авто-сообщений в ветках, форумах:",
+            placeholder="Настройки авто-реакций:",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        print('callback')
         value = self.values[0]
         value = int(value)
-        print('val')
-        channel = await interaction.guild.fetch_channel(value)
-        channel_data = self.forum_message.get(value,{})
         
-        print('chnls')
+        channel = await interaction.guild.fetch_channel(value)
+        channel_data = self.reactions.get(value,[])
+        
         embed = nextcord.Embed(
             title="Авто-сообщения",
-            description=f"Канал: {channel.mention}"
+            description=(
+                f"Канал: {channel.mention}\n"
+                f"Эмодзи: {', '.join([emo for emo in channel_data])}"
+            )
         )
-        print('edit')
-        await interaction.message.edit(embed=embed,view=ThreadData(channel,channel_data))
+        
+        await interaction.message.edit(embed=embed,view=ReactData(channel,channel_data))
 
-class AutoThreadMessage(nextcord.ui.View):
+class AutoReactions(nextcord.ui.View):
     type = 'view'
-    content = {
-        'embed' : nextcord.Embed(
-            title='Auto Thread-Forum Message',
-            description='Добавляйте или изменяйте свои автоматические сообщения'
-        )
-    }
+    content = {}
     
     def __init__(self,guild) -> None:
         super().__init__()
@@ -65,6 +61,7 @@ class AutoThreadMessage(nextcord.ui.View):
         
         if not self.auto.is_option:
             self.add_item(self.auto)
+    
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

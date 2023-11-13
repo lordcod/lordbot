@@ -2,66 +2,17 @@ import nextcord,string,random,re,orjson
 from nextcord.ext import commands
 from captcha.image import ImageCaptcha
 from bot.resources import errors
+import aiohttp
 from io import BytesIO
 from PIL import Image
 from bot.databases.db import GuildDateBases
 
-class CallbackCommandError:
-    def __init__(self,ctx: commands.Context,error) -> None:
-        self.ctx = ctx
-        self.error = error
-    
-    async def process(self):
-        for error in self.errors:
-            name = error.__name__
-            if isinstance(self.error,getattr(commands,name)):
-                await error(self)
-                break
-        else:
-            await self.OfterError()
-    
-    async def MissingPermissions(self):
-        content = "The user does not have enough rights"
-    
-    async def MissingRole(self):
-        content = "You don't have the right role to execute the command"
-    
-    async def MissingAnyRole(self):
-        content = "You don't have the right or the right roles to execute the command"
-    
-    async def BotMissingPermissions(self):
-        content = "The bot doesn't have enough rights"
-    
-    async def CommandNotFound(self):
-        content = "There is no such command"
-        await self.ctx.send(content)
-    
-    async def CommandOnCooldown(self):
-        embed = nextcord.Embed(
-            title='The command is on hold',
-            description=f'Repeat after {self.error.retry_after :.0f} seconds',
-            colour=nextcord.Color.red()
-        )
-        await self.ctx.send(embed=embed, delete_after=5.0)
-    
-    async def NotOwner(self):
-        content = "This command is intended for the bot owner"
-    
-    async def CheckFailure(self):
-        content = "You don't fulfill all the conditions"
-    
-    async def BadArgument(self):
-        content = "Incorrect arguments"
-    
-    async def OfterError(self):
-        pass
-    
-    errors = [
-        MissingPermissions,MissingRole,MissingAnyRole,BotMissingPermissions,
-        CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
-    ]
-
-
+async def getRandomQuote(lang='en'):
+    url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url) as responce:
+            json = await responce.json()
+            return json
 
 def get_prefix(guild_id):
     gdb = GuildDateBases(guild_id)

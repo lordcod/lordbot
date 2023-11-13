@@ -7,6 +7,7 @@ from bot.databases.db import GuildDateBases
 from bot.misc import (utils,env)
 from bot.resources import (info,languages,errors)
 from bot.views import views
+from bot.resources.errors import CallbackCommandError
 
 translator = googletrans.Translator()
 
@@ -26,11 +27,9 @@ async def on_ready():
 async def on_disconnect():
     print("Bot is disconnect")
 
-
-
 @bot.event
 async def on_command_error(ctx: commands.Context, error):
-    CommandError = utils.CallbackCommandError(ctx,error)
+    CommandError = CallbackCommandError(ctx,error)
     await CommandError.process()
 
 @bot.event
@@ -186,10 +185,9 @@ async def add_emoji(ctx: commands.Context, name):
     await ctx.guild.create_custom_emoji(name=name,image=em)
 
 @bot.command(aliases=["set","setting"])
+@commands.has_permissions(manage_guild=True)
 async def settings(ctx: commands.Context):
-    view = nextcord.ui.View()
-    view.add_item(views.SetDropdown())
-    await ctx.send(view=view)
+    await ctx.send(view=views.SettingsView())
 
 def start_bot():
     for filename in os.listdir("./bot/cogs"):

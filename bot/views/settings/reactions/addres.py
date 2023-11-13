@@ -1,43 +1,42 @@
 from typing import Optional
 import nextcord
 from bot.databases.db import GuildDateBases
-from  .. import thread_message 
+from  .. import reactions
 
 class ModalsBuilder(nextcord.ui.Modal):
     def __init__(self,channel_id) -> None:
         self.channel_id = channel_id
         super().__init__('Авто-сообщение')
         
-        self.content = nextcord.ui.TextInput(
-            label='Сообщение:',
-            placeholder='Вы также можете пользоваться embed-builder'
+        self.emo = nextcord.ui.TextInput(
+            label='Эмодзи:',
+            placeholder='<[a]:name:id>'
         )
         
-        self.add_item(self.content)
+        self.add_item(self.emo)
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        forum_message = gdb.get('thread_messages',{})
-        content = self.content.value
+        reacts  = gdb.get('reactions',{})
+        content = self.emo.value
         channel_id = self.channel_id
         
-        if channel_id in forum_message:
+        if channel_id in reacts:
             await interaction.response.send_message("На этот канал уже установлено авто-сообщения")
             return
         
-        forum_message[channel_id] = {}
-        forum_message[channel_id]['content'] = content
+        reacts[channel_id] = []
+        reacts[channel_id].append(content)
         
-        gdb.set('thread_messages',forum_message)
+        gdb.set('reactions',reacts)
         
-        view = thread_message.AutoThreadMessage(interaction.guild)
+        view = reactions.AutoReactions(interaction.guild)
         await interaction.message.edit(**view.content,view=view)
 
 class DropDownBuilder(nextcord.ui.ChannelSelect):
     def __init__(self) -> None:
         super().__init__(
-            placeholder='Выберете канал для авто-сообщений', 
-            channel_types=[nextcord.ChannelType.forum,nextcord.ChannelType.text,nextcord.ChannelType.news]
+            placeholder='Выберете канал для авто-реакций'
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -55,5 +54,5 @@ class ViewBuilder(nextcord.ui.View):
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = thread_message.AutoThreadMessage(interaction.guild)
+        view = reactions.AutoReactions(interaction.guild)
         await interaction.message.edit(**view.content,view=view)

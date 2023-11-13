@@ -32,5 +32,3 @@ class AutoTranslate(nextcord.ui.View):
         self.auto = DropDown()
         
         self.add_item(self.auto)
-        
-        

@@ -1,6 +1,7 @@
 from bot.databases.db import GuildDateBases
 import nextcord
 from bot.misc import utils
+from  .. import thread_message 
 
 
 class EditModalsBuilder(nextcord.ui.Modal):
@@ -38,7 +39,13 @@ class ThreadData(nextcord.ui.View):
         self.channel = channel
         super().__init__()
     
-    @nextcord.ui.button(label='Посмотреть сообщение',style=nextcord.ButtonStyle.blurple)
+    
+    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
+    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        view = thread_message.AutoThreadMessage(interaction.guild)
+        await interaction.message.edit(**view.content,view=view)
+    
+    @nextcord.ui.button(label='Посмотреть сообщение',style=nextcord.ButtonStyle.success,row=2)
     async def message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         channel_data = self.channel_data
         
@@ -49,17 +56,17 @@ class ThreadData(nextcord.ui.View):
         content = await utils.generate_message(content)
         await interaction.response.send_message(**content,ephemeral=True)
     
-    @nextcord.ui.button(label='Изменить сообщение',style=nextcord.ButtonStyle.primary)
+    @nextcord.ui.button(label='Изменить сообщение',style=nextcord.ButtonStyle.primary,row=2)
     async def edit_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.send_modal(EditModalsBuilder(self.channel.id))
     
-    @nextcord.ui.button(label='Удалить сообщение',style=nextcord.ButtonStyle.red)
+    @nextcord.ui.button(label='Удалить сообщение',style=nextcord.ButtonStyle.red,row=2)
     async def delete_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         channel_id = self.channel.id
         del self.forum_message[channel_id]
         
-        
         self.gdb.set('thread_messages',self.forum_message)
         
-        await interaction.response.send_message("Сообщение успешно удалено!",ephemeral=True,delete_after=5)
-
+        
+        view = thread_message.AutoThreadMessage(interaction.guild)
+        await interaction.message.edit(**view.content,view=view)

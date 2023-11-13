@@ -5,17 +5,18 @@ from nextcord.ext import commands
 
 
 class CallbackCommandError:
-    async def __init__(self,ctx: commands.Context, error) -> None:
+    def __init__(self,ctx: commands.Context,error) -> None:
         self.ctx = ctx
         self.error = error
-        for err in self.errors:
-            name = err.__name__
-            if isinstance(error,getattr(commands,name)):
-                await err(ctx,error)
+    
+    async def process(self):
+        for error in self.errors:
+            name = error.__name__
+            if isinstance(self.error,getattr(commands,name)):
+                await error(self)
                 break
         else:
             await self.OfterError()
-    
     
     async def MissingPermissions(self):
         content = "The user does not have enough rights"
@@ -31,14 +32,15 @@ class CallbackCommandError:
     
     async def CommandNotFound(self):
         content = "There is no such command"
+        await self.ctx.send(content)
     
     async def CommandOnCooldown(self):
-        error = self.error
         embed = nextcord.Embed(
             title='The command is on hold',
-            description=f'Repeat after {error.retry_after :.0f} seconds',
+            description=f'Repeat after {self.error.retry_after :.0f} seconds',
             colour=nextcord.Color.red()
         )
+        await self.ctx.send(embed=embed, delete_after=5.0)
     
     async def NotOwner(self):
         content = "This command is intended for the bot owner"
@@ -56,6 +58,7 @@ class CallbackCommandError:
         MissingPermissions,MissingRole,MissingAnyRole,BotMissingPermissions,
         CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
     ]
+
 
 
 class ErrorTypeChannel(Exception):
