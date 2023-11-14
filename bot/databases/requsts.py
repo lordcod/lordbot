@@ -27,7 +27,7 @@ except Exception as err:
 with connection.cursor() as cursor:
     cursor.execute('''
         ALTER TABLE guilds
-        RENAME COLUMN forum_messages TO thread_messages;
+        ADD color INT8 DEFAULT '1974050'
     ''')
 
 

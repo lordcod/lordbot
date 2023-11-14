@@ -1,5 +1,6 @@
 import nextcord
 from bot.resources.languages import Languages_self as AllLangs
+from bot.views import views
 
 
 
@@ -33,3 +34,9 @@ class Languages(nextcord.ui.View):
         self._lang = DropDown()
         
         self.add_item(self._lang)
+    
+    
+    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
+    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.message.edit(embed=None,view=views.SettingsView())
+    

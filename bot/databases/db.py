@@ -34,7 +34,8 @@ def registrated_table():
                 auto_translate JSON DEFAULT '{}',
                 language TEXT DEFAULT 'en',
                 economic_settings JSON DEFAULT '{}',
-                prefix TEXT DEFAULT 'l.'
+                prefix TEXT DEFAULT 'l.',
+                color INT8 DEFAULT '1974050'
             )
     ''')
 

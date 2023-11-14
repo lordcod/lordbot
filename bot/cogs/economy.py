@@ -55,7 +55,9 @@ class Economy(commands.Cog):
     async def handler_rewards(self,ctx: commands.Context):
         time = tick()
         account = MemberDB(ctx.guild.id,ctx.author.id)
-        eco_sets = GuildDateBases(ctx.guild.id).get('economic_settings',{})
+        gdb = GuildDateBases(ctx.guild.id)
+        eco_sets = gdb.get('economic_settings',{})
+        colour = gdb.get('color',1974050)
         award = eco_sets.get(ctx.command.name,0)
         
         if award <= 0:
@@ -68,7 +70,7 @@ class Economy(commands.Cog):
             embed = nextcord.Embed(
                 title="You have received a gift",
                 description=f"In size {award} come through <t:{wait_long :.0f}:R>",
-                color = 0xF5740E
+                color = colour
             )
             
             account[ctx.command.name] = wait_long
@@ -77,7 +79,7 @@ class Economy(commands.Cog):
             embed = nextcord.Embed(
                 title="The reward is not available",
                 description=f'Try again after <t:{account.get(ctx.command.name) :.0f}:R>',
-                color = 0xF50E85
+                color = colour
             )
         await ctx.send(embed=embed)
     
@@ -103,6 +105,9 @@ class Economy(commands.Cog):
         if not member:
             member = ctx.author
         
+        
+        gdb = GuildDateBases(ctx.guild.id)
+        colour = gdb.get('color',1974050)
         time = tick()
         account = MemberDB(ctx.guild.id,member.id)
         balance = account.get('balance',0)
@@ -120,7 +125,7 @@ class Economy(commands.Cog):
         
         embed = nextcord.Embed(
             title="Баланс",
-            color=0xE9139B,
+            color=colour,
             description = description,
             timestamp=ctx.message.created_at
         )
@@ -148,6 +153,8 @@ class Economy(commands.Cog):
     @commands.command(name="pay")
     @work_economy()
     async def pay(self,ctx: commands.Context, member: nextcord.Member, sum: int):
+        gdb = GuildDateBases(ctx.guild.id)
+        colour = gdb.get('color',1974050)
         from_account = MemberDB(ctx.guild.id,ctx.author.id)
         to_account = MemberDB(ctx.guild.id,member.id)
         
@@ -160,7 +167,7 @@ class Economy(commands.Cog):
         
         embed = nextcord.Embed(
                 title="Transfer of currency", 
-                color=nextcord.Colour(0x14db6b),
+                color=colour,
                 description=f"You were given **{sum}$**"
             )
         embed.set_author(name=f'{member.display_name} это вам!', icon_url=member.display_avatar)
@@ -177,6 +184,8 @@ class Economy(commands.Cog):
     @work_economy()
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def dep(self,ctx: commands.Context, sum: str):
+        gdb = GuildDateBases(ctx.guild.id)
+        colour = gdb.get('color',1974050)
         account = MemberDB(ctx.guild.id,ctx.author.id)
         balance = account.get('balance',0)
     
@@ -199,7 +208,7 @@ class Economy(commands.Cog):
 
         embed = nextcord.Embed(
             title="Transfer of currency", 
-            colour=nextcord.Colour(0x9aecce), 
+            color=colour, 
             description=f"You have transferred **{sum}$** to the bank account"
         )
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar)
@@ -210,6 +219,8 @@ class Economy(commands.Cog):
     @work_economy()
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def withdraw(self,ctx: commands.Context, sum: str):
+        gdb = GuildDateBases(ctx.guild.id)
+        colour = gdb.get('color',1974050)
         account = MemberDB(ctx.guild.id,ctx.author.id)
         bank = account.get('bank',0)
     
@@ -232,7 +243,7 @@ class Economy(commands.Cog):
 
         embed = nextcord.Embed(
             title="Transfer of currency", 
-            colour=nextcord.Colour(0x9aecce), 
+            color=colour, 
             description=f"You have transferred {sum}$ to the account"
         )
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar)

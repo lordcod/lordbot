@@ -37,6 +37,9 @@ class Economy(nextcord.ui.View):
         self.gdb = GuildDateBases(guild_id)
         self.es = self.gdb.get('economic_settings',{})
         operate = self.es.get('operate',False)
+        colour = self.gdb.get('color',1974050)
+        
+        self.content['embed'].color = colour
         
         super().__init__()
         

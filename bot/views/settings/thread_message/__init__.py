@@ -34,19 +34,18 @@ class DropDown(nextcord.ui.Select):
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        print('callback')
         value = self.values[0]
         value = int(value)
-        print('val')
         channel = await interaction.guild.fetch_channel(value)
         channel_data = self.forum_message.get(value,{})
+        colour = self.gdb.get('color',1974050)
         
-        print('chnls')
+        
         embed = nextcord.Embed(
             title="Авто-сообщения",
-            description=f"Канал: {channel.mention}"
+            description=f"Канал: {channel.mention}",
+            color=colour
         )
-        print('edit')
         await interaction.message.edit(embed=embed,view=ThreadData(channel,channel_data))
 
 class AutoThreadMessage(nextcord.ui.View):
@@ -60,6 +59,9 @@ class AutoThreadMessage(nextcord.ui.View):
     
     def __init__(self,guild) -> None:
         super().__init__()
+        gdb = GuildDateBases(guild.id)
+        colour = gdb.get('color',1974050)
+        self.content['embed'].color = colour
         
         self.auto = DropDown(guild)
         
