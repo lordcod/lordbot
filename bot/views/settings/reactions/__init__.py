@@ -4,6 +4,7 @@ from bot.resources.languages import channel_type
 from .addres import ViewBuilder
 from .datas import ReactData
 from bot.views import views
+from ...settings import DefaultSettingsView
 
 
 class DropDown(nextcord.ui.Select):
@@ -50,9 +51,8 @@ class DropDown(nextcord.ui.Select):
         
         await interaction.message.edit(embed=embed,view=ReactData(channel,channel_data))
 
-class AutoReactions(nextcord.ui.View):
-    type = 'view'
-    content = {}
+class AutoReactions(DefaultSettingsView):
+    embed = None
     
     def __init__(self,guild) -> None:
         super().__init__()

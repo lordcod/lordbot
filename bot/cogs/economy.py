@@ -6,6 +6,7 @@ from time import time as tick
 from bot.databases.db import EconomyMembedDB,colums,GuildDateBases
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.languages import Emoji
+from bot.misc.utils import get_prefix
 
 timeout_rewards = {"daily": 86400,"weekly": 604800,"monthly": 2592000}
 
@@ -112,14 +113,15 @@ class Economy(commands.Cog):
         account = MemberDB(ctx.guild.id,member.id)
         balance = account.get('balance',0)
         bank = account.get('bank',0)
+        prefix = get_prefix(ctx.guild.id,markdown=True)
         
         description = ""
         if account.get('daily',0) < time:
-            description = f"{description}— Ежедневный бонус ({self.bot.command_prefix}daily)\n"
+            description = f"{description}— Ежедневный бонус ({prefix}daily)\n"
         if account.get('weekly',0) < time:
-            description = f"{description}— Еженедельный бонус ({self.bot.command_prefix}weekly)\n"
+            description = f"{description}— Еженедельный бонус ({prefix}weekly)\n"
         if account.get('monthly',0) < time:
-            description = f"{description}— Ежемесячный бонус ({self.bot.command_prefix}monthly)\n"
+            description = f"{description}— Ежемесячный бонус ({prefix}monthly)\n"
         if description:
             description = f"{Emoji.award}Доступные награды:\n{description}"
         

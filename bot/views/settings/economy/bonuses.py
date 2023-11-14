@@ -2,7 +2,7 @@ import nextcord
 from bot.misc.utils import clord
 from bot.databases.db import GuildDateBases
 from .. import economy
-
+from ...settings import DefaultSettingsView
 
 class Modal(nextcord.ui.Modal):
     type = 'modal'
@@ -64,7 +64,7 @@ class DropDown(nextcord.ui.Select):
         await interaction.response.send_modal(Modal(name,value,default))
 
 
-class Bonus(nextcord.ui.View):
+class Bonus(DefaultSettingsView):
     type = 'view'
     content = {}
     

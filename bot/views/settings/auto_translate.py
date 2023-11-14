@@ -1,5 +1,6 @@
 import nextcord
 from bot.databases.db import GuildDateBases
+from ..settings import DefaultSettingsView
 
 class DropDown(nextcord.ui.Select):
     def __init__(self):
@@ -19,7 +20,7 @@ class DropDown(nextcord.ui.Select):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         pass
 
-class AutoTranslate(nextcord.ui.View):
+class AutoTranslate(DefaultSettingsView):
     type = 'view'
     content = {}
     

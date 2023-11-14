@@ -2,12 +2,14 @@ from typing import Optional
 import nextcord
 
 from bot.resources.languages import Emoji
+from bot.databases.db import GuildDateBases
 from . import settings
 
 
 
 class SetDropdown(nextcord.ui.Select):
     def __init__(self):
+        
         options = [
             nextcord.SelectOption(
                 label="Economy", emoji=Emoji.economy, value='Economy'
@@ -25,9 +27,9 @@ class SetDropdown(nextcord.ui.Select):
             nextcord.SelectOption(
                 label="Auto Reactionsⁿᵉʷ", emoji=Emoji.reactions, value='Reactions'
             ),
-            nextcord.SelectOption(
-                label="Auto Translateⁿᵉʷ", emoji=Emoji.auto_translate, value='Auto_Translate'
-            ),
+            # nextcord.SelectOption(
+            #     label="Auto Translateⁿᵉʷ", emoji=Emoji.auto_translate, value='Auto_Translate'
+            # ),
             nextcord.SelectOption(
                 label="Auto Thread-Forum Messageⁿᵉʷ", emoji=Emoji.thread_message, value='Thread_Message'
             ),
@@ -41,10 +43,6 @@ class SetDropdown(nextcord.ui.Select):
         )
 
     async def callback(self, interaction: nextcord.Interaction):
-        if not interaction.user.guild_permissions.manage_guild:
-            await interaction.response.send_message('You don\'t have the authority to use the settings',ephemeral=True)
-            return
-        
         value = self.values[0]
         lister = {
             'Economy': settings.Economy(interaction.guild_id),
@@ -56,13 +54,23 @@ class SetDropdown(nextcord.ui.Select):
             'Thread_Message':settings.AutoThreadMessage(interaction.guild),
         }
         view = lister[value]
-        if view.type == 'modal':
-            await interaction.response.send_modal(view)
-        if view.type == 'view':
-            await interaction.message.edit(**view.content,view=view)
+        await interaction.message.edit(embed=view.embed,view=view)
 
-class SettingsView(nextcord.ui.View):
-    def __init__(self) -> None:
+class SettingsView(settings.DefaultSettingsView):
+    embed = None
+    
+    def __init__(self,member: nextcord.Member) -> None:
+        gdb = GuildDateBases(member.guild.id)
+        colour = gdb.get('color')
+        
+        self.embed = nextcord.Embed(
+            description='Взаимодействуйте с выпадающим меню выбора, чтобы настроить сервер.',
+            color=colour
+        )
+        self.embed.set_author(name='Настройка модулей бота.',icon_url=member.guild.icon)
+        self.embed.set_footer(text=f'Запрос от {member.display_name}',icon_url=member.avatar)
+        
+        
         super().__init__()
         
         self.add_item(SetDropdown())

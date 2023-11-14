@@ -1,10 +1,11 @@
 import nextcord
 from bot.databases.db import GuildDateBases
 import re
+from bot.views import views
+from ..settings import DefaultSettingsView
 
 
-class Color(nextcord.ui.Modal):
-    type = 'modal'
+class Modal(nextcord.ui.Modal):
     def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
         
@@ -34,3 +35,15 @@ class Color(nextcord.ui.Modal):
         
         await interaction.response.send_message(embed=embed,ephemeral=True)
 
+class ColorView(DefaultSettingsView):
+    embed = None
+    
+    def __init__(self, guild_id) -> None:
+        pass
+        super().__init__()
+    
+    
+    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
+    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.message.edit(embed=None,view=views.SettingsView(interaction.user))
+    

@@ -3,6 +3,7 @@ from .bonuses import Bonus
 from bot.resources.languages import Emoji
 from bot.databases.db import GuildDateBases
 from bot.views import views
+from ...settings import DefaultSettingsView
 
 class DropDown(nextcord.ui.Select):
     def __init__(self):
@@ -27,11 +28,8 @@ class DropDown(nextcord.ui.Select):
         view = lists[value]
         await interaction.message.edit(**view.content,view=view)
 
-class Economy(nextcord.ui.View):
-    type = 'view'
-    content = {
-        'embed':nextcord.Embed(title='Система экономики')
-    }
+class Economy(DefaultSettingsView):
+    embed = nextcord.Embed(title='Система экономики')
     
     def __init__(self,guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -39,7 +37,7 @@ class Economy(nextcord.ui.View):
         operate = self.es.get('operate',False)
         colour = self.gdb.get('color',1974050)
         
-        self.content['embed'].color = colour
+        self.embed.color = colour
         
         super().__init__()
         

@@ -1,5 +1,7 @@
+from typing import Optional
 import nextcord
 from bot.databases.db import GuildDateBases
+from ..settings import DefaultSettingsView
 
 
 class Prefix(nextcord.ui.Modal):
@@ -22,3 +24,9 @@ class Prefix(nextcord.ui.Modal):
         prefix = self.prefix.value
         self.gdb.set('prefix',prefix)
         await interaction.response.send_message(f'New prefix - `{prefix}`',ephemeral=True)
+
+class PrefixView(DefaultSettingsView):
+    embed = None
+    
+    def __init__(self) -> None:
+        super().__init__()

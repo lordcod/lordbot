@@ -2,6 +2,7 @@ from bot.databases.db import GuildDateBases
 import nextcord
 from bot.misc import utils
 from  .. import thread_message 
+from ...settings import DefaultSettingsView
 
 
 class EditModalsBuilder(nextcord.ui.Modal):
@@ -30,7 +31,7 @@ class EditModalsBuilder(nextcord.ui.Modal):
 
 
 
-class ThreadData(nextcord.ui.View):
+class ThreadData(DefaultSettingsView):
     def __init__(self,channel,channel_data) -> None:
         self.gdb = GuildDateBases(channel.guild.id)
         self.forum_message  = self.gdb.get('thread_messages',{})

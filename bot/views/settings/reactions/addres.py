@@ -2,6 +2,7 @@ from typing import Optional
 import nextcord
 from bot.databases.db import GuildDateBases
 from  .. import reactions
+from ...settings import DefaultSettingsView
 
 class ModalsBuilder(nextcord.ui.Modal):
     def __init__(self,channel_id) -> None:
@@ -43,7 +44,7 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         channel = self.values[0]
         await interaction.response.send_modal(ModalsBuilder(channel.id))
 
-class ViewBuilder(nextcord.ui.View):
+class ViewBuilder(DefaultSettingsView):
     def __init__(self) -> None:
         super().__init__()
         

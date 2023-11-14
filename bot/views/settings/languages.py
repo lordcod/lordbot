@@ -1,6 +1,7 @@
 import nextcord
 from bot.resources.languages import Languages_self as AllLangs
 from bot.views import views
+from ..settings import DefaultSettingsView
 
 
 
@@ -24,9 +25,8 @@ class DropDown(nextcord.ui.Select):
         value = self.values[0]
         await interaction.response.send_message(f'Selected language: {value}',ephemeral=True)
 
-class Languages(nextcord.ui.View):
-    type = 'view'
-    content = {}
+class Languages(DefaultSettingsView):
+    embed = None
     
     def __init__(self, guild_id) -> None:
         super().__init__()

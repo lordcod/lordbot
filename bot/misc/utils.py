@@ -5,6 +5,7 @@ from bot.resources import errors
 import aiohttp
 from io import BytesIO
 from PIL import Image
+from nextcord.utils import escape_markdown
 from bot.databases.db import GuildDateBases
 
 async def getRandomQuote(lang='en'):
@@ -14,9 +15,11 @@ async def getRandomQuote(lang='en'):
             json = await responce.json()
             return json
 
-def get_prefix(guild_id):
+def get_prefix(guild_id: int,markdown: bool = False) -> str:
     gdb = GuildDateBases(guild_id)
     prefix = gdb.get('prefix')
+    if markdown:
+        return escape_markdown(prefix)
     return prefix
 
 async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:

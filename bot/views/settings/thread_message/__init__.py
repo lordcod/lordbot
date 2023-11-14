@@ -4,6 +4,7 @@ from bot.resources.languages import channel_type
 from .addptional import ViewBuilder
 from bot.views import views
 from .thread import ThreadData
+from ...settings import DefaultSettingsView
 
 class DropDown(nextcord.ui.Select):
     is_option = False
@@ -48,20 +49,18 @@ class DropDown(nextcord.ui.Select):
         )
         await interaction.message.edit(embed=embed,view=ThreadData(channel,channel_data))
 
-class AutoThreadMessage(nextcord.ui.View):
-    type = 'view'
-    content = {
-        'embed' : nextcord.Embed(
-            title='Auto Thread-Forum Message',
-            description='Добавляйте или изменяйте свои автоматические сообщения'
-        )
-    }
+class AutoThreadMessage(DefaultSettingsView):
+    embed = nextcord.Embed(
+        title='Auto Thread-Forum Message',
+        description='Добавляйте или изменяйте свои автоматические сообщения'
+    )
+    
     
     def __init__(self,guild) -> None:
         super().__init__()
         gdb = GuildDateBases(guild.id)
         colour = gdb.get('color',1974050)
-        self.content['embed'].color = colour
+        self.embed.color = colour
         
         self.auto = DropDown(guild)
         

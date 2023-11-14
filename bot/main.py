@@ -186,8 +186,11 @@ async def add_emoji(ctx: commands.Context, name):
 
 @bot.command(aliases=["set","setting"])
 @commands.has_permissions(manage_guild=True)
+@commands.guild_only()
 async def settings(ctx: commands.Context):
-    await ctx.send(view=views.SettingsView())
+    view = views.SettingsView(ctx.author)
+    
+    await ctx.send(embed=view.embed,view=view)
 
 def start_bot():
     for filename in os.listdir("./bot/cogs"):
