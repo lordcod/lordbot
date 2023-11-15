@@ -28,7 +28,7 @@ class DropDown(nextcord.ui.Select):
 class Languages(DefaultSettingsView):
     embed = None
     
-    def __init__(self, guild_id) -> None:
+    def __init__(self, guild) -> None:
         super().__init__()
         
         lang = DropDown()

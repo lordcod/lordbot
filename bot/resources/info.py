@@ -16,6 +16,7 @@ activities_list = [
     {'id':1107689944685748377,'label':'Bobble Bash','max_user':'8'},
 ]
 DEFAULT_PREFIX = 'l.'
+DEFAULT_COLOR = 1974050
 
 invite_link = '\
 https://discord.com/api/oauth2/authorize\

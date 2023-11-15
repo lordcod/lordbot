@@ -57,10 +57,11 @@ class AutoThreadMessage(DefaultSettingsView):
     
     
     def __init__(self,guild) -> None:
-        super().__init__()
         gdb = GuildDateBases(guild.id)
         colour = gdb.get('color',1974050)
         self.embed.color = colour
+        
+        super().__init__()
         
         self.auto = DropDown(guild)
         

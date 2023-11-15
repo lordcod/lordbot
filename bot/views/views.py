@@ -46,9 +46,11 @@ class SetDropdown(nextcord.ui.Select):
         value = self.values[0]
         lister = {
             'Economy': settings.Economy(interaction.guild_id),
-            'Color': settings.Color(interaction.guild_id),
-            'Languages':settings.Languages(interaction.guild_id),
-            'Prefix':settings.Prefix(interaction.guild_id),
+            
+            'Color': settings.Color(interaction.guild),
+            'Languages':settings.Languages(interaction.guild),
+            'Prefix':settings.Prefix(interaction.guild),
+            
             'Reactions':settings.AutoReactions(interaction.guild),
             # 'Auto_Translate':settings.AutoTranslate(interaction.guild_id),
             'Thread_Message':settings.AutoThreadMessage(interaction.guild),

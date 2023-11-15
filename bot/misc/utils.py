@@ -15,6 +15,14 @@ async def getRandomQuote(lang='en'):
             json = await responce.json()
             return json
 
+def to_color(colour: int) -> str:
+    color = hex(colour).replace('0x', '#').upper()
+    return color
+
+def from_color(color: str) -> int:
+    colour = int(color[1:], 16)
+    return colour
+
 def get_prefix(guild_id: int,markdown: bool = False) -> str:
     gdb = GuildDateBases(guild_id)
     prefix = gdb.get('prefix')

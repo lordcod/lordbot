@@ -4,14 +4,14 @@ from bot.databases.db import GuildDateBases
 from ..settings import DefaultSettingsView
 from bot.views import views
 from bot.resources.info import DEFAULT_PREFIX
+from bot.misc.utils import get_prefix
 
 
 class Modal(nextcord.ui.Modal):
     type = 'modal'
     
     def __init__(self,guild_id) -> None:
-        self.gdb = GuildDateBases(guild_id)
-        prefix = self.gdb.get('prefix')
+        prefix = get_prefix(guild_id,markdown=True)
         
         super().__init__(title='Префикс')
         
@@ -24,13 +24,24 @@ class Modal(nextcord.ui.Modal):
     
     async def callback(self, interaction: nextcord.Interaction):
         prefix = self.prefix.value
-        self.gdb.set('prefix',prefix)
+        gdb = GuildDateBases(interaction.guild_id)
+        gdb.set('prefix',prefix)
         await interaction.response.send_message(f'New prefix - `{prefix}`',ephemeral=True)
 
 class PrefixView(DefaultSettingsView):
-    embed = None
+    embed = nextcord.Embed(
+        title='Префикс',
+        description='Установка префикса, на который бот будет реагировать при вызове команды.'
+    )
     
-    def __init__(self,guild_id) -> None:
+    def __init__(self,guild: nextcord.Guild) -> None:
+        gdb = GuildDateBases(guild.id)
+        colour = gdb.get('color',1974050)
+        prefix = get_prefix(guild.id,markdown=False)
+        
+        self.embed.color = colour
+        self.embed._fields = [{'name':f'Текущий префикс: `{prefix}`','value':''}]
+        
         super().__init__()
     
     
