@@ -31,9 +31,9 @@ class Languages(DefaultSettingsView):
     def __init__(self, guild_id) -> None:
         super().__init__()
         
-        self._lang = DropDown()
+        lang = DropDown()
         
-        self.add_item(self._lang)
+        self.add_item(lang)
     
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)

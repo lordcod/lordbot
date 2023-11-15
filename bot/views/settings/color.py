@@ -39,8 +39,8 @@ class ColorView(DefaultSettingsView):
     embed = None
     
     def __init__(self, guild_id) -> None:
-        pass
         super().__init__()
+        
     
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)

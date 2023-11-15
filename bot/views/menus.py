@@ -60,7 +60,7 @@ class Main(ui.View):
         await self.handler_disable()
         await self.previous(button,interaction)
         await self.callback(button,interaction)
-        
+    
     @ui.button(emoji='◀️',style=nextcord.ButtonStyle.grey,disabled=True)
     async def button_backward(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         self.index -= 1
