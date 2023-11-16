@@ -2,6 +2,7 @@ from bot.databases.db import GuildDateBases
 import nextcord
 from bot.misc import utils
 from  .. import reactions
+from ...settings import DefaultSettingsView
 
 
 class EditModalsBuilder(nextcord.ui.Modal):
@@ -28,10 +29,10 @@ class EditModalsBuilder(nextcord.ui.Modal):
         gdb.set('reactions',reacts)
         
         view = reactions.AutoReactions(interaction.guild)
-        await interaction.message.edit(**view.content,view=view)
+        await interaction.message.edit(embed=view.embed,view=view)
 
 
-class ReactData(nextcord.ui.View):
+class ReactData(DefaultSettingsView):
     def __init__(self,channel,channel_data) -> None:
         self.gdb = GuildDateBases(channel.guild.id)
         self.forum_message  = self.gdb.get('reactions',{})
@@ -44,7 +45,8 @@ class ReactData(nextcord.ui.View):
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = reactions.AutoReactions(interaction.guild)
-        await interaction.message.edit(**view.content,view=view)
+        
+        await interaction.message.edit(embed=view.embed,view=view)
     
     @nextcord.ui.button(label='Изменить реакции',style=nextcord.ButtonStyle.primary,row=2)
     async def edit_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -59,4 +61,4 @@ class ReactData(nextcord.ui.View):
         
         
         view = reactions.AutoReactions(interaction.guild)
-        await interaction.message.edit(**view.content,view=view)
+        await interaction.message.edit(embed=view.embed,view=view)

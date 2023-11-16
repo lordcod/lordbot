@@ -32,7 +32,7 @@ class ModalsBuilder(nextcord.ui.Modal):
         gdb.set('thread_messages',forum_message)
         
         view = thread_message.AutoThreadMessage(interaction.guild)
-        await interaction.message.edit(**view.content,view=view)
+        await interaction.message.edit(embed=view.embed,view=view)
 
 class DropDownBuilder(nextcord.ui.ChannelSelect):
     def __init__(self) -> None:
@@ -57,4 +57,5 @@ class ViewBuilder(DefaultSettingsView):
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = thread_message.AutoThreadMessage(interaction.guild)
-        await interaction.message.edit(**view.content,view=view)
+        
+        await interaction.message.edit(embed=view.embed,view=view)

@@ -44,7 +44,8 @@ class ThreadData(DefaultSettingsView):
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = thread_message.AutoThreadMessage(interaction.guild)
-        await interaction.message.edit(**view.content,view=view)
+        
+        await interaction.message.edit(embed=view.embed,view=view)
     
     @nextcord.ui.button(label='Посмотреть сообщение',style=nextcord.ButtonStyle.success,row=2)
     async def message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -70,4 +71,4 @@ class ThreadData(DefaultSettingsView):
         
         
         view = thread_message.AutoThreadMessage(interaction.guild)
-        await interaction.message.edit(**view.content,view=view)
+        await interaction.message.edit(embed=view.embed,view=view)

@@ -23,16 +23,16 @@ class DropDown(nextcord.ui.Select):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
         lists = {
-            'Bonus':Bonus(interaction.guild_id)
+            'Bonus':Bonus
         }
-        view = lists[value]
-        await interaction.message.edit(**view.content,view=view)
+        view = lists[value](interaction.guild)
+        await interaction.message.edit(embed=view.embed,view=view)
 
 class Economy(DefaultSettingsView):
     embed = nextcord.Embed(title='Система экономики')
     
-    def __init__(self,guild_id) -> None:
-        self.gdb = GuildDateBases(guild_id)
+    def __init__(self,guild: nextcord.Guild) -> None:
+        self.gdb = GuildDateBases(guild.id)
         self.es = self.gdb.get('economic_settings',{})
         operate = self.es.get('operate',False)
         colour = self.gdb.get('color',1974050)
@@ -41,29 +41,34 @@ class Economy(DefaultSettingsView):
         
         super().__init__()
         
-        self._lang = DropDown()
+        self.economy = DropDown()
         
-        self.add_item(self._lang)
+        self.add_item(self.economy)
         
         
         if operate:
+            self.remove_item(self.economy_On)
             self.economy_Off.disabled = False
         else:
+            self.remove_item(self.economy_Off)
             self.economy_On.disabled = False
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red,row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=None,view=views.SettingsView())
+        view = views.SettingsView(interaction.user)
+        
+        await interaction.message.edit(embed=view.embed,view=view)
     
-    
-    @nextcord.ui.button(label='Включить',style=nextcord.ButtonStyle.green,row=2,disabled=True)
+    @nextcord.ui.button(label='Включить',style=nextcord.ButtonStyle.green,row=1,disabled=True)
     async def economy_On(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         es = self.es
         es['operate'] = True
         self.gdb.set('economic_settings',es)
     
-    @nextcord.ui.button(label='Выключить',style=nextcord.ButtonStyle.red,row=2,disabled=True)
+    @nextcord.ui.button(label='Выключить',style=nextcord.ButtonStyle.red,row=1,disabled=True)
     async def economy_Off(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         es = self.es
         es['operate'] = False
         self.gdb.set('economic_settings',es)
+
+

@@ -15,3 +15,14 @@ from .thread_message import AutoThreadMessage
 from .auto_translate import AutoTranslate
 
 
+moduls = {
+    'Economy': Economy,
+    
+    'Color': Color,
+    'Languages': Languages,
+    'Prefix': Prefix,
+    
+    'Reactions': AutoReactions,
+    # 'Auto_Translate': AutoTranslate,
+    'Thread_Message': AutoThreadMessage,
+}

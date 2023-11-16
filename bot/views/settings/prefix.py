@@ -26,6 +26,7 @@ class Modal(nextcord.ui.Modal):
         prefix = self.prefix.value
         gdb = GuildDateBases(interaction.guild_id)
         gdb.set('prefix',prefix)
+        
         await interaction.response.send_message(f'New prefix - `{prefix}`',ephemeral=True)
 
 class PrefixView(DefaultSettingsView):

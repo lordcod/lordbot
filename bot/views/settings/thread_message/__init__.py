@@ -51,12 +51,12 @@ class DropDown(nextcord.ui.Select):
 
 class AutoThreadMessage(DefaultSettingsView):
     embed = nextcord.Embed(
-        title='Auto Thread-Forum Message',
-        description='Добавляйте или изменяйте свои автоматические сообщения'
+        title='Автоматические сообщения в форумах/ветках',
+        description='Добавляйте или изменяйте свои автоматические сообщения в форумах/ветках'
     )
     
     
-    def __init__(self,guild) -> None:
+    def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         colour = gdb.get('color',1974050)
         self.embed.color = colour
@@ -70,7 +70,9 @@ class AutoThreadMessage(DefaultSettingsView):
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=None,view=views.SettingsView())
+        view = views.SettingsView(interaction.user)
+        
+        await interaction.message.edit(embed=view.embed,view=view)
     
     @nextcord.ui.button(label='Добавить',style=nextcord.ButtonStyle.green)
     async def addtion(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

@@ -35,6 +35,9 @@ class DropDown(nextcord.ui.Select):
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        gdb = GuildDateBases(interaction.guild_id)
+        colour = gdb.get('color',1974050)
+        
         value = self.values[0]
         value = int(value)
         
@@ -46,15 +49,23 @@ class DropDown(nextcord.ui.Select):
             description=(
                 f"Канал: {channel.mention}\n"
                 f"Эмодзи: {', '.join([emo for emo in channel_data])}"
-            )
+            ),
+            color=colour
         )
         
         await interaction.message.edit(embed=embed,view=ReactData(channel,channel_data))
 
 class AutoReactions(DefaultSettingsView):
-    embed = None
+    embed = nextcord.Embed(
+        title='Автоматические реакции',
+        description='Управление автоматическим добавлением реакций в каналах'
+    )
     
-    def __init__(self,guild) -> None:
+    def __init__(self,guild: nextcord.Guild) -> None:
+        gdb = GuildDateBases(guild.id)
+        colour = gdb.get('color',1974050)
+        self.embed.color = colour
+        
         super().__init__()
         
         self.auto = DropDown(guild)
@@ -65,7 +76,9 @@ class AutoReactions(DefaultSettingsView):
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=None,view=views.SettingsView())
+        view = views.SettingsView(interaction.user)
+        
+        await interaction.message.edit(embed=view.embed,view=view)
     
     @nextcord.ui.button(label='Добавить',style=nextcord.ButtonStyle.green)
     async def addtion(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

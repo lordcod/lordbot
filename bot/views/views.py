@@ -44,18 +44,7 @@ class SetDropdown(nextcord.ui.Select):
 
     async def callback(self, interaction: nextcord.Interaction):
         value = self.values[0]
-        lister = {
-            'Economy': settings.Economy(interaction.guild_id),
-            
-            'Color': settings.Color(interaction.guild),
-            'Languages':settings.Languages(interaction.guild),
-            'Prefix':settings.Prefix(interaction.guild),
-            
-            'Reactions':settings.AutoReactions(interaction.guild),
-            # 'Auto_Translate':settings.AutoTranslate(interaction.guild_id),
-            'Thread_Message':settings.AutoThreadMessage(interaction.guild),
-        }
-        view = lister[value]
+        view = settings.moduls[value](interaction.guild)
         await interaction.message.edit(embed=view.embed,view=view)
 
 class SettingsView(settings.DefaultSettingsView):

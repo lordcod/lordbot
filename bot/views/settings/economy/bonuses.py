@@ -65,18 +65,24 @@ class DropDown(nextcord.ui.Select):
 
 
 class Bonus(DefaultSettingsView):
-    type = 'view'
-    content = {}
+    embed = nextcord.Embed(
+        title='Бонусы'
+    )
     
-    def __init__(self,guild_id) -> None:
+    def __init__(self,guild: nextcord.Guild) -> None:
+        gdb = GuildDateBases(guild.id)
+        colour = gdb.get('color',1974050)
+        self.embed.color = colour
+        
         super().__init__()
         
-        self.bonus = DropDown(guild_id)
+        self.bonus = DropDown(guild.id)
         
         self.add_item(self.bonus)
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red,row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = economy.Economy(interaction.guild_id)
-        await interaction.message.edit(**view.content,view=view)
+        view = economy.Economy(interaction.guild)
+        
+        await interaction.message.edit(embed=view.embed,view=view)
     

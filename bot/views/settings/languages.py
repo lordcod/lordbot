@@ -2,7 +2,7 @@ import nextcord
 from bot.resources.languages import Languages_self as AllLangs
 from bot.views import views
 from ..settings import DefaultSettingsView
-
+from bot.databases.db import GuildDateBases
 
 
 class DropDown(nextcord.ui.Select):
@@ -26,9 +26,16 @@ class DropDown(nextcord.ui.Select):
         await interaction.response.send_message(f'Selected language: {value}',ephemeral=True)
 
 class Languages(DefaultSettingsView):
-    embed = None
+    embed = nextcord.Embed(
+        title='Язык',
+        description='Эта настройка изменяет язык для работы с ботом. Выберите язык сервера.'
+    )
     
-    def __init__(self, guild) -> None:
+    def __init__(self, guild: nextcord.Guild) -> None:
+        gdb = GuildDateBases(guild.id)
+        colour = gdb.get('color',1974050)
+        self.embed.color = colour
+        
         super().__init__()
         
         lang = DropDown()
@@ -38,5 +45,7 @@ class Languages(DefaultSettingsView):
     
     @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.message.edit(embed=None,view=views.SettingsView())
-    
+        view = views.SettingsView(interaction.user) 
+        
+        await interaction.message.edit(embed=view.embed,view=view)
+
