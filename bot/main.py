@@ -71,6 +71,8 @@ async def on_message(message: nextcord.Message):
         return
     
     guild_data = GuildDateBases(message.guild.id)
+    prefix = utils.get_prefix(message.guild.id,markdown=False)
+    colour = guild_data.get('color',{})
     reactions = guild_data.get('reactions',{})
     auto_translate = guild_data.get('auto_translate',{})
     lang = guild_data.get('language','en')
@@ -136,61 +138,30 @@ async def on_message(message: nextcord.Message):
         except (nextcord.errors.NotFound,errors.ErrorTypeChannel):
             pass
     
+    if message.content.strip() == bot.user.mention:
+        global_name = bot.user.global_name or bot.user.name
+        embed = nextcord.Embed(
+            title=f'{global_name} — это многофункциональный бот',
+            description=(
+                f'Бот предназначен для облегчения управления сервером и оснащен различными средствами автоматизации'
+            ),
+            color=colour
+        )
+        embed.add_field(
+            name='Информация о сервере',
+            value=f'> Префикс сервера - `{prefix}`'
+        )
+        
+        await message.channel.send(embed=embed)
     
     await bot.process_commands(message)
 
-
-@bot.slash_command(
-    name="activiti",
-    description="Create an activity",
-)
-@application_checks.guild_only()
-async def activiti(
-    interaction:nextcord.Interaction,
-    voice:nextcord.VoiceChannel=nextcord.SlashOption(
-        required=True,
-        name="voice",
-        description="Select the voice channel in which the activity will work!"
-    ),
-    act=nextcord.SlashOption(
-        required=True,
-        name="activiti",
-        description="Select the activity you want to use!",
-        choices=[activ['label'] for activ in info.activities_list],
-    ),
-) -> None:
-    lang = GuildDateBases(interaction.guild_id).language
-    activiti = utils.find(lambda a: a['label']==act,info.activities_list)
-    try:
-        inv = await voice.create_invite(
-            target_type=nextcord.InviteTarget.embedded_application,
-            target_application_id=activiti['id']
-        )
-    except:
-        await interaction.response.send_message(content=languages.activiti.failed[lang])
-        return
-    view = nextcord.ui.View(timeout=None)
-    view.add_item(nextcord.ui.Button(label="Activiti",emoji=languages.Emoji.roketa,url=inv.url))
-    emb = nextcord.Embed(title=f"**{languages.activiti.embed_title[lang]}**",color=0xfff8dc,description=languages.activiti.embed_description[lang])
-    emb._fields = [
-        {'name':languages.activiti.fields_label[lang],'value':activiti['label'],'inline':True},
-        {'name':languages.activiti.fields_max_user[lang],'value':activiti['max_user'],'inline':True},
-    ]
-    await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
 @bot.command()
 @commands.has_permissions(manage_emojis=True)
 async def add_emoji(ctx: commands.Context, name):
     em = ctx.message.attachments[0]
     await ctx.guild.create_custom_emoji(name=name,image=em)
-
-@bot.command(aliases=["set","setting"])
-@commands.has_permissions(manage_guild=True)
-@commands.guild_only()
-async def settings(ctx: commands.Context):
-    view = views.SettingsView(ctx.author)
-    
-    await ctx.send(embed=view.embed,view=view)
 
 def start_bot():
     for filename in os.listdir("./bot/cogs"):

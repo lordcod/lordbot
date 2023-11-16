@@ -25,6 +25,16 @@ class moderations(commands.Cog):
         
         await ctx.message.delete()
 
+    
+    @commands.command(aliases=["set","setting"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.guild_only()
+    async def settings(self, ctx: commands.Context):
+        view = views.SettingsView(ctx.author)
+        
+        await ctx.send(embed=view.embed,view=view)
+
+
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(manage_messages=True)
     async def purge(self,ctx: commands.Context, limit: int):
