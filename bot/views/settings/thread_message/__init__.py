@@ -1,6 +1,6 @@
 import nextcord
 from bot.databases.db import GuildDateBases
-from bot.resources.languages import channel_type
+from bot.resources.ether import Channel_Type
 from .addptional import ViewBuilder
 from bot.views import views
 from .thread import ThreadData
@@ -9,7 +9,7 @@ from ...settings import DefaultSettingsView
 class DropDown(nextcord.ui.Select):
     is_option = False
     
-    def __init__(self,guild):
+    def __init__(self,guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
         self.forum_message = forum_message  = self.gdb.get('thread_messages',{})
         channels = [guild.get_channel(key) for key in forum_message]
@@ -21,7 +21,7 @@ class DropDown(nextcord.ui.Select):
         options = [
             nextcord.SelectOption(
                 label=chnl.name,
-                emoji=channel_type[chnl.type.value],
+                emoji=Channel_Type[chnl.type.value],
                 value=chnl.id
             )
             for chnl in channels

@@ -5,7 +5,8 @@ import googletrans,os
 
 from bot.databases.db import GuildDateBases
 from bot.misc import (utils,env)
-from bot.resources import (info,languages,errors)
+from bot.resources import (info,errors)
+from bot import languages
 from bot.views import views
 from bot.resources.errors import CallbackCommandError
 

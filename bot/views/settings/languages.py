@@ -1,17 +1,24 @@
 import nextcord
-from bot.resources.languages import Languages_self as AllLangs
+from bot import languages
 from bot.views import views
 from ..settings import DefaultSettingsView
 from bot.databases.db import GuildDateBases
+from nextcord.utils import find
 
 
 class DropDown(nextcord.ui.Select):
-    def __init__(self):
+    def __init__(self,guild_id):
+        gdb = GuildDateBases(guild_id)
+        locale = gdb.get('language','en')
+        
         options = [
             nextcord.SelectOption(
-                label=data.get('native_name'), value=data.get('discord_language'), emoji=data.get('flag',None)
+                label=f"{data.get('english_name')} ({data.get('native_name')})", 
+                value=data.get('locale'), 
+                emoji=data.get('flag',None),
+                default=True if locale == data.get('locale') else False
             )
-            for data in AllLangs[:24]
+            for data in languages.current[:24]
         ]
 
         super().__init__(
@@ -23,7 +30,14 @@ class DropDown(nextcord.ui.Select):
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
-        await interaction.response.send_message(f'Selected language: {value}',ephemeral=True)
+        gdb = GuildDateBases(interaction.guild_id)
+        
+        langData = find(lambda lan:lan.get('locale',None)==value,languages.current)
+        
+        gdb.set('language',langData.get('locale'))
+        
+        
+        await interaction.response.send_message(f"Selected language: {langData.get('native_name')}",ephemeral=True)
 
 class Languages(DefaultSettingsView):
     embed = nextcord.Embed(
@@ -38,7 +52,7 @@ class Languages(DefaultSettingsView):
         
         super().__init__()
         
-        lang = DropDown()
+        lang = DropDown(guild.id)
         
         self.add_item(lang)
     

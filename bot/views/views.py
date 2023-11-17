@@ -1,7 +1,6 @@
-from typing import Optional
 import nextcord
 
-from bot.resources.languages import Emoji
+from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases
 from . import settings
 

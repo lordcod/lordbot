@@ -1,5 +1,5 @@
 import asyncio
-from bot.resources import languages
+from bot import languages
 from bot.misc import utils
 from nextcord.ext import commands,application_checks
 import nextcord,random
@@ -87,9 +87,13 @@ class basic(commands.Cog):
         await ctx.send(f"Pong!🥍🎉")
 
     @nextcord.message_command(name="Translate",default_member_permissions=8)
-    async def reping(self,inters: nextcord.Interaction, message: nextcord.Message):
-        local = find(lambda lan:lan['locale']==inters.locale,languages.Languages_information)
-        result = translator.translate(text=message.content, dest=local['google_language'])
+    async def translate(
+        self,
+        inters: nextcord.Interaction, 
+        message: nextcord.Message
+    ):
+        data = find(lambda lan:lan.get("discord_language")==inters.locale,languages.data)
+        result = translator.translate(text=message.content, dest=data.get('google_language'))
         view = nextcord.ui.View(timeout=None)
         select = nextcord.ui.Select(
             placeholder="Will choose the appropriate language:",
@@ -97,12 +101,12 @@ class basic(commands.Cog):
             max_values=1,
             options=[
                 nextcord.SelectOption(
-                    label=lang['native_name'],
-                    description=lang['language_name'],
-                    emoji=lang['flag'],
-                    value=lang['google_language']
+                    label=lang.get('native_name'),
+                    description=lang.get('language_name'),
+                    emoji=lang.get('flag'),
+                    value=lang.get('google_language')
                 )
-                for lang in languages[:25]
+                for lang in languages.data[:24]
             ]
         )
         

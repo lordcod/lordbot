@@ -3,7 +3,7 @@ from datetime import datetime
 from nextcord.utils import format_dt,escape_markdown
 
 
-Languages_information = [
+data = [
     {"discord_language":"da","google_language":"da","english_name":"Danish","native_name":"Dansk","flag":"🇩🇰"},
     {"discord_language":"de","google_language":"de","english_name":"German","native_name":"Deutsch","flag":"🇩🇪"},
     {"discord_language":"en-GB","google_language":"en","english_name":"English, UK","native_name":"English, UK","flag":"🇬🇧"},
@@ -37,55 +37,10 @@ Languages_information = [
     {"discord_language":"ko","google_language":"ko","english_name":"Korean","native_name":"한국어","flag":"🇰🇷"}
 ]
 
-Languages_self = [
-    Languages_information[2],
-    Languages_information[19],
+current = [
+    {"locale":"en","english_name":"English","native_name":"English","flag":"🇬🇧"},
+    {"locale":"ru","english_name":"Russian","native_name":"Pусский","flag":"🇷🇺"},
 ]
-
-class Emoji:
-    congratulation = '<a:congratulation:1165684808844845176>'
-    owner = '<:owner:1166002519315599500>'
-    verified = '<:verified:1166001046468964406>'
-    create = '<:paint:1166001043562307674>'
-    channel_text = '<:channel_text:1166001040198484178>'
-    channel_voice = '<:channel_voice:1166001038772404284>'
-    channel_forum = '<:channel_forum:1166094701020070009>'
-    channel_stage = '<:channel_stage:1166092341317226566>'
-    category = '<:category:1166001036553621534>'
-    text1 = '<:text1:1166001701912846346>'
-    text2 = '<:text2:1166001699295592528>'
-    member = '<:member:1166001035182080161>'
-    channel_announce = '<:channel_announce:1166092338242785370>'
-    thread = '<:thread:1166096258511937666>'
-    roketa = '<a:rocketa:1165684783754522704>'
-    bagmoney = '<:bag_money:1172834872067362818>'
-    bank = '<:bank:1165684762279673948>'
-    money = '<:money:1165684764775297187>'
-    award = '<a:award:1165684769829421209>'
-    economy = '<:economy:1172611420454649937>'
-    languages = '<:languages:1172611417170526319>'
-    prefix = '<:prefix:1172611415392124998>' 
-    colour = '<:colour:1172611412519043102>'
-    reactions = '<:reactions:1172862660442853497>'
-    auto_translate = '<:autotranslate:1172862657586544750>'
-    thread_message = '<:threadmessage:1172862656030453770>'
-
-channel_type = {
-    0:Emoji.channel_text,
-    1:Emoji.channel_text,
-    2:Emoji.channel_voice,
-    3:Emoji.category,
-    4:Emoji.category,
-    5:Emoji.channel_announce,
-    10:Emoji.thread,
-    11:Emoji.thread,
-    12:Emoji.thread,
-    13:Emoji.channel_stage,
-    14:Emoji.category,
-    15:Emoji.channel_forum,
-    16:Emoji.channel_forum,
-}
-
 
 class invites:
     verification_level = {
@@ -119,41 +74,6 @@ class invites:
         'en':'Custom Invite Link',
         'ru':'Пользовательская ссылка для приглашения'
     }
-    
-    @property
-    def field_guild(self):
-        invite = self.invite 
-        guild = invite.guild
-        return {
-            'ru':(
-                f'{Emoji.owner} Владелец: {guild.owner.mention}\n'
-                f'{Emoji.verified} Уровень проверки: {self.verification_level["ru"][guild.verification_level.value]}\n'
-                f'{Emoji.create} Создан: {format_dt(guild.created_at,"f")} ({format_dt(guild.created_at,"R")})\n'
-                f'{Emoji.channel_text} Всего {len(guild.channels)} каналов\n'
-                f'{Emoji.text1}{Emoji.channel_text} Текстовые каналы: {len(guild.text_channels)}\n'
-                f'{Emoji.text1}{Emoji.channel_voice}  Голосовые каналы: {len(guild.voice_channels)}\n'
-                f'{Emoji.text1}{Emoji.channel_forum}  Форум: {len(guild.forum_channels)}\n'
-                f'{Emoji.text1}{Emoji.channel_stage}  Трибуны: {len(guild.stage_channels)}\n'
-                f'{Emoji.text2}{Emoji.category}  Категории: {len(guild.categories)}\n'
-                f'{Emoji.member} Всего {guild.member_count} пользователя\n'
-                f'{Emoji.text1} Ботов: {len(guild.bots)}\n'
-                f'{Emoji.text2} Участников: {len(guild.humans)}'
-            ),
-            'en':(
-                f'{Emoji.owner} Owner: {guild.owner.mention}\n'
-                f'{Emoji.verified} Verification level: {self.verification_level["en"][guild.verification_level.value]}\n'
-                f'{Emoji.create} Generated: {format_dt(guild.created_at,"f")} ({format_dt(guild.created_at,"R")})\n'
-                f'{Emoji.channel_text} Total {len(guild.channels)} channels\n'
-                f'{Emoji.text1}{Emoji.channel_text} Text channels: {len(guild.text_channels)}\n'
-                f'{Emoji.text1}{Emoji.channel_voice}  Voice channels: {len(guild.voice_channels)}\n'
-                f'{Emoji.text1}{Emoji.channel_forum}  Forums: {len(guild.forum_channels)}\n'
-                f'{Emoji.text1}{Emoji.channel_stage}  Stands: {len(guild.stage_channels)}\n'
-                f'{Emoji.text2}{Emoji.category} Categories: {len(guild.categories)}\n'
-                f'{Emoji.member} Total {guild.member_count} user\n'
-                f'{Emoji.text1} Bots: {len(guild.bots)}\n'
-                f'{Emoji.text2} Participants: {len(guild.humans)}'
-            )
-        }
 
 class captcha:
     congratulation = {

@@ -5,7 +5,7 @@ from random import randint
 from time import time as tick
 from bot.databases.db import EconomyMembedDB,colums,GuildDateBases
 from bot.resources.errors import NotActivateEconomy
-from bot.resources.languages import Emoji
+from bot.resources.ether import Emoji
 from bot.misc.utils import get_prefix
 
 timeout_rewards = {"daily": 86400,"weekly": 604800,"monthly": 2592000}

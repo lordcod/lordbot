@@ -1,6 +1,6 @@
 import nextcord
 from .bonuses import Bonus
-from bot.resources.languages import Emoji
+from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases
 from bot.views import views
 from ...settings import DefaultSettingsView

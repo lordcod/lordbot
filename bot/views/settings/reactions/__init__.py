@@ -1,6 +1,6 @@
 import nextcord
 from bot.databases.db import GuildDateBases
-from bot.resources.languages import channel_type
+from bot.resources.ether import Channel_Type
 from .addres import ViewBuilder
 from .datas import ReactData
 from bot.views import views
@@ -21,7 +21,7 @@ class DropDown(nextcord.ui.Select):
         options = [
             nextcord.SelectOption(
                 label=chnl.name,
-                emoji=channel_type[chnl.type.value],
+                emoji=Channel_Type[chnl.type.value],
                 value=chnl.id
             )
             for chnl in channels
