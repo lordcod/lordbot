@@ -4,6 +4,11 @@ from bot.views import views
 from ..settings import DefaultSettingsView
 from bot.databases.db import GuildDateBases
 from nextcord.utils import find
+from bot.languages.settings import (
+    languages as languages_trans,
+    button as button_name
+)
+
 
 
 class DropDown(nextcord.ui.Select):
@@ -22,7 +27,7 @@ class DropDown(nextcord.ui.Select):
         ]
 
         super().__init__(
-            placeholder="Выберите язык для сервера:",
+            placeholder=languages_trans.choose.get(locale),
             min_values=1,
             max_values=1,
             options=options,
@@ -36,28 +41,34 @@ class DropDown(nextcord.ui.Select):
         
         gdb.set('language',langData.get('locale'))
         
+        view = Languages(interaction.guild)
         
-        await interaction.response.send_message(f"Selected language: {langData.get('native_name')}",ephemeral=True)
+        await interaction.message.edit(embed=view.embed,view=view)
 
 class Languages(DefaultSettingsView):
-    embed = nextcord.Embed(
-        title='Язык',
-        description='Эта настройка изменяет язык для работы с ботом. Выберите язык сервера.'
-    )
+    embed: nextcord.Embed
     
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color',1974050)
-        self.embed.color = colour
+        colour = gdb.get('color')
+        locale = gdb.get('language')
+        
+        self.embed = nextcord.Embed(
+            title=languages_trans.title.get(locale),
+            description=languages_trans.description.get(locale),
+            color = colour
+        )
         
         super().__init__()
+        
+        self.back.label = button_name.back.get(locale)
         
         lang = DropDown(guild.id)
         
         self.add_item(lang)
     
     
-    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red)
+    @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = views.SettingsView(interaction.user) 
         

@@ -31,7 +31,9 @@ class Modal(nextcord.ui.Modal):
         locale = gdb.get('language')
         gdb.set('prefix',prefix)
         
-        await interaction.response.send_message(f"{prefix_langs.new_prefix.get(locale)} - `{prefix}`",ephemeral=True)
+        view = PrefixView(interaction.guild)
+        
+        await interaction.message.edit(embed=view.embed,view=view)
 
 class PrefixView(DefaultSettingsView):
     embed: nextcord.Embed
@@ -77,14 +79,10 @@ class PrefixView(DefaultSettingsView):
     @nextcord.ui.button(label='Reset',style=nextcord.ButtonStyle.success)
     async def reset(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language','en')
         prefix = DEFAULT_PREFIX
         
         gdb.set('prefix',prefix)
-        await interaction.response.send_message(
-        content=(
-            f"{prefix_langs.reset.get(locale)}\n"
-            f"{prefix_langs.default.get(locale)} - `{prefix}`"
-        ),
-        ephemeral=True
-        )
+        
+        view = PrefixView(interaction.guild)
+        
+        await interaction.message.edit(embed=view.embed,view=view)

@@ -3,34 +3,40 @@ import nextcord
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases
 from . import settings
+from bot.languages.settings import (
+    start as start_langs,
+    module_name
+)
 
 
 
 class SetDropdown(nextcord.ui.Select):
-    def __init__(self):
+    def __init__(self,guild_id):
+        gdb = GuildDateBases(guild_id)
+        locale = gdb.get('language')
         
         options = [
             nextcord.SelectOption(
-                label="Economy", emoji=Emoji.economy, value='Economy'
+                label=module_name.economy.get(locale), emoji=Emoji.economy, value='Economy'
             ),
             nextcord.SelectOption(
-                label="Languages", emoji=Emoji.languages, value='Languages'
+                label=module_name.languages.get(locale), emoji=Emoji.languages, value='Languages'
             ),
             nextcord.SelectOption(
-                label="Prefix", emoji=Emoji.prefix, value='Prefix'
+                label=module_name.prefix.get(locale), emoji=Emoji.prefix, value='Prefix'
             ),
             nextcord.SelectOption(
-                label="Color", emoji=Emoji.colour, value='Color'
+                label=module_name.color.get(locale), emoji=Emoji.colour, value='Color'
             ),
             
             nextcord.SelectOption(
-                label="Auto Reactionsⁿᵉʷ", emoji=Emoji.reactions, value='Reactions'
+                label=module_name.reactions.get(locale), emoji=Emoji.reactions, value='Reactions'
             ),
             # nextcord.SelectOption(
-            #     label="Auto Translateⁿᵉʷ", emoji=Emoji.auto_translate, value='Auto_Translate'
+            #     label=module_name.translate.get(locale), emoji=Emoji.auto_translate, value='Auto_Translate'
             # ),
             nextcord.SelectOption(
-                label="Auto Thread-Forum Messageⁿᵉʷ", emoji=Emoji.thread_message, value='Thread_Message'
+                label=module_name.thread.get(locale), emoji=Emoji.thread_message, value='Thread_Message'
             ),
         ]
 
@@ -52,15 +58,17 @@ class SettingsView(settings.DefaultSettingsView):
     def __init__(self,member: nextcord.Member) -> None:
         gdb = GuildDateBases(member.guild.id)
         colour = gdb.get('color')
+        locale = gdb.get('language')
         
         self.embed = nextcord.Embed(
-            description='Взаимодействуйте с выпадающим меню выбора, чтобы настроить сервер.',
+            description=start_langs.description.get(locale),
             color=colour
         )
-        self.embed.set_author(name='Настройка модулей бота.',icon_url=member.guild.icon)
-        self.embed.set_footer(text=f'Запрос от {member.display_name}',icon_url=member.avatar)
+        self.embed.set_author(name=start_langs.author.get(locale),icon_url=member.guild.icon)
+        self.embed.set_footer(text=f'{start_langs.request.get(locale)} {member.display_name}',icon_url=member.avatar)
         
         
         super().__init__()
         
-        self.add_item(SetDropdown())
+        sd = SetDropdown(member.guild.id)
+        self.add_item(sd)
