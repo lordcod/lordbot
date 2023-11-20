@@ -38,8 +38,8 @@ class DropDown(nextcord.ui.Select):
         value = self.values[0]
         value = int(value)
         channel = await interaction.guild.fetch_channel(value)
-        channel_data = self.forum_message.get(value,{})
-        colour = self.gdb.get('color',1974050)
+        channel_data = self.forum_message.get(value)
+        colour = self.gdb.get('color')
         
         
         embed = nextcord.Embed(
@@ -58,7 +58,7 @@ class AutoThreadMessage(DefaultSettingsView):
     
     def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color',1974050)
+        colour = gdb.get('color')
         self.embed.color = colour
         
         super().__init__()

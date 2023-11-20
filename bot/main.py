@@ -164,10 +164,18 @@ async def add_emoji(ctx: commands.Context, name):
     em = ctx.message.attachments[0]
     await ctx.guild.create_custom_emoji(name=name,image=em)
 
-def start_bot():
-    for filename in os.listdir("./bot/cogs"):
-        if filename.endswith(".py") and not filename.startswith("__init__"):
+def load_dir(dirpath: str):
+    for filename in os.listdir(dirpath):
+        if os.path.isfile(f'{dirpath}/{filename}') and filename.endswith(".py") and not filename.startswith("__"):
             fmp = filename[:-3]
-            bot.load_extension(f"bot.cogs.{fmp}")
+            supdirpath = dirpath[2:].split("/")
+            findirpatch = '.'.join(supdirpath)
+            bot.load_extension(f"{findirpatch}.{fmp}")
+        elif os.path.isdir(f'{dirpath}/{filename}'):
+            load_dir(f'{dirpath}/{filename}')
+
+
+def start_bot():
+    load_dir("./bot/cogs")
     
     bot.run(env.token_lord_the_tester)
