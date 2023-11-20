@@ -5,6 +5,7 @@ from bot.resources import errors
 import aiohttp
 from io import BytesIO
 from PIL import Image
+import re
 from nextcord.utils import escape_markdown
 from bot.databases.db import GuildDateBases
 
@@ -14,6 +15,20 @@ async def getRandomQuote(lang='en'):
         async with session.post(url) as responce:
             json = await responce.json()
             return json
+
+def is_emoji(emoji):
+    pattern = "<[a]?:([a-zA-Z0-9-_]+):([0-9]+)>"
+    check = re.fullmatch(pattern,emoji)
+    
+    if not check:
+        return False
+    
+    groups = check.groups()
+    payload = {
+        'name':groups[0],
+        'id':groups[1]
+    }
+    return payload
 
 def to_color(colour: int) -> str:
     color = hex(colour).replace('0x', '#').upper()
