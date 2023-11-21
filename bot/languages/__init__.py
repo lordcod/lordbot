@@ -42,6 +42,12 @@ current = [
     {"locale":"ru","english_name":"Russian","native_name":"Pусский","flag":"🇷🇺"},
 ]
 
+class translate:
+    placeholder = {
+        'ru':'Выберет подходящий язык:',
+        'en':'Will choose the appropriate language:'
+    }
+
 class invites:
     verification_level = {
         'ru':[

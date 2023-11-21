@@ -1,5 +1,4 @@
 import nextcord
-
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases
 from . import settings
@@ -8,6 +7,8 @@ from bot.languages.settings import (
     module_name
 )
 
+
+from .translate import TranslateView
 
 
 class SetDropdown(nextcord.ui.Select):
@@ -53,7 +54,7 @@ class SetDropdown(nextcord.ui.Select):
         await interaction.message.edit(embed=view.embed,view=view)
 
 class SettingsView(settings.DefaultSettingsView):
-    embed = None
+    embed: nextcord.Embed
     
     def __init__(self,member: nextcord.Member) -> None:
         gdb = GuildDateBases(member.guild.id)
@@ -72,3 +73,6 @@ class SettingsView(settings.DefaultSettingsView):
         
         sd = SetDropdown(member.guild.id)
         self.add_item(sd)
+
+
+

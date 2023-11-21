@@ -8,6 +8,7 @@ from bot.databases.db import GuildDateBases
 import googletrans
 from nextcord.utils import find
 from bot.resources import info
+from bot.views.views import TranslateView
 
 translator = googletrans.Translator()
 
@@ -94,28 +95,9 @@ class basic(commands.Cog):
     ):
         data = find(lambda lan:lan.get("discord_language")==inters.locale,languages.data)
         result = translator.translate(text=message.content, dest=data.get('google_language'))
-        view = nextcord.ui.View(timeout=None)
-        select = nextcord.ui.Select(
-            placeholder="Will choose the appropriate language:",
-            min_values=1,
-            max_values=1,
-            options=[
-                nextcord.SelectOption(
-                    label=lang.get('native_name'),
-                    description=lang.get('language_name'),
-                    emoji=lang.get('flag'),
-                    value=lang.get('google_language')
-                )
-                for lang in languages.data[:24]
-            ]
-        )
         
-        async def _callback(_inter: nextcord.Interaction):
-            result = translator.translate(text=message.content, dest=select.values[0])
-            await _inter.response.send_message(content=result.text,ephemeral=True)
-        select.callback = _callback
+        view = TranslateView(inters.guild_id)
         
-        view.add_item(select)
         await inters.response.send_message(content=result.text,view=view,ephemeral=True)
 
 

@@ -61,6 +61,7 @@ class button:
         'en':'Add'
     }
 
+
 class prefix:
     title = {
         'ru':'Префикс',
@@ -111,6 +112,79 @@ class color:
         'en':'Current color'
     }
 
+class thread:
+    class init:
+        title = {
+            'ru':'Автоматические сообщения в форумах/ветках',
+            'en':'Automatic messages in forums/branches'
+        }
+        brief_title = {
+            'ru':'Авто-сообщения',
+            'en':'Auto-messages'
+        }
+        description={
+            'ru':'Добавляйте или изменяйте свои автоматические сообщения в форумах/ветках',
+            'en':'Add or change your automatic posts in forums/branches'
+        }
+        pc = {
+            'ru':'Настройки авто-сообщений в ветках/форумах:',
+            'en':'Auto-message settings in branches/forums:'
+        }
+        channel = {
+            'ru':'Канал',
+            'en':'Channel'
+        }
+    class addptional:
+        title = {
+            'ru':'Авто-сообщение',
+            'en':'Auto-message'
+        }
+        tilabel = {
+            'ru':'Сообщение:',
+            'en':'Message:'
+        }
+        tiph = {
+            'ru':'Вы также можете пользоваться embed-builder',
+            'en':'You can also use embed-builder'
+        }
+        cherr = {
+            'ru':'На этот канал уже установлено авто-сообщения',
+            'en':'Auto-messages have already been installed on this channel'
+        }
+        mph = {
+            'ru':'Выберете канал для авто-сообщений',
+            'en':'Select a channel for auto-messages'
+        }
+    class thread:
+        tilabel = {
+            'ru':'Сообщение:',
+            'en':'Message:'
+        }
+        tiph = {
+            'ru':'Вы также можете пользоваться embed-builder',
+            'en':'You can also use embed-builder'
+        }
+        mtitle = {
+            'ru':'Авто-сообщение',
+            'en':'Auto-communication'
+        }
+        mes_not_found = {
+            'ru':'Сообщения не найдено',
+            'en':'No message found'
+        }
+        watch_message = {
+            'ru':'Посмотреть сообщение',
+            'en':'View the message'
+        }
+        edit_message = {
+            'ru':'Изменить сообщение',
+            'en':'Edit a message'
+        }
+        delete_message = {
+            'ru':'Удалить сообщение',
+            'en':'Delete a message'
+        }
+        
 
 class economy:
     pass
@@ -193,7 +267,3 @@ class reactions:
             'ru':'Введенный эмодзи должен присутствовать на сервере',
             'en':'The entered emoji must be present on the server'
         }
-    
-
-class economy:
-    pass
