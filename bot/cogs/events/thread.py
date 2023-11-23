@@ -20,7 +20,7 @@ class thread_event(commands.Cog):
     
     
     @commands.Cog.listener()
-    async def on_thread_create(thread:nextcord.Thread):
+    async def on_thread_create(self, thread:nextcord.Thread):
         guild_data = GuildDateBases(thread.guild.id)
         afm = guild_data.get('thread_messages')
         thread_data = afm.get(thread.parent_id,None)

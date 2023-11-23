@@ -71,8 +71,7 @@ class message_event(commands.Cog):
             )
             
             await message.channel.send(embed=embed)
-        
-        await self.bot.process_commands(message)
+    
 
     
     

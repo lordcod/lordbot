@@ -22,42 +22,41 @@ def decode_downald_info(bs_data: BeautifulSoup) -> None:
 
 class Playlist:
     def __init__(self,data) -> None:
-        self.owner: dict = data['owner']
-        self.id: int = data['uid']
-        self.kind = data['kind']
-        self.title = data['title']
-        self.description = data['description']
-        self.tags = data['tags']
+        self.owner: dict = data.get('owner')
+        self.id: int = data.get('uid')
+        self.kind = data.get('kind')
+        self.title = data.get('title')
+        self.description = data.get('description')
+        self.tags = data.get('tags')
 
 class Album:
     def __init__(self,data) -> None:
-        self.id:int = data['id']
-        self.title:str = data['title']
-        self.type:str = data['metaType']
-        # self.year:int = data['year']
-        # self.release_date:str = data['releaseDate']
-        self.image:str = data['ogImage']
-        self.artists:List[Artist] = [Artist(artist) for artist in data['artists']]
-        self.labels:dict = data['labels']
+        self.id:int = data.get('id')
+        self.title:str = data.get('title')
+        self.type:str = data.get('metaType')
+        self.year:int = data.get('year')
+        self.release_date:str = data.get('releaseDate')
+        self.image:str = data.get('ogImage')
+        self.artists:List[Artist] = [Artist(artist) for artist in data.get('artists',[])]
+        self.labels:dict = data.get('labels')
 
 class Artist:
     def __init__(self,data:dict) -> None:
-        self.id:int = data['id']
-        self.name:str = data['name']
-        if 'cover' in data:
-            self.cover:str = data['cover']
-            self.avatar:str = data['cover']['uri']
+        self.id:int = data.get('id')
+        self.name:str = data.get('name')
+        self.cover:str = data.get('cover')
+        self.avatar:str = self.cover and data.get('cover').get('uri')
 
 class Track:
     def __init__(self,data: dict) -> None:
-        self.id:int = data['id']
-        self.title:str = data['title']
-        self.major:dict = data['major']
-        self.diration:float = (data['durationMs']/100)
-        self.artists:List[Artist] = [Artist(artist) for artist in data['artists']]
+        self.id:int = data.get('id')
+        self.title:str = data.get('title')
+        self.major:dict = data.get('major')
+        self.image:str = data.get('ogImage')
+        self.diration:float = (data.get('durationMs')/100)
+        self.artists:List[Artist] = [Artist(artist) for artist in data.get('artists',[])]
         self.artist_names:List[str] = [art.name for art in self.artists]
-        self.albums:List[Album] = [Album(album) for album in data['albums']]
-        self.image:str = data['ogImage']
+        self.albums:List[Album] = [Album(album) for album in data.get('albums',[])]
     
     def __str__(self) -> str:
         return f"{self.title} - {' ,'.join(self.artist_names)}"

@@ -3,6 +3,8 @@ import psycopg2
 import ujson as json
 import threading
 import asyncio
+import sys
+from bot.misc.logger import Logger
 
 
 host = 'postgresql.879043c3234e.hosting.myjino.ru'
@@ -21,7 +23,13 @@ try:
     )
     connection.autocommit = True
 except Exception as err:
-    print(err)
+    Logger.error(err)
+    Logger.error('Failed connection')
+    Logger.error('EXIT')
+    sys.exit()
+else:
+    Logger.success("Successful connection")
+
 
 def registrated_table():
     with connection.cursor() as cursor:

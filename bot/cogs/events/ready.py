@@ -1,15 +1,6 @@
 import nextcord
 from nextcord.ext import commands
-
-from bot.databases.db import GuildDateBases
-from bot.misc import utils
-from bot.resources import errors
-from bot import languages
-
-import googletrans
-
-translator = googletrans.Translator()
-
+from bot.misc.logger import Logger
 
 class ready_event(commands.Cog):
     bot: commands.Bot
@@ -21,12 +12,12 @@ class ready_event(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"The bot is registered as {self.bot.user}")
+        Logger.success(f"The bot is registered as {self.bot.user}")
     
     @commands.Cog.listener()
     async def on_disconnect(self):
-        print("Bot is disconnect")
-        
+        Logger.core("Bot is disconnect")
+    
     
 
 

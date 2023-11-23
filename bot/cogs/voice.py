@@ -78,7 +78,7 @@ class Voice(commands.Cog):
             found = finder.groups()[1]
             tracks = await yandex_music_requests.get_list(found)
             track = tracks[0]
-        mes = await ctx.send("Download track")
+        mes = await ctx.send("Скачиваем трек")
         
         track_byte = await track.download_bytes()
         byio = io.BytesIO(track_byte)
@@ -131,5 +131,4 @@ class Voice(commands.Cog):
 
 
 def setup(bot):
-    return
     bot.add_cog(Voice(bot))

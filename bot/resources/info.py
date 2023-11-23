@@ -28,8 +28,8 @@ invite_link = (
     '&redirect_uri=https://lordbot.ru/link-role-callback'
 )
 
-commands = {
-    'default':{
+categories = {
+    'default' : [
         {
             'name':'help',
             'aliases':[],
@@ -37,6 +37,6 @@ commands = {
             'descriptrion':'Current command',
             'brief_descriptrion':'A command describing the bot\'s functions',
             'allowed_disabled':False
-        }
-    }
+        },
+    ]
 }

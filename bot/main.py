@@ -1,15 +1,11 @@
 import nextcord
-from nextcord.ext import (commands,application_checks,tasks)
-from nextcord.utils import (get,find,escape_markdown)
-import os
+from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
 from bot.misc import (utils,env)
-from bot.resources import (info,errors)
-from bot import languages
-from bot.views import views
-from bot.resources.errors import CallbackCommandError
+from bot.resources import errors
 
+import os
 
 
 
@@ -17,7 +13,11 @@ def get_command_prefixs(bot: commands.Bot, msg: nextcord.Message):
     prefix = utils.get_prefix(msg.guild.id)
     return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
-bot = commands.Bot(command_prefix=get_command_prefixs,intents=nextcord.Intents.all())
+bot = commands.Bot(
+    command_prefix=get_command_prefixs,
+    intents=nextcord.Intents.all(),
+    help_command=None
+)
 
 @bot.check
 async def main_check(ctx: commands.Context):

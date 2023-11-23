@@ -14,7 +14,9 @@ from bot.views.views import TranslateView
 translator = googletrans.Translator()
 
 class basic(commands.Cog):
-    def __init__(self, bot):
+    bot: commands.Bot
+    
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     
@@ -65,7 +67,6 @@ class basic(commands.Cog):
         
         await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
-
     @commands.command()
     async def captcha(self, ctx:commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
@@ -87,7 +88,7 @@ class basic(commands.Cog):
 
     @commands.command()
     async def ping(self,ctx: commands.Context):
-        await ctx.send(f"Pong!🥍🎉")
+        await ctx.send(f"Pong!🥍🎉\n{self.bot.latency}")
 
     @nextcord.message_command(name="Translate",default_member_permissions=8)
     async def translate(

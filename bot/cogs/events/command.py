@@ -16,9 +16,9 @@ class command_event(commands.Cog):
         self.bot = bot
         super().__init__()
     
-        commands.Cog.cog_check
+    
     @commands.Cog.listener()
-    async def on_command_error(ctx: commands.Context, error):
+    async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx,error)
         await CommandError.process()
 
