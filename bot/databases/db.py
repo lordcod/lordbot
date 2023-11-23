@@ -5,68 +5,54 @@ import threading
 import asyncio
 import sys
 from bot.misc.logger import Logger
+from .load import load_db
+from .utils import Json,Formating
+
+_connection = load_db()
+
+def connection():
+    global _connection
+    if not _connection:
+        Logger.core("Update db")
+        _connection = load_db()
+    return _connection
 
 
-host = 'postgresql.879043c3234e.hosting.myjino.ru'
-port = 5432
-password = 'nVR*6#1P%hyR*4l0'
-user = 'j5191558_bot'
-db_name = 'j5191558_main'
 
+with connection().cursor() as cursor:
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS guilds (
+            id INT8 PRIMARY KEY,
+            thread_messages JSON DEFAULT '{}',
+            reactions JSON DEFAULT '{}',
+            auto_translate JSON DEFAULT '{}',
+            language TEXT DEFAULT 'en',
+            economic_settings JSON DEFAULT '{}',
+            prefix TEXT DEFAULT 'l.',
+            color INT8 DEFAULT '1974050',
+            disabled_commands JSON DEFAULT '{}'
+        )
+''')
 
-try:
-    connection = psycopg2.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=db_name
-    )
-    connection.autocommit = True
-except Exception as err:
-    Logger.error(err)
-    Logger.error('Failed connection')
-    Logger.error('EXIT')
-    sys.exit()
-else:
-    Logger.success("Successful connection")
-
-
-def registrated_table():
-    with connection.cursor() as cursor:
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS guilds (
-                id INT8 PRIMARY KEY,
-                thread_messages JSON DEFAULT '{}',
-                reactions JSON DEFAULT '{}',
-                auto_translate JSON DEFAULT '{}',
-                language TEXT DEFAULT 'en',
-                economic_settings JSON DEFAULT '{}',
-                prefix TEXT DEFAULT 'l.',
-                color INT8 DEFAULT '1974050',
-                disabled_commands JSON DEFAULT '{}'
-            )
+with connection().cursor() as cursor:
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS economic (
+            guild_id INT8 NOT NULL,
+            member_id INT8 NOT NULL,
+            balance INT8 DEFAULT '0',
+            bank INT8 DEFAULT '0',
+            daily INT8 DEFAULT '0',
+            weekly INT8 DEFAULT '0',
+            monthly INT8 DEFAULT '0'
+        )
     ''')
-
-    with connection.cursor() as cursor:
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS economic (
-                guild_id INT8 NOT NULL,
-                member_id INT8 NOT NULL,
-                balance INT8 DEFAULT '0',
-                bank INT8 DEFAULT '0',
-                daily INT8 DEFAULT '0',
-                weekly INT8 DEFAULT '0',
-                monthly INT8 DEFAULT '0'
-            )
-        ''')
 
 
 colums = {
     'guilds':{},
     'economic':{}
 }
-
-def get_info():
+def update_info():
     query = """
         SELECT
             column_name,
@@ -78,7 +64,7 @@ def get_info():
         WHERE
             table_name = 'guilds';
     """
-    with connection.cursor() as cursor:
+    with connection().cursor() as cursor:
         cursor.execute(query)
         
         info = cursor.fetchall()
@@ -96,68 +82,18 @@ def get_info():
         WHERE
             table_name = 'economic';
     """
-    with connection.cursor() as cursor:
+    with connection().cursor() as cursor:
         cursor.execute(query)
         
         info = cursor.fetchall()
         
         colums['economic'] = list(info)
-
-registrated_table()
-get_info()
-
-
-class Json:
-    def loads(data):
-        try:
-            data = json.loads(data)
-            return data
-        except:
-            return data
-    
-    def dumps(data):
-        try:
-            data = json.dumps(data)
-            return data
-        except:
-            return data
-
-class Formating:
-    def on_error(func):
-        def wrapped(data: Dict[Any,Any]):
-            try:
-                result = func(data)
-                return result
-            except:
-                return data
-        return wrapped
-    
-    @on_error
-    def loads(data: Dict[str,Any]):
-        new_data = {}
-        for key in data:
-            value = data[key]
-            if key.isdigit:
-                new_data[int(key)] = value
-            else:
-                new_data[key] = value
-        return new_data
-    
-    @on_error
-    def dumps(data: Dict[Union[str,int],Any]):
-        new_data = {}
-        for key in data:
-            
-            if type(key) == int:
-                new_data[str(key)] = data[key]
-            else:
-                new_data[key] = data[key]
-        return new_data
+update_info()
 
 
 class EconomyMembedDB:
     def get(guild_id,member_id):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('SELECT * FROM economic WHERE guild_id = %s AND member_id = %s', (guild_id,member_id))
             
             guild = cursor.fetchone()
@@ -165,17 +101,17 @@ class EconomyMembedDB:
             return guild
     
     def insert(guild_id,member_id):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('INSERT INTO economic (guild_id,member_id) VALUES (%s,%s)', (guild_id,member_id))
     
     def update(guild_id,member_id,arg,value):
         if not EconomyMembedDB.get(guild_id,member_id):
             EconomyMembedDB.insert(guild_id,member_id)
         
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute(f'UPDATE economic SET {arg} = %s WHERE guild_id = %s AND member_id = %s', (value, guild_id, member_id))
             
-            connection.commit()
+            connection().commit()
     
     def update_list(guild_id,member_id,args):
         for arg in args:
@@ -183,20 +119,20 @@ class EconomyMembedDB:
             EconomyMembedDB.update(guild_id,member_id,arg,value)
     
     def delete(guild_id,member_id):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('DELETE FROM economic WHERE guild_id = %s AND member_id = %s', (guild_id,member_id))
             
-            connection.commit()
+            connection().commit()
     
     def delete_guild(guild_id):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('DELETE FROM economic WHERE guild_id = %s', (guild_id,))
             
-            connection.commit()
+            connection().commit()
 
 class RequstsDB:
     def get(guild_id):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('SELECT * FROM guilds WHERE id = %s', (guild_id,))
             
             guild = cursor.fetchone()
@@ -204,7 +140,7 @@ class RequstsDB:
             return guild
     
     def get_from_service(guild_id,arg):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute(f'SELECT {arg} FROM guilds WHERE id = %s', (guild_id,))
             
             value = cursor.fetchone()
@@ -212,18 +148,18 @@ class RequstsDB:
             return value
     
     def insert(guild_id):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
             
-            connection.commit()
+            connection().commit()
     
     def update(guild_id,arg,value):
         if not RequstsDB.get(guild_id):
             RequstsDB.insert(guild_id)
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute(f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value, guild_id))
             
-            connection.commit()
+            connection().commit()
     
     def update_from_kwargs(guild_id,**kwargs):
         if not RequstsDB.get(guild_id):
@@ -233,16 +169,16 @@ class RequstsDB:
             RequstsDB.update(guild_id,kw,kwargs[kw])
     
     def delete(guild_id):
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('DELETE FROM guilds WHERE id = %s', (guild_id,))
             
-            connection.commit()
+            connection().commit()
     
     def drop_table():
-        with connection.cursor() as cursor:
+        with connection().cursor() as cursor:
             cursor.execute('DROP TABLE guilds')
             
-            connection.commit()
+            connection().commit()
 
 class GuildDateBases:
     @classmethod
@@ -279,7 +215,7 @@ def db_forever():
     try:
         loop.run_forever()
     finally:
-        connection.close()
+        connection().close()
         loop.close()
         exit()
 
