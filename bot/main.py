@@ -19,6 +19,10 @@ bot = commands.Bot(
     help_command=None
 )
 
+@bot.event
+async def on_error(*args,**kwargs):
+    pass
+
 @bot.check
 async def main_check(ctx: commands.Context):
     gdb = GuildDateBases(ctx.guild.id)

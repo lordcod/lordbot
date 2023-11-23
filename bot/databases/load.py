@@ -1,7 +1,6 @@
-from typing import Any,Dict,Union
 import psycopg2
-import sys
 from bot.misc.logger import Logger
+import time
 
 
 host = 'postgresql.879043c3234e.hosting.myjino.ru'
@@ -22,8 +21,9 @@ def load_db():
     except Exception as err:
         Logger.error(err)
         Logger.error('Failed connection')
-        Logger.error('EXIT')
-        sys.exit()
+        time.sleep(5)
+        Logger.critical('Starting a database reboot')
+        load_db()
     else:
         Logger.success("Successful connection")
         return connection

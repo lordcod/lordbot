@@ -12,8 +12,8 @@ _connection = load_db()
 
 def connection():
     global _connection
-    if not _connection:
-        Logger.core("Update db")
+    if _connection.closed > 0 :
+        Logger.core("Starting a database reboot")
         _connection = load_db()
     return _connection
 

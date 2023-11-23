@@ -88,7 +88,7 @@ class basic(commands.Cog):
 
     @commands.command()
     async def ping(self,ctx: commands.Context):
-        await ctx.send(f"Pong!🥍🎉\n{self.bot.latency}")
+        await ctx.send(f"Pong!🏓🎉\nLatency: {(self.bot.latency)*100:.1f}ms")
 
     @nextcord.message_command(name="Translate",default_member_permissions=8)
     async def translate(
