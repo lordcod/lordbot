@@ -27,3 +27,16 @@ invite_link = (
     '&response_type=code'
     '&redirect_uri=https://lordbot.ru/link-role-callback'
 )
+
+commands = {
+    'default':{
+        {
+            'name':'help',
+            'aliases':[],
+            'arguments':['command/category name'],
+            'descriptrion':'Current command',
+            'brief_descriptrion':'A command describing the bot\'s functions',
+            'allowed_disabled':False
+        }
+    }
+}

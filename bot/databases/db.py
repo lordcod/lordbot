@@ -3,7 +3,6 @@ import psycopg2
 import ujson as json
 import threading
 import asyncio
-import orjson
 
 
 host = 'postgresql.879043c3234e.hosting.myjino.ru'
@@ -35,7 +34,8 @@ def registrated_table():
                 language TEXT DEFAULT 'en',
                 economic_settings JSON DEFAULT '{}',
                 prefix TEXT DEFAULT 'l.',
-                color INT8 DEFAULT '1974050'
+                color INT8 DEFAULT '1974050',
+                disabled_commands JSON DEFAULT '{}'
             )
     ''')
 
@@ -239,7 +239,7 @@ class RequstsDB:
 class GuildDateBases:
     @classmethod
     def create_guild(cls,guild_id: int):
-        cls.__init__(guild_id)
+        return cls.__init__(guild_id)
     
     def __init__(self,guild_id) -> None:
         if not RequstsDB.get(guild_id):

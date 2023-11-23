@@ -25,9 +25,10 @@ except Exception as err:
     print(err)
 
 with connection.cursor() as cursor:
-    cursor.execute('''
-        ALTER TABLE guilds
-        ADD color INT8 DEFAULT '1974050'
+    value = '["captcha"]'
+    id = 1165681101294030898
+    cursor.execute(f'''
+        UPDATE guilds SET disabled_commands = '{value}' WHERE id = {id}
     ''')
 
 

@@ -3,16 +3,33 @@ from typing import Union
 from nextcord.ext import commands
 
 
+class DisabledCommand(commands.CommandError):
+    pass
+
+class ErrorTypeChannel(Exception):
+    pass
+
+class OnlyTeamError(commands.CommandError):
+    def __init__(self, author: Union[nextcord.Member,nextcord.User]) -> None:
+        self.author: Union[nextcord.Member,nextcord.User] = author
+        super().__init__("This command can only be used by the bot team")
+
+class NotActivateEconomy(commands.CommandError):
+    pass
+
 
 class CallbackCommandError:
     def __init__(self,ctx: commands.Context,error) -> None:
         self.ctx = ctx
         self.error = error
+        print(error)
     
     async def process(self):
         for error in self.errors:
             name = error.__name__
-            if isinstance(self.error,getattr(commands,name)):
+            error_name = self.error.__class__.__name__
+            
+            if name == error_name:
                 await error(self)
                 break
         else:
@@ -51,23 +68,17 @@ class CallbackCommandError:
     async def BadArgument(self):
         content = "Incorrect arguments"
     
+    async def DisabledCommand(self):
+        content = f'This command is disabled on the server'
+        await self.ctx.send(content)
+    
     async def OfterError(self):
         pass
     
     errors = [
         MissingPermissions,MissingRole,MissingAnyRole,BotMissingPermissions,
         CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
+        DisabledCommand
     ]
 
 
-
-class ErrorTypeChannel(Exception):
-    pass
-
-class OnlyTeamError(commands.CommandError):
-    def __init__(self, author: Union[nextcord.Member,nextcord.User]) -> None:
-        self.author: Union[nextcord.Member,nextcord.User] = author
-        super().__init__("This command can only be used by the bot team")
-
-class NotActivateEconomy(commands.CommandError):
-    pass

@@ -1,5 +1,6 @@
 import asyncio
 from bot import languages
+from bot.resources.ether import Emoji
 from bot.misc import utils
 from nextcord.ext import commands,application_checks
 import nextcord,random
@@ -67,21 +68,22 @@ class basic(commands.Cog):
 
     @commands.command()
     async def captcha(self, ctx:commands.Context):
-        lang = GuildDateBases(ctx.guild.id).language
+        gdb = GuildDateBases(ctx.guild.id)
+        lang = gdb.get('language')
         data,text = await utils.generator_captcha(random.randint(3,7))
         image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
-        await ctx.send(content=languages.captcha.enter[lang],file=image_file)
+        await ctx.send(content=languages.captcha.enter.get(lang),file=image_file)
         try:
             check = lambda m: m.channel==ctx.channel and m.author==ctx.author
             mes:nextcord.Message = await self.bot.wait_for("message",timeout=30,check=check)
         except asyncio.TimeoutError:
-            await ctx.send(content=languages.captcha.failed[lang])
+            await ctx.send(content=languages.captcha.failed.get(lang))
             return
         
         if mes.content.lower() == text.lower():
-            await ctx.send(f"{languages.Emoji.congratulation}{languages.captcha.congratulation[lang]}")
+            await ctx.send(f"{Emoji.congratulation}{languages.captcha.congratulation.get(lang)}")
         else:
-            await ctx.send(content=languages.captcha.failed[lang])
+            await ctx.send(content=languages.captcha.failed.get(lang))
 
     @commands.command()
     async def ping(self,ctx: commands.Context):
@@ -93,7 +95,8 @@ class basic(commands.Cog):
         inters: nextcord.Interaction, 
         message: nextcord.Message
     ):
-        data = find(lambda lan:lan.get("discord_language")==inters.locale,languages.data)
+        check = lambda lan:lan.get("discord_language")==inters.locale
+        data = find(check,languages.data)
         result = translator.translate(text=message.content, dest=data.get('google_language'))
         
         view = TranslateView(inters.guild_id)
@@ -102,5 +105,5 @@ class basic(commands.Cog):
 
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(basic(bot))
