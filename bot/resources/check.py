@@ -10,3 +10,4 @@ def team_only():
             raise errors.OnlyTeamError("This command can only be used by the bot team")
         return True
     return commands.check(predicate)
+

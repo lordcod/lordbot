@@ -1,3 +1,6 @@
+DEFAULT_PREFIX = 'l.'
+DEFAULT_COLOR = 1974050
+
 activities_list = [
     {'id':880218394199220334,'label':'Watch Together','max_user':'Unlimited'},
     {'id':755827207812677713,'label':'Poker Night','max_user':'25'},
@@ -15,13 +18,25 @@ activities_list = [
     {'id':1037680572660727838,'label':'Chef Showdown','max_user':'15'},
     {'id':1107689944685748377,'label':'Bobble Bash','max_user':'8'},
 ]
-DEFAULT_PREFIX = 'l.'
 
-invite_link = '\
-https://discord.com/api/oauth2/authorize\
-?client_id=1095713975532007434\
-&permissions=-1\
-&scope=bot%20applications.commands\
-&response_type=code\
-&redirect_uri=https://lordbot.ru/link-role-callback\
-'
+invite_link = (
+    'https://discord.com/api/oauth2/authorize'
+    '?client_id=1095713975532007434'
+    '&permissions=-1'
+    '&scope=bot%20applications.commands'
+    '&response_type=code'
+    '&redirect_uri=https://lordbot.ru/link-role-callback'
+)
+
+categories = {
+    'default' : [
+        {
+            'name':'help',
+            'aliases':[],
+            'arguments':['command/category name'],
+            'descriptrion':'Current command',
+            'brief_descriptrion':'A command describing the bot\'s functions',
+            'allowed_disabled':False
+        },
+    ]
+}
