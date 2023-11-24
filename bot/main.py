@@ -20,7 +20,7 @@ bot = commands.Bot(
 )
 
 @bot.event
-async def on_error(*args,**kwargs):
+async def on_error(event,*args,**kwargs):
     pass
 
 @bot.check

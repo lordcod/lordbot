@@ -88,7 +88,12 @@ class basic(commands.Cog):
 
     @commands.command()
     async def ping(self,ctx: commands.Context):
-        await ctx.send(f"Pong!🏓🎉\nLatency: {(self.bot.latency)*100:.1f}ms")
+        content = (
+            "Pong!🏓🎉\n"
+            f"Latency: {(self.bot.latency)*100:.1f}ms"
+        )
+        
+        await ctx.send(content)
 
     @nextcord.message_command(name="Translate",default_member_permissions=8)
     async def translate(
@@ -96,7 +101,8 @@ class basic(commands.Cog):
         inters: nextcord.Interaction, 
         message: nextcord.Message
     ):
-        check = lambda lan:lan.get("discord_language")==inters.locale
+        def check(lan: dict):
+            return lan.get("discord_language")==inters.locale
         data = find(check,languages.data)
         result = translator.translate(text=message.content, dest=data.get('google_language'))
         

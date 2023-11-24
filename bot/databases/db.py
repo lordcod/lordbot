@@ -1,9 +1,7 @@
 from typing import Any,Dict,Union
-import psycopg2
-import ujson as json
 import threading
 import asyncio
-import sys
+from .error_handler import on_error
 from bot.misc.logger import Logger
 from .load import load_db
 from .utils import Json,Formating
@@ -12,9 +10,11 @@ _connection = load_db()
 
 def connection():
     global _connection
-    if _connection.closed > 0 :
-        Logger.core("Starting a database reboot")
+    
+    if not _connection.closed == 0 :
+        Logger.core("[Closed connection] Starting a database reboot")
         _connection = load_db()
+    
     return _connection
 
 
@@ -92,6 +92,7 @@ update_info()
 
 
 class EconomyMembedDB:
+    @on_error()
     def get(guild_id,member_id):
         with connection().cursor() as cursor:
             cursor.execute('SELECT * FROM economic WHERE guild_id = %s AND member_id = %s', (guild_id,member_id))
@@ -100,10 +101,12 @@ class EconomyMembedDB:
             
             return guild
     
+    @on_error()
     def insert(guild_id,member_id):
         with connection().cursor() as cursor:
             cursor.execute('INSERT INTO economic (guild_id,member_id) VALUES (%s,%s)', (guild_id,member_id))
     
+    @on_error()
     def update(guild_id,member_id,arg,value):
         if not EconomyMembedDB.get(guild_id,member_id):
             EconomyMembedDB.insert(guild_id,member_id)
@@ -113,17 +116,20 @@ class EconomyMembedDB:
             
             connection().commit()
     
+    @on_error()
     def update_list(guild_id,member_id,args):
         for arg in args:
             value = args[arg]
             EconomyMembedDB.update(guild_id,member_id,arg,value)
     
+    @on_error()
     def delete(guild_id,member_id):
         with connection().cursor() as cursor:
             cursor.execute('DELETE FROM economic WHERE guild_id = %s AND member_id = %s', (guild_id,member_id))
             
             connection().commit()
     
+    @on_error()
     def delete_guild(guild_id):
         with connection().cursor() as cursor:
             cursor.execute('DELETE FROM economic WHERE guild_id = %s', (guild_id,))
@@ -131,6 +137,7 @@ class EconomyMembedDB:
             connection().commit()
 
 class RequstsDB:
+    @on_error()
     def get(guild_id):
         with connection().cursor() as cursor:
             cursor.execute('SELECT * FROM guilds WHERE id = %s', (guild_id,))
@@ -139,6 +146,7 @@ class RequstsDB:
             
             return guild
     
+    @on_error()
     def get_from_service(guild_id,arg):
         with connection().cursor() as cursor:
             cursor.execute(f'SELECT {arg} FROM guilds WHERE id = %s', (guild_id,))
@@ -147,12 +155,14 @@ class RequstsDB:
             
             return value
     
+    @on_error()
     def insert(guild_id):
         with connection().cursor() as cursor:
             cursor.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
             
             connection().commit()
     
+    @on_error()
     def update(guild_id,arg,value):
         if not RequstsDB.get(guild_id):
             RequstsDB.insert(guild_id)
@@ -161,6 +171,7 @@ class RequstsDB:
             
             connection().commit()
     
+    @on_error()
     def update_from_kwargs(guild_id,**kwargs):
         if not RequstsDB.get(guild_id):
             RequstsDB.insert(guild_id)
@@ -168,12 +179,14 @@ class RequstsDB:
         for kw in kwargs:
             RequstsDB.update(guild_id,kw,kwargs[kw])
     
+    @on_error()
     def delete(guild_id):
         with connection().cursor() as cursor:
             cursor.execute('DELETE FROM guilds WHERE id = %s', (guild_id,))
             
             connection().commit()
     
+    @on_error()
     def drop_table():
         with connection().cursor() as cursor:
             cursor.execute('DROP TABLE guilds')
@@ -190,6 +203,7 @@ class GuildDateBases:
             RequstsDB.insert(guild_id)
         self.guild_id = guild_id
 
+    @on_error()
     def get(self, service, default=None):
         data = RequstsDB.get_from_service(self.guild_id,service)
         data = data[0]
@@ -200,6 +214,7 @@ class GuildDateBases:
             return default
         return data
     
+    @on_error()
     def set(self, service, value):
         value = Formating.dumps(value)
         value = Json.dumps(value)
