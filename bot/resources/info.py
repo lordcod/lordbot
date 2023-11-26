@@ -1,3 +1,6 @@
+DEFAULT_PREFIX = 'l.'
+DEFAULT_COLOR = 1974050
+
 activities_list = [
     {'id':880218394199220334,'label':'Watch Together','max_user':'Unlimited'},
     {'id':755827207812677713,'label':'Poker Night','max_user':'25'},
@@ -15,13 +18,222 @@ activities_list = [
     {'id':1037680572660727838,'label':'Chef Showdown','max_user':'15'},
     {'id':1107689944685748377,'label':'Bobble Bash','max_user':'8'},
 ]
-DEFAULT_PREFIX = 'l.'
 
-invite_link = '\
-https://discord.com/api/oauth2/authorize\
-?client_id=1095713975532007434\
-&permissions=-1\
-&scope=bot%20applications.commands\
-&response_type=code\
-&redirect_uri=https://lordbot.ru/link-role-callback\
-'
+invite_link = (
+    'https://discord.com/api/oauth2/authorize'
+    '?client_id=1095713975532007434'
+    '&permissions=-1'
+    '&scope=bot%20applications.commands'
+    '&response_type=code'
+    '&redirect_uri=https://lordbot.ru/link-role-callback'
+)
+
+categories = {
+    'Economy':[
+        {
+            'name':'balance',
+            'aliases':['bal'],
+            'arguments':['[member]'],
+            'descriptrion':(
+                'Displays the participant\'s balance as well as possible rewards that can be collected'
+                '\n\n'
+                'If no participant is specified, the value is taken by the one who started the command'
+            ),
+            'brief_descriptrion':'Participant\'s balance',
+            'allowed_disabled':True
+        },
+        
+        {
+            'name':'daily',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Issues a cash reward once a day',
+            'brief_descriptrion':'Daily cash rewards',
+            'allowed_disabled':True
+        },    
+        {
+            'name':'weekly',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Issues a cash reward once a week',
+            'brief_descriptrion':'Weekly cash rewards',
+            'allowed_disabled':True
+        },    
+        {
+            'name':'monthly',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Issues a cash reward once a month',
+            'brief_descriptrion':'Monthly cash rewards',
+            'allowed_disabled':True
+        },  
+        
+        {
+            'name':'deposit',
+            'aliases':['dep'],
+            'arguments':['<amount>'],
+            'descriptrion':'Transfers the entered amount of money to the bank protecting your funds from robbery',
+            'brief_descriptrion':'Transfers the entered amount of money to the bank',
+            'allowed_disabled':True
+        },        
+        {
+            'name':'withdraw',
+            'aliases':['wd'],
+            'arguments':['<amount>'],
+            'descriptrion':(
+                'Redirects your funds from the bank back to your account'
+                '\n\n'
+                'Please note that if you lose your funds, it is not possible to return them'
+            ),
+            'brief_descriptrion':'Transfers the amount back to the account',
+            'allowed_disabled':True
+        },   
+        
+        {
+            'name':'pay' ,
+            'aliases':[],
+            'arguments':['<member>','<amount>'],
+            'descriptrion':'Transfers the specified amount to the selected participant',
+            'brief_descriptrion':'Transfers money',
+            'allowed_disabled':True
+        },
+        
+        {
+            'name':'gift' ,
+            'aliases':[],
+            'arguments':['[member]','<amount>'],
+            'descriptrion':(
+            'Adds a certain amount to the selected participant\n'
+            'If the participant is not selected, the team performer acts instead'
+            ),
+            'brief_descriptrion':'Adds the amount to the participant',
+            'allowed_disabled':True
+        },   
+        {
+            'name':'take' ,
+            'aliases':[],
+            'arguments':['[member]','<amount>'],
+            'descriptrion':(
+            'Takes a certain amount to the selected participant\n'
+            'If the participant is not selected, the team performer acts instead'
+            ),
+            'brief_descriptrion':'Takes the amount to the participant',
+            'allowed_disabled':True
+        },     
+    ],
+    'Voice':[
+        {
+            'name':'join',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Enters the channel with the user who called the command',
+            'brief_descriptrion':'Enters the channel',
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'leave',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Comes out the channel with the user who called the command',
+            'brief_descriptrion':'Comes out the channel',
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'play',
+            'aliases':[],
+            'arguments':['<title/url>'],
+            'descriptrion':(
+                'Starts playing the music set by the user\n'
+                'As a cloud with music is **Yandex Music**'
+            ),
+            'brief_descriptrion':'Starts playing music',
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'stop',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Stops the current music stream',
+            'brief_descriptrion':'Stops the music',
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'pause',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Stops the current music stream in the future which can be continued',
+            'brief_descriptrion':'Assigns a pause for music',
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'resume',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Resumes the music stream that was completed by the necessary means in order to continue in the future',
+            'brief_descriptrion':'Resumes music',
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'volume',
+            'aliases':[],
+            'arguments':['<volume>'],
+            'descriptrion':'Set the volume to the current music stream from 1 to 100',
+            'brief_descriptrion':'Sets the volume',
+            'allowed_disabled':True,
+        }, 
+    ],
+    'Major':[
+        {
+            'name':'help',
+            'aliases':[],
+            'arguments':['[command/category]'],
+            'descriptrion':'A command describing the bot\'s functions',
+            'brief_descriptrion':'Current command',
+            'allowed_disabled':False,
+        },  
+        {
+            'name':'ping',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Shows the performance and current status of the bot',
+            'brief_descriptrion':'Current bot delay',
+            'allowed_disabled':False,
+        },  
+        {
+            'name':'captcha',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Shows a picture on which the text is encrypted within 30 seconds the user must solve the captcha',
+            'brief_descriptrion':'Test command',
+            'allowed_disabled':True,
+        },  
+    ],
+    'Moderation':[
+        {
+            'name':'purge',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':'Subcommands that help clean the chat',
+            'brief_descriptrion':'Several sub commands',
+            'allowed_disabled':True,
+        },  
+        {
+            'name':'say',
+            'aliases':[],
+            'arguments':['<text/json>'],
+            'descriptrion':'Sends a message on behalf of the bot using a unique [**embed builder**](<https://lordbot.ru/embed-builder>) or plain text',
+            'brief_descriptrion':'Sends a message',
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'settings',
+            'aliases':['set','setting'],
+            'arguments':[],
+            'descriptrion':'Opens special bot management settings as well as its extensions',
+            'brief_descriptrion':'Opens the bot settings',
+            'allowed_disabled':False,
+        }, 
+    ],
+}
+
+footer = '[] = Optional | <> = Required'

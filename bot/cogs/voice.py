@@ -1,15 +1,15 @@
 import nextcord
 
 from nextcord.ext import commands
-
-import yandex_music
+from bot.misc.yandex_api import yandex_music_requests,Track
+from bot.views import views
+import asyncio
 import aiohttp
+import time
 import io
 import re
 
 path = 'ffmpeg'
-
-cl = yandex_music.Client('y0_AgAAAAA8S1W0AAG8XgAAAADrChJ46-a4hy0gTUesY2pHjjc3tpPbYw8').init()
 
 ydl_opts = {
     'format': 'bestaudio/best',
@@ -23,7 +23,7 @@ FFMPEG_OPTIONS = {'options': '-vn'}
 
 
 class Voice(commands.Cog):
-    def __init__(self,bot) -> None:
+    def __init__(self,bot:commands.Bot) -> None:
         self.bot = bot
     
     @commands.command(pass_context=True)
@@ -67,8 +67,8 @@ class Voice(commands.Cog):
                 async with session.get(req) as responce:
                     pass
         except:
-            s = cl.search(text=req)
-            r = s.tracks.results[0]
+            tracks = await yandex_music_requests.search(req)
+            track = tracks[0]
         else:
             finder =  re.fullmatch('https://music.yandex.ru/album/(\d+)/track/(\d+)(.*)', req)
             if not finder:
@@ -76,18 +76,17 @@ class Voice(commands.Cog):
                 return
             
             found = finder.groups()[1]
-            s = cl.tracks([found])
-            r = s[0]
+            tracks = await yandex_music_requests.get_list(found)
+            track = tracks[0]
+        mes = await ctx.send("Скачиваем трек")
         
-        mes = await ctx.send("Download track")
-        
-        b = r.download_bytes()
-        bu = io.BytesIO(b)
-        source = nextcord.FFmpegPCMAudio(bu,pipe=True,executable=path)
+        track_byte = await track.download_bytes()
+        byio = io.BytesIO(track_byte)
+        source = nextcord.FFmpegPCMAudio(byio,pipe=True,executable=path)
         source = nextcord.PCMVolumeTransformer(source,volume=0.5)
         voice.play(source)
         
-        await mes.edit(content=f"Песня:{r.title}\nАртист(ы):{', '.join([a.name for a in r.artists])}")
+        await mes.edit(content=f"Песня:{track.title}\nАртист(ы):{', '.join(track.artist_names)}")
     
     @commands.command(name="volume")
     async def volume(self,ctx:commands.Context,vol:int=None):

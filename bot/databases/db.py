@@ -1,150 +1,73 @@
-from typing import Literal
-import sqlite3
-import orjson
+import threading
+import asyncio
+from .misc.error_handler import on_error
+from bot.misc.logger import Logger
+from .load import load_db
+from .misc.utils import get_info_colums, register_table
+from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance
+
+_connection = load_db()
+
+def connection():
+    global _connection
+    
+    if not _connection.closed == 0 :
+        Logger.core("[Closed connection] Starting a database reboot")
+        _connection = load_db()
+    
+    return _connection
 
 
-
-
-connection = sqlite3.connect('bot/databases/gdb.db')
-cursor = connection.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS guilds (
-        id INTEGER,
-        forum_messages TEXT DEFAULT '{}',
-        reactions TEXT DEFAULT '{}',
-        auto_translate TEXT DEFAULT '{}',
-        language TEXT DEFAULT 'en',
-        PRIMARY KEY("id")
-    )
-''')
-connection.commit()
-
-table = (
-    'id',
-    'forum_messages',
-    'reactions',
-    'auto_translate',
-    'language'
+register_table(
+    table_name="guild",
+    variable=(
+        "id INT8 PRIMARY KEY,"
+        "thread_messages JSON DEFAULT '{}',"
+        "reactions JSON DEFAULT '{}',"
+        "auto_translate JSON DEFAULT '{}',"
+        "language TEXT DEFAULT 'en',"
+        "economic_settings JSON DEFAULT '{}',"
+        "prefix TEXT DEFAULT 'l.',"
+        "color INT8 DEFAULT '1974050',"
+        "disabled_commands JSON DEFAULT '{}'"
+    ),
+    connection=_connection
 )
 
+register_table(
+    table_name="economic",
+    variable=(
+        "guild_id INT8 NOT NULL,"
+        "member_id INT8 NOT NULL,"
+        "balance INT8 DEFAULT '0',"
+        "bank INT8 DEFAULT '0',"
+        "daily INT8 DEFAULT '0',"
+        "weekly INT8 DEFAULT '0',"
+        "monthly INT8 DEFAULT '0'"
+    ),
+    connection=_connection
+)
 
-class RequstsDB:
-    def get(guild_id):
-        cursor = connection.cursor()
-        
-        cursor.execute('SELECT * FROM guilds WHERE id = ?', (guild_id,))
-        guild = cursor.fetchone()
-        
-        connection.commit()
-        if not guild:
-            return None
-        
-        return dict(zip(table,guild))
-    
-    def insert(guild_id):
-        cursor = connection.cursor()
-        
-        cursor.execute('INSERT INTO guilds (id) VALUES (?)', (guild_id,))
-        
-        connection.commit()
-    
-    def update(guild_id,arg,value):
-        if not RequstsDB.get(guild_id):
-            RequstsDB.insert(guild_id)
-        
-        cursor = connection.cursor()
-        
-        cursor.execute(f'UPDATE guilds SET {arg} = ? WHERE id = ?', (value, guild_id))
-        
-        connection.commit()
-    
-    def delete(guild_id):
-        cursor = connection.cursor()
-        
-        cursor.execute('DELETE FROM guilds WHERE id = ?', (guild_id,))
-        
-        connection.commit()
-    
-    def drop_table():
-        cursor = connection.cursor()
-        
-        cursor.execute('DROP TABLE guilds')
-        
-        connection.commit()
-    
-    def update_kwargs(guild_id,**kwargs):
-        if not RequstsDB.get(guild_id):
-            RequstsDB.insert(guild_id)
-        
-        for kw in kwargs:
-            RequstsDB.update(guild_id,kw,kwargs[kw])
+colums = {
+    'guilds':get_info_colums('guilds', _connection),
+    'economic':get_info_colums('economic', _connection)
+}
 
 
-class GuildDateBases:
-    def __init__(self,guild_id):
-        self.guild_id = guild_id
+GuildDateBases = GuildDateBasesInstance(connection)
+EconomyMembedDB = EconomyMembedDBInstance(connection)
 
-    @property
-    def guild(self):
-        if not hasattr(self,'guild_id'):
-            return None
-        gdb = RequstsDB.get(self.guild_id)
-        if not gdb:
-            RequstsDB.insert(self.guild_id)
-            gdb = RequstsDB.get(self.guild_id)
-        return gdb
-    
-    def _get_atr_service(self, service):
-        guild = self.guild
-        if not guild:
-            return None
-        if not (service in guild and guild[service]):
-            return None
-        return guild[service]
-    
-    def _set_atr_service(self, service, value):
-        RequstsDB.update(self.guild_id,service,value)
-    
-    @property
-    def forum_messages(self):
-        service = 'forum_messages'
-        data = self._get_atr_service(service)
-        data = orjson.loads(data)
-        return data
-    
-    @property
-    def reactions(self):
-        service = 'reactions'
-        data = self._get_atr_service(service)
-        data = orjson.loads(data)
-        return data
-    
-    @property
-    def auto_translate(self):
-        service = 'auto_translate'
-        data = self._get_atr_service(service)
-        data = orjson.loads(data)
-        return data
 
-    @property
-    def language(self):
-        service = 'language'
-        data = self._get_atr_service(service)
-        return data
 
-    def set_forum_messages(self, value):
-        service = 'forum_messages'
-        self._set_atr_service(service,value)
-    
-    def set_reactions(self, value):
-        service = 'reactions'
-        self._set_atr_service(service,value)
-    
-    def set_auto_translate(self, value):
-        service = 'auto_translate'
-        self._set_atr_service(service,value)
-    
-    def set_language(self, value):
-        service = 'language'
-        self._set_atr_service(service,value)
+def db_forever():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_forever()
+    finally:
+        connection().close()
+        loop.close()
+        exit()
 
+thread = threading.Thread(target=db_forever,name='DataBase')
+thread.start()
