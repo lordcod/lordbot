@@ -13,6 +13,7 @@ from .languages import Languages
 from .reactions import AutoReactions
 from .thread_message import AutoThreadMessage
 from .auto_translate import AutoTranslate
+from .disable_command import DisabledCommandsView as DisabledCommands
 
 
 moduls = {
@@ -24,5 +25,6 @@ moduls = {
     
     'Reactions': AutoReactions,
     # 'Auto_Translate': AutoTranslate,
-    'Thread_Message': AutoThreadMessage,
+    'ThreadMessage': AutoThreadMessage,
+    'DisabledCommands': DisabledCommands
 }

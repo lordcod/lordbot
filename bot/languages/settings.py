@@ -42,6 +42,10 @@ class module_name:
         'en':"Auto message in a thread/postⁿᵉʷ",
         'ru':"Автоматическое сообщение в ветке/постеⁿᵉʷ"
     }
+    disabled_commands = {
+        'en':'Command switch',
+        'ru':'Командный переключатель'
+    }
 
 class button:
     back = {
@@ -184,7 +188,7 @@ class thread:
             'ru':'Удалить сообщение',
             'en':'Delete a message'
         }
-        
+
 
 class economy:
     pass
@@ -267,3 +271,19 @@ class reactions:
             'ru':'Введенный эмодзи должен присутствовать на сервере',
             'en':'The entered emoji must be present on the server'
         }
+
+
+class disabled_commands:
+    title = {
+        'en':'Command switch',
+        'ru':'Командный переключатель'
+    }
+    description = {
+        'en':'Disables/Enables commands built into the bot',
+        'ru':'Отключает/Включает команды, встроенные в бота'
+    }
+    placeholder = {
+        'en':'Select the commands you want to disable on the server',
+        'ru':'Выберите команды, которые вы хотите отключить на сервере'
+    }
+

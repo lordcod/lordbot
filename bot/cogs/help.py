@@ -41,13 +41,6 @@ def check_command(commandName: str) -> Union[Dict[str,Union[List[str],bool,str]]
             return command_data
     return False
 
-def find_category(command):
-    for key in info.categories:
-        value = info.categories[key]
-        if command in value:
-            return key
-    return None
-
 
 def generate_embed_not_var(embed):
     for categ in info.categories:
@@ -111,6 +104,9 @@ def generate_embed_commands(embed: nextcord.Embed, commnds: Dict[str,Union[List[
     
     
     return embed
+
+
+
 
 class help(commands.Cog):
     bot: commands.Bot

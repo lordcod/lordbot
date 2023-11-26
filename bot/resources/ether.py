@@ -26,6 +26,9 @@ class Emoji:
     reactions = '<:reactions:1172862660442853497>'
     auto_translate = '<:autotranslate:1172862657586544750>'
     thread_message = '<:threadmessage:1172862656030453770>'
+    enabled = '<:enabled:1178366308161687685>'
+    disabled = '<:disabled:1178366305305378907>' 
+    command = '<:command:1178371765441921074>'
 
 
 
