@@ -1,15 +1,18 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases.db import GuildDateBases
 from bot.misc import (utils,env)
-from bot.resources import errors
+from bot.misc.logger import Logger
 
+from typing import List
 import os
 
 
 
-def get_command_prefixs(bot: commands.Bot, msg: nextcord.Message):
+def get_command_prefixs(
+bot: commands.Bot, 
+msg: nextcord.Message
+) -> List[str]:
     prefix = utils.get_prefix(msg.guild.id)
     return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
@@ -22,12 +25,13 @@ bot = commands.Bot(
 
 
 
-def load_dir(dirpath: str):
+def load_dir(dirpath: str) -> None:
     for filename in os.listdir(dirpath):
         if os.path.isfile(f'{dirpath}/{filename}') and filename.endswith(".py") and not filename.startswith("__"):
             fmp = filename[:-3]
             supdirpath = dirpath[2:].split("/")
             findirpatch = '.'.join(supdirpath)
+            Logger.info(f'Load Extension: {dirpath}/{filename}')
             bot.load_extension(f"{findirpatch}.{fmp}")
         elif os.path.isdir(f'{dirpath}/{filename}'):
             load_dir(f'{dirpath}/{filename}')

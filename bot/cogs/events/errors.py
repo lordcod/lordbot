@@ -13,19 +13,21 @@ class command_event(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         super().__init__()
+        
+        bot.commands
+        bot.add_check(self.main_check)
     
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx,error)
         await CommandError.process()
-
+    
     @commands.Cog.listener()
-    async def on_error(event,*args,**kwargs):
+    async def on_error(self, event,*args,**kwargs):
         pass
     
-    @commands.Cog.bot_check()
-    async def main_check(ctx: commands.Context):
+    async def main_check(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
         com_name = ctx.command.name
         dis_coms = gdb.get('disabled_commands')

@@ -4,8 +4,7 @@ from .misc.error_handler import on_error
 from bot.misc.logger import Logger
 from .load import load_db
 from .misc.utils import get_info_colums, register_table
-from .handlers.guildHD import GuildDateBases as GuildDateBasesInstance
-from .handlers.economyHD import EconomyMembedDB as EconomyMembedDBInstance
+from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance
 
 _connection = load_db()
 
