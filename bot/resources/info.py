@@ -24,8 +24,8 @@ invite_link = (
     '?client_id=1095713975532007434'
     '&permissions=-1'
     '&scope=bot%20applications.commands'
-    '&response_type=code'
-    '&redirect_uri=https://lordbot.ru/link-role-callback'
+    # '&response_type=code'
+    # '&redirect_uri=https://lordbot.ru/link-role-callback'
 )
 
 categories = {

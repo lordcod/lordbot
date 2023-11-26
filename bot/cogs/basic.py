@@ -50,6 +50,15 @@ class basic(commands.Cog):
         
         await ctx.send(content)
     
+    @commands.command()
+    async def invite(self,ctx: commands.Context):
+        content = (
+            "Special bot invitation to the server:\n"
+            f"{info.invite_link}"
+        )
+        
+        await ctx.send(content)
+    
     
     @nextcord.slash_command(
         name="activiti",
