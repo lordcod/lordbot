@@ -14,7 +14,9 @@ class MemberDB:
     def __init__(self, guild_id: int, member_id: int) -> None:
         self.guild_id = guild_id
         self.member_id = member_id
-        data = EconomyMembedDB.get(guild_id,member_id)
+        
+        emdb = EconomyMembedDB(guild_id,member_id)
+        data = emdb.get()
         colums_name = [cl[0] for cl in colums['economic']][2:]
         
         if not data:
@@ -45,7 +47,8 @@ class Economy(commands.Cog):
     
     def work_economy():
         def wrapped(ctx: commands.Context):
-            es = GuildDateBases(ctx.guild.id).get('economic_settings')
+            gdb = GuildDateBases(ctx.guild.id)
+            es = gdb.get('economic_settings')
             operate = es.get('operate',False)
             if not operate:
                 raise NotActivateEconomy("Economy is not enabled on the server")

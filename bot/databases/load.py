@@ -1,7 +1,7 @@
 import psycopg2
 from bot.misc.logger import Logger
 import time
-from .config import (host, user, password, db_name)
+from .config import (host, port, user, password, db_name)
 
 
 
@@ -9,6 +9,7 @@ def load_db():
     try:
         connection = psycopg2.connect(
             host=host,
+            port=port,
             user=user,
             password=password,
             database=db_name

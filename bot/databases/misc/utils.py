@@ -1,8 +1,6 @@
 from typing import Any,Dict,Union
 import ujson as json
-from bot.misc.logger import Logger
-from .load import load_db
-
+from psycopg2.extensions import connection
 
 class Json:
     def loads(data):
@@ -51,3 +49,30 @@ class Formating:
                 new_data[key] = data[key]
         return new_data
 
+def register_table(table_name: str, variable: str, connection: connection):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"CREATE TABLE IF NOT EXISTS {table_name} ({variable})"
+        )
+
+def get_info_colums(table_name: str, connection: connection):
+    query = """
+        SELECT
+            column_name,
+            ordinal_position,
+            data_type,
+            column_default
+        FROM
+            information_schema.columns
+        WHERE
+            table_name = %s;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query, (table_name,))
+        
+        info = cursor.fetchall()
+        
+        if not info:
+            return None
+        
+        return list(info)
