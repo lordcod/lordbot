@@ -22,7 +22,6 @@ class CallbackCommandError:
     def __init__(self,ctx: commands.Context,error) -> None:
         self.ctx = ctx
         self.error = error
-        print(error)
     
     async def process(self):
         for error in self.errors:
