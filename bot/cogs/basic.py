@@ -1,17 +1,20 @@
-import asyncio
+import nextcord
+from nextcord.ext import commands,application_checks
+from nextcord.utils import find
+
 from bot import languages
 from bot.resources.ether import Emoji
 from bot.misc import utils
-from nextcord.ext import commands,application_checks
-import nextcord,random
-from bot.misc import utils
 from bot.databases.db import GuildDateBases
-import googletrans
-from nextcord.utils import find
 from bot.resources import info
 from bot.views.views import TranslateView
 
+import googletrans
+import asyncio
+import random
+
 translator = googletrans.Translator()
+
 
 class basic(commands.Cog):
     bot: commands.Bot
@@ -19,6 +22,34 @@ class basic(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    @commands.command()
+    async def captcha(self, ctx:commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+        lang = gdb.get('language')
+        data,text = await utils.generator_captcha(random.randint(3,7))
+        image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
+        await ctx.send(content=languages.captcha.enter.get(lang),file=image_file)
+        try:
+            check = lambda m: m.channel==ctx.channel and m.author==ctx.author
+            mes:nextcord.Message = await self.bot.wait_for("message",timeout=30,check=check)
+        except asyncio.TimeoutError:
+            await ctx.send(content=languages.captcha.failed.get(lang))
+            return
+        
+        if mes.content.lower() == text.lower():
+            await ctx.send(f"{Emoji.congratulation}{languages.captcha.congratulation.get(lang)}")
+        else:
+            await ctx.send(content=languages.captcha.failed.get(lang))
+
+    @commands.command()
+    async def ping(self,ctx: commands.Context):
+        content = (
+            "Pong!🏓🎉\n"
+            f"Latency: {(self.bot.latency)*100:.1f}ms"
+        )
+        
+        await ctx.send(content)
+    
     
     @nextcord.slash_command(
         name="activiti",
@@ -67,36 +98,14 @@ class basic(commands.Cog):
         
         await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
-    @commands.command()
-    async def captcha(self, ctx:commands.Context):
-        gdb = GuildDateBases(ctx.guild.id)
-        lang = gdb.get('language')
-        data,text = await utils.generator_captcha(random.randint(3,7))
-        image_file = nextcord.File(data,filename="cap.png",description="Captcha",spoiler=True)
-        await ctx.send(content=languages.captcha.enter.get(lang),file=image_file)
-        try:
-            check = lambda m: m.channel==ctx.channel and m.author==ctx.author
-            mes:nextcord.Message = await self.bot.wait_for("message",timeout=30,check=check)
-        except asyncio.TimeoutError:
-            await ctx.send(content=languages.captcha.failed.get(lang))
-            return
-        
-        if mes.content.lower() == text.lower():
-            await ctx.send(f"{Emoji.congratulation}{languages.captcha.congratulation.get(lang)}")
-        else:
-            await ctx.send(content=languages.captcha.failed.get(lang))
-
-    @commands.command()
-    async def ping(self,ctx: commands.Context):
-        await ctx.send(f"Pong!🏓🎉\nLatency: {(self.bot.latency)*100:.1f}ms")
-
     @nextcord.message_command(name="Translate",default_member_permissions=8)
     async def translate(
         self,
         inters: nextcord.Interaction, 
         message: nextcord.Message
     ):
-        check = lambda lan:lan.get("discord_language")==inters.locale
+        def check(lan: dict):
+            return lan.get("discord_language")==inters.locale
         data = find(check,languages.data)
         result = translator.translate(text=message.content, dest=data.get('google_language'))
         

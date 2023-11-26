@@ -1,12 +1,13 @@
 import nextcord
 from nextcord.ext import commands
-from typing import Any, Dict,Union
-from random import randint
-from time import time as tick
+
 from bot.databases.db import EconomyMembedDB,colums,GuildDateBases
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
 from bot.misc.utils import get_prefix
+
+from time import time as tick
+from typing import Optional
 
 timeout_rewards = {"daily": 86400,"weekly": 604800,"monthly": 2592000}
 
@@ -14,14 +15,17 @@ class MemberDB:
     def __init__(self, guild_id: int, member_id: int) -> None:
         self.guild_id = guild_id
         self.member_id = member_id
-        data = EconomyMembedDB.get(guild_id,member_id)
-        colums_name = [cl[0] for cl in colums['economic']][2:]
+        
+        self.emdb = emdb = EconomyMembedDB(guild_id,member_id)
+        data = emdb.get()
+        
+        colums_name = [cl[0] for cl in colums['economic']][2:] # Get name colums from economic except guild_id and member_id 
         
         if not data:
             EconomyMembedDB.insert(guild_id,member_id)
             data = EconomyMembedDB.get(guild_id,member_id)
-        data = list(data)[2:]
-        data = dict(zip(colums_name,data))
+        data = list(data)[2:] # Get data from economy member except guild_id and member_id
+        data = dict(zip(colums_name,data)) # Create dict in which colums_name = data_member
         self.data = data
     
     def get(self,__name,__default=None):
@@ -34,23 +38,30 @@ class MemberDB:
         return self.data[item]
     
     def __setitem__(self, key, value):
+        print("MEC")
+        print(self.member_id, self.guild_id)
+        print(key, value)
+        
         self.data[key] = value
         
-        EconomyMembedDB.update_list(self.guild_id,self.member_id,self.data)
+        self.emdb.update(key, value)
 
 
 class Economy(commands.Cog):
-    def __init__(self,bot) -> None:
-        self.bot = bot
+    bot: commands.Bot
     
-    def work_economy():
-        def wrapped(ctx: commands.Context):
-            es = GuildDateBases(ctx.guild.id).get('economic_settings')
-            operate = es.get('operate',False)
-            if not operate:
-                raise NotActivateEconomy("Economy is not enabled on the server")
-            return True
-        return commands.check(wrapped)
+    def __init__(self,bot: commands.Bot) -> None:
+        self.bot = bot
+        
+        super().__init__()
+    
+    def cog_check(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+        es = gdb.get('economic_settings')
+        operate = es.get('operate',False)
+        if not operate:
+            raise NotActivateEconomy("Economy is not enabled on the server")
+        return True
     
     
     async def handler_rewards(self,ctx: commands.Context):
@@ -85,23 +96,19 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name='daily')
-    @work_economy()
     async def daily(self,ctx: commands.Context):
         await self.handler_rewards(ctx)
     
     @commands.command(name='weekly')
-    @work_economy()
     async def weekly(self,ctx: commands.Context):
         await self.handler_rewards(ctx)
     
     @commands.command(name='monthly')
-    @work_economy()
     async def monthly(self,ctx: commands.Context):
         await self.handler_rewards(ctx)
     
     
     @commands.command(name="balance",aliases=["bal"])
-    @work_economy()
     async def balance(self,ctx:commands.Context, member: nextcord.Member = None):
         if not member:
             member = ctx.author
@@ -153,7 +160,6 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="pay")
-    @work_economy()
     async def pay(self,ctx: commands.Context, member: nextcord.Member, sum: int):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color',1974050)
@@ -177,13 +183,12 @@ class Economy(commands.Cog):
         
         await ctx.send(embed=embed)
         
-        from_account["balance"] = from_account["balance"] - sum
-        to_account["balance"] = to_account["balance"] + sum
+        from_account["balance"] -= sum
+        to_account["balance"] += sum
     
     
     
     @commands.command(name="deposit",aliases=["dep"])
-    @work_economy()
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def dep(self,ctx: commands.Context, sum: str):
         gdb = GuildDateBases(ctx.guild.id)
@@ -218,7 +223,6 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="withdraw",aliases=["wd"])
-    @work_economy()
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def withdraw(self,ctx: commands.Context, sum: str):
         gdb = GuildDateBases(ctx.guild.id)
@@ -254,9 +258,11 @@ class Economy(commands.Cog):
     
     
     @commands.command(name="gift")
-    @work_economy()
     @commands.has_permissions(administrator=True)
-    async def gift(self,ctx: commands.Context, member: nextcord.Member, sum: int):
+    async def gift(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if not member:
+            member = ctx.author
+        
         account = MemberDB(ctx.guild.id,member.id)
         
         account["balance"] += sum
@@ -264,9 +270,11 @@ class Economy(commands.Cog):
         await ctx.send(f"You passed {member.mention}, **{sum}$** ")
     
     @commands.command(name="take")
-    @work_economy()
     @commands.has_permissions(administrator=True)
-    async def take(self,ctx: commands.Context, member: nextcord.Member = None, sum: int = None):
+    async def take(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if not member:
+            member = ctx.author
+        
         account = MemberDB(ctx.guild.id,member.id)
         
         account["balance"] -= sum
@@ -274,5 +282,5 @@ class Economy(commands.Cog):
         await ctx.send(f"You passed {member.mention}, **{sum}$** ")
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Economy(bot))

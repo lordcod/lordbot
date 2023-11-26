@@ -1,9 +1,4 @@
 import psycopg2
-import ujson as json
-import threading
-import asyncio
-import re
-
 
 host = 'postgresql.879043c3234e.hosting.myjino.ru'
 port = 5432
@@ -12,12 +7,16 @@ user = 'j5191558_bot'
 db_name = 'j5191558_main'
 
 
+
+
+
 try:
     connection = psycopg2.connect(
         host=host,
+        port=port,
         user=user,
         password=password,
-        database=db_name
+        database=db_name,
     )
     connection.autocommit = True
 except Exception as err:
