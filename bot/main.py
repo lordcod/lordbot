@@ -19,18 +19,7 @@ bot = commands.Bot(
     help_command=None
 )
 
-@bot.event
-async def on_error(event,*args,**kwargs):
-    pass
 
-@bot.check
-async def main_check(ctx: commands.Context):
-    gdb = GuildDateBases(ctx.guild.id)
-    com_name = ctx.command.name
-    dis_coms = gdb.get('disabled_commands')
-    if com_name in dis_coms:
-        raise errors.DisabledCommand('This command is disabled on the server')
-    return True
 
 
 def load_dir(dirpath: str):
@@ -42,7 +31,6 @@ def load_dir(dirpath: str):
             bot.load_extension(f"{findirpatch}.{fmp}")
         elif os.path.isdir(f'{dirpath}/{filename}'):
             load_dir(f'{dirpath}/{filename}')
-
 
 def start_bot():
     load_dir("./bot/cogs")
