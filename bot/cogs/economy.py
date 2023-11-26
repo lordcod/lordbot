@@ -38,10 +38,6 @@ class MemberDB:
         return self.data[item]
     
     def __setitem__(self, key, value):
-        print("MEC")
-        print(self.member_id, self.guild_id)
-        print(key, value)
-        
         self.data[key] = value
         
         self.emdb.update(key, value)
