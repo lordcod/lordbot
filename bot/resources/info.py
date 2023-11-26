@@ -221,7 +221,7 @@ categories = {
             'name':'say',
             'aliases':[],
             'arguments':['<text/json>'],
-            'descriptrion':'Sends a message on behalf of the bot using a unique embed builder or plain text',
+            'descriptrion':'Sends a message on behalf of the bot using a unique [**embed builder**](<https://lordbot.ru/embed-builder>) or plain text',
             'brief_descriptrion':'Sends a message',
             'allowed_disabled':True,
         }, 

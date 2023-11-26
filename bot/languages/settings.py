@@ -286,4 +286,15 @@ class disabled_commands:
         'en':'Select the commands you want to disable on the server',
         'ru':'Выберите команды, которые вы хотите отключить на сервере'
     }
-
+    embed_title = {
+        'en':'Disabled commands',
+        'ru':'Отключенные команды'
+    }
+    embed_description_list = {
+        'en':'New list of disabled commands:',
+        'ru':'Новый список отключенных команд:'
+    }
+    embed_description_no_disabled = {
+        'en':'All commands are enabled',
+        'ru':'Все команды включены'
+    }

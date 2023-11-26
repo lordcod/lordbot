@@ -39,4 +39,4 @@ def load_dir(dirpath: str) -> None:
 def start_bot():
     load_dir("./bot/cogs")
     
-    bot.run(env.token_lord_the_tester)
+    bot.run(env.Tokens.token)

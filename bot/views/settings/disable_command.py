@@ -63,17 +63,17 @@ class DropDown(nextcord.ui.Select):
         disabled_commands = self.values
         self.gdb.set('disabled_commands',disabled_commands)
         
-        string_DC = '\n'.join(disabled_commands)
+        string_DC = ',\n'.join(disabled_commands)
         embed = nextcord.Embed(
-            title='Disabled commands'
+            title=disabled_commands_langs.embed_title.get(locale)
         )
         if string_DC:
             embed.description = (
-                'New list of disabled commands:\n'
+                f'{disabled_commands_langs.embed_description_list.get(locale)}\n'
                 f"{string_DC}"
             )
         else:
-            embed.description = 'All commands are enabled'
+            embed.description = disabled_commands_langs.embed_description_no_disabled.get(locale)
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
         
