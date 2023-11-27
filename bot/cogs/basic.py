@@ -81,33 +81,40 @@ class basic(commands.Cog):
         ),
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        lang = gdb.get('language','en')
-        colour = gdb.get('color',info.DEFAULT_COLOR)
+        lang = gdb.get('language')
+        colour = gdb.get('color')
         
-        activiti = find(lambda a: a['label']==act,info.activities_list)
+        activiti = find(lambda a: a.get('label')==act,info.activities_list)
         try:
             inv = await voice.create_invite(
                 target_type=nextcord.InviteTarget.embedded_application,
                 target_application_id=activiti.get('id')
             )
         except:
-            await interaction.response.send_message(content=languages.activiti.failed[lang])
+            await interaction.response.send_message(content=languages.activiti.failed.get(lang))
             return
         
         view = nextcord.ui.View(timeout=None)
-        view.add_item(nextcord.ui.Button(label="Activiti",emoji=languages.Emoji.roketa,url=inv.url))
+        view.add_item(nextcord.ui.Button(label="Activiti",emoji=Emoji.roketa,url=inv.url))
         
         emb = nextcord.Embed(
-            title=f"**{languages.activiti.embed_title[lang]}**",
+            title=f"**{languages.activiti.embed_title.get(lang)}**",
             color=colour,
-            description=languages.activiti.embed_description[lang]
+            description=languages.activiti.embed_description.get(lang)
         )
-        emb.add_field(name=languages.activiti.fields_label[lang],value=activiti['label'])
-        emb.add_field(name=languages.activiti.fields_max_user[lang],value=activiti['max_user'])
+        emb.add_field(
+            name=languages.activiti.fields_label.get(lang),
+            value=activiti.get('label')
+        )
+        emb.add_field(
+            name=languages.activiti.fields_max_user.get(lang),
+            value=activiti.get('max_user')
+        )
+        
         
         await interaction.response.send_message(embed=emb,view=view,ephemeral=True)
 
-    @nextcord.message_command(name="Translate",default_member_permissions=8)
+    @nextcord.message_command(name="Translate")
     async def translate(
         self,
         inters: nextcord.Interaction, 

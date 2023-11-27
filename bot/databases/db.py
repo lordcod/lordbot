@@ -19,7 +19,7 @@ def connection():
 
 
 register_table(
-    table_name="guild",
+    table_name="guilds",
     variable=(
         "id INT8 PRIMARY KEY,"
         "thread_messages JSON DEFAULT '{}',"
