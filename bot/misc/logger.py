@@ -22,7 +22,7 @@ class Logger:
         pass
     
     def callback(self, text):
-        print(text)
+        # print(text)
         pass
     
     def on_logs(func):
