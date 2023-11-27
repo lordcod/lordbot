@@ -130,3 +130,10 @@ class auto_translate:
         'ru':'Переведено на',
         'en':'Translated to'
     }
+
+
+class errors:
+    MissingPermissions = {
+        'en':'You don\'t have enough rights',
+        'ru':'У вас недостаточно прав'
+    }

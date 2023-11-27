@@ -34,7 +34,7 @@ class SetDropdown(nextcord.ui.Select):
                 label=module_name.reactions.get(locale), emoji=Emoji.reactions, value='Reactions'
             ),
             # nextcord.SelectOption(
-            #     label=module_name.translate.get(locale), emoji=Emoji.auto_translate, value='Auto_Translate'
+            #     label=module_name.translate.get(locale), emoji=Emoji.translate, value='Auto_Translate'
             # ),
             nextcord.SelectOption(
                 label=module_name.thread.get(locale), emoji=Emoji.thread_message, value='ThreadMessage'

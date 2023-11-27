@@ -16,12 +16,6 @@ class ready_event(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        integer = 0
-        for guild in self.bot.guilds:
-            if guild.get_member(636824998123798531):
-                integer += 1
-        Logger.info(f'Lords: {integer}')
-        
         Logger.success(f"The bot is registered as {self.bot.user}")
     
     @commands.Cog.listener()

@@ -13,7 +13,7 @@ class moderations(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def say(self, ctx:commands.Context, *, message: str=None):
+    async def say(self, ctx:commands.Context, *, message: str):
         files = []
         for attach in ctx.message.attachments:
             data = io.BytesIO(await attach.read())
