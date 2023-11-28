@@ -151,7 +151,7 @@ class thread:
             'ru':'Вы также можете пользоваться embed-builder',
             'en':'You can also use embed-builder'
         }
-        cherr = {
+        channel_error = {
             'ru':'На этот канал уже установлено авто-сообщения',
             'en':'Auto-messages have already been installed on this channel'
         }
@@ -237,13 +237,9 @@ class reactions:
             'ru':'На этот канал уже установлены авто-реакции',
             'en':'Auto-reactions have already been installed on this channel'
         }
-        emo_cor_error = {
+        emoji_input_error = {
             'ru':'К сожалению, вы ввели неправильный эмодзи',
             'en':'Unfortunately you entered an incorrect emoji'
-        }
-        emo_gi_error = {
-            'ru':'Введенный эмодзи должен присутствовать на сервере',
-            'en':'The entered emoji must be present on the server'
         }
     
     class datas:

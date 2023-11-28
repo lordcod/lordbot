@@ -3,38 +3,11 @@ import nextcord
 from bot.misc import utils
 from  .. import thread_message 
 from ...settings import DefaultSettingsView
+from .modalsBuilder import ModalsBuilder
 from bot.languages.settings import (
     thread as thread_langs,
     button as button_name
 )
-
-
-class EditModalsBuilder(nextcord.ui.Modal):
-    def __init__(self,guild_id,channel_id) -> None:
-        gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
-        self.channel_id = channel_id
-        super().__init__(thread_langs.thread.mtitle.get(locale))
-        
-        self.content = nextcord.ui.TextInput(
-            label=thread_langs.thread.tilabel.get(locale),
-            placeholder=thread_langs.thread.tiph.get(locale)
-        )
-        
-        self.add_item(self.content)
-    
-    async def callback(self, interaction: nextcord.Interaction) -> None:
-        gdb = GuildDateBases(interaction.guild_id)
-        forum_message  = gdb.get('thread_messages',{})
-        
-        content = self.content.value
-        channel_id = self.channel_id
-        
-        channel_data = forum_message.get(channel_id,{})
-        channel_data['content'] = content
-        
-        gdb.set('thread_messages',forum_message)
-
 
 
 class ThreadData(DefaultSettingsView):
@@ -78,7 +51,7 @@ class ThreadData(DefaultSettingsView):
     
     @nextcord.ui.button(label='Edit message',style=nextcord.ButtonStyle.primary,row=2)
     async def edit_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = EditModalsBuilder(interaction.guild_id,self.channel.id)
+        modal = ModalsBuilder(interaction.guild_id,self.channel.id)
         
         await interaction.response.send_modal(modal)
     

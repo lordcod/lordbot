@@ -16,13 +16,13 @@ class text_colors:
 
 @lambda cls: cls()
 class Logger:
-    def __init__(self, service=True, date=True) -> None:
-        self.service = service
-        self.date = date
+    def __init__(self, prints=True) -> None:
+        self.prints = prints
         pass
     
     def callback(self, text):
-        # print(text)
+        if self.prints:
+            print(text)
         pass
     
     def on_logs(func):

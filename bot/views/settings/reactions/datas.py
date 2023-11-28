@@ -4,59 +4,11 @@ from bot.misc import utils
 from bot.misc.utils import is_emoji
 from  .. import reactions
 from ...settings import DefaultSettingsView
+from .modalBuilder import ModalsBuilder
 from bot.languages.settings import (
     reactions as reaction_langs,
     button as button_name
 )
-
-
-class EditModalsBuilder(nextcord.ui.Modal):
-    def __init__(self,guild_id,channel_id) -> None:
-        gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
-        
-        self.channel_id = channel_id
-        super().__init__(reaction_langs.datas.title.get(locale))
-        
-        self.emo = nextcord.ui.TextInput(
-            label=reaction_langs.datas.tilabel.get(locale),
-            placeholder='<[a]:name:id>'
-        )
-        
-        self.add_item(self.emo)
-    
-    async def callback(self, interaction: nextcord.Interaction) -> None:
-        gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
-        reacts = gdb.get('reactions')
-        emoji = self.emo.value
-        channel_id = self.channel_id
-        
-        
-        check_emoji = is_emoji(emoji)
-        if not check_emoji:
-            await interaction.response.send_message(
-                content=reaction_langs.datas.emo_cor_error.get(locale),
-                ephemeral=True
-            )
-            return
-        try:
-            await interaction.guild.fetch_emoji(check_emoji.get('id'))
-        except:
-            await interaction.response.send_message(
-                reaction_langs.datas.emo_gi_error.get(locale),
-                ephemeral=True
-            )
-            return
-        
-        reacts[channel_id] = []
-        reacts[channel_id].append(emoji)
-        
-        gdb.set('reactions',reacts)
-        
-        view = reactions.AutoReactions(interaction.guild)
-        await interaction.message.edit(embed=view.embed,view=view)
-
 
 class ReactData(DefaultSettingsView):
     def __init__(self,channel,channel_data) -> None:
@@ -81,7 +33,9 @@ class ReactData(DefaultSettingsView):
     
     @nextcord.ui.button(label='Edit reaction',style=nextcord.ButtonStyle.primary,row=2)
     async def edit_reactions(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.send_modal(EditModalsBuilder(interaction.guild_id,self.channel.id))
+        modal = ModalsBuilder(interaction.guild_id,self.channel.id)
+        
+        await interaction.response.send_modal(modal)
     
     @nextcord.ui.button(label='Delete reaction',style=nextcord.ButtonStyle.red,row=2)
     async def delete_reactions(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

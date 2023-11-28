@@ -17,7 +17,7 @@ async def getRandomQuote(lang='en'):
             return json
 
 def is_emoji(emoji):
-    pattern = "<[a]?:([a-zA-Z0-9-_]+):([0-9]+)>"
+    pattern = ":(.+):"
     check = re.fullmatch(pattern,emoji)
     
     if not check:
