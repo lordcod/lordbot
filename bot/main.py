@@ -31,7 +31,6 @@ def load_dir(dirpath: str) -> None:
             fmp = filename[:-3]
             supdirpath = dirpath[2:].split("/")
             findirpatch = '.'.join(supdirpath)
-            Logger.info(f'Load Extension: {dirpath}/{filename}')
             bot.load_extension(f"{findirpatch}.{fmp}")
         elif os.path.isdir(f'{dirpath}/{filename}'):
             load_dir(f'{dirpath}/{filename}')

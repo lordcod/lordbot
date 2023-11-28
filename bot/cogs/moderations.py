@@ -1,9 +1,12 @@
 import nextcord
 from nextcord.ext import commands,application_checks
-import io
+
 from bot.misc import utils
 from bot.resources import errors
 from bot.views import views
+
+import io
+import asyncio
 
 
 
@@ -74,7 +77,7 @@ class moderations(commands.Cog):
             icon=role.icon
         )
         
-        await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}')
+        await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}', ephemeral=True)
 
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(manage_messages=True)
@@ -88,13 +91,20 @@ class moderations(commands.Cog):
         if limit > 100:
             raise commands.CommandError("The maximum number of messages to delete is `100`")
         
+        tasks = []
+        
         deleted = 0
         async for message in ctx.channel.history(limit=250):
             if deleted >= limit:
                 break
             if message.author == member:
-                await message.delete()
+                
+                task = asyncio.ensure_future(message.delete())
+                tasks.append(task)
+                
                 deleted += 1
+        
+        await asyncio.wait(tasks)
         
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
@@ -119,5 +129,5 @@ class moderations(commands.Cog):
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(moderations(bot))
