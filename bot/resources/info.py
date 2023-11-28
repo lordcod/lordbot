@@ -121,67 +121,6 @@ categories = {
             'allowed_disabled':True
         },     
     ],
-    'Voice':[
-        {
-            'name':'join',
-            'aliases':[],
-            'arguments':[],
-            'descriptrion':'Enters the channel with the user who called the command',
-            'brief_descriptrion':'Enters the channel',
-            'allowed_disabled':True,
-        }, 
-        {
-            'name':'leave',
-            'aliases':[],
-            'arguments':[],
-            'descriptrion':'Comes out the channel with the user who called the command',
-            'brief_descriptrion':'Comes out the channel',
-            'allowed_disabled':True,
-        }, 
-        {
-            'name':'play',
-            'aliases':[],
-            'arguments':['<title/url>'],
-            'descriptrion':(
-                'Starts playing the music set by the user\n'
-                'As a cloud with music is **Yandex Music**'
-            ),
-            'brief_descriptrion':'Starts playing music',
-            'allowed_disabled':True,
-        }, 
-        {
-            'name':'stop',
-            'aliases':[],
-            'arguments':[],
-            'descriptrion':'Stops the current music stream',
-            'brief_descriptrion':'Stops the music',
-            'allowed_disabled':True,
-        }, 
-        {
-            'name':'pause',
-            'aliases':[],
-            'arguments':[],
-            'descriptrion':'Stops the current music stream in the future which can be continued',
-            'brief_descriptrion':'Assigns a pause for music',
-            'allowed_disabled':True,
-        }, 
-        {
-            'name':'resume',
-            'aliases':[],
-            'arguments':[],
-            'descriptrion':'Resumes the music stream that was completed by the necessary means in order to continue in the future',
-            'brief_descriptrion':'Resumes music',
-            'allowed_disabled':True,
-        }, 
-        {
-            'name':'volume',
-            'aliases':[],
-            'arguments':['<volume>'],
-            'descriptrion':'Set the volume to the current music stream from 1 to 100',
-            'brief_descriptrion':'Sets the volume',
-            'allowed_disabled':True,
-        }, 
-    ],
     'Major':[
         {
             'name':'help',
