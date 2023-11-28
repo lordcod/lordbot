@@ -34,6 +34,47 @@ class moderations(commands.Cog):
         
         await ctx.send(embed=view.embed,view=view)
 
+    @nextcord.slash_command(
+        name='clone',
+        guild_ids=[1179069504186232852]
+    )
+    async def clone(
+        self,
+        interaction: nextcord.Interaction
+    ) -> None:
+        pass
+
+    @clone.subcommand(
+        name='role',
+        description='If you want to copy the role but still keep the rights, then this is the command for you'
+    )
+    async def clone_role(
+        self,
+        interaction: nextcord.Interaction,
+        role: nextcord.Role = nextcord.SlashOption(
+            name='role',
+            description='Select the role you want to copy',
+            required=True
+        ),
+        name: str = nextcord.SlashOption(
+            name='name',
+            description='When creating a new role, this name will be specified',
+            required=False
+        )
+    ) -> None:
+        role_name = name or role.name
+        
+        new_role = await interaction.guild.create_role(
+            reason="Copying a role with rights",
+            name=role_name,
+            permissions=role.permissions,
+            colour=role.colour,
+            hoist=role.hoist,
+            mentionable=role.mentionable,
+            icon=role.icon
+        )
+        
+        await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}')
 
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(manage_messages=True)
@@ -66,13 +107,13 @@ class moderations(commands.Cog):
             raise commands.CommandError("Channel error")
         deleted = 0
         finder = False
-        async for message in message_start.channel.history(limit=250):
+        async for message in message_start.channel.history(limit=100):
             if message == messsage_finish:
                 finder = True
             if finder:
                 deleted += 1
                 await message.delete()
-            if message == message_start:
+            if message == message_start or deleted >= 50:
                 break
         
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)

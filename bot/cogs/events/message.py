@@ -28,15 +28,16 @@ class message_event(commands.Cog):
         reactions = guild_data.get('reactions')
         auto_translate = guild_data.get('auto_translate')
         lang = guild_data.get('language')
-        prefix = utils.get_prefix(message.guild.id,markdown=False)
+        prefix = guild_data.get('prefix')
         
         if message.channel.id in reactions:
             for react in reactions[message.channel.id]:
                 await message.add_reaction(react)
         
         if message.channel.id in auto_translate:
-            result = translator.translate(message.content,dest=auto_translate[message.channel.id])
-            if result.src != auto_translate:
+            translate_data: dict = auto_translate[message.channel.id]
+            result = translator.translate(message.content,dest=translate_data.get('dest'))
+            if result.src not in translate_data.get('whitelist'):
                 embed = nextcord.Embed(
                     title="",
                     description=f'### {result.text}',

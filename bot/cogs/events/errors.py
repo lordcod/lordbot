@@ -32,7 +32,7 @@ class command_event(commands.Cog):
         com_name = ctx.command.name
         dis_coms = gdb.get('disabled_commands')
         if com_name in dis_coms:
-            raise errors.DisabledCommand('This command is disabled on the server')
+            raise errors.DisabledCommand()
         return True
 
 
