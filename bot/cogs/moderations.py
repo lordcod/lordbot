@@ -38,7 +38,8 @@ class moderations(commands.Cog):
         await ctx.send(embed=view.embed,view=view)
 
     @nextcord.slash_command(
-        name='clone'
+        name='clone',
+        default_member_permissions=268435456
     )
     async def clone(
         self,
