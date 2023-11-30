@@ -1,13 +1,15 @@
-from typing import Optional
 import nextcord
-from bot.databases.db import GuildDateBases
+
+from .modal import ModalBuilder
 from  .. import thread_message 
 from ...settings import DefaultSettingsView
-from .modal import ModalBuilder
+
+from bot.databases.db import GuildDateBases
 from bot.languages.settings import (
     thread as thread_langs,
     button as button_name
 )
+
 
 class DropDownBuilder(nextcord.ui.ChannelSelect):
     def __init__(self,guild_id) -> None:
