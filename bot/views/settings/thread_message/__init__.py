@@ -21,9 +21,6 @@ class DropDown(nextcord.ui.Select):
         self.forum_message = self.gdb.get('thread_messages',{})
         channels = [guild.get_channel(key) for key in self.forum_message]
         
-        print(self.forum_message)
-        print(channels)
-        
         if len(channels) <= 0:
             self.is_option = True
             return
