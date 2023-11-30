@@ -16,6 +16,11 @@ async def getRandomQuote(lang='en'):
             json = await responce.json()
             return json
 
+def remove_none(dlist: list) -> None:
+    for arg in dlist:
+        if arg is None:
+            dlist.remove(arg)
+
 def is_emoji(emoji):
     pattern = ":(.+):"
     check = re.fullmatch(pattern,emoji)

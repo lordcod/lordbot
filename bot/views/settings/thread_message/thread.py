@@ -35,7 +35,7 @@ class ThreadData(DefaultSettingsView):
         
         await interaction.message.edit(embed=view.embed,view=view)
     
-    @nextcord.ui.button(label='Message',style=nextcord.ButtonStyle.success,row=2)
+    @nextcord.ui.button(label='Message',style=nextcord.ButtonStyle.success)
     async def message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         channel_data = self.channel_data
         
@@ -49,13 +49,13 @@ class ThreadData(DefaultSettingsView):
         content = await utils.generate_message(content)
         await interaction.response.send_message(**content,ephemeral=True)
     
-    @nextcord.ui.button(label='Edit message',style=nextcord.ButtonStyle.primary,row=2)
+    @nextcord.ui.button(label='Edit message',style=nextcord.ButtonStyle.primary)
     async def edit_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = ModalsBuilder(interaction.guild_id,self.channel.id)
         
         await interaction.response.send_modal(modal)
     
-    @nextcord.ui.button(label='Delete message',style=nextcord.ButtonStyle.red,row=2)
+    @nextcord.ui.button(label='Delete message',style=nextcord.ButtonStyle.red)
     async def delete_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         channel_id = self.channel.id
         del self.forum_message[channel_id]

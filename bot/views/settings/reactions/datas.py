@@ -31,13 +31,13 @@ class ReactData(DefaultSettingsView):
         
         await interaction.message.edit(embed=view.embed,view=view)
     
-    @nextcord.ui.button(label='Edit reaction',style=nextcord.ButtonStyle.primary,row=2)
+    @nextcord.ui.button(label='Edit reaction',style=nextcord.ButtonStyle.primary)
     async def edit_reactions(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = ModalsBuilder(interaction.guild_id,self.channel.id)
         
         await interaction.response.send_modal(modal)
     
-    @nextcord.ui.button(label='Delete reaction',style=nextcord.ButtonStyle.red,row=2)
+    @nextcord.ui.button(label='Delete reaction',style=nextcord.ButtonStyle.red)
     async def delete_reactions(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         channel_id = self.channel.id
         del self.forum_message[channel_id]

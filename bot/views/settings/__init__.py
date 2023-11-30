@@ -1,4 +1,5 @@
 import nextcord
+
 class DefaultSettingsView(nextcord.ui.View):
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         if not interaction.user.guild_permissions.manage_guild:
