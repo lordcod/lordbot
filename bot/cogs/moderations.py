@@ -98,13 +98,12 @@ class moderations(commands.Cog):
             if deleted >= limit:
                 break
             if message.author == member:
-                
-                task = asyncio.ensure_future(message.delete())
+                task = message.delete()
                 tasks.append(task)
                 
                 deleted += 1
         
-        await asyncio.wait(tasks)
+        await asyncio.gather(*tasks)
         
         await ctx.send(f'Deleted {deleted} message(s)',delete_after=5.0)
 

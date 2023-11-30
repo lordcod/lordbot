@@ -22,9 +22,9 @@ try:
 except Exception as err:
     print(type(err))
     print(err)
-
+data = '{"1175404400215326802":["🟢","🔴"]}'
 with connection.cursor() as cursor:
-    cursor.execute('DROP TABLE guild')
+    cursor.execute('UPDATE guilds SET reactions = %s WHERE id = %s',(data,1171849727210426459))
 
 
 

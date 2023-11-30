@@ -10,8 +10,8 @@ import os
 
 
 def get_command_prefixs(
-bot: commands.Bot, 
-msg: nextcord.Message
+    bot: commands.Bot, 
+    msg: nextcord.Message
 ) -> List[str]:
     prefix = utils.get_prefix(msg.guild.id)
     return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
@@ -21,9 +21,6 @@ bot = commands.Bot(
     intents=nextcord.Intents.all(),
     help_command=None
 )
-
-
-
 
 def load_dir(dirpath: str) -> None:
     for filename in os.listdir(dirpath):

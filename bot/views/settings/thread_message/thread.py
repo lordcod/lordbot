@@ -62,6 +62,5 @@ class ThreadData(DefaultSettingsView):
         
         self.gdb.set('thread_messages',self.forum_message)
         
-        
         view = thread_message.AutoThreadMessage(interaction.guild)
         await interaction.message.edit(embed=view.embed,view=view)

@@ -32,7 +32,7 @@ class CallbackCommandError:
         self.locale = self.gdb.get('language')
     
     async def process(self):
-        Logger.info(self.error)
+        Logger.info(f'[{self.error.__class__.__name__}] {self.error}')
         for error in self.errors:
             name = error.__name__
             error_name = self.error.__class__.__name__
