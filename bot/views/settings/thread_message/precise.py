@@ -3,7 +3,7 @@ import nextcord
 from bot.misc import utils
 from  .. import thread_message 
 from ...settings import DefaultSettingsView
-from .modalsBuilder import ModalsBuilder
+from .modal import ModalBuilder
 from bot.languages.settings import (
     thread as thread_langs,
     button as button_name
@@ -51,7 +51,7 @@ class ThreadData(DefaultSettingsView):
     
     @nextcord.ui.button(label='Edit message',style=nextcord.ButtonStyle.primary)
     async def edit_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = ModalsBuilder(interaction.guild_id,self.channel.id)
+        modal = ModalBuilder(interaction.guild_id,self.channel.id)
         
         await interaction.response.send_modal(modal)
     

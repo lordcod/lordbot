@@ -2,8 +2,8 @@ import nextcord
 from bot.databases.db import GuildDateBases
 from bot.resources.ether import Channel_Type
 from bot.misc import utils
-from .addres import ViewBuilder
-from .datas import ReactData
+from .additional import ViewBuilder
+from .precise import ReactData
 from bot.views import views
 from ...settings import DefaultSettingsView
 from bot.languages.settings import (

@@ -6,7 +6,7 @@ from bot.languages.settings import (
 )
 
 
-class ModalsBuilder(nextcord.ui.Modal):
+class ModalBuilder(nextcord.ui.Modal):
     def __init__(self,guild_id,channel_id) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')

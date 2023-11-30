@@ -1,9 +1,9 @@
 import nextcord
 from bot.databases.db import GuildDateBases
 from bot.resources.ether import Channel_Type
-from .addptional import ViewBuilder
+from .additional import ViewBuilder
 from bot.views import views
-from .thread import ThreadData
+from .precise import ThreadData
 from ...settings import DefaultSettingsView
 from bot.languages.settings import (
     thread as thread_langs,

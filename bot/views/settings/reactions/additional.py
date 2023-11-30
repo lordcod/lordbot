@@ -3,7 +3,7 @@ from bot.databases.db import GuildDateBases
 from bot.misc.utils import is_emoji
 from  .. import reactions
 from ...settings import DefaultSettingsView
-from .modalBuilder import ModalsBuilder
+from .modal import ModalBuilder
 from bot.languages.settings import (
     reactions as reaction_langs,
     button as button_name
@@ -59,6 +59,6 @@ class ViewBuilder(DefaultSettingsView):
     
     @nextcord.ui.button(label='Install emoji',style=nextcord.ButtonStyle.blurple,disabled=True)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = ModalsBuilder(interaction.guild_id,self.installer) 
+        modal = ModalBuilder(interaction.guild_id,self.installer) 
         
         await interaction.response.send_modal(modal)

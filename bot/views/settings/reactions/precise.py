@@ -4,7 +4,7 @@ from bot.misc import utils
 from bot.misc.utils import is_emoji
 from  .. import reactions
 from ...settings import DefaultSettingsView
-from .modalBuilder import ModalsBuilder
+from .modal import ModalBuilder
 from bot.languages.settings import (
     reactions as reaction_langs,
     button as button_name
@@ -33,7 +33,7 @@ class ReactData(DefaultSettingsView):
     
     @nextcord.ui.button(label='Edit reaction',style=nextcord.ButtonStyle.primary)
     async def edit_reactions(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = ModalsBuilder(interaction.guild_id,self.channel.id)
+        modal = ModalBuilder(interaction.guild_id,self.channel.id)
         
         await interaction.response.send_modal(modal)
     

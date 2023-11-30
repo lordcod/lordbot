@@ -3,7 +3,7 @@ import nextcord
 from bot.databases.db import GuildDateBases
 from  .. import thread_message 
 from ...settings import DefaultSettingsView
-from .modalsBuilder import ModalsBuilder
+from .modal import ModalBuilder
 from bot.languages.settings import (
     thread as thread_langs,
     button as button_name
@@ -59,6 +59,6 @@ class ViewBuilder(DefaultSettingsView):
     
     @nextcord.ui.button(label='Install message',style=nextcord.ButtonStyle.blurple,disabled=True)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = ModalsBuilder(interaction.guild_id,self.installer) 
+        modal = ModalBuilder(interaction.guild_id,self.installer) 
         
         await interaction.response.send_modal(modal)

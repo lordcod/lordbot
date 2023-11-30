@@ -1,15 +1,14 @@
 import nextcord
-from bot.databases.db import GuildDateBases
-from bot.misc.utils import is_emoji
+
 from  .. import reactions
-from ...settings import DefaultSettingsView
+
+from bot.databases.db import GuildDateBases
 from bot.languages.settings import (
-    reactions as reaction_langs,
-    button as button_name
+    reactions as reaction_langs
 )
 
 
-class ModalsBuilder(nextcord.ui.Modal):
+class ModalBuilder(nextcord.ui.Modal):
     def __init__(self,guild_id,channel_id) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
