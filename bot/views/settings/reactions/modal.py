@@ -15,22 +15,22 @@ class ModalsBuilder(nextcord.ui.Modal):
         locale = gdb.get('language')
         
         self.channel_id = channel_id
-        super().__init__(reaction_langs.addres.title.get(locale))
+        super().__init__(reaction_langs.modal.title.get(locale))
         
         self.emoji_1 = nextcord.ui.TextInput(
-            label=reaction_langs.addres.tilabel.get(locale),
+            label=reaction_langs.modal.label.get(locale),
             placeholder='<a:name:id>',
             required=True
         )
         
         self.emoji_2 = nextcord.ui.TextInput(
-            label=reaction_langs.addres.tilabel.get(locale),
+            label=reaction_langs.modal.label.get(locale),
             placeholder='<:name:id>',
             required=False
         )
         
         self.emoji_3 = nextcord.ui.TextInput(
-            label=reaction_langs.addres.tilabel.get(locale),
+            label=reaction_langs.modal.label.get(locale),
             placeholder='😀',
             required=False
         )
@@ -41,8 +41,8 @@ class ModalsBuilder(nextcord.ui.Modal):
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        reacts: dict  = gdb.get('reactions')
-        emojis =[self.emoji_1.value]
+        reacts: dict = gdb.get('reactions')
+        emojis = [self.emoji_1.value]
         
         emoji_2 = self.emoji_2.value
         if emoji_2:

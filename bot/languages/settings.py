@@ -139,39 +139,19 @@ class thread:
             'en':'Channel'
         }
     class addptional:
-        title = {
-            'ru':'Авто-сообщение',
-            'en':'Auto-message'
-        }
-        tilabel = {
-            'ru':'Сообщение:',
-            'en':'Message:'
-        }
-        tiph = {
-            'ru':'Вы также можете пользоваться embed-builder',
-            'en':'You can also use embed-builder'
-        }
         channel_error = {
             'ru':'На этот канал уже установлено авто-сообщения',
             'en':'Auto-messages have already been installed on this channel'
         }
-        mph = {
+        placeholder = {
             'ru':'Выберете канал для авто-сообщений',
             'en':'Select a channel for auto-messages'
         }
+        install_mes = {
+            'ru':'Установить сообщение',
+            'en':'Install message'
+        }
     class thread:
-        tilabel = {
-            'ru':'Сообщение:',
-            'en':'Message:'
-        }
-        tiph = {
-            'ru':'Вы также можете пользоваться embed-builder',
-            'en':'You can also use embed-builder'
-        }
-        mtitle = {
-            'ru':'Авто-сообщение',
-            'en':'Auto-communication'
-        }
         mes_not_found = {
             'ru':'Сообщения не найдено',
             'en':'No message found'
@@ -188,6 +168,20 @@ class thread:
             'ru':'Удалить сообщение',
             'en':'Delete a message'
         }
+    class modal:
+        title = {
+            'ru':'Авто-сообщение',
+            'en':'Auto-message'
+        }
+        label = {
+            'ru':'Сообщение:',
+            'en':'Message:'
+        }
+        placeholder = {
+            'ru':'Вы также можете пользоваться embed-builder',
+            'en':'You can also use embed-builder'
+        }
+
 
 
 class economy:
@@ -225,32 +219,16 @@ class reactions:
             'ru':'Выберете канал для авто-реакций',
             'en':'Select a channel for auto-reactions'
         }
-        title = {
-            'ru':'Авто-реакция',
-            'en':'Auto-reaction'
-        }
-        tilabel = {
-            'ru':'Эмодзи:',
-            'en':'Emoji'
-        }
-        cherror = {
+        channel_error = {
             'ru':'На этот канал уже установлены авто-реакции',
             'en':'Auto-reactions have already been installed on this channel'
         }
-        emoji_input_error = {
-            'ru':'К сожалению, вы ввели неправильный эмодзи',
-            'en':'Unfortunately you entered an incorrect emoji'
+        install_emoji = {
+            'ru':'Установить эмодзи',
+            'en':'Install emoji'
         }
     
     class datas:
-        title = {
-            'ru':'Авто-реакция',
-            'en':'Auto reaction'
-        }
-        tilabel = {
-            'ru':'Эмодзи:',
-            'en':'Emoji:'
-        }
         delreact = {
             'ru':'Удалить реакцию',
             'en':'Delete reaction'
@@ -259,13 +237,15 @@ class reactions:
             'ru':'Редактировать реакцию',
             'en':'Edit reaction'
         }
-        emo_cor_error = {
-            'ru':'К сожалению, вы ввели неправильный эмодзи',
-            'en':'Unfortunately you entered an incorrect emoji'
+
+    class modal:
+        title = {
+            'ru':'Авто-реакция',
+            'en':'Auto reaction'
         }
-        emo_gi_error = {
-            'ru':'Введенный эмодзи должен присутствовать на сервере',
-            'en':'The entered emoji must be present on the server'
+        label = {
+            'ru':'Эмодзи:',
+            'en':'Emoji:'
         }
 
 

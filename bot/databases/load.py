@@ -1,14 +1,10 @@
 from bot.misc.logger import Logger
 from .config import (host, port, user, password, db_name)
 import psycopg2
-import time
 import sys
 
 
-def load_db(attempt=0):
-    if attempt > 3:
-        sys.exit()
-    
+def load_db():
     try:
         connection = psycopg2.connect(
             host=host,
@@ -23,9 +19,7 @@ def load_db(attempt=0):
         Logger.error('Failed connection')
         Logger.critical('Starting a database reboot')
         
-        time.sleep(300)
-        
-        load_db(attempt+1)
+        sys.exit()
     else:
         Logger.success("Successful connection")
         return connection

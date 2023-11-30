@@ -45,4 +45,5 @@ class ReactData(DefaultSettingsView):
         self.gdb.set('reactions',self.forum_message)
         
         view = reactions.AutoReactions(interaction.guild)
+        
         await interaction.message.edit(embed=view.embed,view=view)

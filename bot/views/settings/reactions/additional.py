@@ -15,7 +15,8 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         locale = self.gdb.get('language')
         
         super().__init__(
-            placeholder=reaction_langs.addres.ph.get(locale)
+            placeholder=reaction_langs.addres.ph.get(locale), 
+            channel_types=[nextcord.ChannelType.news, nextcord.ChannelType.text]
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -24,21 +25,26 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         locale: str = self.gdb.get('language')
         
         if channel.id in reacts:
-            await interaction.response.send_message(reaction_langs.addres.cherror.get(locale))
+            await interaction.response.send_message(reaction_langs.addres.channel_error.get(locale), ephemeral=True)
             return
         
-        modal = ModalsBuilder(interaction.guild_id,channel.id) 
+        view = ViewBuilder(channel.guild.id ,channel.id)
         
-        await interaction.response.send_modal(modal)
+        view.install.disabled = False
+        
+        await interaction.message.edit(view=view)
 
 class ViewBuilder(DefaultSettingsView):
-    def __init__(self,guild_id: int) -> None:
+    def __init__(self,guild_id: int, installer = None) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
+        
+        self.installer = installer
         
         super().__init__()
         
         self.back.label = button_name.back.get(locale)
+        self.install.label = reaction_langs.addres.install_emoji.get(locale)
         
         DDB = DropDownBuilder(guild_id)
         
@@ -50,3 +56,9 @@ class ViewBuilder(DefaultSettingsView):
         view = reactions.AutoReactions(interaction.guild)
         
         await interaction.message.edit(embed=view.embed,view=view)
+    
+    @nextcord.ui.button(label='Install emoji',style=nextcord.ButtonStyle.blurple,disabled=True)
+    async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        modal = ModalsBuilder(interaction.guild_id,self.installer) 
+        
+        await interaction.response.send_modal(modal)
