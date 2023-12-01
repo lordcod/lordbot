@@ -13,7 +13,6 @@ from .prefix import PrefixView as Prefix
 from .languages import Languages
 from .reactions import AutoReactions
 from .thread_message import AutoThreadMessage
-from .auto_translate import AutoTranslate
 from .disable_command import DisabledCommandsView as DisabledCommands
 
 
@@ -25,7 +24,7 @@ moduls = {
     'Prefix': Prefix,
     
     'Reactions': AutoReactions,
-    # 'Auto_Translate': AutoTranslate,
     'ThreadMessage': AutoThreadMessage,
+    
     'DisabledCommands': DisabledCommands
 }
