@@ -1,14 +1,9 @@
 import psycopg2
 
-host = 'postgresql.879043c3234e.hosting.myjino.ru'
-port = 5432
-user = 'j5191558_cord'
-password = 'fd5-DVv-pf5-6bx'
-db_name = 'j5191558_main'
+import sys
+sys.path.append(r"C:\Users\2008d\git\lordbot\bot\databases")
 
-
-
-
+from config import (host, port, user, password, db_name)
 
 try:
     connection = psycopg2.connect(
@@ -22,9 +17,19 @@ try:
 except Exception as err:
     print(type(err))
     print(err)
-data = '{"1175404400215326802":["🟢","🔴"]}'
+
+data = """
+{
+    "1179069504651796562":{
+            "type":"message",
+            "dest":"ru",
+            "whitelist":["ru"]
+        }
+    }
+"""
+guild_id = 1179069504186232852
 with connection.cursor() as cursor:
-    cursor.execute('UPDATE guilds SET reactions = %s WHERE id = %s',(data,1171849727210426459))
+    cursor.execute('UPDATE guilds SET auto_translate = %s WHERE id = %s',(data,guild_id))
 
 
 

@@ -44,7 +44,7 @@ current = [
 
 class translate:
     placeholder = {
-        'ru':'Выберет подходящий язык:',
+        'ru':'Выберете подходящий язык:',
         'en':'Will choose the appropriate language:'
     }
 
@@ -131,11 +131,6 @@ class auto_translate:
         'en':'Translated to'
     }
 
-exemple = {
-        'en':'',
-        'ru':''
-    }
-
 class errors:
     MissingPermissions = {
         'en':'You don\'t have enough rights',
@@ -196,4 +191,3 @@ class errors:
             'en':'seconds',
             'ru':'секунд'
         }
-    
