@@ -46,6 +46,10 @@ class module_name:
         'en':'Command switch',
         'ru':'Командный переключатель'
     }
+    greeting = {
+        'en':'Greeting',
+        'ru':'Приветствие'
+    }
 
 class button:
     back = {

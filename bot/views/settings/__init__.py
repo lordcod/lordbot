@@ -14,6 +14,7 @@ from .languages import Languages
 from .reactions import AutoReactions
 from .thread_message import AutoThreadMessage
 from .disable_command import DisabledCommandsView as DisabledCommands
+from .greeting import Greeting 
 
 
 moduls = {
@@ -23,6 +24,7 @@ moduls = {
     'Languages': Languages,
     'Prefix': Prefix,
     
+    'Greeting':Greeting,
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
     

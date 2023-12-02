@@ -20,10 +20,18 @@ class Emoji:
     languages = '<:languages:1178742515420106906>'
     prefix = '<:prefix:1178742513083875368>' 
     colour = '<:colour:1178742511649431573>'
+    greeting = '<:greeting:1180603831378255974>'
     reactions = '<:reactions:1178742501109145740>'
     translate = '<:translate:1178742517190107287>'
     thread_message = '<:threadmessage:1178742507983601724>'
     command = '<:command:1178742498160545965>'
+    
+    #Greeting
+    frame_person = '<:frame_person:1180609535107399770>'
+    auto_role = '<:auto_role:1180609685112492172>'
+    
+    
+    #Disabled command
     enabled = '<:enabled:1178742503822852248>'
     disabled = '<:disabled:1178742506544955522>' 
     
