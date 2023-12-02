@@ -9,6 +9,7 @@ from bot.languages.settings import (
 
 
 from .translate import TranslateView
+from .help import HelpView
 
 
 class SetDropdown(nextcord.ui.Select):

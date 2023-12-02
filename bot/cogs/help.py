@@ -1,111 +1,19 @@
 import nextcord
 from nextcord.ext import commands
-from nextcord.utils import find
 
-from bot import languages
+from bot.languages import help as help_info
 from bot.databases.db import GuildDateBases
-from bot.resources import info
+from bot.views.views import HelpView
 
-from typing import Union, Dict, List
-
-class help_lines:
-    def __init__(self) -> None:
-        self.line = ''
-    
-    def add_line(self,string):
-        self.line = f'{self.line}{string}\n'
-    
-    def get(self):
-        return self.line
+import jmespath
 
 
-category_names: List[str] = info.categories.keys()
-
-all_commands: List[Dict[str,Union[List[str],bool,str]]]  = []
-for comd_list in info.categories.values():
-    for com in comd_list:
-        all_commands.append(com) 
-
-
-def check_category(categoryName: str):
-    for cateName in category_names:
-        if categoryName.lower() == cateName.lower():
-            return info.categories[cateName]
-    return False
-
-def check_command(commandName: str) -> Union[Dict[str,Union[List[str],bool,str]],bool]:
-    for command_data in all_commands:
-        if commandName.lower() == command_data.get('name'):
-            return command_data
-        if commandName.lower() in command_data.get('aliases'):
-            return command_data
-    return False
-
-
-def generate_embed_not_var(embed):
-    for categ in info.categories:
-        lines = help_lines()
-        
-        for com in info.categories[categ]:
-            args = ' '.join(com.get('arguments'))
-            text = f"{com.get('name')} {args}"
-            lines.add_line(text)
-        
-        embed.add_field(
-            name=categ,
-            value=lines.get(),
-            inline=False
-        )
-    return embed
-
-def generate_embed_category(embed,name, category):
-    lines = help_lines()
-    for com in category:
-        args = ' '.join(com.get('arguments'))
-        text = f"{com.get('name')}({args}) - {com.get('brief_descriptrion')}"
-        lines.add_line(text)
-        
-    embed.add_field(
-        name=name,
-        value=lines.get()
-    )
-    return embed
-
-def generate_embed_commands(embed: nextcord.Embed, commnds: Dict[str,Union[List[str],bool,str]]):
-    args = ' '.join(commnds.get('arguments'))
-    aliases = ', '.join(commnds.get('aliases'))
-    
-    embed.description = 'Description of the command'
-    
-    embed.add_field(
-        name='Command name',
-        value=commnds.get('name'),
-        inline=True
-    )
-    if aliases:
-        embed.add_field(
-            name='Command aliases',
-            value=aliases,
-            inline=True
-        )
-    
-    if args:
-        embed.add_field(
-            name='Arguments',
-            value=args,
-            inline=False
-        )
-    
-    embed.add_field(
-        name='Descriptrion',
-        value=commnds.get('descriptrion'),
-        inline=False
-    )
-    
-    
-    return embed
-
-
+def get_command(name: str) -> help_info.CommandOption: 
+    expression = f"[?name == '{name}'||contains(aliases, '{name}')]"
+    result = jmespath.search(expression,help_info.commands)
+    if not result:
+        return None
+    return result[0]
 
 
 class help(commands.Cog):
@@ -115,35 +23,120 @@ class help(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def help(self, ctx: commands.Context, catcom: str = None):
-        gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color')
+    async def help(self, ctx: commands.Context, command_name: str = None):
+        self.gdb = GuildDateBases(ctx.guild.id)
+        
+        if not command_name:
+            await self.generate_message(ctx)
+            return
+        
+        command_data = get_command(command_name)
+        if command_data:
+            await self.generate_command(ctx,command_data)
+            return
+        
+        await self.generate_not_found(ctx)
+    
+    async def generate_message(self, ctx: commands.Context):
+        locale = self.gdb.get('language')
+        colour = self.gdb.get('color')
         
         embed = nextcord.Embed(
-            title='Help',
-            description='Help on bot commands',
+            title=help_info.Embed.title.get(locale),
+            description=help_info.Embed.description.get(locale),
             color=colour
         )
-        embed.set_footer(text=info.footer)
         
-        if not catcom:
-            embed = generate_embed_not_var(embed)
-        elif check_category(catcom):
-            catdata = check_category(catcom)
-            embed = generate_embed_category(embed, catcom, catdata)
-        elif check_command(catcom):
-            camdata = check_command(catcom)
-            embed = generate_embed_commands(embed,camdata)
-        else:
+        for category, coms in help_info.categories.items():
+            text = ''
+            for cmd in coms:
+                text = (
+                    f"{text}"
+                    f"`{cmd.get('name')}` "
+                )
             embed.add_field(
-                name='Command/Category not found',
-                value='Try to call it something else or look at the general сommand'
+                name=help_info.categories_name.get(category).get(locale),
+                value=text,
+                inline=False
             )
-            embed.remove_footer()
+        
+        
+        view = HelpView(ctx.guild.id)
+        
+        await ctx.send(embed=embed, view=view)
+    
+    async def generate_command(self, ctx: commands.Context, command_data: help_info.CommandOption):
+        locale = self.gdb.get('language')
+        colour = self.gdb.get('color')
+        aliases = command_data.get('aliases')
+        arguments = command_data.get('arguments')
+        
+        embed = nextcord.Embed(
+            title=help_info.Embed.title.get(locale),
+            description=help_info.Embed.description.get(locale),
+            color=colour
+        )
+        
+        
+        embed.add_field(
+            name=help_info.CommandEmbed.name.get(locale),
+            value=command_data.get('name')
+        )
+        
+        embed.add_field(
+            name=help_info.CommandEmbed.category.get(locale),
+            value=help_info.categories_name.get(command_data.get('category')).get(locale)
+        )
+        
+        embed.add_field(
+            name='',
+            value='',
+            inline=False
+        )
+        
+        
+        if aliases:
+            embed.add_field(
+                name=help_info.CommandEmbed.aliases.get(locale),
+                value=', '.join(aliases)
+            )
+        
+        if arguments:
+            embed.add_field(
+                name=help_info.CommandEmbed.arguments.get(locale),
+                value=' '.join(arguments)
+            )
+            embed.set_footer(
+                text=help_info.Embed.footer.get(locale)
+            )
+        
+        
+        embed.add_field(
+            name=help_info.CommandEmbed.disable_command.get(locale),
+            value=help_info.CommandEmbed.connection_disabled.get(command_data.get('allowed_disabled')).get(locale),
+            inline=False
+        )
+        
+        embed.add_field(
+            name=help_info.CommandEmbed.description.get(locale),
+            value=command_data.get('descriptrion').get(locale),
+            inline=False
+        )
+        
         
         await ctx.send(embed=embed)
 
-
+    async def generate_not_found(self, ctx: commands.Context):
+        locale = self.gdb.get('language')
+        colour = self.gdb.get('color')
+        
+        embed = nextcord.Embed(
+            title=help_info.CommandNotFound.title.get(locale),
+            description=help_info.CommandNotFound.description.get(locale),
+            color=colour
+        )
+        
+        await ctx.send(embed=embed)
 
 def setup(bot: commands.Bot):
     bot.add_cog(help(bot))

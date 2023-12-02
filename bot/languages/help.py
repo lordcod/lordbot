@@ -1,170 +1,363 @@
+from typing import List, Dict, Literal, Union
+
+possible_args = Literal['name','category','aliases','arguments','descriptrion','brief_descriptrion','allowed_disabled']
+CommandOption = Dict[
+    possible_args,
+    Union[dict,list,str,bool]
+]   
+
 
 categories_name = {
     'economy':{
-        'ru':'Экономика',
-        'en':'Economy'
+        'ru':'💎 Экономика',
+        'en':'💎 Economy'
     },
     'major':{
-        'ru':'Главное',
-        'en':'Major'
+        'ru':'👑 Главное',
+        'en':'👑 Major'
     },
     'moderation':{
-        'ru':'Модерационные',
-        'en':'Moderation'
+        'ru':'⚠ Модерационные',
+        'en':'⚠ Moderation'
     },
 }
 
-categories = {
+categories: Dict[str,List[CommandOption]] = {
     'economy':[
         {
             'name':'balance',
+            'category':'economy',
             'aliases':['bal'],
             'arguments':['[member]'],
-            'descriptrion':(
-                'Displays the participant\'s balance as well as possible rewards that can be collected'
-                '\n\n'
-                'If no participant is specified, the value is taken by the one who started the command'
-            ),
-            'brief_descriptrion':'Participant\'s balance',
+            'descriptrion':{
+                'en':(
+                    'Displays the participant\'s balance as well as possible rewards that can be collected'
+                    '\n\n'
+                    'If no participant is specified, the value is taken by the one who started the command'
+                ),
+                'ru':(
+                    'Отображает баланс участника, а также возможные вознаграждения, которые можно получить'
+                    '\n\n'
+                    'Если участник не указан, значение принимает тот, кто запустил команду'
+                )
+            },
+            'brief_descriptrion':{
+                'en':'Participant\'s balance',
+                'ru':'Баланс участника'
+            },
             'allowed_disabled':True
         },
         
         {
             'name':'daily',
+            'category':'economy',
             'aliases':[],
             'arguments':[],
-            'descriptrion':'Issues a cash reward once a day',
-            'brief_descriptrion':'Daily cash rewards',
+            'descriptrion':{
+                'en':'Issues a cash reward once a day',
+                'ru':'Выдает денежное вознаграждение один раз в день'
+            },
+            'brief_descriptrion':{
+                'en':'Daily cash rewards',
+                'ru':'Ежедневные денежные вознаграждения'
+            },
             'allowed_disabled':True
         },    
         {
             'name':'weekly',
+            'category':'economy',
             'aliases':[],
             'arguments':[],
-            'descriptrion':'Issues a cash reward once a week',
-            'brief_descriptrion':'Weekly cash rewards',
+            'descriptrion':{
+                'en':'Issues a cash reward once a week',
+                'ru':'Выдает денежное вознаграждение раз в неделю'
+            },
+            'brief_descriptrion':{
+                'en':'Weekly cash rewards',
+                'ru':'Еженедельные денежные вознаграждения'
+            },
             'allowed_disabled':True
         },    
         {
             'name':'monthly',
+            'category':'economy',
             'aliases':[],
             'arguments':[],
-            'descriptrion':'Issues a cash reward once a month',
-            'brief_descriptrion':'Monthly cash rewards',
+            'descriptrion':{
+                'en':'Issues a cash reward once a month',
+                'ru':'Выдает денежное вознаграждение раз в месяц'
+            },
+            'brief_descriptrion':{
+                'en':'Monthly cash rewards',
+                'ru':'Ежемесячное денежное вознаграждение'
+            },
             'allowed_disabled':True
         },  
         
         {
             'name':'deposit',
+            'category':'economy',
             'aliases':['dep'],
             'arguments':['<amount>'],
-            'descriptrion':'Transfers the entered amount of money to the bank protecting your funds from robbery',
-            'brief_descriptrion':'Transfers the entered amount of money to the bank',
+            'descriptrion':{
+                'en':'Transfers the entered amount of money to the bank protecting your funds from robbery',
+                'ru':'Переводит введенную сумму денег в банк, защищая ваши средства от ограбления'
+            },
+            'brief_descriptrion':{
+                'en':'Transfers the entered amount of money to the bank',
+                'ru':'Переводит введенную сумму денег в банк'
+            },
             'allowed_disabled':True
         },        
         {
             'name':'withdraw',
+            'category':'economy',
             'aliases':['wd'],
             'arguments':['<amount>'],
-            'descriptrion':(
-                'Redirects your funds from the bank back to your account'
-                '\n\n'
-                'Please note that if you lose your funds, it is not possible to return them'
-            ),
-            'brief_descriptrion':'Transfers the amount back to the account',
+            'descriptrion':{
+                'en':(
+                    'Redirects your funds from the bank back to your account'
+                    '\n\n'
+                    'Please note that if you lose your funds, it is not possible to return them'
+                ),
+                'ru':(
+                    'Перенаправляет ваши средства из банка обратно на ваш счет'
+                    '\n\n'
+                    'Пожалуйста, обратите внимание, что если вы потеряете свои средства, вернуть их будет невозможно'
+                ),
+            },
+            'brief_descriptrion':{
+                'en':'Transfers the amount back to the account',
+                'ru':'Переводит сумму обратно на счет'
+            },
             'allowed_disabled':True
         },   
         
         {
-            'name':'pay' ,
+            'name':'pay',
+            'category':'economy',
             'aliases':[],
             'arguments':['<member>','<amount>'],
-            'descriptrion':'Transfers the specified amount to the selected participant',
-            'brief_descriptrion':'Transfers money',
+            'descriptrion':{
+                'en':'Transfers the specified amount to the selected participant',
+                'ru':'Переводит указанную сумму выбранному участнику'
+            },
+            'brief_descriptrion':{
+                'en':'Transfers money',
+                'ru':'Переводит деньги'
+            },
             'allowed_disabled':True
         },
         
         {
-            'name':'gift' ,
+            'name':'gift',
+            'category':'economy',
             'aliases':[],
             'arguments':['[member]','<amount>'],
-            'descriptrion':(
-            'Adds a certain amount to the selected participant\n'
-            'If the participant is not selected, the team performer acts instead'
-            ),
-            'brief_descriptrion':'Adds the amount to the participant',
+            'descriptrion':{
+                'en':(
+                    'Adds a certain amount to the selected participant\n'
+                    'If the participant is not selected, the team performer acts instead'
+                ),
+                'ru':(
+                    'Добавляет определенную сумму выбранному участнику\n'
+                    'Если участник не выбран, вместо него действует исполнитель команды'
+                )
+            },
+            'brief_descriptrion':{
+                'en':'Adds the amount to the participant',
+                'ru':'Добавляет сумму участнику'
+            },
             'allowed_disabled':True
         },   
         {
-            'name':'take' ,
+            'name':'take',
+            'category':'economy',
             'aliases':[],
             'arguments':['[member]','<amount>'],
-            'descriptrion':(
-            'Takes a certain amount to the selected participant\n'
-            'If the participant is not selected, the team performer acts instead'
-            ),
-            'brief_descriptrion':'Takes the amount to the participant',
+            'descriptrion':{
+                'en':(
+                    'Takes a certain amount to the selected participant\n'
+                    'If the participant is not selected, the team performer acts instead'
+                ),
+                'ru':(
+                    'Выплачивает определенную сумму выбранному участнику\n'
+                    'Если участник не выбран, вместо него действует исполнитель команды'
+                )
+            },
+            'brief_descriptrion':{
+                'en':'Takes the amount to the participant',
+                'ru':'Возвращает сумму участнику'
+            },
             'allowed_disabled':True
         },     
     ],
     'major':[
         {
             'name':'help',
+            'category':'major',
             'aliases':[],
-            'arguments':['[command/category]'],
-            'descriptrion':'A command describing the bot\'s functions',
-            'brief_descriptrion':'Current command',
+            'arguments':['[command]'],
+            'descriptrion':{
+                'en':'A command describing the bot\'s functions',
+                'ru':'Команда, описывающая функции бота'
+            },
+            'brief_descriptrion':{
+                'en':'Current command',
+                'ru':'Текущая команда'
+            },
             'allowed_disabled':False,
         },  
         {
             'name':'ping',
+            'category':'major',
             'aliases':[],
             'arguments':[],
-            'descriptrion':'Shows the performance and current status of the bot',
-            'brief_descriptrion':'Current bot delay',
+            'descriptrion':{
+                'en':'Shows the performance and current status of the bot',
+                'ru':'Показывает производительность и текущее состояние бота'
+            },
+            'brief_descriptrion':{
+                'en':'Current bot delay',
+                'ru':'Текущая задержка бота'
+            },
             'allowed_disabled':False,
         },  
         {
             'name':'captcha',
+            'category':'major',
             'aliases':[],
             'arguments':[],
-            'descriptrion':'Shows a picture on which the text is encrypted within 30 seconds the user must solve the captcha',
-            'brief_descriptrion':'Test command',
+            'descriptrion':{
+                'en':'Shows a picture on which the text is encrypted within 30 seconds the user must solve the captcha',
+                'ru':'Показывает картинку, на которой зашифрован текст, в течение 30 секунд пользователь должен разгадать капчу'
+            },
+            'brief_descriptrion':{
+                'en':'Test command',
+                'ru':'Тестовая команда'
+            },
             'allowed_disabled':True,
         },  
     ],
     'moderation':[
         {
             'name':'purge',
+            'category':'moderation',
             'aliases':[],
             'arguments':[],
-            'descriptrion':'Subcommands that help clean the chat',
-            'brief_descriptrion':'Several sub commands',
+            'descriptrion':{
+                'en':'Subcommands that help clean the chat',
+                'ru':'Подкоманды, которые помогают очистить чат'
+            },
+            'brief_descriptrion':{
+                'en':'Commands to clear the chat',
+                'ru':'Команды для очистки чата'
+            },
             'allowed_disabled':True,
         },  
+        
         {
             'name':'say',
+            'category':'moderation',
             'aliases':[],
             'arguments':['<text/json>'],
-            'descriptrion':'Sends a message on behalf of the bot using a unique [**embed builder**](<https://lordbot.ru/embed-builder>) or plain text',
-            'brief_descriptrion':'Sends a message',
+            'descriptrion':{
+                'en':(
+                    'Sends a message on behalf of the bot using a unique '
+                    '[**embed builder**](<https://lordcord.fun/embed-builder>) or plain text'
+                ),
+                'ru':(
+                    'Отправляет сообщение от имени бота, используя уникальный '
+                    '[**embed конструктор**](<https://lordcord.fun/embed-builder>) или обычный текст'
+                )
+            },
+            'brief_descriptrion':{
+                'en':'Sends a message',
+                'ru':'Отправляет сообщение'
+            },
             'allowed_disabled':True,
         }, 
         {
             'name':'settings',
+            'category':'moderation',
             'aliases':['set','setting'],
             'arguments':[],
-            'descriptrion':'Opens special bot management settings as well as its extensions',
-            'brief_descriptrion':'Opens the bot settings',
+            'descriptrion':{
+                'en':'Opens special bot management settings as well as its extensions',
+                'ru':'Открывает специальные настройки управления ботом, а также его расширения'
+            }
+            ,
+            'brief_descriptrion':{
+                'en':'Opens the bot settings',
+                'ru':'Открывает настройки бота'
+            },
             'allowed_disabled':False,
         }, 
     ],
 }
 
-commands = [com for cat in categories.values() for com in cat]
+
+commands: List[CommandOption] = [com for cat in categories.values() for com in cat]
 
 
-footer = {
-    'ru':'[] = Необязательно | <> = Обязательно',
-    'en':'[] = Optional | <> = Required'
-}
+class Embed:
+    title = {
+        'ru':'Справочник',
+        'en':'Help Book'
+    }
+    
+    description = {
+        'ru':'Справка по командам бота',
+        'en':'Help on bot commands'
+    }
+    
+    footer = {
+        'ru':'[] = Необязательно | <> = Обязательно',
+        'en':'[] = Optional | <> = Required'
+    }
+
+class CommandEmbed:
+    name = {
+        'ru':'Имя команды',
+        'en':'Command name'
+    }
+    category  = {
+        'ru':'Категория',
+        'en':'Category'
+    }
+    aliases = {
+        'ru':'Псевдонимы',
+        'en':'Aliases'
+    }
+    arguments = {
+        'ru':'Аргументы',
+        'en':'Arguments'
+    }
+    disable_command = {
+        'ru':'Можно отключить?',
+        'en':'Can I turn it off?'
+    }
+    connection_disabled = {
+        True:{
+            'ru':'Да',
+            'en':'Yeah'
+        },
+        False:{
+            'ru':'Нет',
+            'en':'Nope'
+        }
+    }
+    description = {
+        'ru':'Описание',
+        'en':'Descriptrion'
+    }
+
+class CommandNotFound:
+    title = {
+        'en':'Command Not Found',
+        'ru':'Команда не найдена'
+    }
+    description = {
+        'en':'When searching for command, we did not find it, look at it again in the general list of commands',
+        'ru':'При поиске команды мы ее не нашли, посмотрите на нее еще раз в общем списке команд'
+    }
