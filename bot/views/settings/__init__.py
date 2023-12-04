@@ -7,6 +7,7 @@ class DefaultSettingsView(nextcord.ui.View):
             return False
         return True
 
+
 from .color import ColorView as Color
 from .economy import Economy
 from .prefix import PrefixView as Prefix
