@@ -32,6 +32,7 @@ class ViewBuilder(DefaultSettingsView):
     
     def __init__(self,guild: nextcord.Guild, roles: List[nextcord.Role] = []) -> None:
         self.gdb = GuildDateBases(guild.id)
+        colour = self.gdb.get('color')
         locale = self.gdb.get('language')
         roles_ids = self.gdb.get('auto_roles')
         
@@ -53,7 +54,8 @@ class ViewBuilder(DefaultSettingsView):
         
         self.embed = nextcord.Embed(
             title=role_lang.embed_title.get(locale),
-            description=role_lang.embed_description.get(locale)
+            description=role_lang.embed_description.get(locale),
+            color=colour
         )
         
         if roles_ids:
@@ -61,7 +63,7 @@ class ViewBuilder(DefaultSettingsView):
             utils.remove_none(roles)
             
             self.embed.add_field(
-                name='Selected roles:',
+                name=role_lang.embed_field.get(locale),
                 value=', '.join([role.mention for role in roles])
             )
     
