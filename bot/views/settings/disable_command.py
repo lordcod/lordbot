@@ -8,15 +8,11 @@ from bot.languages.settings import (
     disabled_commands as disabled_commands_langs,
     button as button_name
 )
-from bot.resources import info
+from bot.languages import help
 from bot.resources.ether import Emoji
 
 from typing import List,Dict,Union
 
-all_commands: List[Dict[str,Union[List[str],bool,str]]]  = []
-for command_list_from_category in info.categories.values():
-    for com in command_list_from_category:
-        all_commands.append(com) 
 
 
 class DropDown(nextcord.ui.Select):
@@ -28,7 +24,7 @@ class DropDown(nextcord.ui.Select):
         disabled_commands = self.gdb.get('disabled_commands')
         
         options = []
-        for command in all_commands[0:25]:
+        for command in help.commands[0:25]:
             if not command.get('allowed_disabled'):
                 continue
             

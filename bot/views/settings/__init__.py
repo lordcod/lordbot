@@ -1,4 +1,5 @@
 import nextcord
+
 class DefaultSettingsView(nextcord.ui.View):
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         if not interaction.user.guild_permissions.manage_guild:
@@ -6,14 +7,15 @@ class DefaultSettingsView(nextcord.ui.View):
             return False
         return True
 
+
 from .color import ColorView as Color
 from .economy import Economy
 from .prefix import PrefixView as Prefix
 from .languages import Languages
 from .reactions import AutoReactions
 from .thread_message import AutoThreadMessage
-from .auto_translate import AutoTranslate
 from .disable_command import DisabledCommandsView as DisabledCommands
+from .greeting import Greeting 
 
 
 moduls = {
@@ -23,8 +25,9 @@ moduls = {
     'Languages': Languages,
     'Prefix': Prefix,
     
+    'Greeting':Greeting,
     'Reactions': AutoReactions,
-    # 'Auto_Translate': AutoTranslate,
     'ThreadMessage': AutoThreadMessage,
+    
     'DisabledCommands': DisabledCommands
 }

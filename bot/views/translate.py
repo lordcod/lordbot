@@ -7,7 +7,6 @@ translator = googletrans.Translator()
 
 
 class TranslateDropDown(nextcord.ui.Select):
-    
     def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')

@@ -1,11 +1,11 @@
-import psycopg2
 from bot.misc.logger import Logger
-import time
 from .config import (host, port, user, password, db_name)
-
+import psycopg2
+import sys
 
 
 def load_db():
+    Logger.info("Load DataBases")
     try:
         connection = psycopg2.connect(
             host=host,
@@ -20,9 +20,7 @@ def load_db():
         Logger.error('Failed connection')
         Logger.critical('Starting a database reboot')
         
-        time.sleep(15)
-        
-        return load_db()
+        sys.exit()
     else:
         Logger.success("Successful connection")
         return connection

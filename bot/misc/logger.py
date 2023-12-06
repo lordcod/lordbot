@@ -16,24 +16,29 @@ class text_colors:
 
 @lambda cls: cls()
 class Logger:
-    def __init__(self, service=True, date=True) -> None:
-        self.service = service
-        self.date = date
+    def __init__(self, prints=True) -> None:
+        self.prints = prints
+        pass
+    
+    def callback(self, text):
+        if self.prints:
+            print(text)
         pass
     
     def on_logs(func):
-        def redirect(*args,**kwargs):
+        def redirect(self, txt):
             named_tuple = time.localtime() 
             time_string = time.strftime("%m-%d-%Y %H:%M:%S", named_tuple)
             
-            data:dict = func(*args,**kwargs)
+            data:dict = func(self, txt)
             text = (
                 f"{data.get('color')}"
                 f"[{time_string}][{data.get('service')}]: {data.get('text')}"
                 f"{text_colors.RESET}"
             )
             
-            print(text)
+            self.callback(text)
+            
             return text
         return redirect
     

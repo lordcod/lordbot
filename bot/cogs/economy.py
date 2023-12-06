@@ -22,8 +22,8 @@ class MemberDB:
         colums_name = [cl[0] for cl in colums['economic']][2:] # Get name colums from economic except guild_id and member_id 
         
         if not data:
-            EconomyMembedDB.insert(guild_id,member_id)
-            data = EconomyMembedDB.get(guild_id,member_id)
+            emdb.insert()
+            data = emdb.get()
         data = list(data)[2:] # Get data from economy member except guild_id and member_id
         data = dict(zip(colums_name,data)) # Create dict in which colums_name = data_member
         self.data = data
@@ -38,10 +38,6 @@ class MemberDB:
         return self.data[item]
     
     def __setitem__(self, key, value):
-        print("MEC")
-        print(self.member_id, self.guild_id)
-        print(key, value)
-        
         self.data[key] = value
         
         self.emdb.update(key, value)

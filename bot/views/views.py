@@ -9,6 +9,7 @@ from bot.languages.settings import (
 
 
 from .translate import TranslateView
+from .help import HelpView
 
 
 class SetDropdown(nextcord.ui.Select):
@@ -29,13 +30,12 @@ class SetDropdown(nextcord.ui.Select):
             nextcord.SelectOption(
                 label=module_name.color.get(locale), emoji=Emoji.colour, value='Color'
             ),
-            
+            nextcord.SelectOption(
+                label=module_name.greeting.get(locale), emoji=Emoji.greeting, value='Greeting'
+            ),
             nextcord.SelectOption(
                 label=module_name.reactions.get(locale), emoji=Emoji.reactions, value='Reactions'
             ),
-            # nextcord.SelectOption(
-            #     label=module_name.translate.get(locale), emoji=Emoji.auto_translate, value='Auto_Translate'
-            # ),
             nextcord.SelectOption(
                 label=module_name.thread.get(locale), emoji=Emoji.thread_message, value='ThreadMessage'
             ),
@@ -45,7 +45,7 @@ class SetDropdown(nextcord.ui.Select):
         ]
 
         super().__init__(
-            placeholder="Choose settings...",
+            placeholder=start_langs.choose.get(locale),
             min_values=1,
             max_values=1,
             options=options,

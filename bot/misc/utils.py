@@ -1,13 +1,105 @@
-import nextcord,string,random,re,orjson
+from typing import Any
+import nextcord
 from nextcord.ext import commands
-from captcha.image import ImageCaptcha
-from bot.resources import errors
-import aiohttp
-from io import BytesIO
-from PIL import Image
-import re
 from nextcord.utils import escape_markdown
+
+from bot.resources import errors
 from bot.databases.db import GuildDateBases
+
+import re
+import string
+import random
+import aiohttp
+import orjson
+
+from datetime import datetime
+from captcha.image import ImageCaptcha
+from io import BytesIO
+
+
+class GuildPayload:
+    guild: nextcord.Guild
+    
+    def __init__(self, guild: nextcord.Guild) -> None:
+        self.guild = guild
+    
+    @property
+    def id(self) -> int:
+        return self.guild.id
+    
+    @property
+    def name(self) -> str:
+        return self.guild.name
+    
+    @property
+    def icon(self) -> str:
+        guild = self.guild
+        if not (guild.icon and guild.icon.url):
+            return None
+        return guild.icon.url
+    
+    @property
+    def memberCount(self) -> int:
+        return self.guild.member_count
+    
+    @property
+    def createdAt(self) -> datetime:
+        return self.guild.created_at
+    
+    @property
+    def premiumSubscriptionCount(self) -> int:
+        return self.guild.premium_subscription_count
+
+    def __getattr__(self, name: str) -> Any:
+        return f'{"{"}{name}{"}"}'
+    
+    def __str__(self) -> str:
+        return self.name
+
+class MemberPayload:
+    member: nextcord.Member
+    
+    def __init__(self, member: nextcord.Member) -> None:
+        self.member = member
+    
+    @property
+    def mention(self) -> str:
+        return self.member.mention
+    
+    @property
+    def id(self) -> int:
+        return self.member.id
+    
+    @property 
+    def username(self) -> str:
+        return self.member.name
+    
+    @property 
+    def displayName(self) -> str:
+        return self.member.display_name
+    
+    @property
+    def discriminator(self) -> int:
+        return self.member.discriminator
+    
+    @property
+    def tag(self) -> str:
+        member = self.member
+        tag = f'{member.name}#{member.discriminator}'
+        return tag
+    
+    @property
+    def avatar(self) -> str:
+        member = self.member
+        if not (member.display_avatar and member.display_avatar.url):
+            return None
+        return member.display_avatar.url
+    
+    def __getattr__(self, name: str) -> str:
+        return f'{"{"}{name}{"}"}'
+
+    def __str__(self) -> str:
+        return self.tag
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
@@ -16,8 +108,13 @@ async def getRandomQuote(lang='en'):
             json = await responce.json()
             return json
 
+def remove_none(dlist: list) -> None:
+    for arg in dlist:
+        if arg is None:
+            dlist.remove(arg)
+
 def is_emoji(emoji):
-    pattern = "<[a]?:([a-zA-Z0-9-_]+):([0-9]+)>"
+    pattern = ":(.+):"
     check = re.fullmatch(pattern,emoji)
     
     if not check:
@@ -72,7 +169,7 @@ def clord(value,cls,default=None):
         except:
             return default
 
-async def generate_message(content):
+async def generate_message(content) -> dict|str:
     message = {}
     try:
         content: dict = orjson.loads(content)
@@ -89,7 +186,7 @@ async def generate_message(content):
         if thumbnail:
             embed.set_thumbnail(thumbnail)
         
-        author = content.get('author',{})
+        author: dict = content.get('author',{})
         if author:
             embed.set_author(
                 name=author.get('name',None),
@@ -131,3 +228,63 @@ async def generator_captcha(num):
     )
     data:BytesIO = captcha_image.generate(text)
     return data,text
+
+
+class GreetingFormat:
+    def __init__(self, guild: GuildPayload, member: MemberPayload) -> None:
+        self.guild = guild
+        self.member = member
+    
+    def __call__(self, content: str) -> str:
+        if not content:
+            return content
+        message = content.format(
+            guild=self.guild,
+            member=self.member
+        )
+        return message
+
+async def generate_message_greeting(content, guild: GuildPayload, member: MemberPayload):
+    Formating = GreetingFormat(guild, member)
+    message = {}
+    try:
+        content: dict = orjson.loads(content)
+        
+        message['content'] = content.get('plainText',None)
+        embed = nextcord.Embed(
+            title=Formating(content.get('title',None)),
+            description=Formating(content.get('description',None)),
+            color=content.get('color',None),
+            url=Formating(content.get('url',None)),
+        )
+        
+        thumbnail = content.get('thumbnail')
+        if thumbnail:
+            embed.set_thumbnail(Formating(thumbnail))
+        
+        author: dict = content.get('author',{})
+        if author:
+            embed.set_author(
+                name=Formating(author.get('name',None)),
+                url=Formating(author.get('url',None)),
+                icon_url=Formating(author.get('icon_url',None)),
+            )
+        
+        footer = content.get('footer',None)
+        if footer:
+            embed.set_footer(
+                text=Formating(footer.get('text')),
+                icon_url=Formating(footer.get('icon_url')),
+            )
+        
+        fields = content.get('fields',[])
+        for field in fields:
+            embed.add_field(
+                name=Formating(field.get('name',None)),
+                value=Formating(field.get('value',None)),
+                inline=Formating(field.get('inline',None))
+            )
+        message['embed'] = embed
+    except orjson.JSONDecodeError:
+        message['content'] = content
+    return message

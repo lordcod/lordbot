@@ -1,10 +1,12 @@
 import nextcord
+
+from .additional import ViewBuilder
+from .precise import ThreadData
+from ...settings import DefaultSettingsView
+
+from bot.views import views
 from bot.databases.db import GuildDateBases
 from bot.resources.ether import Channel_Type
-from .addptional import ViewBuilder
-from bot.views import views
-from .thread import ThreadData
-from ...settings import DefaultSettingsView
 from bot.languages.settings import (
     thread as thread_langs,
     button as button_name
@@ -16,8 +18,8 @@ class DropDown(nextcord.ui.Select):
     def __init__(self,guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
         locale = self.gdb.get('language')
-        self.forum_message = forum_message  = self.gdb.get('thread_messages',{})
-        channels = [guild.get_channel(key) for key in forum_message]
+        self.forum_message = self.gdb.get('thread_messages',{})
+        channels = [guild.get_channel(key) for key in self.forum_message]
         
         if len(channels) <= 0:
             self.is_option = True

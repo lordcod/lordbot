@@ -2,14 +2,81 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
-from bot.misc import utils
-from bot.resources import errors
-from bot import languages
+from bot.views.views import TranslateView
 
 import googletrans
 
 translator = googletrans.Translator()
 
+class Reactions:
+    def __init__(self, message: nextcord.Message, data: list) -> None:
+        self.message = message
+        self.data = data
+    
+    async def process(self):
+        message = self.message
+        data = self.data
+        
+        if not isinstance(data, list):        
+            return
+        
+        for reat in data:
+            await message.add_reaction(reat)
+
+
+class Translates:
+    def __init__(
+        self,
+        message: nextcord.Message, 
+        data: dict, 
+        colour: int,
+        lang:str,
+    ) -> None:
+        return
+        self.mes = message
+        self.data = data
+        self.colour = colour
+        self.lang = lang
+    
+    async def process(self):
+        data = self.data
+        type = data.get('type')
+        dest = data.get('dest')
+        whitelist = data.get('whitelist')
+        
+        func = self.select_types.get(type)
+        await func(self, dest, whitelist)
+    
+    
+    async def message(self,dest,whitelist):
+        mes = self.mes
+        colour  = self.colour
+        
+        result = translator.translate(
+            text=mes.content,
+            dest=dest
+        )
+        if result.src in whitelist:
+            return
+        
+        view = TranslateView(mes.guild.id)
+        
+        embed = nextcord.Embed(
+            title='Auto Translator',
+            description=result.text,
+            color=colour
+        )
+        embed.set_author(
+            name=mes.author.display_name,
+            icon_url=mes.author.display_avatar
+        )
+        
+        await mes.channel.send(mes.content,embed=embed,view=view)
+        await mes.delete()
+
+    select_types = {
+        'message':message
+    }
 
 class message_event(commands.Cog):
     bot: commands.Bot
@@ -24,38 +91,25 @@ class message_event(commands.Cog):
             return
         
         guild_data = GuildDateBases(message.guild.id)
+        
         colour = guild_data.get('color')
-        reactions = guild_data.get('reactions')
-        auto_translate = guild_data.get('auto_translate')
         lang = guild_data.get('language')
-        prefix = utils.get_prefix(message.guild.id,markdown=False)
+        prefix = guild_data.get('prefix')
         
-        if message.channel.id in reactions:
-            for react in reactions[message.channel.id]:
-                await message.add_reaction(react)
+        reactions: dict = guild_data.get('reactions')
+        auto_translate: dict = guild_data.get('auto_translate')
         
-        if message.channel.id in auto_translate:
-            result = translator.translate(message.content,dest=auto_translate[message.channel.id])
-            if result.src != auto_translate:
-                embed = nextcord.Embed(
-                    title="",
-                    description=f'### {result.text}',
-                    color=colour
-                )
-                embed._fields = [
-                    {
-                        'name':f'{languages.auto_translate.field_name_from.get(lang)} {googletrans.LANGUAGES[result.src]}',
-                        'value':f'',
-                        'inline':True
-                    },
-                    {
-                        'name':f'{languages.auto_translate.field_name_to.get(lang)} {googletrans.LANGUAGES[result.dest]}',
-                        'value':f'',
-                        'inline':True
-                    },
-                ]
-                embed.set_footer(text='Performed with LordBot',icon_url=self.bot.user.avatar.url)
-                await message.channel.send(embed=embed)
+        data_reactions = reactions.get(message.channel.id)
+        data_translate = auto_translate.get(message.channel.id)
+        
+        if data_reactions:
+            reaction_handelers = Reactions(message,data_reactions)
+            await reaction_handelers.process()
+        
+        if data_translate:
+            translate_handelers = Translates(message,data_translate,colour,lang)
+            await translate_handelers.process()
+        
         
         if message.content.strip() == self.bot.user.mention:
             embed = nextcord.Embed(
@@ -71,10 +125,7 @@ class message_event(commands.Cog):
             )
             
             await message.channel.send(embed=embed)
-    
 
-    
-    
 
 
 def setup(bot: commands.Bot):
