@@ -12,6 +12,10 @@ class start:
         'ru':'Запрос от',
         'en':'Request from'
     }
+    choose = {
+        'en':'Choose settings...',
+        'ru':'Выберите настройки...'
+    }
 
 class module_name:
     economy = {
