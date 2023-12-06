@@ -63,12 +63,12 @@ class MemberPayload:
         self.member = member
     
     @property
-    def mention(self) -> str:
-        return self.member.mention
-    
-    @property
     def id(self) -> int:
         return self.member.id
+    
+    @property
+    def mention(self) -> str:
+        return self.member.mention
     
     @property 
     def username(self) -> str:
@@ -100,6 +100,7 @@ class MemberPayload:
 
     def __str__(self) -> str:
         return self.tag
+
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
