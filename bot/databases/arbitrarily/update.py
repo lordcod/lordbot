@@ -20,16 +20,14 @@ except Exception as err:
 
 data = """
 {
-    "1179069504651796562":{
-            "type":"message",
-            "dest":"ru",
-            "whitelist":["ru"]
-        }
-    }
+    "channel_id":1181640672126705724,
+    "message":"Hello {member.username}"
+}
 """
 guild_id = 1179069504186232852
+
 with connection.cursor() as cursor:
-    cursor.execute('UPDATE guilds SET auto_translate = %s WHERE id = %s',(data,guild_id))
+    cursor.execute('UPDATE guilds SET greeting_message = %s WHERE id = %s',(data,guild_id))
 
 
 

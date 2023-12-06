@@ -1,10 +1,12 @@
 import threading
 import asyncio
-from .misc.error_handler import on_error
-from bot.misc.logger import Logger
+
 from .load import load_db
+from .misc.error_handler import on_error
 from .misc.utils import get_info_colums, register_table
 from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance
+
+from bot.misc.logger import Logger
 
 _connection = load_db()
 
@@ -26,6 +28,8 @@ register_table(
         "reactions JSON DEFAULT '{}',"
         "auto_translate JSON DEFAULT '{}',"
         "language TEXT DEFAULT 'en',"
+        "auto_roles JSON DEFAULT '{}',"
+        "greeting_message JSON DEFAULT '{}',"
         "economic_settings JSON DEFAULT '{}',"
         "prefix TEXT DEFAULT 'l.',"
         "color INT8 DEFAULT '1974050',"

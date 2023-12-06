@@ -22,7 +22,7 @@ except Exception as err:
 with connection.cursor() as cursor:
     query = """
         ALTER TABLE guilds
-        ADD auto_roles JSON DEFAULT '{}'; 
+        ADD greeting_message JSON DEFAULT '{}'; 
     """
     cursor.execute(query)
 

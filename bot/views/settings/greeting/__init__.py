@@ -5,9 +5,26 @@ from ...settings import DefaultSettingsView
 from bot.resources.ether import Emoji
 from bot.views import views
 from bot.databases.db import GuildDateBases
+from bot.languages.settings.greeting import (
+    init_embed as init_embed_lang,
+    init_dropdown as init_dropdown_lang
+)
 from bot.languages.settings import (
     button as button_name
 )
+
+moduls = None
+
+def get_moduls():
+    from .role import ViewBuilder as RoleView
+    from .welcome import ViewBuilder as WelcomeView
+    
+    _moduls = {
+        'roles': RoleView,
+        'welcome': WelcomeView
+    }
+    
+    return _moduls
 
 
 class DropDown(nextcord.ui.Select):
@@ -19,27 +36,34 @@ class DropDown(nextcord.ui.Select):
         
         options = [
             nextcord.SelectOption(
-                label='Welcoming new members',
+                label=init_dropdown_lang.welcome_label.get(locale),
                 emoji=Emoji.frame_person,
-                value='welcoming'
+                value='welcome'
             ),
             nextcord.SelectOption(
-                label='Automatic roles',
+                label=init_dropdown_lang.roles_label.get(locale),
                 emoji=Emoji.auto_role,
                 value='roles'
             )
         ]
     
         super().__init__(
-            placeholder='Define the greeting setting:',
+            placeholder=init_dropdown_lang.placeholder.get(locale),
             min_values=1,
             max_values=1,
             options=options,
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        global moduls
+        if not moduls:
+            moduls = get_moduls()
+        
         value = self.values[0]
-        await interaction.response.send_message('The menu is being developed!', ephemeral=True)
+        
+        view = moduls[value](interaction.guild)
+        
+        await interaction.message.edit(embed=view.embed, view=view)
 
 class Greeting(DefaultSettingsView):
     embed: nextcord.Embed
@@ -50,8 +74,8 @@ class Greeting(DefaultSettingsView):
         locale = gdb.get('language')
         
         self.embed = nextcord.Embed(
-            title='The Participant Welcome module',
-            description='A module that is equipped with an automatic greeting and roles',
+            title=init_embed_lang.title.get(locale),
+            description=init_embed_lang.description.get(locale),
             color = colour
         )
         

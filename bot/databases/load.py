@@ -5,6 +5,7 @@ import sys
 
 
 def load_db():
+    print("Load DataBases")
     try:
         connection = psycopg2.connect(
             host=host,

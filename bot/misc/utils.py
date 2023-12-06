@@ -1,13 +1,100 @@
-import nextcord,string,random,re,orjson
+from typing import Any
+import nextcord
 from nextcord.ext import commands
-from captcha.image import ImageCaptcha
-from bot.resources import errors
-import aiohttp
-from io import BytesIO
-from PIL import Image
-import re
 from nextcord.utils import escape_markdown
+
+from bot.resources import errors
 from bot.databases.db import GuildDateBases
+
+import re
+import string
+import random
+import aiohttp
+import orjson
+
+from datetime import datetime
+from captcha.image import ImageCaptcha
+from io import BytesIO
+
+
+class GuildPayload:
+    guild: nextcord.Guild
+    
+    def __init__(self, guild: nextcord.Guild) -> None:
+        self.guild = guild
+    
+    @property
+    def id(self) -> int:
+        return self.guild.id
+    
+    @property
+    def name(self) -> str:
+        return self.guild.name
+    
+    @property
+    def icon(self) -> str:
+        guild = self.guild
+        if not (guild.icon and guild.icon.url):
+            return None
+        return guild.icon.url
+    
+    @property
+    def memberCount(self) -> int:
+        return self.guild.member_count
+    
+    @property
+    def createdAt(self) -> datetime:
+        return self.guild.created_at
+    
+    @property
+    def premiumSubscriptionCount(self) -> int:
+        return self.guild.premium_subscription_count
+
+    def __getattr__(self, name: str) -> Any:
+        return f'{"{"}{name}{"}"}'
+
+class MemberPayload:
+    member: nextcord.Member
+    
+    def __init__(self, member: nextcord.Member) -> None:
+        self.member = member
+    
+    @property
+    def mention(self) -> str:
+        return self.member.mention
+    
+    @property
+    def id(self) -> int:
+        return self.member.id
+    
+    @property 
+    def username(self) -> str:
+        return self.member.name
+    
+    @property 
+    def displayName(self) -> str:
+        return self.member.display_name
+    
+    @property
+    def discriminator(self) -> int:
+        return self.member.discriminator
+    
+    @property
+    def tag(self) -> str:
+        member = self.member
+        tag = f'{member.name}#{member.discriminator}'
+        return tag
+    
+    @property
+    def avatar(self) -> str:
+        member = self.member
+        if not (member.display_avatar and member.display_avatar.url):
+            return None
+        return member.display_avatar.url
+    
+    def __getattr__(self, name: str) -> Any:
+        return f'{"{"}{name}{"}"}'
+
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
