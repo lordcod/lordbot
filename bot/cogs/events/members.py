@@ -21,6 +21,16 @@ class members_event(commands.Cog):
         await self.auto_roles(member, gdb)
         await self.auto_message(member, gdb)
     
+    def on_error(func):
+        async def wrapped(self, member, gdb):
+            try:
+                result = await func(self, member, gdb)
+                return result
+            except Exception as err:
+                Logger.error(err)
+        return wrapped
+    
+    @on_error
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
         roles_ids = gdb.get('auto_roles')
         
@@ -33,6 +43,7 @@ class members_event(commands.Cog):
         
         await member.add_roles(*roles,atomic=False)
     
+    @on_error
     async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
         requst: dict = gdb.get('greeting_message')
         

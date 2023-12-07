@@ -1,4 +1,5 @@
 import time
+import functools
 
 class text_colors:
     RESET = '\033[0m'
