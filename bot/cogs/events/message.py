@@ -3,6 +3,7 @@ from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
 from bot.views.views import TranslateView
+from bot.languages import BotInfo
 
 import googletrans
 
@@ -32,7 +33,6 @@ class Translates:
         colour: int,
         lang:str,
     ) -> None:
-        return
         self.mes = message
         self.data = data
         self.colour = colour
@@ -95,6 +95,7 @@ class message_event(commands.Cog):
         colour = guild_data.get('color')
         lang = guild_data.get('language')
         prefix = guild_data.get('prefix')
+        locale = guild_data.get('language')
         
         reactions: dict = guild_data.get('reactions')
         auto_translate: dict = guild_data.get('auto_translate')
@@ -108,23 +109,22 @@ class message_event(commands.Cog):
         
         if data_translate:
             translate_handelers = Translates(message,data_translate,colour,lang)
-            await translate_handelers.process()
-        
+            # await translate_handelers.process()
         
         if message.content.strip() == self.bot.user.mention:
             embed = nextcord.Embed(
-                title=f'{self.bot.user.display_name} — это многофункциональный бот',
-                description=(
-                    f'Бот предназначен для облегчения управления сервером и оснащен различными средствами автоматизации'
-                ),
+                title=f'{self.bot.user.display_name} — {BotInfo.title.get(locale)}',
+                description=BotInfo.description.get(locale),
                 color=colour
             )
             embed.add_field(
-                name='Информация о сервере',
-                value=f'> Префикс сервера - `{prefix}`'
+                name=BotInfo.info_server.get(locale),
+                value=f'> {BotInfo.prefix_server.get(locale)} - `{prefix}`'
             )
             
             await message.channel.send(embed=embed)
+        
+        
 
 
 

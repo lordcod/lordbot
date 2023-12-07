@@ -101,6 +101,16 @@ class MemberPayload:
     def __str__(self) -> str:
         return self.tag
 
+class GreetingTemplate(string.Template):
+    pattern = r"""
+        \$(?:
+            (?P<escaped>\$) |   
+            (?P<named>[.-_a-z][.-_a-z0-9]*) |  
+            \{(?P<braced>[.-_a-z][.-_a-z0-9]*)\} |  
+            (?P<invalid>)
+        )
+    """
+
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
@@ -136,8 +146,8 @@ def from_color(color: str) -> int:
     colour = int(color[1:], 16)
     return colour
 
-def get_prefix(guild_id: int,markdown: bool = False) -> str:
-    gdb = GuildDateBases(guild_id)
+def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBases = None) -> str:
+    gdb = GuildData or GuildDateBases(guild_id)
     prefix = gdb.get('prefix')
     if markdown:
         return escape_markdown(prefix)
@@ -229,63 +239,3 @@ async def generator_captcha(num):
     )
     data:BytesIO = captcha_image.generate(text)
     return data,text
-
-
-class GreetingFormat:
-    def __init__(self, guild: GuildPayload, member: MemberPayload) -> None:
-        self.guild = guild
-        self.member = member
-    
-    def __call__(self, content: str) -> str:
-        if not content:
-            return content
-        message = content.format(
-            guild=self.guild,
-            member=self.member
-        )
-        return message
-
-async def generate_message_greeting(content, guild: GuildPayload, member: MemberPayload):
-    Formating = GreetingFormat(guild, member)
-    message = {}
-    try:
-        content: dict = orjson.loads(content)
-        
-        message['content'] = content.get('plainText',None)
-        embed = nextcord.Embed(
-            title=Formating(content.get('title',None)),
-            description=Formating(content.get('description',None)),
-            color=content.get('color',None),
-            url=Formating(content.get('url',None)),
-        )
-        
-        thumbnail = content.get('thumbnail')
-        if thumbnail:
-            embed.set_thumbnail(Formating(thumbnail))
-        
-        author: dict = content.get('author',{})
-        if author:
-            embed.set_author(
-                name=Formating(author.get('name',None)),
-                url=Formating(author.get('url',None)),
-                icon_url=Formating(author.get('icon_url',None)),
-            )
-        
-        footer = content.get('footer',None)
-        if footer:
-            embed.set_footer(
-                text=Formating(footer.get('text')),
-                icon_url=Formating(footer.get('icon_url')),
-            )
-        
-        fields = content.get('fields',[])
-        for field in fields:
-            embed.add_field(
-                name=Formating(field.get('name',None)),
-                value=Formating(field.get('value',None)),
-                inline=Formating(field.get('inline',None))
-            )
-        message['embed'] = embed
-    except orjson.JSONDecodeError:
-        message['content'] = content
-    return message

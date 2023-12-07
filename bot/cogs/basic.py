@@ -120,6 +120,8 @@ class basic(commands.Cog):
         inters: nextcord.Interaction, 
         message: nextcord.Message
     ):
+        if not message.content:
+            await inters.response.send_message("This message has no content, so we will not be able to translate it.")
         def check(lan: dict):
             return lan.get("discord_language")==inters.locale
         data = find(check,languages.data)

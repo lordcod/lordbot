@@ -112,11 +112,11 @@ class Economy(commands.Cog):
         
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color',1974050)
+        prefix = get_prefix(ctx.guild.id, markdown=True, GuildData=gdb)
         time = tick()
         account = MemberDB(ctx.guild.id,member.id)
         balance = account.get('balance',0)
         bank = account.get('bank',0)
-        prefix = get_prefix(ctx.guild.id,markdown=True)
         
         description = ""
         if account.get('daily',0) < time:
