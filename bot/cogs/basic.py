@@ -9,6 +9,7 @@ from bot.databases.db import GuildDateBases
 from bot.resources import info
 from bot.views.views import TranslateView
 
+import jmespath
 import googletrans
 import asyncio
 import random
@@ -84,7 +85,9 @@ class basic(commands.Cog):
         lang = gdb.get('language')
         colour = gdb.get('color')
         
-        activiti = find(lambda a: a.get('label')==act,info.activities_list)
+        
+        activiti: dict = jmespath.search(f"[?label=='{act}']|[0]",info.activities_list)
+        
         try:
             inv = await voice.create_invite(
                 target_type=nextcord.InviteTarget.embedded_application,
@@ -122,9 +125,9 @@ class basic(commands.Cog):
     ):
         if not message.content:
             await inters.response.send_message("This message has no content, so we will not be able to translate it.")
-        def check(lan: dict):
-            return lan.get("discord_language")==inters.locale
-        data = find(check,languages.data)
+        
+        data = jmespath.search(f"[?discord_language=='{inters.locale}']|[0]",languages.data)
+        
         result = translator.translate(text=message.content, dest=data.get('google_language'))
         
         view = TranslateView(inters.guild_id)

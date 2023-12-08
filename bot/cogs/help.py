@@ -9,11 +9,9 @@ import jmespath
 
 
 def get_command(name: str) -> help_info.CommandOption: 
-    expression = f"[?name == '{name}'||contains(aliases, '{name}')]"
+    expression = f"[?name == '{name}'||contains(aliases, '{name}')]|[0]"
     result = jmespath.search(expression,help_info.commands)
-    if not result:
-        return None
-    return result[0]
+    return result
 
 
 class help(commands.Cog):
