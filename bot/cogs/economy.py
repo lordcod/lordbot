@@ -64,7 +64,7 @@ class Economy(commands.Cog):
         time = tick()
         account = MemberDB(ctx.guild.id,ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
-        eco_sets = gdb.get('economic_settings',{})
+        eco_sets: dict = gdb.get('economic_settings',{})
         colour = gdb.get('color',1974050)
         award = eco_sets.get(ctx.command.name,0)
         
@@ -188,7 +188,8 @@ class Economy(commands.Cog):
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def dep(self,ctx: commands.Context, sum: str):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color',1974050)
+        colour = gdb.get('color')
+        prefix = gdb.get('prefix')
         account = MemberDB(ctx.guild.id,ctx.author.id)
         balance = account.get('balance',0)
     
@@ -196,7 +197,7 @@ class Economy(commands.Cog):
             if sum == "all":
                 sum = balance
             else:
-                await ctx.send(f"You have entered an invalid argument, use the command so `{self.bot.command_prefix}deposit sum`")
+                await ctx.send(f"You have entered an invalid argument, use the command so `{prefix}deposit sum`")
                 return
         sum = int(sum)
     
@@ -222,7 +223,8 @@ class Economy(commands.Cog):
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def withdraw(self,ctx: commands.Context, sum: str):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color',1974050)
+        colour = gdb.get('color')
+        prefix = gdb.get('prefix')
         account = MemberDB(ctx.guild.id,ctx.author.id)
         bank = account.get('bank',0)
     
@@ -230,7 +232,7 @@ class Economy(commands.Cog):
             if sum == "all":
                 sum = bank
             else:
-                await ctx.send(f"You have entered an invalid argument, use the command so `{self.bot.command_prefix}deposit sum`")
+                await ctx.send(f"You have entered an invalid argument, use the command so `{prefix}deposit sum`")
                 return
         sum = int(sum)
     
@@ -256,26 +258,36 @@ class Economy(commands.Cog):
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
     async def gift(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if 0 >= sum:
+            await ctx.send("The amount must be positive")
+            return
+        
         if not member:
             member = ctx.author
+        
         
         account = MemberDB(ctx.guild.id,member.id)
         
         account["balance"] += sum
         
-        await ctx.send(f"You passed {member.mention}, **{sum}$** ")
+        await ctx.send(f"You passed {member.display_name}, **{sum}$** ")
     
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
     async def take(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if 0 >= sum:
+            await ctx.send("The amount must be positive")
+            return
+        
         if not member:
             member = ctx.author
+        
         
         account = MemberDB(ctx.guild.id,member.id)
         
         account["balance"] -= sum
         
-        await ctx.send(f"You passed {member.mention}, **{sum}$** ")
+        await ctx.send(f"You passed `{member.display_name}`, **{sum}$** ")
 
 
 def setup(bot: commands.Bot):
