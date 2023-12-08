@@ -5,6 +5,7 @@ from bot.misc import utils
 from bot.misc.logger import Logger
 from bot.databases.db import GuildDateBases
 
+import asyncio
 
 
 class members_event(commands.Cog):
@@ -18,8 +19,13 @@ class members_event(commands.Cog):
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
         
-        await self.auto_roles(member, gdb)
-        await self.auto_message(member, gdb)
+        tasks = [
+            self.auto_roles(member, gdb),
+            self.auto_message(member, gdb)
+        ]
+        
+        await asyncio.gather(*tasks)
+    
     
     def on_error(func):
         async def wrapped(self, member, gdb):
@@ -45,30 +51,31 @@ class members_event(commands.Cog):
     
     @on_error
     async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
-        requst: dict = gdb.get('greeting_message')
+        guild = member.guild
+        greeting_message: dict = gdb.get('greeting_message')
         
-        if not requst:
+        if not greeting_message:
             return
         
-        guild = member.guild
+        
+        channel_id: int = greeting_message.get("channel_id")
+        channel = guild.get_channel(channel_id)
+        
+        if not channel:
+            return
+        
         
         member_payload = utils.MemberPayload(member)
         guild_payload = utils.GuildPayload(guild)
+        data_payload = guild_payload|member_payload
         
-        channel_id: int = requst.get("channel_id")
-        channel = self.bot.get_channel(channel_id)
+        content: str = greeting_message.get('message')
         
-        message_payload: str = requst.get("message")
-        message_format_json = message_payload.format(
-            member=member_payload,
-            guild=guild_payload
-        )
+        templete = utils.GreetingTemplate(content)
+        message_format = templete.safe_substitute(data_payload)
+        message_data = await utils.generate_message(message_format)
         
-        message = await utils.generate_message(message_format_json)
-        
-        Logger.info(message)
-        
-        await channel.send(**message)
+        await channel.send(**message_data)
 
 
 
