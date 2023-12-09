@@ -111,12 +111,12 @@ class Economy(commands.Cog):
         
         
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color',1974050)
+        colour = gdb.get('color')
         prefix = get_prefix(ctx.guild.id, markdown=True, GuildData=gdb)
-        time = tick()
         account = MemberDB(ctx.guild.id,member.id)
         balance = account.get('balance',0)
         bank = account.get('bank',0)
+        time = tick()
         
         description = ""
         if account.get('daily',0) < time:
@@ -230,8 +230,8 @@ class Economy(commands.Cog):
         if (bank - sum) < 0:
             await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
-        account['balance'] = account['balance'] + sum
-        account['bank'] = account['bank'] - sum
+        account['balance'] += sum
+        account['bank'] -= sum
 
         embed = nextcord.Embed(
             title="Transfer of currency", 
