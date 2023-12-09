@@ -16,9 +16,12 @@ class command_event(commands.Cog):
         
         bot.event(self.on_error)
         bot.event(self.on_command_error)
+        bot.event(self.on_application_error)
         
         bot.add_check(self.main_check)
     
+    async def on_application_error(self, interaction, error):
+        pass
     
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx,error)

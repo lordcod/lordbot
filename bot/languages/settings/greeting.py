@@ -12,7 +12,7 @@ class init_embed:
 class init_dropdown:
     welcome_label = {
         'en':'Welcome new members',
-        'ru':'Приветствую новых участников'
+        'ru':'Приветствие новых участников'
     }
     roles_label = {
         'en':'Automatic roles',

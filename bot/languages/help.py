@@ -361,3 +361,13 @@ class CommandNotFound:
         'en':'When searching for command, we did not find it, look at it again in the general list of commands',
         'ru':'При поиске команды мы ее не нашли, посмотрите на нее еще раз в общем списке команд'
     }
+
+class CommandNotValid:
+    title = {
+        'en':'The command is invalid',
+        'ru':'Команда недействительна'
+    }
+    description = {
+        'en':'Most likely you entered the name of the team incorrectly, perhaps it contains some strange characters',
+        'ru':'Скорее всего, вы неправильно ввели название команды, возможно, оно содержит какие-то странные символы'
+    }

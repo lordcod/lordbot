@@ -129,10 +129,13 @@ class ViewBuilder(DefaultSettingsView):
         
         content: str = greeting_message.get('message')
         
-        guild_payload = utils.GuildPayload(interaction.guild)
-        member_payload = utils.MemberPayload(interaction.user)
+        guild_payload = utils.GuildPayload(interaction.guild).to_dict()
+        member_payload = utils.MemberPayload(interaction.user).to_dict()
+        data_payload = guild_payload|member_payload
         
-        message_data = await utils.generate_message_greeting(content, guild_payload, member_payload)
+        templete = utils.GreetingTemplate(content)
+        message_format = templete.safe_substitute(data_payload)
+        message_data = await utils.generate_message(message_format)
         
         await interaction.response.send_message(**message_data,ephemeral=True)
     

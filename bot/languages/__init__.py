@@ -42,6 +42,25 @@ current = [
     {"locale":"ru","english_name":"Russian","native_name":"Pусский","flag":"🇷🇺"},
 ]
 
+class BotInfo:
+    title = {
+        'en':'This is a multifunctional bot',
+        'ru':'это многофункциональный бот'
+    }
+    description = {
+        'en':'The bot is designed to facilitate server management and is equipped with various automation tools',
+        'ru':'Бот предназначен для облегчения управления сервером и оснащен различными средствами автоматизации'
+    }
+    
+    info_server = {
+        'en':'Information about the server',
+        'ru':'Информация о сервере'
+    }
+    prefix_server = {
+        'en':'Server prefix',
+        'ru':'Префикс сервера'
+    }
+
 class translate:
     placeholder = {
         'ru':'Выберете подходящий язык:',
@@ -176,6 +195,22 @@ class errors:
     OnlyTeamError = {
         'en':'This command can only be used by the bot team',
         'ru':'Эта команда может быть использована только командой бота'
+    }
+    MemberNotFound = {
+        'en':(
+            'The participant could not be found.\n'
+            'In order for us to find him, you can use the following arguments:\n'
+            '* Nickname\n'
+            '* Id\n'
+            '* Mention\n'
+        ),
+        'ru':(
+            'Участника не удалось найти.\n'
+            'Для того, чтобы мы могли его найти, вы можете использовать следующие аргументы:\n'
+            '* Ник\n'
+            '* Идентификатор\n' 
+            '* Упоминание\n'
+        )
     }
     
     class CommandOnCooldown:

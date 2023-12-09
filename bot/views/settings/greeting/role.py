@@ -49,7 +49,15 @@ class ViewBuilder(DefaultSettingsView):
         if roles:
             self.install.disabled = False
             self.roles = roles
-        
+            
+            self.remove_item(self.delete)
+        elif roles_ids:
+            self.delete.disabled = False
+            
+            self.remove_item(self.install)
+        else:
+            self.remove_item(self.install)
+            self.remove_item(self.delete)
         
         
         self.embed = nextcord.Embed(
@@ -78,6 +86,17 @@ class ViewBuilder(DefaultSettingsView):
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = self.gdb 
         roles_ids = [role.id for role in self.roles]
+        
+        gdb.set('auto_roles',roles_ids)
+        
+        view = ViewBuilder(interaction.guild)
+        
+        await interaction.message.edit(embed=view.embed, view=view)
+    
+    @nextcord.ui.button(label='Delete roles',style=nextcord.ButtonStyle.red,disabled=True)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        gdb = self.gdb 
+        roles_ids = []
         
         gdb.set('auto_roles',roles_ids)
         

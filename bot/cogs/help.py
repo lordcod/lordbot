@@ -5,15 +5,20 @@ from bot.languages import help as help_info
 from bot.databases.db import GuildDateBases
 from bot.views.views import HelpView
 
+import re
 import jmespath
 
+def is_valid_command(name: str) -> bool:
+    pattern = r'([ _\-\.a-zA-Z]+)'
+    result = re.fullmatch(pattern,name)
+    if result:
+        return True
+    return False
 
 def get_command(name: str) -> help_info.CommandOption: 
-    expression = f"[?name == '{name}'||contains(aliases, '{name}')]"
+    expression = f"[?name == '{name}'||contains(aliases, '{name}')]|[0]"
     result = jmespath.search(expression,help_info.commands)
-    if not result:
-        return None
-    return result[0]
+    return result
 
 
 class help(commands.Cog):
@@ -30,12 +35,17 @@ class help(commands.Cog):
             await self.generate_message(ctx)
             return
         
+        if not is_valid_command(command_name):
+            await self.generate_not_valid(ctx)
+            return
+        
         command_data = get_command(command_name)
         if command_data:
             await self.generate_command(ctx,command_data)
             return
         
         await self.generate_not_found(ctx)
+    
     
     async def generate_message(self, ctx: commands.Context):
         locale = self.gdb.get('language')
@@ -126,6 +136,7 @@ class help(commands.Cog):
         
         await ctx.send(embed=embed)
 
+
     async def generate_not_found(self, ctx: commands.Context):
         locale = self.gdb.get('language')
         colour = self.gdb.get('color')
@@ -133,6 +144,18 @@ class help(commands.Cog):
         embed = nextcord.Embed(
             title=help_info.CommandNotFound.title.get(locale),
             description=help_info.CommandNotFound.description.get(locale),
+            color=colour
+        )
+        
+        await ctx.send(embed=embed)
+
+    async def generate_not_valid(self, ctx: commands.Context):
+        locale = self.gdb.get('language')
+        colour = self.gdb.get('color')
+        
+        embed = nextcord.Embed(
+            title=help_info.CommandNotValid.title.get(locale),
+            description=help_info.CommandNotValid.description.get(locale),
             color=colour
         )
         

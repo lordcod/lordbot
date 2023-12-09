@@ -78,7 +78,7 @@ class CallbackCommandError:
             title=errors.CommandOnCooldown.title.get(self.locale),
             description=(
                 f'{errors.CommandOnCooldown.description.get(self.locale)}'
-                f'{self.error.retry_after :.0f}'
+                f' {self.error.retry_after :.0f} '
                 f'{errors.CommandOnCooldown.seconds.get(self.locale)}'
             ),
             colour=nextcord.Color.red()
@@ -128,6 +128,14 @@ class CallbackCommandError:
         
         await self.ctx.send(content)
     
+    async def MemberNotFound(self):
+        content = errors.MemberNotFound.get(self.locale)
+        
+        await self.ctx.send(content)
+    
+    async def BadUnionArgument(self):
+        await self.BadArgument()
+    
     async def OfterError(self):
         content = f'OfterError, {self.error.__class__.__name__}'
         # await self.ctx.send(content)
@@ -135,7 +143,8 @@ class CallbackCommandError:
     errors = [
         MissingPermissions,MissingRole,BotMissingPermissions,DisabledCommand,
         CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
-        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy
+        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy,MemberNotFound,
+        BadUnionArgument
     ]
 
 

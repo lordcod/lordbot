@@ -50,6 +50,20 @@ class GuildPayload:
     def premiumSubscriptionCount(self) -> int:
         return self.guild.premium_subscription_count
 
+
+    def to_dict(self):
+        starter = 'guild.'
+        ret = {
+            f'{starter}id':self.id,
+            f'{starter}name':self.name,
+            f'{starter}icon':self.icon,
+            f'{starter}memberCount':self.memberCount,
+            f'{starter}createdAt':self.createdAt,
+            f'{starter}premiumSubscriptionCount':self.premiumSubscriptionCount,
+        }
+        
+        return ret
+
     def __getattr__(self, name: str) -> Any:
         return f'{"{"}{name}{"}"}'
     
@@ -63,12 +77,12 @@ class MemberPayload:
         self.member = member
     
     @property
-    def mention(self) -> str:
-        return self.member.mention
-    
-    @property
     def id(self) -> int:
         return self.member.id
+    
+    @property
+    def mention(self) -> str:
+        return self.member.mention
     
     @property 
     def username(self) -> str:
@@ -95,11 +109,37 @@ class MemberPayload:
             return None
         return member.display_avatar.url
     
+    
+    def to_dict(self):
+        starter = 'member.'
+        ret = {
+            f'{starter}id':self.id,
+            f'{starter}mention':self.mention,
+            f'{starter}username':self.username,
+            f'{starter}displayName':self.displayName,
+            f'{starter}discriminator,':self.discriminator,
+            f'{starter}tag':self.tag,
+            f'{starter}avatar':self.avatar,
+        }
+        
+        return ret
+    
     def __getattr__(self, name: str) -> str:
         return f'{"{"}{name}{"}"}'
 
     def __str__(self) -> str:
         return self.tag
+
+class GreetingTemplate(string.Template):
+    pattern = r'''
+        \{(?:
+        (?P<escaped>\{) |
+        (?P<named>[\._a-z][\._a-z0-9]*)\} |
+        (?P<braced>[\._a-z][\._a-z0-9]*)\} |
+        (?P<invalid>)
+        )
+    '''
+
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
@@ -135,8 +175,8 @@ def from_color(color: str) -> int:
     colour = int(color[1:], 16)
     return colour
 
-def get_prefix(guild_id: int,markdown: bool = False) -> str:
-    gdb = GuildDateBases(guild_id)
+def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBases = None) -> str:
+    gdb = GuildData or GuildDateBases(guild_id)
     prefix = gdb.get('prefix')
     if markdown:
         return escape_markdown(prefix)
@@ -170,23 +210,35 @@ def clord(value,cls,default=None):
             return default
 
 async def generate_message(content) -> dict|str:
+    content = str(content)
     message = {}
     try:
         content: dict = orjson.loads(content)
         
-        message['content'] = content.get('plainText',None)
-        embed = nextcord.Embed(
-            title=content.get('title',None),
-            description=content.get('description',None),
-            color=content.get('color',None),
-            url=content.get('url',None),
-        )
+        message_content = content.get('plainText')
+        
+        title = content.get('title')
+        description=content.get('description')
+        color=content.get('color')
+        url=content.get('url')
         
         thumbnail = content.get('thumbnail')
+        author = content.get('author')
+        footer = content.get('footer')
+        fields = content.get('fields', [])
+        
+        message['content'] = message_content
+        
+        embed = nextcord.Embed(
+            title=title,
+            description=description,
+            color=color,
+            url=url,
+        )
+        
         if thumbnail:
             embed.set_thumbnail(thumbnail)
         
-        author: dict = content.get('author',{})
         if author:
             embed.set_author(
                 name=author.get('name',None),
@@ -194,22 +246,24 @@ async def generate_message(content) -> dict|str:
                 icon_url=author.get('icon_url',None),
             )
         
-        footer = content.get('footer',None)
         if footer:
             embed.set_footer(
                 text=footer.get('text'),
                 icon_url=footer.get('icon_url'),
             )
         
-        fields = content.get('fields',[])
         for field in fields:
             embed.add_field(
                 name=field.get('name',None),
                 value=field.get('value',None),
                 inline=field.get('inline',None)
             )
-        message['embed'] = embed
-    except orjson.JSONDecodeError:
+        
+        if title or description or thumbnail or author or footer or fields:
+            message['embed'] = embed
+        elif not message_content:
+            raise ValueError()
+    except:
         message['content'] = content
     return message
 
@@ -229,62 +283,3 @@ async def generator_captcha(num):
     data:BytesIO = captcha_image.generate(text)
     return data,text
 
-
-class GreetingFormat:
-    def __init__(self, guild: GuildPayload, member: MemberPayload) -> None:
-        self.guild = guild
-        self.member = member
-    
-    def __call__(self, content: str) -> str:
-        if not content:
-            return content
-        message = content.format(
-            guild=self.guild,
-            member=self.member
-        )
-        return message
-
-async def generate_message_greeting(content, guild: GuildPayload, member: MemberPayload):
-    Formating = GreetingFormat(guild, member)
-    message = {}
-    try:
-        content: dict = orjson.loads(content)
-        
-        message['content'] = content.get('plainText',None)
-        embed = nextcord.Embed(
-            title=Formating(content.get('title',None)),
-            description=Formating(content.get('description',None)),
-            color=content.get('color',None),
-            url=Formating(content.get('url',None)),
-        )
-        
-        thumbnail = content.get('thumbnail')
-        if thumbnail:
-            embed.set_thumbnail(Formating(thumbnail))
-        
-        author: dict = content.get('author',{})
-        if author:
-            embed.set_author(
-                name=Formating(author.get('name',None)),
-                url=Formating(author.get('url',None)),
-                icon_url=Formating(author.get('icon_url',None)),
-            )
-        
-        footer = content.get('footer',None)
-        if footer:
-            embed.set_footer(
-                text=Formating(footer.get('text')),
-                icon_url=Formating(footer.get('icon_url')),
-            )
-        
-        fields = content.get('fields',[])
-        for field in fields:
-            embed.add_field(
-                name=Formating(field.get('name',None)),
-                value=Formating(field.get('value',None)),
-                inline=Formating(field.get('inline',None))
-            )
-        message['embed'] = embed
-    except orjson.JSONDecodeError:
-        message['content'] = content
-    return message
