@@ -7,7 +7,7 @@ from bot.resources.ether import Emoji
 from bot.misc.utils import get_prefix
 
 from time import time as tick
-from typing import Optional
+from typing import Optional, Union, Literal
 
 timeout_rewards = {"daily": 86400,"weekly": 604800,"monthly": 2592000}
 
@@ -186,20 +186,15 @@ class Economy(commands.Cog):
     
     @commands.command(name="deposit",aliases=["dep"])
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
-    async def dep(self,ctx: commands.Context, sum: str):
+    async def dep(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')
         prefix = gdb.get('prefix')
         account = MemberDB(ctx.guild.id,ctx.author.id)
         balance = account.get('balance',0)
     
-        if not sum.isdigit():
-            if sum == "all":
-                sum = balance
-            else:
-                await ctx.send(f"You have entered an invalid argument, use the command so `{prefix}deposit sum`")
-                return
-        sum = int(sum)
+        if sum == "all":
+            sum = balance
     
         if sum <= 0:
             await ctx.send(content="Specify the amount more `0`")
@@ -220,21 +215,15 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="withdraw",aliases=["wd"])
-    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
-    async def withdraw(self,ctx: commands.Context, sum: str):
+    async def withdraw(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')
         prefix = gdb.get('prefix')
         account = MemberDB(ctx.guild.id,ctx.author.id)
         bank = account.get('bank',0)
     
-        if not sum.isdigit():
-            if sum == "all":
-                sum = bank
-            else:
-                await ctx.send(f"You have entered an invalid argument, use the command so `{prefix}deposit sum`")
-                return
-        sum = int(sum)
+        if sum == "all":
+            sum = bank
     
         if sum <= 0:
             await ctx.send(content="Specify the amount more `0`")
