@@ -140,7 +140,7 @@ class CallbackCommandError:
     errors = [
         MissingPermissions,MissingRole,BotMissingPermissions,DisabledCommand,
         CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
-        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy
+        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy,MemberNotFound
     ]
 
 
