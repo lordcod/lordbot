@@ -64,8 +64,8 @@ class Economy(commands.Cog):
         time = tick()
         account = MemberDB(ctx.guild.id,ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
-        eco_sets: dict = gdb.get('economic_settings',{})
-        colour = gdb.get('color',1974050)
+        eco_sets: dict = gdb.get('economic_settings')
+        colour = gdb.get('color')
         award = eco_sets.get(ctx.command.name,0)
         
         if award <= 0:
@@ -186,7 +186,7 @@ class Economy(commands.Cog):
     
     @commands.command(name="deposit",aliases=["dep"])
     @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
-    async def dep(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
+    async def deposit(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')
         prefix = gdb.get('prefix')
