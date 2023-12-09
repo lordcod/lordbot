@@ -185,7 +185,6 @@ class Economy(commands.Cog):
     
     
     @commands.command(name="deposit",aliases=["dep"])
-    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
     async def deposit(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')

@@ -133,6 +133,9 @@ class CallbackCommandError:
         
         await self.ctx.send(content)
     
+    async def BadUnionArgument(self):
+        await self.BadArgument()
+    
     async def OfterError(self):
         content = f'OfterError, {self.error.__class__.__name__}'
         # await self.ctx.send(content)
@@ -140,7 +143,8 @@ class CallbackCommandError:
     errors = [
         MissingPermissions,MissingRole,BotMissingPermissions,DisabledCommand,
         CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
-        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy,MemberNotFound
+        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy,MemberNotFound,
+        BadUnionArgument
     ]
 
 

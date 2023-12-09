@@ -210,23 +210,35 @@ def clord(value,cls,default=None):
             return default
 
 async def generate_message(content) -> dict|str:
+    content = str(content)
     message = {}
     try:
         content: dict = orjson.loads(content)
         
-        message['content'] = content.get('plainText',None)
-        embed = nextcord.Embed(
-            title=content.get('title',None),
-            description=content.get('description',None),
-            color=content.get('color',None),
-            url=content.get('url',None),
-        )
+        message_content = content.get('plainText')
+        
+        title = content.get('title')
+        description=content.get('description')
+        color=content.get('color')
+        url=content.get('url')
         
         thumbnail = content.get('thumbnail')
+        author = content.get('author')
+        footer = content.get('footer')
+        fields = content.get('fields', [])
+        
+        message['content'] = message_content
+        
+        embed = nextcord.Embed(
+            title=title,
+            description=description,
+            color=color,
+            url=url,
+        )
+        
         if thumbnail:
             embed.set_thumbnail(thumbnail)
         
-        author: dict = content.get('author',{})
         if author:
             embed.set_author(
                 name=author.get('name',None),
@@ -234,22 +246,24 @@ async def generate_message(content) -> dict|str:
                 icon_url=author.get('icon_url',None),
             )
         
-        footer = content.get('footer',None)
         if footer:
             embed.set_footer(
                 text=footer.get('text'),
                 icon_url=footer.get('icon_url'),
             )
         
-        fields = content.get('fields',[])
         for field in fields:
             embed.add_field(
                 name=field.get('name',None),
                 value=field.get('value',None),
                 inline=field.get('inline',None)
             )
-        message['embed'] = embed
-    except orjson.JSONDecodeError:
+        
+        if title or description or thumbnail or author or footer or fields:
+            message['embed'] = embed
+        elif not message_content:
+            raise ValueError()
+    except:
         message['content'] = content
     return message
 
