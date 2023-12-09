@@ -14,7 +14,7 @@ class text_colors:
     VIOLET = '\033[95m'#
     CYAN = '\033[96m'
 
-@lambda cls: cls()
+@lambda cls: cls(True)
 class Logger:
     def __init__(self, service=True, date=True) -> None:
         self.service = service
