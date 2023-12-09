@@ -8,4 +8,4 @@ token_lord_kind = "MTE1MDA4MTM4NDA5OTA5ODczNQ.GDh14s.0FeVoCkyZBPYRvJgq5s8hpKY9zx
 token_lord_classic = "MTExOTM1MTIxOTc2OTU5Mzk3Ng.GeflqK.G0CwF8QzU5WJiWgxz2NpUBw6JlouQhMWbppmlY"
 
 class Tokens:
-    token = token_lord_cord
+    token = token_lord_kind
