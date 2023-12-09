@@ -30,9 +30,11 @@ class DropDown(nextcord.ui.Select):
             
             selectOption = nextcord.SelectOption(
                 label=command.get('name'),
-                description=command.get('brief_descriptrion'),
                 value=command.get('name')
             )
+            
+            
+            selectOption.description=command.get('brief_descriptrion').get(locale)
             
             if command.get('name') in disabled_commands:
                 emoji = nextcord.PartialEmoji.from_str(Emoji.disabled)
