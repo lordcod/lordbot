@@ -2,6 +2,10 @@ import nextcord
 from nextcord.ext import commands
 from bot.misc.logger import Logger
 
+from time import sleep
+from string import ascii_lowercase
+from random import choice, randint
+
 class ready_event(commands.Cog):
     bot: commands.Bot
     

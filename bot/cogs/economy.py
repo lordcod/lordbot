@@ -7,7 +7,7 @@ from bot.resources.ether import Emoji
 from bot.misc.utils import get_prefix
 
 from time import time as tick
-from typing import Optional
+from typing import Optional, Union, Literal
 
 timeout_rewards = {"daily": 86400,"weekly": 604800,"monthly": 2592000}
 
@@ -38,10 +38,6 @@ class MemberDB:
         return self.data[item]
     
     def __setitem__(self, key, value):
-        print("MEC")
-        print(self.member_id, self.guild_id)
-        print(key, value)
-        
         self.data[key] = value
         
         self.emdb.update(key, value)
@@ -68,8 +64,8 @@ class Economy(commands.Cog):
         time = tick()
         account = MemberDB(ctx.guild.id,ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
-        eco_sets = gdb.get('economic_settings',{})
-        colour = gdb.get('color',1974050)
+        eco_sets: dict = gdb.get('economic_settings')
+        colour = gdb.get('color')
         award = eco_sets.get(ctx.command.name,0)
         
         if award <= 0:
@@ -116,11 +112,11 @@ class Economy(commands.Cog):
         
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color',1974050)
+        prefix = get_prefix(ctx.guild.id, markdown=True, GuildData=gdb)
         time = tick()
         account = MemberDB(ctx.guild.id,member.id)
         balance = account.get('balance',0)
         bank = account.get('bank',0)
-        prefix = get_prefix(ctx.guild.id,markdown=True)
         
         description = ""
         if account.get('daily',0) < time:
@@ -189,26 +185,21 @@ class Economy(commands.Cog):
     
     
     @commands.command(name="deposit",aliases=["dep"])
-    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
-    async def dep(self,ctx: commands.Context, sum: str):
+    async def deposit(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color',1974050)
+        colour = gdb.get('color')
+        prefix = gdb.get('prefix')
         account = MemberDB(ctx.guild.id,ctx.author.id)
         balance = account.get('balance',0)
     
-        if not sum.isdigit():
-            if sum == "all":
-                sum = balance
-            else:
-                await ctx.send(f"You have entered an invalid argument, use the command so `{self.bot.command_prefix}deposit sum`")
-                return
-        sum = int(sum)
+        if sum == "all":
+            sum = balance
     
         if sum <= 0:
             await ctx.send(content="Specify the amount more `0`")
             return
         if (balance - sum) < 0:
-            await ctx.send(content=f"Not enough funds to check your balance use `{self.bot.command_prefix}bal`")
+            await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
         account['balance'] = account['balance'] - sum
         account['bank'] = account['bank'] + sum
@@ -223,26 +214,21 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="withdraw",aliases=["wd"])
-    @commands.cooldown(rate=1, per=60.0, type=commands.BucketType.user)
-    async def withdraw(self,ctx: commands.Context, sum: str):
+    async def withdraw(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color',1974050)
+        colour = gdb.get('color')
+        prefix = gdb.get('prefix')
         account = MemberDB(ctx.guild.id,ctx.author.id)
         bank = account.get('bank',0)
     
-        if not sum.isdigit():
-            if sum == "all":
-                sum = bank
-            else:
-                await ctx.send(f"You have entered an invalid argument, use the command so `{self.bot.command_prefix}deposit sum`")
-                return
-        sum = int(sum)
+        if sum == "all":
+            sum = bank
     
         if sum <= 0:
             await ctx.send(content="Specify the amount more `0`")
             return
         if (bank - sum) < 0:
-            await ctx.send(content=f"Not enough funds to check your balance use `{self.bot.command_prefix}bal`")
+            await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
         account['balance'] = account['balance'] + sum
         account['bank'] = account['bank'] - sum
@@ -260,26 +246,36 @@ class Economy(commands.Cog):
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
     async def gift(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if 0 >= sum:
+            await ctx.send("The amount must be positive")
+            return
+        
         if not member:
             member = ctx.author
+        
         
         account = MemberDB(ctx.guild.id,member.id)
         
         account["balance"] += sum
         
-        await ctx.send(f"You passed {member.mention}, **{sum}$** ")
+        await ctx.send(f"You passed {member.display_name}, **{sum}$** ")
     
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
     async def take(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if 0 >= sum:
+            await ctx.send("The amount must be positive")
+            return
+        
         if not member:
             member = ctx.author
+        
         
         account = MemberDB(ctx.guild.id,member.id)
         
         account["balance"] -= sum
         
-        await ctx.send(f"You passed {member.mention}, **{sum}$** ")
+        await ctx.send(f"You passed `{member.display_name}`, **{sum}$** ")
 
 
 def setup(bot: commands.Bot):

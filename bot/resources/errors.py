@@ -1,30 +1,38 @@
 import nextcord
-from typing import Union
 from nextcord.ext import commands
 
+from bot.misc.logger import Logger
+from bot.databases.db import GuildDateBases
+from bot.languages import errors
 
-class DisabledCommand(commands.CommandError):
-    pass
+from inspect import Parameter
+from typing import Union
 
 class ErrorTypeChannel(Exception):
+    pass
+
+class DisabledCommand(commands.CommandError):
     pass
 
 class OnlyTeamError(commands.CommandError):
     def __init__(self, author: Union[nextcord.Member,nextcord.User]) -> None:
         self.author: Union[nextcord.Member,nextcord.User] = author
-        super().__init__("This command can only be used by the bot team")
+        super().__init__()
 
 class NotActivateEconomy(commands.CommandError):
     pass
 
 
 class CallbackCommandError:
-    def __init__(self,ctx: commands.Context,error) -> None:
+    def __init__(self,ctx: commands.Context, error) -> None:
         self.ctx = ctx
         self.error = error
-        print(error)
+        
+        self.gdb = GuildDateBases(ctx.guild.id)
+        self.locale = self.gdb.get('language')
     
     async def process(self):
+        Logger.info(f'[{self.error.__class__.__name__}] {self.error}')
         for error in self.errors:
             name = error.__name__
             error_name = self.error.__class__.__name__
@@ -36,49 +44,107 @@ class CallbackCommandError:
             await self.OfterError()
     
     async def MissingPermissions(self):
-        content = "The user does not have enough rights"
-    
-    async def MissingRole(self):
-        content = "You don't have the right role to execute the command"
-    
-    async def MissingAnyRole(self):
-        content = "You don't have the right or the right roles to execute the command"
+        content = errors.MissingPermissions.get(self.locale)
+        
+        await self.ctx.send(
+            content=content
+        )
     
     async def BotMissingPermissions(self):
-        content = "The bot doesn't have enough rights"
+        content = errors.BotMissingPermissions.get(self.locale)
+        
+        await self.ctx.send(
+            content=content
+        )
+    
+    async def MissingRole(self):
+        content = errors.MissingRole.get(self.locale)
+        
+        await self.ctx.send(
+            content=content
+        )
+    
     
     async def CommandNotFound(self):
-        content = "There is no such command"
-        await self.ctx.send(content)
+        content = errors.CommandNotFound.get(self.locale)
+        
+        await self.ctx.send(
+            content=content,
+            delete_after=5
+        )
     
     async def CommandOnCooldown(self):
         embed = nextcord.Embed(
-            title='The command is on hold',
-            description=f'Repeat after {self.error.retry_after :.0f} seconds',
+            title=errors.CommandOnCooldown.title.get(self.locale),
+            description=(
+                f'{errors.CommandOnCooldown.description.get(self.locale)}'
+                f' {self.error.retry_after :.0f} '
+                f'{errors.CommandOnCooldown.seconds.get(self.locale)}'
+            ),
             colour=nextcord.Color.red()
         )
+        
         await self.ctx.send(embed=embed, delete_after=5.0)
     
     async def NotOwner(self):
-        content = "This command is intended for the bot owner"
+        content = errors.NotOwner.get(self.locale)
+        
+        await self.ctx.send(
+            content=content
+        )
     
     async def CheckFailure(self):
-        content = "You don't fulfill all the conditions"
+        content = errors.CheckFailure.get(self.locale)
+        
+        await self.ctx.send(
+            content=content
+        )
     
     async def BadArgument(self):
-        content = "Incorrect arguments"
+        content = errors.BadArgument.get(self.locale)
+        
+        await self.ctx.send(
+            content=content
+        )
     
     async def DisabledCommand(self):
-        content = f'This command is disabled on the server'
+        content = errors.DisabledCommand.get(self.locale)
+        
         await self.ctx.send(content)
     
+    async def MissingRequiredArgument(self):
+        param: Parameter = self.error.param
+        content = f'{errors.MissingRequiredArgument.get(self.locale)} - {param.name}'
+        
+        await self.ctx.send(content)
+    
+    async def NotActivateEconomy(self):
+        content = errors.NotActivateEconomy.get(self.locale)
+        
+        await self.ctx.send(content)
+    
+    async def OnlyTeamError(self):
+        content = errors.OnlyTeamError.get(self.locale)
+        
+        await self.ctx.send(content)
+    
+    async def MemberNotFound(self):
+        content = errors.MemberNotFound.get(self.locale)
+        
+        await self.ctx.send(content)
+    
+    async def BadUnionArgument(self):
+        await self.BadArgument()
+    
     async def OfterError(self):
-        pass
+        content = f'OfterError, {self.error.__class__.__name__}'
+        # await self.ctx.send(content)
     
     errors = [
-        MissingPermissions,MissingRole,MissingAnyRole,BotMissingPermissions,
+        MissingPermissions,MissingRole,BotMissingPermissions,DisabledCommand,
         CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
-        DisabledCommand
+        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy,MemberNotFound,
+        BadUnionArgument
     ]
 
 

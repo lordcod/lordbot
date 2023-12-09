@@ -42,9 +42,28 @@ current = [
     {"locale":"ru","english_name":"Russian","native_name":"Pусский","flag":"🇷🇺"},
 ]
 
+class BotInfo:
+    title = {
+        'en':'This is a multifunctional bot',
+        'ru':'это многофункциональный бот'
+    }
+    description = {
+        'en':'The bot is designed to facilitate server management and is equipped with various automation tools',
+        'ru':'Бот предназначен для облегчения управления сервером и оснащен различными средствами автоматизации'
+    }
+    
+    info_server = {
+        'en':'Information about the server',
+        'ru':'Информация о сервере'
+    }
+    prefix_server = {
+        'en':'Server prefix',
+        'ru':'Префикс сервера'
+    }
+
 class translate:
     placeholder = {
-        'ru':'Выберет подходящий язык:',
+        'ru':'Выберете подходящий язык:',
         'en':'Will choose the appropriate language:'
     }
 
@@ -130,3 +149,80 @@ class auto_translate:
         'ru':'Переведено на',
         'en':'Translated to'
     }
+
+class errors:
+    MissingPermissions = {
+        'en':'You don\'t have enough rights',
+        'ru':'У вас недостаточно прав'
+    }
+    BotMissingPermissions = {
+        'en':'The bot does not have enough rights to perform this action, most likely you took it away when adding the bot to the server',
+        'ru':'У бота недостаточно прав для выполнения этого действия, скорее всего, вы убрали их при добавлении бота на сервер'
+    }
+    MissingRole = {
+        'en':'You don\'t have a suitable role to execute the command',
+        'ru':'У вас нет нужной роли для выполнения команды'
+    }
+    
+    NotOwner = {
+        'en':'This command is intended for the bot owner',
+        'ru':'Эта команда предназначена для владельца бота'
+    }
+    CommandNotFound = {
+        'en':'There is no such command',
+        'ru':'Такой команды нет'
+    }
+    CheckFailure = {
+        'en':'You don\'t fulfill all the conditions',
+        'ru':'Вы не выполняете всех условий'
+    }
+    BadArgument = {
+        'en':'Invalid argument entered',
+        'ru':'Введен недопустимый аргумент'
+    }
+    DisabledCommand = {
+        'en':'This command is disabled on the server',
+        'ru':'Эта команда отключена на сервере'
+    }
+    MissingRequiredArgument = {
+        'en':'You didn\'t enter a required argument',
+        'ru':'Вы не ввели обязательный аргумент'
+    }
+    NotActivateEconomy = {
+        'en':'The economy system is disabled on the server',
+        'ru':'Система экономики отключена на сервере'
+    }
+    OnlyTeamError = {
+        'en':'This command can only be used by the bot team',
+        'ru':'Эта команда может быть использована только командой бота'
+    }
+    MemberNotFound = {
+        'en':(
+            'The participant could not be found.\n'
+            'In order for us to find him, you can use the following arguments:\n'
+            '* Nickname\n'
+            '* Id\n'
+            '* Mention\n'
+        ),
+        'ru':(
+            'Участника не удалось найти.\n'
+            'Для того, чтобы мы могли его найти, вы можете использовать следующие аргументы:\n'
+            '* Ник\n'
+            '* Идентификатор\n' 
+            '* Упоминание\n'
+        )
+    }
+    
+    class CommandOnCooldown:
+        title = {
+            'en':'The command is on hold',
+            'ru':'Команда находится в режиме ожидания'
+        }
+        description = {
+            'en':'Try again after',
+            'ru':'Повторите попытку через'
+        }
+        seconds = {
+            'en':'seconds',
+            'ru':'секунд'
+        }

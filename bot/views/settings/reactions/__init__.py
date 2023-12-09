@@ -1,23 +1,28 @@
 import nextcord
+
+from .additional import ViewBuilder
+from .precise import ReactData
+from ...settings import DefaultSettingsView
+
+from bot.misc import utils
+from bot.views import views
 from bot.databases.db import GuildDateBases
 from bot.resources.ether import Channel_Type
-from .addres import ViewBuilder
-from .datas import ReactData
-from bot.views import views
-from ...settings import DefaultSettingsView
 from bot.languages.settings import (
     reactions as reaction_langs,
     button as button_name
 )
 
+
 class DropDown(nextcord.ui.Select):
     is_option = False
     
-    def __init__(self,guild):
+    def __init__(self,guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
         locale = self.gdb.get('language')
         self.reactions = self.gdb.get('reactions',{})
         channels = [guild.get_channel(key)  for key in self.reactions]
+        utils.remove_none(channels)
         
         if len(channels) <= 0:
             self.is_option = True

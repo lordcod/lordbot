@@ -1,6 +1,9 @@
 import nextcord
 from nextcord.ext import commands
+
 from bot.resources import check
+
+import sys
 
 class teams(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -10,7 +13,7 @@ class teams(commands.Cog):
     @check.team_only()
     async def shutdown(self,ctx:commands.Context):
         await ctx.send("The bot has activated the completion process!")
-        await self.bot.close()
+        sys.exit()
 
     @commands.command()
     @commands.guild_only()
