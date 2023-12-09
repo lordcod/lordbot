@@ -128,6 +128,11 @@ class CallbackCommandError:
         
         await self.ctx.send(content)
     
+    async def MemberNotFound(self):
+        content = errors.MemberNotFound.get(self.locale)
+        
+        await self.ctx.send(content)
+    
     async def OfterError(self):
         content = f'OfterError, {self.error.__class__.__name__}'
         # await self.ctx.send(content)
