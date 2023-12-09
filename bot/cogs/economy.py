@@ -205,7 +205,7 @@ class Economy(commands.Cog):
             await ctx.send(content="Specify the amount more `0`")
             return
         if (balance - sum) < 0:
-            await ctx.send(content=f"Not enough funds to check your balance use `{self.bot.command_prefix}bal`")
+            await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
         account['balance'] = account['balance'] - sum
         account['bank'] = account['bank'] + sum
@@ -240,7 +240,7 @@ class Economy(commands.Cog):
             await ctx.send(content="Specify the amount more `0`")
             return
         if (bank - sum) < 0:
-            await ctx.send(content=f"Not enough funds to check your balance use `{self.bot.command_prefix}bal`")
+            await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
         account['balance'] = account['balance'] + sum
         account['bank'] = account['bank'] - sum

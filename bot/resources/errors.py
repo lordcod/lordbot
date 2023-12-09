@@ -78,7 +78,7 @@ class CallbackCommandError:
             title=errors.CommandOnCooldown.title.get(self.locale),
             description=(
                 f'{errors.CommandOnCooldown.description.get(self.locale)}'
-                f'{self.error.retry_after :.0f}'
+                f' {self.error.retry_after :.0f} '
                 f'{errors.CommandOnCooldown.seconds.get(self.locale)}'
             ),
             colour=nextcord.Color.red()
