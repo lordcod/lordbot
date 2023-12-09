@@ -18,14 +18,12 @@ except Exception as err:
     print(type(err))
     print(err)
 
-
 with connection.cursor() as cursor:
     query = """
         ALTER TABLE guilds
-        ADD greeting_message JSON DEFAULT '{}'; 
+        ADD auto_roles JSON DEFAULT '{}'; 
     """
     cursor.execute(query)
-
 
 
 print("Finish")
