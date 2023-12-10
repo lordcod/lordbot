@@ -219,7 +219,6 @@ class Economy(commands.Cog):
         
         await message.edit(content=None,embed=embed)
     
-    
     @commands.command(name="pay")
     async def pay(self,ctx: commands.Context, member: nextcord.Member, sum: int):
         gdb = GuildDateBases(ctx.guild.id)
@@ -316,12 +315,16 @@ class Economy(commands.Cog):
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
     async def gift(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if sum > 1_000_000:
+            await ctx.send(f"The maximum amount for this server - {1_000_000}")
+            return
         if 0 >= sum:
             await ctx.send("The amount must be positive")
             return
         
         if not member:
             member = ctx.author
+        
         
         gdb = GuildDateBases(ctx.guild.id)
         eco_sets: dict = gdb.get('economic_settings')
@@ -335,6 +338,9 @@ class Economy(commands.Cog):
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
     async def take(self,ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+        if sum > 1_000_000:
+            await ctx.send(f"The maximum amount for this server - {1_000_000}")
+            return
         if 0 >= sum:
             await ctx.send("The amount must be positive")
             return
@@ -342,10 +348,15 @@ class Economy(commands.Cog):
         if not member:
             member = ctx.author
         
+        
         gdb = GuildDateBases(ctx.guild.id)
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
         account = MemberDB(ctx.guild.id,member.id)
+        
+        if 0 > (account.get('balance')-sum):
+            await ctx.send('The operation cannot be performed because the balance will become negative during it')
+            return
         
         account["balance"] -= sum
         
