@@ -32,7 +32,7 @@ class command_event(commands.Cog):
     
     async def main_check(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
-        com_name = ctx.command.name
+        com_name = ctx.command.qualified_name
         dis_coms = gdb.get('disabled_commands')
         if com_name in dis_coms:
             raise errors.DisabledCommand()
