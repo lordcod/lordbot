@@ -35,8 +35,6 @@ class GuildDateBases:
     def _insert(self, guild_id):
         with connection().cursor() as cursor:
             cursor.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
-            
-            connection().commit()
     
     @on_error()
     def _update(self, guild_id,arg,value):
@@ -44,15 +42,6 @@ class GuildDateBases:
             self._insert(guild_id)
         with connection().cursor() as cursor:
             cursor.execute(f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value, guild_id))
-            
-            connection().commit()
-    
-    @on_error()
-    def _delete(self, guild_id):
-        with connection().cursor() as cursor:
-            cursor.execute('DELETE FROM guilds WHERE id = %s', (guild_id,))
-            
-            connection().commit()
     
     
     @on_error()
@@ -71,4 +60,11 @@ class GuildDateBases:
         value = Formating.dumps(value)
         value = Json.dumps(value)
         self._update(self.guild_id,service,value)
+    
+    @on_error()
+    def delete(self):
+        with connection().cursor() as cursor:
+            cursor.execute('DELETE FROM guilds WHERE id = %s', (self.guild_id,))
+            
+            connection().commit()
 
