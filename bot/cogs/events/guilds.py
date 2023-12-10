@@ -8,7 +8,7 @@ from bot.databases.db import GuildDateBases
 import asyncio
 
 
-class members_event(commands.Cog):
+class guilds_event(commands.Cog):
     bot: commands.Bot
     
     def __init__(self, bot: commands.Bot) -> None:
@@ -36,6 +36,6 @@ class members_event(commands.Cog):
 
 
 def setup(bot: commands.Bot):
-    event = members_event(bot)
+    event = guilds_event(bot)
     
     bot.add_cog(event)
