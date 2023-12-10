@@ -24,15 +24,15 @@ register_table(
     table_name="guilds",
     variable=(
         "id INT8 PRIMARY KEY,"
+        "language TEXT DEFAULT 'en',"
+        "prefix TEXT DEFAULT 'l.',"
+        "color INT8 DEFAULT '1974050',"
+        "economic_settings JSON DEFAULT '{}',"
+        "auto_roles JSON DEFAULT '{}',"
         "thread_messages JSON DEFAULT '{}',"
         "reactions JSON DEFAULT '{}',"
         "auto_translate JSON DEFAULT '{}',"
-        "language TEXT DEFAULT 'en',"
-        "auto_roles JSON DEFAULT '{}',"
         "greeting_message JSON DEFAULT '{}',"
-        "economic_settings JSON DEFAULT '{}',"
-        "prefix TEXT DEFAULT 'l.',"
-        "color INT8 DEFAULT '1974050',"
         "disabled_commands JSON DEFAULT '{}'"
     ),
     connection=_connection
