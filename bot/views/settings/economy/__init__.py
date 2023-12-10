@@ -1,15 +1,21 @@
 import nextcord
+
+from .emoji import EmojiView
 from .bonuses import Bonus
+from ...settings import DefaultSettingsView
+
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases
 from bot.views import views
-from ...settings import DefaultSettingsView
 
 class DropDown(nextcord.ui.Select):
     def __init__(self):
         options = [
             nextcord.SelectOption(
                 label='Изменить сумму бонусов',emoji=Emoji.bagmoney, value='bonus'
+            ),
+            nextcord.SelectOption(
+                label='Change the emoji',emoji=Emoji.emoji, value='emoji'
             )
         ]
 
@@ -23,7 +29,8 @@ class DropDown(nextcord.ui.Select):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
         lists = {
-            'bonus':Bonus
+            'bonus':Bonus,
+            'emoji': EmojiView
         }
         view = lists[value](interaction.guild)
         await interaction.message.edit(embed=view.embed,view=view)

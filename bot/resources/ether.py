@@ -30,6 +30,8 @@ class Emoji:
     frame_person = '<:frame_person:1180609535107399770>'
     auto_role = '<:auto_role:1180609685112492172>'
     
+    #Economy
+    emoji = '<:emoji:1183456189141504091>'
     
     #Disabled command
     enabled = '<:enabled:1178742503822852248>'

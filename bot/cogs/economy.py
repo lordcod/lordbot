@@ -161,9 +161,12 @@ class Economy(commands.Cog):
     
     @commands.command(name="leaderboard",aliases=["leader"])
     async def leaderboard(self, ctx: commands.Context):
+        message = await ctx.send("Загрузка данных...")
+        
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get("color")
-        currency_emoji = "<:diamond:1183363436780978186>"
+        economy_settings: dict = gdb.get('economic_settings',{})
+        currency_emoji = economy_settings.get("emoji")
         
         emdb = MemberDB(ctx.guild.id, ctx.author.id)
         leaderboard_datas = emdb.get_leaderboards()
@@ -210,7 +213,7 @@ class Economy(commands.Cog):
                 inline=False
             )
         
-        await ctx.send(embed=embed)
+        await message.edit(content=None,embed=embed)
     
     
     @commands.command(name="pay")

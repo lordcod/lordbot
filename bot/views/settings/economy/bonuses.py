@@ -5,12 +5,12 @@ from .. import economy
 from ...settings import DefaultSettingsView
 
 class Modal(nextcord.ui.Modal):
-    def __init__(self,name,value,default) -> None:
+    def __init__(self,name,value,previous) -> None:
         super().__init__("Rewards", timeout=300)
         self.value = value
         self.bonus = nextcord.ui.TextInput(
             label=name,
-            placeholder=default,
+            placeholder=previous,
             max_length=6
         )
         self.add_item(self.bonus)
@@ -24,6 +24,11 @@ class Modal(nextcord.ui.Modal):
             economy_settings[self.value] = bonus
         
         gdb.set('economic_settings',economy_settings)
+        
+        
+        view = Bonus(interaction.guild)
+        
+        await interaction.message.edit(embed=view.embed, view=view)
 
 
 class DropDown(nextcord.ui.Select):
@@ -53,10 +58,10 @@ class DropDown(nextcord.ui.Select):
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        name = value.capitalize()
         value = self.values[0]
-        default = self.economy_settings.get(value)
-        await interaction.response.send_modal(Modal(name,value,default))
+        name = value.capitalize()
+        previous = self.economy_settings.get(value)
+        await interaction.response.send_modal(Modal(name,value,previous))
 
 
 class Bonus(DefaultSettingsView):

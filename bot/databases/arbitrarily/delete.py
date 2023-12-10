@@ -20,13 +20,14 @@ except Exception as err:
 
 data = """
 {
-    "emoji":"<:diamond:1183363436780978186>"
+    "channel_id":1181640672126705724,
+    "message":"Hello {member.username}"
 }
 """
 guild_id = 1179069504186232852
 
 with connection.cursor() as cursor:
-    cursor.execute('UPDATE guilds SET economic_settings = %s WHERE id = %s',(data,guild_id))
+    cursor.execute("DROP TABLE guilds")
 
 
 

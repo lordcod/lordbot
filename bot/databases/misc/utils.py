@@ -14,7 +14,7 @@ class Json:
         try:
             data = json.dumps(data)
             return data
-        except:
+        except Exception as err:
             return data
 
 class Formating:

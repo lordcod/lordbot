@@ -19,7 +19,6 @@ def connection():
     
     return _connection
 
-
 register_table(
     table_name="guilds",
     variable=(
@@ -27,7 +26,7 @@ register_table(
         "language TEXT DEFAULT 'en',"
         "prefix TEXT DEFAULT 'l.',"
         "color INT8 DEFAULT '1974050',"
-        "economic_settings JSON DEFAULT '{}',"
+        "economic_settings JSON DEFAULT '{\"emoji\":\"<:diamond:1183363436780978186>\"}',"
         "auto_roles JSON DEFAULT '{}',"
         "thread_messages JSON DEFAULT '{}',"
         "reactions JSON DEFAULT '{}',"
