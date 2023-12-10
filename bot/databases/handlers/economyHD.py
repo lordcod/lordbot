@@ -10,6 +10,16 @@ class EconomyMembedDB:
         self.guild_id = guild_id
         self.member_id = member_id
     
+    
+    @on_error()
+    def get_leaderboards(self):
+        with connection().cursor() as cursor:
+            cursor.execute('SELECT * FROM economic WHERE guild_id = %s', (self.guild_id,))
+            
+            guild = cursor.fetchall()
+            
+            return guild
+    
     @on_error()
     def get(self):
         with connection().cursor() as cursor:

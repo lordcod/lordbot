@@ -148,6 +148,15 @@ async def getRandomQuote(lang='en'):
             json = await responce.json()
             return json
 
+def get_award(number):
+    awards = {
+        1:'🥇',
+        2:'🥈',
+        3:'🥉'
+    }
+    award = awards.get(number,number)
+    return award
+
 def remove_none(dlist: list) -> None:
     for arg in dlist:
         if arg is None:

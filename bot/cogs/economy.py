@@ -4,7 +4,7 @@ from nextcord.ext import commands
 from bot.databases.db import EconomyMembedDB,colums,GuildDateBases
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
-from bot.misc.utils import get_prefix
+from bot.misc.utils import get_prefix, get_award
 
 from time import time as tick
 from typing import Optional, Union, Literal
@@ -16,17 +16,21 @@ class MemberDB:
         self.guild_id = guild_id
         self.member_id = member_id
         
-        self.emdb = emdb = EconomyMembedDB(guild_id,member_id)
-        data = emdb.get()
+        self.emdb = EconomyMembedDB(guild_id,member_id)
+        data = self.emdb.get()
         
         colums_name = [cl[0] for cl in colums['economic']][2:] # Get name colums from economic except guild_id and member_id 
         
         if not data:
-            emdb.insert()
-            data = emdb.get()
+            self.emdb.insert()
+            data = self.emdb.get()
         data = list(data)[2:] # Get data from economy member except guild_id and member_id
         data = dict(zip(colums_name,data)) # Create dict in which colums_name = data_member
         self.data = data
+    
+    def get_leaderboards(self):
+        leaderboard_ids = self.emdb.get_leaderboards()
+        return leaderboard_ids
     
     def get(self,__name,__default=None):
         try:
@@ -155,6 +159,60 @@ class Economy(commands.Cog):
         
         await ctx.send(embed=embed)
     
+    @commands.command(name="leaderboard",aliases=["leader"])
+    async def leaderboard(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+        colour = gdb.get("color")
+        currency_emoji = "<:diamond:1183363436780978186>"
+        
+        emdb = MemberDB(ctx.guild.id, ctx.author.id)
+        leaderboard_datas = emdb.get_leaderboards()
+        
+        leaderboard_balance = {}
+        
+        for leader in leaderboard_datas:
+            member_id = leader[1]
+            balance = leader[2]
+            bank = leader[3]
+            total = balance+bank
+            
+            leaderboard_balance[member_id] = {
+                'balance':balance,
+                'bank':bank,
+                'total':total
+            }
+        sorted_leaderboard = dict(sorted(leaderboard_balance.items(), key=lambda item: item[1]['total'], reverse=True))
+        index = list(sorted_leaderboard).index(ctx.author.id)+1
+        embed = nextcord.Embed(
+            title="Список лидеров по балансу",
+            description=f"**{ctx.author.display_name}**, Ваша позиция в топе: **{index}**",
+            color=colour
+        )
+        sll = list(sorted_leaderboard.items())
+        
+        for member_id, data in sll[:10]:
+            member = ctx.guild.get_member(member_id)
+            if not member:
+                continue
+            index = list(sorted_leaderboard).index(member_id)+1
+            award = get_award(index)
+            balance = data['balance']
+            bank = data['bank']
+            total = data['total']
+            
+            embed.add_field(
+                name=f"{award}. {member.display_name}",
+                value=(
+                    f"Наличные: {balance}{currency_emoji} | В банке: {bank}{currency_emoji}"
+                    "\n"
+                    f"Всего: {total}{currency_emoji}"
+                ),
+                inline=False
+            )
+        
+        await ctx.send(embed=embed)
+    
+    
     @commands.command(name="pay")
     async def pay(self,ctx: commands.Context, member: nextcord.Member, sum: int):
         gdb = GuildDateBases(ctx.guild.id)
@@ -181,7 +239,6 @@ class Economy(commands.Cog):
         
         from_account["balance"] -= sum
         to_account["balance"] += sum
-    
     
     
     @commands.command(name="deposit",aliases=["dep"])
