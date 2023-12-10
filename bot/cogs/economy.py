@@ -162,7 +162,7 @@ class Economy(commands.Cog):
         
         await ctx.send(embed=embed)
     
-    @commands.command(name="leaderboard",aliases=["leader"])
+    @commands.command(name="leaderboard")
     async def leaderboard(self, ctx: commands.Context):
         message = await ctx.send("Загрузка данных...")
         

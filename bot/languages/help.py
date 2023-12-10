@@ -47,6 +47,36 @@ categories: Dict[str,List[CommandOption]] = {
             },
             'allowed_disabled':True
         },
+        {
+            'name':'leaderboard',
+            'category':'economy',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Shows statistics of the top 10 server participants by balance',
+                'ru':'Показывает статистику по 10 лучшим участникам сервера по балансу'
+            },
+            'brief_descriptrion':{
+                'en':'Top server participants by balance',
+                'ru':'Лучшие участники сервера по балансу'
+            },
+            'allowed_disabled':True
+        },
+        {
+            'name':'pay',
+            'category':'economy',
+            'aliases':[],
+            'arguments':['<member>','<amount>'],
+            'descriptrion':{
+                'en':'Transfers the specified amount to the selected participant',
+                'ru':'Переводит указанную сумму выбранному участнику'
+            },
+            'brief_descriptrion':{
+                'en':'Transfers money',
+                'ru':'Переводит деньги'
+            },
+            'allowed_disabled':True
+        },
         
         {
             'name':'daily',
@@ -132,22 +162,6 @@ categories: Dict[str,List[CommandOption]] = {
             },
             'allowed_disabled':True
         },   
-        
-        {
-            'name':'pay',
-            'category':'economy',
-            'aliases':[],
-            'arguments':['<member>','<amount>'],
-            'descriptrion':{
-                'en':'Transfers the specified amount to the selected participant',
-                'ru':'Переводит указанную сумму выбранному участнику'
-            },
-            'brief_descriptrion':{
-                'en':'Transfers money',
-                'ru':'Переводит деньги'
-            },
-            'allowed_disabled':True
-        },
         
         {
             'name':'gift',
