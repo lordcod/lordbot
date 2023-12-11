@@ -19,24 +19,11 @@ except Exception as err:
     print(err)
 
 
-
-guild_id = 1179069504186232852
-value = """
-{"operate": 0}
-"""
-
 with connection.cursor() as cursor:
-    cursor.execute(
-        """
-            UPDATE 
-                guilds 
-            SET 
-                command_permissions = jsonb_set(command_permissions::jsonb, '{ping}', %s) 
-            WHERE 
-                id = %s
-        """, 
-        (value, guild_id, )
-    )
+    cursor.execute("""
+        ALTER TABLE guilds
+        RENAME COLUMN disabled_commands TO command_permissions;
+    """)
 
 
 

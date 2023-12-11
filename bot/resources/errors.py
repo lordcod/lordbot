@@ -22,6 +22,12 @@ class OnlyTeamError(commands.CommandError):
 class NotActivateEconomy(commands.CommandError):
     pass
 
+class MissingRole(commands.CommandError):
+    pass
+
+class MissingChannel(commands.CommandError):
+    pass
+
 
 class CallbackCommandError:
     def __init__(self,ctx: commands.Context, error) -> None:
@@ -59,6 +65,13 @@ class CallbackCommandError:
     
     async def MissingRole(self):
         content = errors.MissingRole.get(self.locale)
+        
+        await self.ctx.send(
+            content=content
+        )
+    
+    async def MissingChannel(self):
+        content = errors.MissingChannel.get(self.locale)
         
         await self.ctx.send(
             content=content
@@ -141,10 +154,10 @@ class CallbackCommandError:
         # await self.ctx.send(content)
     
     errors = [
-        MissingPermissions,MissingRole,BotMissingPermissions,DisabledCommand,
-        CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,BadArgument,
-        MissingRequiredArgument,OnlyTeamError,NotActivateEconomy,MemberNotFound,
-        BadUnionArgument
+        MissingPermissions,MissingRole,MissingChannel,BotMissingPermissions,
+        DisabledCommand,CommandNotFound,CommandOnCooldown,NotOwner,CheckFailure,
+        BadArgument,MissingRequiredArgument,OnlyTeamError,NotActivateEconomy,
+        MemberNotFound,BadUnionArgument
     ]
 
 

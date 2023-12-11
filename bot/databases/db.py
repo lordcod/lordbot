@@ -4,7 +4,7 @@ import asyncio
 from .load import load_db
 from .misc.error_handler import on_error
 from .misc.utils import get_info_colums, register_table
-from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance
+from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance, CommandDBInstance
 
 from bot.misc.logger import Logger
 
@@ -59,7 +59,7 @@ colums = {
 
 GuildDateBases = GuildDateBasesInstance(connection)
 EconomyMembedDB = EconomyMembedDBInstance(connection)
-
+CommandDB = CommandDBInstance(connection)
 
 
 def db_forever():

@@ -189,12 +189,18 @@ class Economy(commands.Cog):
             }
         sorted_leaderboard = dict(sorted(leaderboard_ids.items(), key=lambda item: item[1]['total'], reverse=True))
         index = list(sorted_leaderboard).index(ctx.author.id)+1
+        sld = list(sorted_leaderboard.items())
+        
         embed = nextcord.Embed(
             title="Список лидеров по балансу",
             description=f"**{ctx.author.display_name}**, Ваша позиция в топе: **{index}**",
             color=colour
         )
-        sld = list(sorted_leaderboard.items())
+        embed.set_thumbnail("https://cdn.discordapp.com/attachments/1179069504651796562/1183659540324036638/1426727.png")
+        embed.set_footer(
+            text=ctx.guild.name,
+            icon_url=ctx.guild.icon
+        )
         
         for member_id, data in sld[:10]:
             member = ctx.guild.get_member(member_id)
