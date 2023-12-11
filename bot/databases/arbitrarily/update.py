@@ -22,7 +22,15 @@ except Exception as err:
 
 guild_id = 1179069504186232852
 value = """
-{"operate": 0}
+{
+    "operate": 1,
+    "distribution":{
+        "role":{
+            "permission":1,
+            "values":[1179070749361840220]
+        }
+    }
+}
 """
 
 with connection.cursor() as cursor:
@@ -31,7 +39,7 @@ with connection.cursor() as cursor:
             UPDATE 
                 guilds 
             SET 
-                command_permissions = jsonb_set(command_permissions::jsonb, '{ping}', %s) 
+                command_permissions = jsonb_set(command_permissions::jsonb, '{balance}', %s) 
             WHERE 
                 id = %s
         """, 

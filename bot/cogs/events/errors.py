@@ -16,7 +16,6 @@ class PermissionChecker:
         command_name = ctx.command.qualified_name
         cdb = CommandDB(ctx.guild.id)
         self.command_permissions = cdb.get(command_name, {})
-        print(self.command_permissions)
         
         enabled = await self.is_enabled()
         allowed = await self.is_allowed()
