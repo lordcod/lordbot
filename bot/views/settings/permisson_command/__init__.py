@@ -1,5 +1,6 @@
 import nextcord
 
+from .precise import CommandData
 from ...settings import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
@@ -13,8 +14,6 @@ from bot.resources.ether import Emoji
 
 
 class DropDown(nextcord.ui.Select):
-    is_option = False
-    
     def __init__(self, guild_id, name):
         self.gdb = GuildDateBases(guild_id)
         locale = self.gdb.get('language')
@@ -41,8 +40,9 @@ class DropDown(nextcord.ui.Select):
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         command = self.values[0]
+        view = CommandData(interaction.guild, command)
         
-        await interaction.response.send_message(command, ephemeral=True)
+        await interaction.message.edit(embed=view.embed, view=view)
 
 
 class CommandsDataView(DefaultSettingsView):
