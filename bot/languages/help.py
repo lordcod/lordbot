@@ -6,19 +6,24 @@ CommandOption = Dict[
     Union[dict,list,str,bool]
 ]   
 
+categories_emoji = {
+    'economy':'💎',
+    'major':'👑',
+    'moderation':'⚠',
+}
 
 categories_name = {
     'economy':{
-        'ru':'💎 Экономика',
-        'en':'💎 Economy'
+        'ru':'Экономика',
+        'en':'Economy'
     },
     'major':{
-        'ru':'👑 Главное',
-        'en':'👑 Major'
+        'ru':'Главное',
+        'en':'Major'
     },
     'moderation':{
-        'ru':'⚠ Модерационные',
-        'en':'⚠ Moderation'
+        'ru':'Модерационные',
+        'en':'Moderation'
     },
 }
 
@@ -312,7 +317,6 @@ categories: Dict[str,List[CommandOption]] = {
 
 
 commands: List[CommandOption] = [com for cat in categories.values() for com in cat]
-
 
 class Embed:
     title = {

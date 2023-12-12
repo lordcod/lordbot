@@ -40,7 +40,7 @@ class SetDropdown(nextcord.ui.Select):
                 label=module_name.thread.get(locale), emoji=Emoji.thread_message, value='ThreadMessage'
             ),
             nextcord.SelectOption(
-                label=module_name.disabled_commands.get(locale), emoji=Emoji.command, value='DisabledCommands'
+                label=module_name.command_permission.get(locale), emoji=Emoji.command, value='CommandPermission'
             ),
         ]
 

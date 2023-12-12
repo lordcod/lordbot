@@ -50,6 +50,10 @@ class module_name:
         'en':'Command switch',
         'ru':'Командный переключатель'
     }
+    command_permission = {
+        'en':'Command Settings',
+        'ru':'Настройки команды'
+    }
     greeting = {
         'en':'Greeting',
         'ru':'Приветствие'

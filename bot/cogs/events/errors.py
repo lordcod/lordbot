@@ -95,12 +95,12 @@ class command_event(commands.Cog):
         await CommandError.process()
     
     async def on_error(self, event, *args,**kwargs):
-        Logger.error(event.__class__.__name__)
+        Logger.error(event)
     
     async def permission_check(self,  ctx: commands.Context):
         perch = PermissionChecker(ctx)
         answer = await perch.process()
-        print(answer)
+        
         return answer
     
 

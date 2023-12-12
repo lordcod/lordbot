@@ -11,7 +11,7 @@ class CommandDB:
         self.guild_id = guild_id
     
     @on_error()
-    def get(self, command, default):
+    def get(self, command, default) -> dict:
         with connection().cursor() as cursor:
             cursor.execute("SELECT command_permissions ->> %s FROM guilds WHERE id = %s", (command, self.guild_id,))
             
@@ -24,7 +24,12 @@ class CommandDB:
     @on_error()
     def update(self,key,value):
         value = Json.dumps(value)
-        dkey = f"{'{'}{key}{'}'}"
+        dkey = (
+            '{'
+            f'{key}'
+            '}'
+        )
+        
         with connection().cursor() as cursor:
             cursor.execute(
             f"""

@@ -65,7 +65,7 @@ class help(commands.Cog):
                     f"`{cmd.get('name')}` "
                 )
             embed.add_field(
-                name=help_info.categories_name.get(category).get(locale),
+                name=f'{help_info.categories_emoji.get(category)}{help_info.categories_name.get(category).get(locale)}',
                 value=text,
                 inline=False
             )
@@ -95,7 +95,7 @@ class help(commands.Cog):
         
         embed.add_field(
             name=help_info.CommandEmbed.category.get(locale),
-            value=help_info.categories_name.get(command_data.get('category')).get(locale)
+            value=f"{help_info.categories_emoji.get(command_data.get('category'))}{help_info.categories_name.get(command_data.get('category')).get(locale)}"
         )
         
         embed.add_field(

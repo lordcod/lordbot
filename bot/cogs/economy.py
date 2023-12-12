@@ -138,11 +138,9 @@ class Economy(commands.Cog):
         embed = nextcord.Embed(
             title="Баланс",
             color=colour,
-            description = description,
-            timestamp=ctx.message.created_at
+            description = description
         )
-        embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar.url)
-        embed.set_author(name=member.name, icon_url=member.avatar.url)
+        embed.set_author(name=member.display_name, icon_url=member.display_avatar)
         
         embed.add_field(
             name=f"{Emoji.money} Наличные:",
