@@ -26,7 +26,7 @@ class DropDown(nextcord.ui.StringSelect):
             ),
             nextcord.SelectOption(
                 label='Role', emoji=Emoji.auto_role, value='role'
-            )
+            ),
         ]
         
         
