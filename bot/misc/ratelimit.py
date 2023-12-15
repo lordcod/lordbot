@@ -36,13 +36,12 @@ class CooldownGuild:
         per: float = cooldata.get('per',0)
         
         if time.time() >= per:
-            print('reset')
             self.reset()
             return True
         
         if regular_rate > rate:
             return True
-        return round(per-time.time())
+        return round(per-time.time(),2)
     
     def add(self) -> None:
         global data
@@ -61,6 +60,21 @@ class CooldownGuild:
             'per':datatime
         }
     
+    def take(self) -> None:
+        global data
+        
+        cooldata: dict = data[self.guild_id][self.command_name] 
+        rate: int = cooldata.get('rate',0)
+        per: float = cooldata.get('per',0)
+        
+        datarate = 0 if 0>=(rate-1) else rate-1
+        
+        
+        data[self.guild_id][self.command_name] = {
+            'rate':datarate,
+            'per':per
+        }
+    
     def reset(self) -> None:
         data[self.guild_id][self.command_name] = {
             'rate':0,
@@ -68,20 +82,80 @@ class CooldownGuild:
         }
 
 class CooldownMember:
-    def __init__(self, command_name, command_data, guild_id, member_id) -> None:
+    def __init__(
+        self, 
+        command_name: str, 
+        command_data: dict, 
+        guild_id: int,
+        member_id: int
+    ) -> None:
         self.command_name = command_name
         self.command_data = command_data
         self.guild_id = guild_id
         self.member_id = member_id
+        
+        self.check_register()
+    
+    def check_register(self) -> None:
+        if self.guild_id not in data:
+            data[self.guild_id] = {}
+        if self.command_name not in data[self.guild_id]:
+            data[self.guild_id][self.command_name] = {}
+        if self.member_id not in data[self.guild_id][self.command_name]:
+            data[self.guild_id][self.command_name][self.member_id] = {}
     
     def get(self) -> bool:
-        return True
+        cooldata: dict = data[self.guild_id][self.command_name][self.member_id]
+        
+        regular_rate: int = self.command_data.get('rate')
+        rate: int = cooldata.get('rate',0)
+        per: float = cooldata.get('per',0)
+        
+        if time.time() >= per:
+            self.reset()
+            return True
+        
+        if regular_rate > rate:
+            return True
+        return round(per-time.time(),2)
     
-    def add(self):
-        pass
+    def add(self) -> None:
+        global data
+        
+        cooldata: dict = data[self.guild_id][self.command_name][self.member_id]
+        rate: int = cooldata.get('rate',0)
+        per: float = cooldata.get('per',0)
+        
+        regular_per: int = self.command_data.get('per')
+        
+        datatime = time.time()+regular_per if rate == 0 else per
+        
+        
+        data[self.guild_id][self.command_name][self.member_id] = {
+            'rate':rate+1,
+            'per':datatime
+        }
     
-    def reset(self):
-        pass
+    def take(self) -> None:
+        global data
+        
+        cooldata: dict = data[self.guild_id][self.command_name][self.member_id] 
+        rate: int = cooldata.get('rate',0)
+        per: float = cooldata.get('per',0)
+        
+        datarate = 0 if 0>=(rate-1) else rate-1
+        
+        
+        data[self.guild_id][self.command_name][self.member_id] = {
+            'rate':datarate,
+            'per':per
+        }
+    
+    def reset(self) -> None:
+        data[self.guild_id][self.command_name][self.member_id] = {
+            'rate':0,
+            'per':0
+        }
 
 
 class Cooldown:
@@ -128,28 +202,13 @@ class Cooldown:
         
         service.add()
     
+    def take(self):
+        service = self.get_service()
+        
+        service.take()
+    
     def reset(self):
         service = self.get_service()
         
         service.reset()
 
-cd = Cooldown(
-    'help',
-    {
-        'type': 1,
-        'rate':2,
-        'per':3
-    },
-    123,
-    1203
-)
-
-print('get',cd.get())
-cd.add()
-print('get',cd.get())
-cd.add()
-print('get',cd.get())
-cd.add()
-print('get',cd.get())
-time.sleep(4)
-print('get',cd.get())
