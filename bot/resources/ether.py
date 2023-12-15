@@ -38,6 +38,7 @@ class Emoji:
     disabled = '<:disabled:1178742506544955522>' 
     
     #Ofher
+    cooldown = '<:cooldown:1185277451295793192>'
     congratulation = '<a:congratulation:1165684808844845176>'
     roketa = '<a:rocketa:1165684783754522704>'
 

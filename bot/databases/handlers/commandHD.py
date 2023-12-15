@@ -24,7 +24,7 @@ class CommandDB:
     @on_error()
     def update(self,key,value):
         value = Json.dumps(value)
-        dkey = (
+        ckey = (
             '{'
             f'{key}'
             '}'
@@ -36,10 +36,10 @@ class CommandDB:
                 UPDATE 
                     guilds 
                 SET 
-                    command_permissions = jsonb_set(command_permissions::jsonb, '{dkey}', %s) 
+                    command_permissions = jsonb_set(command_permissions::jsonb, %s, %s) 
                 WHERE 
                     id = %s
             """, 
-            (value, self.guild_id, )
+            (ckey,value, self.guild_id, )
             )
     

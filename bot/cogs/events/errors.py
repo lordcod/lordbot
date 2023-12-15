@@ -1,11 +1,14 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.misc.ratelimit import Cooldown
 from bot.misc.logger import Logger
 from bot.resources import errors
-from bot.resources.errors import CallbackCommandError, MissingRole, MissingChannel
+from bot.databases.db import GuildDateBases, CommandDB
+from bot.resources.errors import CallbackCommandError, MissingRole, MissingChannel, CommandOnCooldown
 
+TrueType = type(True)
+NumberType = (int, float)
 
 class PermissionChecker:
     def __init__(self, ctx: commands.Context) -> None:
@@ -69,9 +72,28 @@ class PermissionChecker:
             raise MissingChannel()
         return True
     
+    async def _is_allowed_cooldown(self, data: dict) -> bool:
+        ctx = self.ctx
+        cooldown = Cooldown(
+            ctx.command.qualified_name,
+            data,
+            ctx.guild.id,
+            ctx.author.id
+        )
+        retry = cooldown.get()
+        cooldown.add()
+        
+        if isinstance(retry,TrueType):
+            return True
+        elif isinstance(retry, NumberType):
+            raise CommandOnCooldown(retry)
+        else:  
+            raise TypeError()
+    
     allowed_types = {
         'role':_is_allowed_role,
-        'channel':_is_allowed_channel
+        'channel':_is_allowed_channel,
+        'cooldown':_is_allowed_cooldown
     }
 
 class command_event(commands.Cog):

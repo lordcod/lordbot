@@ -25,9 +25,10 @@ value = """
 {
     "operate": 1,
     "distribution":{
-        "role":{
-            "permission":1,
-            "values":[1179070749361840220]
+        "cooldown": {
+            "type": 1,
+            "rate":2,
+            "per":30
         }
     }
 }

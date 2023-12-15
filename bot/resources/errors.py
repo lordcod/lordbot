@@ -28,6 +28,11 @@ class MissingRole(commands.CommandError):
 class MissingChannel(commands.CommandError):
     pass
 
+class CommandOnCooldown(commands.CommandError):
+    def __init__(self, retry_after: float) -> None:
+        self.retry_after: float = retry_after
+        super().__init__("Cooldown")
+
 
 class CallbackCommandError:
     def __init__(self,ctx: commands.Context, error) -> None:
