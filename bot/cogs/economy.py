@@ -116,10 +116,11 @@ class Economy(commands.Cog):
         
         
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color')
         prefix = get_prefix(ctx.guild.id, markdown=True, GuildData=gdb)
+        colour = gdb.get('color')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
+        
         account = MemberDB(ctx.guild.id,member.id)
         balance = account.get('balance',0)
         bank = account.get('bank',0)
@@ -186,8 +187,9 @@ class Economy(commands.Cog):
                 'total':total
             }
         sorted_leaderboard = dict(sorted(leaderboard_ids.items(), key=lambda item: item[1]['total'], reverse=True))
-        index = list(sorted_leaderboard).index(ctx.author.id)+1
         sld = list(sorted_leaderboard.items())
+        leaderboard_indexs = list(sorted_leaderboard)
+        index = leaderboard_indexs.index(ctx.author.id)+1
         
         embed = nextcord.Embed(
             title="Список лидеров по балансу",
@@ -201,11 +203,14 @@ class Economy(commands.Cog):
         )
         
         for member_id, data in sld[:10]:
+            # Find member
             member = ctx.guild.get_member(member_id)
             if not member:
                 del sorted_leaderboard[member_id]
                 continue
-            index = list(sorted_leaderboard).index(member_id)+1
+            
+            # Find position leadeboard
+            index = leaderboard_indexs.index(member_id)+1
             award = get_award(index)
             balance = data['balance']
             bank = data['bank']

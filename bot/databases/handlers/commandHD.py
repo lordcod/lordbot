@@ -11,7 +11,7 @@ class CommandDB:
         self.guild_id = guild_id
     
     @on_error()
-    def get(self, command, default) -> dict:
+    def get(self, command, default = None) -> dict:
         with connection().cursor() as cursor:
             cursor.execute("SELECT command_permissions ->> %s FROM guilds WHERE id = %s", (command, self.guild_id,))
             

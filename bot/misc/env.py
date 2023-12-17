@@ -1,6 +1,5 @@
 from os import environ
 
-
 anprim_token = "MTE2Mzc0NzQxOTg2ODExOTA0MA.GA6nMN.oGDmsgTtQX-40ov51airPeziHflOg7Z2_XNSt0"
 
 token_lord_cord = "MTA5NTcxMzk3NTUzMjAwNzQzNA.GdoeFJ.RuUbalItmQArVDmqcKLLK_2eImRpt-glwLyarI"

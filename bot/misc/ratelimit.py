@@ -212,3 +212,8 @@ class Cooldown:
         
         service.reset()
 
+def reset_data(guild_id, command_name) -> None:
+    try:
+        del data[guild_id][command_name]
+    except:
+        pass

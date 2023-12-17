@@ -1,16 +1,18 @@
 import nextcord
 
 from  .. import permisson_command
+from .distribution.channel import ChannelsView
+from .distribution.role import RolesView
 from ...settings import DefaultSettingsView
 
 from bot.misc import utils
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases, CommandDB
+from bot.languages import help as help_info
 from bot.languages.settings import (
     button as button_name
 )
 
-from bot.languages import help as help_info
 import jmespath
 
 def get_command(name: str) -> help_info.CommandOption: 
@@ -19,7 +21,9 @@ def get_command(name: str) -> help_info.CommandOption:
     return result
 
 class DropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild_id) -> None:
+    def __init__(self, guild_id, command_name) -> None:
+        self.command_name = command_name
+        
         options = [
             nextcord.SelectOption(
                 label='Channel', emoji=Emoji.channel_text, value='channel'
@@ -30,13 +34,25 @@ class DropDown(nextcord.ui.StringSelect):
             nextcord.SelectOption(
                 label='Cooldown', emoji=Emoji.cooldown, value='cooldown'
             ),
-        ]
+        ] 
         
         
         super().__init__(options=options)
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        pass
+        value = self.values[0]
+        
+        objections = {
+            'channel':ChannelsView,
+            'role':RolesView,
+        }
+        classification = objections.get(value)
+        view = classification(
+            interaction.guild,
+            self.command_name
+        )
+        
+        await interaction.message.edit(embed=view.embed, view=view)
 
 
 class CommandData(DefaultSettingsView):
@@ -44,24 +60,43 @@ class CommandData(DefaultSettingsView):
     
     def __init__(self, guild:nextcord.Guild, command_name: str) -> None:
         self.command_name = command_name
-        self.cdb = CommandDB(guild.id)
+        
         self.gdb = GuildDateBases(guild.id)
+        colour: int = self.gdb.get('color')
+        locale: str = self.gdb.get('language')
         
-        super().__init__()
-        
-        DDD = DropDown(guild.id)
-        self.add_item(DDD)
-        
-        locale:str = self.gdb.get('language')
-        
+        self.cdb = CommandDB(guild.id)
         self.command_data: dict = get_command(command_name)
         self.command_info: dict = self.cdb.get(command_name,{})
         
         self.operate = self.command_info.get("operate",1)
-        if self.operate == 1:
+        
+        cat_emoji = help_info.categories_emoji[self.command_data.get('category')]
+        self.embed = nextcord.Embed(
+            title=(
+                f"{cat_emoji}"
+                f"{self.command_data.get('name')}"
+            ),
+            description=self.command_data.get('brief_descriptrion').get(locale),
+            color=colour
+        )
+        
+        
+        super().__init__()
+        
+        DDD = DropDown(guild.id, command_name)
+        self.add_item(DDD)
+        
+        
+        if self.command_data.get("allowed_disabled") == False:
+            self.switcher.label = "Forbidden"
+            self.switcher.style = nextcord.ButtonStyle.grey
+            self.switcher.disabled = True
+            DDD.disabled = True
+        elif self.operate == 1:
             self.switcher.label = "Disable"
             self.switcher.style = nextcord.ButtonStyle.red
-        else:
+        elif self.operate == 0:
             self.switcher.label = "Enable"
             self.switcher.style = nextcord.ButtonStyle.green
         
@@ -72,7 +107,10 @@ class CommandData(DefaultSettingsView):
     
     @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = permisson_command.CommandsDataView(interaction.guild)
+        cat_name = self.command_data.get('category')
+        index = list(help_info.categories).index(cat_name)
+        
+        view = permisson_command.CommandsDataView(interaction.guild, index)
         
         await interaction.message.edit(embed=view.embed,view=view)
     
