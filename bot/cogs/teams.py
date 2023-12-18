@@ -3,7 +3,7 @@ from nextcord.ext import commands
 
 from bot.resources import check
 
-import sys
+import sys, os
 
 
 class teams(commands.Cog):
@@ -14,7 +14,7 @@ class teams(commands.Cog):
     @check.team_only()
     async def shutdown(self, ctx: commands.Context):
         await ctx.send("The bot has activated the completion process!")
-        sys.exit()
+        os._exit(1)
 
     @commands.command()
     @commands.guild_only()

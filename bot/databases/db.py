@@ -61,7 +61,6 @@ GuildDateBases = GuildDateBasesInstance(connection)
 EconomyMembedDB = EconomyMembedDBInstance(connection)
 CommandDB = CommandDBInstance(connection)
 
-
 def db_forever():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

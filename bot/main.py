@@ -8,7 +8,6 @@ from typing import List
 import os
 
 
-
 def get_command_prefixs(
     bot: commands.Bot, 
     msg: nextcord.Message
