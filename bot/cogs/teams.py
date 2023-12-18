@@ -34,6 +34,9 @@ class teams(commands.Cog):
     @commands.command()
     @check.team_only()
     async def unload_extension(self, ctx: commands.Context, name):
+        if name=="teams":
+            return
+        
         self.bot.unload_extension(f"bot.cogs.{name}")
         await ctx.send(f"Service **{name}** successfully shut down")
 
