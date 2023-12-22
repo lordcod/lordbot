@@ -8,6 +8,6 @@
 
 ## Reporting a Vulnerability
 
-### If you find any bug vulnerability and the like, report by:
+### If you find any bug, vulnerability, or the like, please report to:
 
-Discord DM - LordCode
+[Discord Support Server](https://discord.gg/48JCcbAAnV)
