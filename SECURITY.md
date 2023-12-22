@@ -2,10 +2,9 @@
 
 ## Versions/Сurrent version
 
-| Version | Is it current         |
-| ------- | ------------------ |
-| Alpha v0.1.2   | :white_check_mark: |
-| Alpha v0.1   | :x: |
+
+[x] Alpha v0.1.2 
+[] Alpha v0.1 
 
 ## Reporting a Vulnerability
 
