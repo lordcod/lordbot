@@ -1,4 +1,4 @@
-from . import economyHD,guildHD
+from . import economyHD,guildHD, commandHD
 
 
 def GuildDateBasesInstance(conn):
@@ -12,5 +12,12 @@ def EconomyMembedDBInstance(conn):
     economyHD.connection = conn
     
     classification = economyHD.EconomyMembedDB
+    
+    return classification
+
+def CommandDBInstance(conn):
+    commandHD.connection = conn
+    
+    classification = commandHD.CommandDB
     
     return classification

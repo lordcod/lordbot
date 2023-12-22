@@ -14,7 +14,7 @@ from .prefix import PrefixView as Prefix
 from .languages import Languages
 from .reactions import AutoReactions
 from .thread_message import AutoThreadMessage
-from .disable_command import DisabledCommandsView as DisabledCommands
+from .permisson_command import CommandsDataView
 from .greeting import Greeting 
 
 
@@ -25,9 +25,10 @@ moduls = {
     'Languages': Languages,
     'Prefix': Prefix,
     
+    'CommandPermission': CommandsDataView,
+    
     'Greeting':Greeting,
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
     
-    'DisabledCommands': DisabledCommands
 }

@@ -3,7 +3,7 @@ from nextcord.ext import commands
 
 from bot.misc import utils
 from bot.misc.logger import Logger
-from bot.databases.db import GuildDateBases
+from bot.databases.db import GuildDateBases, EconomyMembedDB
 
 import asyncio
 
@@ -76,7 +76,6 @@ class members_event(commands.Cog):
         message_data = await utils.generate_message(message_format)
         
         await channel.send(**message_data)
-
 
 
 

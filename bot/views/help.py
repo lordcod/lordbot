@@ -11,7 +11,8 @@ class DropDown(nextcord.ui.Select):
         options = [
             nextcord.SelectOption(
                 label=help_info.categories_name.get(category).get(locale),
-                value=category
+                value=category,
+                emoji=help_info.categories_emoji.get(category),
             )
             for category in help_info.categories.keys()
         ]
@@ -26,7 +27,7 @@ class DropDown(nextcord.ui.Select):
         
         category_key = self.values[0]
         category_data = help_info.categories.get(category_key)
-        category_name = help_info.categories_name.get(category_key).get(locale)
+        category_name = f"{help_info.categories_emoji.get(category_key)}{help_info.categories_name.get(category_key).get(locale)}"
         
         text = ''
         for command in category_data:

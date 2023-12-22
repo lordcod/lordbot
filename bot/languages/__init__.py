@@ -163,6 +163,10 @@ class errors:
         'en':'You don\'t have a suitable role to execute the command',
         'ru':'У вас нет нужной роли для выполнения команды'
     }
+    MissingChannel = {
+        'en':'You cannot execute this command in this channel',
+        'ru':'Вы не можете выполнить эту команду в этом канале'
+    }
     
     NotOwner = {
         'en':'This command is intended for the bot owner',

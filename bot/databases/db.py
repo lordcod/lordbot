@@ -4,7 +4,7 @@ import asyncio
 from .load import load_db
 from .misc.error_handler import on_error
 from .misc.utils import get_info_colums, register_table
-from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance
+from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance, CommandDBInstance
 
 from bot.misc.logger import Logger
 
@@ -19,20 +19,19 @@ def connection():
     
     return _connection
 
-
 register_table(
     table_name="guilds",
     variable=(
         "id INT8 PRIMARY KEY,"
+        "language TEXT DEFAULT 'en',"
+        "prefix TEXT DEFAULT 'l.',"
+        "color INT8 DEFAULT '1974050',"
+        "economic_settings JSON DEFAULT '{\"emoji\":\"<:diamond:1183363436780978186>\"}',"
+        "auto_roles JSON DEFAULT '{}',"
         "thread_messages JSON DEFAULT '{}',"
         "reactions JSON DEFAULT '{}',"
         "auto_translate JSON DEFAULT '{}',"
-        "language TEXT DEFAULT 'en',"
-        "auto_roles JSON DEFAULT '{}',"
         "greeting_message JSON DEFAULT '{}',"
-        "economic_settings JSON DEFAULT '{}',"
-        "prefix TEXT DEFAULT 'l.',"
-        "color INT8 DEFAULT '1974050',"
         "disabled_commands JSON DEFAULT '{}'"
     ),
     connection=_connection
@@ -60,8 +59,7 @@ colums = {
 
 GuildDateBases = GuildDateBasesInstance(connection)
 EconomyMembedDB = EconomyMembedDBInstance(connection)
-
-
+CommandDB = CommandDBInstance(connection)
 
 def db_forever():
     loop = asyncio.new_event_loop()

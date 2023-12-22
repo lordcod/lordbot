@@ -19,32 +19,14 @@ except Exception as err:
     print(err)
 
 
-
 guild_id = 1179069504186232852
-value = """
-{
-    "operate": 1,
-    "distribution":{
-        "channel":{
-            "permission":1,
-            "values":[1179782301035536514]
-        }
-    }
-}
-"""
 
 with connection.cursor() as cursor:
-    cursor.execute(
-        """
-            UPDATE 
-                guilds 
-            SET 
-                command_permissions = jsonb_set(command_permissions::jsonb, '{balance}', %s) 
-            WHERE 
-                id = %s
-        """, 
-        (value, guild_id, )
-    )
+    cursor.execute("SELECT command_permissions ->> 'ping' FROM guilds WHERE id = %s",(guild_id,))
+    
+    val = cursor.fetchone()
+    print(val)
+    print(val[0])
 
 
 

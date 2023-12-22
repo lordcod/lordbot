@@ -1,5 +1,6 @@
 DEFAULT_PREFIX = 'l.'
 DEFAULT_COLOR = 1974050
+DEFAULT_EMOJI = '<:diamond:1183363436780978186>'
 
 activities_list = [
     {'id':880218394199220334,'label':'Watch Together','max_user':'Unlimited'},

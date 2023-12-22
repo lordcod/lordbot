@@ -5,14 +5,12 @@ from .. import economy
 from ...settings import DefaultSettingsView
 
 class Modal(nextcord.ui.Modal):
-    type = 'modal'
-    
-    def __init__(self,name,value,default) -> None:
+    def __init__(self,name,value,previous) -> None:
         super().__init__("Rewards", timeout=300)
         self.value = value
         self.bonus = nextcord.ui.TextInput(
             label=name,
-            placeholder=default,
+            placeholder=previous,
             max_length=6
         )
         self.add_item(self.bonus)
@@ -26,6 +24,11 @@ class Modal(nextcord.ui.Modal):
             economy_settings[self.value] = bonus
         
         gdb.set('economic_settings',economy_settings)
+        
+        
+        view = Bonus(interaction.guild)
+        
+        await interaction.message.edit(embed=view.embed, view=view)
 
 
 class DropDown(nextcord.ui.Select):
@@ -35,23 +38,20 @@ class DropDown(nextcord.ui.Select):
         options = [
             nextcord.SelectOption(
                 label='Daily',
-                description=self.economy_settings.get('daily',0),
                 value='daily',
             ),
             nextcord.SelectOption(
                 label='Weekly',
-                description=self.economy_settings.get('weekly',0),
                 value='weekly'
             ),
             nextcord.SelectOption(
                 label='Monthly',
-                description=self.economy_settings.get('monthly',0),
                 value='monthly'
             )
         ]
 
         super().__init__(
-            placeholder="Настройка бонусов:",
+            placeholder="Настройка сумм бонусов",
             min_values=1,
             max_values=1,
             options=options,
@@ -60,19 +60,34 @@ class DropDown(nextcord.ui.Select):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
         name = value.capitalize()
-        default = self.economy_settings.get(value)
-        await interaction.response.send_modal(Modal(name,value,default))
+        previous = self.economy_settings.get(value)
+        await interaction.response.send_modal(Modal(name,value,previous))
 
 
 class Bonus(DefaultSettingsView):
-    embed = nextcord.Embed(
-        title='Бонусы'
-    )
+    embed: nextcord.Embed
     
     def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
+        economy_settings = gdb.get('economic_settings',{})
+        
         colour = gdb.get('color',1974050)
-        self.embed.color = colour
+        self.embed = nextcord.Embed(
+            title='Бонусы',
+            color=colour
+        )
+        self.embed.add_field(
+            name="Daily",
+            value=economy_settings.get('daily',0)
+        )
+        self.embed.add_field(
+            name="Weekly",
+            value=economy_settings.get('weekly',0)
+        )
+        self.embed.add_field(
+            name="Monthly",
+            value=economy_settings.get('monthly',0)
+        )
         
         super().__init__()
         
@@ -85,4 +100,3 @@ class Bonus(DefaultSettingsView):
         view = economy.Economy(interaction.guild)
         
         await interaction.message.edit(embed=view.embed,view=view)
-    

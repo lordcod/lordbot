@@ -18,33 +18,16 @@ except Exception as err:
     print(type(err))
     print(err)
 
-
-
-guild_id = 1179069504186232852
-value = """
+data = """
 {
-    "operate": 1,
-    "distribution":{
-        "channel":{
-            "permission":1,
-            "values":[1179782301035536514]
-        }
-    }
+    "channel_id":1181640672126705724,
+    "message":"Hello {member.username}"
 }
 """
+guild_id = 1179069504186232852
 
 with connection.cursor() as cursor:
-    cursor.execute(
-        """
-            UPDATE 
-                guilds 
-            SET 
-                command_permissions = jsonb_set(command_permissions::jsonb, '{balance}', %s) 
-            WHERE 
-                id = %s
-        """, 
-        (value, guild_id, )
-    )
+    cursor.execute("DROP TABLE guilds")
 
 
 

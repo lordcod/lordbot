@@ -3,19 +3,24 @@ import ujson as json
 from psycopg2.extensions import connection
 
 class Json:
-    def loads(data):
-        try:
-            data = json.loads(data)
-            return data
-        except:
-            return data
+    def on_error(func):
+        def wrapped(data: Dict[Any,Any]):
+            try:
+                result = func(data)
+                return result
+            except:
+                return data
+        return wrapped
     
+    @on_error
+    def loads(data):
+        data = json.loads(data)
+        return data
+    
+    @on_error
     def dumps(data):
-        try:
-            data = json.dumps(data)
-            return data
-        except:
-            return data
+        data = json.dumps(data)
+        return data
 
 class Formating:
     def on_error(func):
