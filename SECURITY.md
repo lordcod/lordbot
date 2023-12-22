@@ -1,10 +1,15 @@
 # Security Policy
 
-## Versions/Сurrent version
+## [Privacy policy](https://lordcord.fun/privacy_policy)
 
+## [Terms of Service](https://lordcord.fun/terms_of_service)
+
+
+## Versions/Сurrent version
 
 * [x] Alpha v0.1.2 
 * [ ] Alpha v0.1 
+
 
 ## Reporting a Vulnerability
 
