@@ -1,11 +1,11 @@
 # Security Policy
 
-## Supported Versions
+## Versions/Сurrent version
 
-| Version | Supported          |
+| Version | Is it current         |
 | ------- | ------------------ |
-| >  | :x: |
-| Alpha v0.1   | :white_check_mark: |
+| Alpha v0.1.2   | :white_check_mark: |
+| Alpha v0.1   | :x: |
 
 ## Reporting a Vulnerability
 
