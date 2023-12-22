@@ -1,10 +1,11 @@
 import nextcord
 from nextcord.ext import commands
+
+from bot.misc.utils import process_role
+from bot.databases.db import RolesDB
 from bot.misc.logger import Logger
 
-from time import sleep
-from string import ascii_lowercase
-from random import choice, randint
+import asyncio
 
 class ready_event(commands.Cog):
     bot: commands.Bot
@@ -13,9 +14,10 @@ class ready_event(commands.Cog):
         self.bot = bot
         super().__init__()
     
-    
     @commands.Cog.listener()
     async def on_ready(self):
+        await self.process_temp_roles()
+        
         Logger.success(f"The bot is registered as {self.bot.user}")
     
     @commands.Cog.listener()
@@ -23,6 +25,31 @@ class ready_event(commands.Cog):
         Logger.core("Bot is disconnect")
     
     
+    async def process_temp_roles(self):
+        rsdb = RolesDB(12523, 35623)
+        datas = rsdb.get_all()
+        for dat in datas:
+            guild_id = dat[0]
+            member_id = dat[1]
+            temp_datas = dat[2]
+            
+            guild = self.bot.get_guild(guild_id)
+            if not guild:
+                continue
+            
+            member = guild.get_member(member_id)
+            if not member:  
+                continue
+            
+            for tp_data in temp_datas:
+                time = tp_data.get("time")
+                role_id = tp_data.get("role_id")
+                role = guild.get_role(role_id)
+                if not (time and role):
+                    continue
+                
+                task = process_role(member, role, time)
+                asyncio.create_task(task)
 
 
 def setup(bot: commands.Bot):
