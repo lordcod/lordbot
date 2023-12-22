@@ -4,7 +4,7 @@
 
 
 * [x] Alpha v0.1.2 
-* [] Alpha v0.1 
+* [ ] Alpha v0.1 
 
 ## Reporting a Vulnerability
 
