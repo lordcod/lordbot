@@ -4,11 +4,13 @@ from nextcord.ext import commands
 from nextcord.utils import escape_markdown
 
 from bot.resources import errors
-from bot.databases.db import GuildDateBases
+from bot.databases.db import GuildDateBases, RolesDB
 
 import re
 import string
 import random
+import time
+import asyncio
 import aiohttp
 import orjson
 
@@ -140,6 +142,25 @@ class GreetingTemplate(string.Template):
         )
     '''
 
+async def process_role(
+    member: nextcord.Member,
+    role: nextcord.Role,
+    unix_time: int
+) -> None:
+    rsdb = RolesDB(
+        guild_id=member.guild.id,
+        member_id=member.id
+    )
+    data = {
+        'time':unix_time,
+        'role_id': role.id
+    }
+    temp = unix_time - int(time.time())
+    
+    await asyncio.sleep(temp)
+    
+    await member.remove_roles(role)
+    rsdb.remove(data)
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
@@ -147,6 +168,26 @@ async def getRandomQuote(lang='en'):
         async with session.post(url) as responce:
             json = await responce.json()
             return json
+
+def calculate_time(string: str) -> (int|None):
+    coefficients = {
+        's':1,
+        'm':60,
+        'h':3600,
+        'd':86400
+    }
+    timedate = re.findall(r'(\d+)([a-zA-Z]+)', string)
+    ftime = 0
+    for number, word in timedate:
+        if word not in coefficients:
+            return None
+        
+        number = int(number)
+        multiplier = coefficients[word]
+        
+        ftime += number*multiplier
+    
+    return ftime
 
 def get_award(number):
     awards = {

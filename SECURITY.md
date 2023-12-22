@@ -1,14 +1,18 @@
 # Security Policy
 
-## Supported Versions
+## [Privacy policy](https://lordcord.fun/privacy_policy)
 
-| Version | Supported          |
-| ------- | ------------------ |
-| >  | :x: |
-| Alpha v0.1   | :white_check_mark: |
+## [Terms of Service](https://lordcord.fun/terms_of_service)
+
+
+## Versions/Сurrent version
+
+* [x] Alpha v0.1.2 
+* [ ] Alpha v0.1 
+
 
 ## Reporting a Vulnerability
 
-### If you find any bug vulnerability and the like, report by:
+### If you find any bug, vulnerability, or the like, please report to:
 
-Discord DM - LordCode
+[Discord Support Server](https://discord.gg/48JCcbAAnV)

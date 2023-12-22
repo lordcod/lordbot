@@ -2,12 +2,13 @@ import nextcord
 from nextcord.ext import commands,application_checks
 
 from bot.misc import utils
-from bot.resources import errors
 from bot.views import views
+from bot.databases.db import RolesDB, GuildDateBases
+from bot.resources.ether import Emoji
 
 import io
 import asyncio
-import time
+from time import time as tick
 
 
 
@@ -32,11 +33,84 @@ class moderations(commands.Cog):
     
     @commands.command(aliases=["set","setting"])
     @commands.has_permissions(manage_guild=True)
-    @commands.guild_only()
     async def settings(self, ctx: commands.Context):
         view = views.SettingsView(ctx.author)
         
         await ctx.send(embed=view.embed,view=view)
+
+    @commands.group(name='temp-role',invoke_without_command=True)
+    @commands.has_permissions(manage_roles=True)
+    async def temp_role(
+        self, 
+        ctx: commands.Context, 
+        member: nextcord.Member, 
+        roles: commands.Greedy[nextcord.Role],
+        time: str = None
+    ):
+        await member.add_roles(*roles)
+        
+        if time:
+            rsdb = RolesDB(ctx.guild.id, member.id)
+            ftime = utils.calculate_time(time)
+            if ftime is None:
+                await ctx.send("The role was given forever because you specified the wrong amount of time")
+                return
+            
+            unix_time = int(tick()+ftime)
+            
+            for rol in roles:
+                data = {
+                    'time': unix_time,
+                    'role_id': rol.id
+                }
+                rsdb.add(data)
+                
+                task = utils.process_role(
+                    member,
+                    rol,
+                    unix_time
+                )
+                asyncio.create_task(task)
+        
+        await ctx.send(f"{Emoji.congratulation}The roles were issued successfully")
+
+    @temp_role.command(name='list')
+    async def temp_role_list(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+        colour = gdb.get('color')
+        
+        rsdb = RolesDB(ctx.guild.id)
+        datas = rsdb.get_as_guild()
+        
+        quantity = 0
+        message = ""
+        
+        for dat in datas:
+            member_id = dat[1]
+            roles_data = dat[2]
+            
+            for rol_data in roles_data:
+                quantity += 1
+                
+                time = rol_data.get("time")
+                role_id = rol_data.get("role_id")
+                
+                member = ctx.guild.get_member(member_id)
+                role = ctx.guild.get_role(role_id)
+                
+                message = (
+                    f"{message}"
+                    f"{quantity}. {member.mention} → {role.mention} (<t:{time}:R>)\n"
+                )
+        
+        message = message or "There are no registered temporary roles on this server"
+        embed = nextcord.Embed(
+            title="Temp Roles",
+            description=message,
+            color=colour
+        )
+        
+        await ctx.send(embed=embed)
 
     @nextcord.slash_command(
         name='clone',
@@ -97,7 +171,7 @@ class moderations(commands.Cog):
         
         messages = []
         
-        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        minimum_time = int((tick() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
         
         async for message in ctx.channel.history(limit=250):
             if len(messages) >= limit:
@@ -120,7 +194,7 @@ class moderations(commands.Cog):
         
         messages = []
         finder = False
-        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        minimum_time = int((tick() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
         
         async for message in message_start.channel.history(limit=100):
             if not messsage_finish:
