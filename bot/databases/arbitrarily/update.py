@@ -25,9 +25,10 @@ value = """
 {
     "operate": 1,
     "distribution":{
-        "channel":{
-            "permission":1,
-            "values":[1179782301035536514]
+        "cooldown":{
+            "type":1,
+            "rate":2,
+            "per":30
         }
     }
 }

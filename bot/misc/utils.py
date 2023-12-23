@@ -319,9 +319,8 @@ async def generate_message(content) -> dict|str:
 
 async def check_invite(content):
     regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)([a-zA-Z0-9_-]+)(\/|\s|\?|$)'
-    pattern = re.fullmatch(regex_string,content)
-    if pattern:
-        return pattern.groups()[1]
+    if pattern := re.fullmatch(regex_string,content):
+        return pattern.group(2)
 
 async def generator_captcha(num):
     text = "".join([random.choice(string.ascii_uppercase) for _ in range(num)])
@@ -332,4 +331,3 @@ async def generator_captcha(num):
     )
     data:BytesIO = captcha_image.generate(text)
     return data,text
-

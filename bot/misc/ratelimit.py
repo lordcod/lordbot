@@ -159,6 +159,33 @@ class CooldownMember:
 
 
 class Cooldown:
+    def __new__(
+        cls,
+        command_name: str,
+        command_data: dict, 
+        guild_id: int,
+        member_id: int
+    ) -> (CooldownGuild|CooldownMember):
+        cooldata: dict = command_data
+        type = cooldata.get('type')
+        
+        if type == BucketType.member:
+            classification = CooldownMember(
+                command_name,
+                command_data,
+                guild_id,
+                member_id
+            )
+        elif type == BucketType.server:
+            classification = CooldownGuild(
+                command_name,
+                command_data,
+                guild_id
+            )
+        else:
+            raise ValueError()
+        return classification
+    
     def __init__(
         self, 
         command_name: str,
@@ -170,49 +197,9 @@ class Cooldown:
         self.command_data = command_data
         self.guild_id = guild_id
         self.member_id = member_id
-    
-    def get_service(self):
-        cooldata: dict = self.command_data
-        type = cooldata.get('type')
-        
-        if type == BucketType.member:
-            classification = CooldownMember(
-                self.command_name,
-                self.command_data,
-                self.guild_id,
-                self.member_id
-            )
-        elif type == BucketType.server:
-            classification = CooldownGuild(
-                self.command_name,
-                self.command_data,
-                self.guild_id
-            )
-        else:
-            return None
-        return classification
-    
-    def get(self):
-        service = self.get_service()
-        
-        return service.get()
-    
-    def add(self):
-        service = self.get_service()
-        
-        service.add()
-    
-    def take(self):
-        service = self.get_service()
-        
-        service.take()
-    
-    def reset(self):
-        service = self.get_service()
-        
-        service.reset()
 
-def reset_data(guild_id, command_name) -> None:
+
+def reset_data(guild_id, command_name) -> None: 
     try:
         del data[guild_id][command_name]
     except:
