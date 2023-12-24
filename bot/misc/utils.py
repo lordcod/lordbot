@@ -19,6 +19,15 @@ from captcha.image import ImageCaptcha
 from io import BytesIO
 
 
+intervals = (
+    ('weeks', 604800),  # 60 * 60 * 24 * 7
+    ('days', 86400),    # 60 * 60 * 24
+    ('hours', 3600),    # 60 * 60
+    ('minutes', 60),
+    ('seconds', 1),
+)
+
+
 class GuildPayload:
     guild: nextcord.Guild
     
@@ -141,6 +150,7 @@ class GreetingTemplate(string.Template):
         (?P<invalid>)
         )
     '''
+
 
 async def process_role(
     member: nextcord.Member,
@@ -331,3 +341,35 @@ async def generator_captcha(num):
     )
     data:BytesIO = captcha_image.generate(text)
     return data,text
+
+def cut_back(string: str, length: int):
+    ellipsis = "..."
+    current_lenght = len(string)
+    if length >= current_lenght:
+        return string
+    
+    cropped_string = string[:length-len(ellipsis)].strip()
+    new_string = f"{cropped_string}{ellipsis}"
+    return new_string
+
+def is_float(element: any) -> bool:
+    if element is None: 
+        return False
+    
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
+def display_time(seconds, granularity=2):
+    result = []
+
+    for name, count in intervals:
+        value = seconds // count
+        if value:
+            seconds -= value * count
+            if value == 1:
+                name = name.rstrip('s')
+            result.append("{} {}".format(value, name))
+    return ', '.join(result[:granularity])

@@ -15,8 +15,8 @@ from bot.languages.settings import (
 from typing import List, Optional
 
 cd_types = {
-    0:'Delay for a specific user',
-    1:'Server latency(global)'
+    0:'Member',
+    1:'Server(global)'
 }
 
 
@@ -24,8 +24,11 @@ cd_types = {
 class CoolModal(nextcord.ui.Modal):
     def __init__(
         self,
-        type,
-        command_name
+        type: int,
+        command_name: str,
+        *,
+        rate: int = None,
+        per: float = None
     ) -> None:
         self.type = type
         self.command_name = command_name
@@ -33,13 +36,14 @@ class CoolModal(nextcord.ui.Modal):
         super().__init__("Cooldown")
         
         self.rate = nextcord.ui.TextInput(
-            label="Rate",
+            label="Rate (Exemple: 2)",
+            placeholder=rate,
             min_length=1,
-            max_length=4
+            max_length=4,
         )
         self.per = nextcord.ui.TextInput(
-            label="Per",
-            placeholder="1h10m",
+            label="Per (Exemple: 1h10m)",
+            placeholder=per,
             min_length=1,
             max_length=10
         )
@@ -124,15 +128,19 @@ class CooldownsView(DefaultSettingsView):
         cdb = CommandDB(guild.id)
         command_data = cdb.get(command_name, {})
         distribution = command_data.get("distribution", {})
-        cooldate = distribution.get("cooldown", None)
+        self.cooldate = cooldate = distribution.get("cooldown", None)
+        
+        super().__init__()
         
         if isinstance(cooldate, dict):
             description = (
                 "The current delay for the command\n"
-                f"Type: {cd_types.get(cooldate.get('type'))}\n"
-                f"{cooldate.get('rate')} → {cooldate.get('per')}\n"
+                f"Type: **{cd_types.get(cooldate.get('type'))}**\n"
+                f"Frequency of use: **{cooldate.get('rate')}** → **{utils.display_time(cooldate.get('per'))}**\n"
             )
         else:
+            self.remove_item(self.edit)
+            self.remove_item(self.delete)
             description = "The delay is not set"
         
         self.embed = nextcord.Embed(
@@ -141,7 +149,6 @@ class CooldownsView(DefaultSettingsView):
             color=colour
         )  
         
-        super().__init__()
         
         cdd = DropDown(
             guild.id,
@@ -154,6 +161,32 @@ class CooldownsView(DefaultSettingsView):
     @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = permisson_command.precise.CommandData(
+            interaction.guild,
+            self.command_name
+        )
+        
+        await interaction.message.edit(embed=view.embed, view=view)
+    
+    
+    @nextcord.ui.button(label='Edit',style=nextcord.ButtonStyle.blurple)
+    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        typ = self.cooldate.get('type')
+        
+        modal = CoolModal(typ, self.command_name)
+        
+        await interaction.response.send_modal(modal)
+    
+    @nextcord.ui.button(label='Delete',style=nextcord.ButtonStyle.red)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        cdb = CommandDB(interaction.guild.id)
+        command_data = cdb.get(self.command_name, {})
+        
+        del command_data["distribution"]["cooldown"]
+        
+        cdb.update(self.command_name, command_data)
+        
+        
+        view = CooldownsView(
             interaction.guild,
             self.command_name
         )
