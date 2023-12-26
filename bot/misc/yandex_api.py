@@ -21,7 +21,7 @@ def decode_downald_info(bs_data: BeautifulSoup) -> None:
 
 
 class Playlist:
-    def __init__(self,data) -> None:
+    def __init__(self,data: dict) -> None:
         self.owner: dict = data.get('owner')
         self.id: int = data.get('uid')
         self.kind = data.get('kind')
@@ -30,7 +30,7 @@ class Playlist:
         self.tags = data.get('tags')
 
 class Album:
-    def __init__(self,data) -> None:
+    def __init__(self,data: dict) -> None:
         self.id:int = data.get('id')
         self.title:str = data.get('title')
         self.type:str = data.get('metaType')
@@ -41,11 +41,11 @@ class Album:
         self.labels:dict = data.get('labels')
 
 class Artist:
-    def __init__(self,data:dict) -> None:
+    def __init__(self,data: dict) -> None:
         self.id:int = data.get('id')
         self.name:str = data.get('name')
-        self.cover:str = data.get('cover')
-        self.avatar:str = self.cover and data.get('cover').get('uri')
+        self.cover:dict = data.get('cover')
+        self.avatar:str = self.cover and self.cover.get('uri')
 
 class Track:
     def __init__(self,data: dict) -> None:
