@@ -170,7 +170,7 @@ class IdeaModal(nextcord.ui.Modal):
             name=interaction.user.display_name,
             icon_url=interaction.user.display_avatar
         )
-        embed.add_field(name='Идея:',value=idea)
+        embed.add_field(name='Идея:', value=idea)
         
         mes = await channel.send(content=interaction.user.mention,embed=embed,view=Confirm())
         await mes.add_reaction(Emoji.tickmark)

@@ -30,7 +30,7 @@ class ready_event(commands.Cog):
     
     
     async def process_temp_roles(self):
-        rsdb = RolesDB(12523, 35623)
+        rsdb = RolesDB()
         datas = rsdb.get_all()
         for dat in datas:
             guild_id = dat[0]
