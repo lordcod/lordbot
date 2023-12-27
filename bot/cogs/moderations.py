@@ -75,12 +75,17 @@ class moderations(commands.Cog):
         await ctx.send(f"{Emoji.congratulation}The roles were issued successfully")
 
     @temp_role.command(name='list')
-    async def temp_role_list(self, ctx: commands.Context):
+    async def temp_role_list(self, ctx: commands.Context, member: nextcord.Member = None):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')
         
-        rsdb = RolesDB(ctx.guild.id)
-        datas = rsdb.get_as_guild()
+        if member:
+            rsdb = RolesDB(ctx.guild.id, member.id)
+            predata = rsdb.get_as_member()
+            datas = [predata] if predata else []
+        else:
+            rsdb = RolesDB(ctx.guild.id)
+            datas = rsdb.get_as_guild()
         
         quantity = 0
         message = ""

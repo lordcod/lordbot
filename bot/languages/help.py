@@ -3,7 +3,7 @@ from typing import List, Dict, Literal, Union
 possible_args = Literal['name','category','aliases','arguments','descriptrion','brief_descriptrion','allowed_disabled']
 CommandOption = Dict[
     possible_args,
-    Union[dict,list,str,bool]
+    Union[dict,list,bool,str]
 ]   
 
 categories_emoji = {
@@ -274,7 +274,50 @@ categories: Dict[str,List[CommandOption]] = {
             },
             'allowed_disabled':True,
         },  
-        
+        {
+            'name':'temp-role',
+            'category':'moderation',
+            'aliases':[],
+            'arguments':['<member>', '<roles>', '[time]'],
+            'descriptrion':{
+                'en':(
+                    'Adds roles to a certain participant for a while or forever\n'
+                    'If the role is not specified, the role will be assigned forever\n'
+                    'You can summarize the roles\n'
+                    'The time is indicated in the format `1d1h1m1s` the values can be combined and also duplicated, for example `1d2h1d`\n\n'
+                    'Example: '
+                    'l.temp-role **@lordcode** **@role1** **@role2** _12h_'
+                ),
+                'ru':(
+                    'Добавляет роли определенному участнику на некоторое время или навсегда\n'
+                    'Если роль не указана, она будет назначена навсегда\n'
+                    'Вы можете суммировать роли\n'
+                    'Время указано в формате `1d1h1m1s` значения могут комбинироваться, а также дублироваться, например `1d2h1d`\n\n'
+                    'Пример: '
+                    'l.temp-role **@user** **@role1** **@role2** _12h_'
+                )
+            },
+            'brief_descriptrion':{
+                'en':'Adds roles to a certain participant for a while or forever',
+                'ru':'Добавляет роли определенному участнику на некоторое время или навсегда'
+            },
+            'allowed_disabled':True,
+        },
+        {
+            'name':'temp-role list',
+            'category':'moderation',
+            'aliases':[],
+            'arguments':['[member]'],
+            'descriptrion':{
+                'en':'Provides a list of temporary roles for the server or member',
+                'ru':'Предоставляет список временных ролей для сервера или участника'
+            },
+            'brief_descriptrion':{
+                'en':'Provides a list of temporary roles for the server or member',
+                'ru':'Предоставляет список временных ролей для сервера или участника'
+            },
+            'allowed_disabled':True,
+        },
         {
             'name':'say',
             'category':'moderation',

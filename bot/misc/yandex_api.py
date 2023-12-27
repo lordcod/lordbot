@@ -53,7 +53,7 @@ class Track:
         self.title:str = data.get('title')
         self.major:dict = data.get('major')
         self.image:str = data.get('ogImage')
-        self.diration:float = (data.get('durationMs')/100)
+        self.diration:float = data.get('durationMs',100)/100
         self.artists:List[Artist] = [Artist(artist) for artist in data.get('artists',[])]
         self.artist_names:List[str] = [art.name for art in self.artists]
         self.albums:List[Album] = [Album(album) for album in data.get('albums',[])]
