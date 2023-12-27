@@ -309,8 +309,18 @@ categories: Dict[str,List[CommandOption]] = {
             'aliases':[],
             'arguments':['[member]'],
             'descriptrion':{
-                'en':'Provides a list of temporary roles for the server or member',
-                'ru':'Предоставляет список временных ролей для сервера или участника'
+                'en':(
+                    'Provides a list of temporary roles for the server or member.\n'
+                    'If `member` is n2ot specified, it shows a list of all temporary roles on the server.\n'
+                    'If specified, it shows only those roles that belong to the participant.\n'
+                    'The roles assigned to are always not shown in the list.'
+                ),
+                'ru':(
+                    'Предоставляет список временных ролей для сервера или участника.\n'
+                    'Если `member` не указан, то отображается список всех временных ролей на сервере.\n'
+                    'Если указано, то отображаются только те роли, которые принадлежат участнику.\n'
+                    'Назначенные роли всегда не отображаются в списке.'
+                )
             },
             'brief_descriptrion':{
                 'en':'Provides a list of temporary roles for the server or member',
