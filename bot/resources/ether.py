@@ -41,6 +41,8 @@ class Emoji:
     cooldown = '<:cooldown:1185277451295793192>'
     congratulation = '<a:congratulation:1165684808844845176>'
     roketa = '<a:rocketa:1165684783754522704>'
+    tickmark = '<a:tickmark:1165684814557495326>'
+    cross = '<a:cross:1165684812250611732>'
 
 
 

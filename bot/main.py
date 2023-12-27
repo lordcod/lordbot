@@ -3,6 +3,7 @@ from nextcord.ext import commands
 
 from bot.misc import (utils,env)
 from bot.misc.logger import Logger
+from bot.views.ideas import IdeaBut
 
 from typing import List
 import os
@@ -22,6 +23,11 @@ bot = commands.Bot(
     help_command=None
 )
 
+
+@bot.command()
+async def button_suggest(ctx:commands.Context):
+    await ctx.message.delete()
+    await ctx.send('Предложи свою идею для проекта!',view=IdeaBut(ctx.guild.id))
 
 def load_dir(dirpath: str) -> None:
     for filename in os.listdir(dirpath):

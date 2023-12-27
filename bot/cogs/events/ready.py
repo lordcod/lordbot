@@ -1,9 +1,10 @@
 import nextcord
 from nextcord.ext import commands
 
+from bot.misc.logger import Logger
 from bot.misc.utils import process_role
 from bot.databases.db import RolesDB
-from bot.misc.logger import Logger
+from bot.views.ideas import (Confirm,IdeaBut)
 
 import asyncio
 
@@ -17,6 +18,9 @@ class ready_event(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         await self.process_temp_roles()
+        
+        self.bot.add_view(Confirm())
+        self.bot.add_view(IdeaBut())
         
         Logger.success(f"The bot is registered as {self.bot.user}")
     
