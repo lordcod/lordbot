@@ -91,7 +91,7 @@ class Confirm(nextcord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
     
-    @nextcord.ui.button(label="Одобрить", style=nextcord.ButtonStyle.green,custom_id='persistent_view:confirm')
+    @nextcord.ui.button(label="Одобрить", style=nextcord.ButtonStyle.green,custom_id='ideas-confirm:confirm')
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         role_ids = set(interaction.user._roles)
         moderation_roles = set(mod_role_ids)
@@ -101,7 +101,7 @@ class Confirm(nextcord.ui.View):
         
         await interaction.response.send_modal(ConfirmModal())
     
-    @nextcord.ui.button(label="Отказать", style=nextcord.ButtonStyle.red,custom_id='persistent_view:cancel')
+    @nextcord.ui.button(label="Отказать", style=nextcord.ButtonStyle.red,custom_id='ideas-confirm:cancel')
     async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         idea_data = localdb.get('ideas', interaction.message.id)
         if idea_data is None:
@@ -194,7 +194,7 @@ class IdeaBut(nextcord.ui.View):
     @nextcord.ui.button(
         label="Предложить идею",
         style=nextcord.ButtonStyle.green,
-        custom_id="persistent_view:suggest"
+        custom_id="ideas-main-button:suggest"
     )
     async def suggest(
         self,
