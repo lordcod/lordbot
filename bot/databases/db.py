@@ -4,7 +4,14 @@ import asyncio
 from .load import load_db
 from .misc.error_handler import on_error
 from .misc.utils import get_info_colums, register_table
-from .handlers import GuildDateBasesInstance, EconomyMembedDBInstance, CommandDBInstance, RolesDBInstance
+from .handlers import (
+    establish_connection,
+    GuildDateBases,
+    EconomyMembedDB,
+    CommandDB,
+    RoleDateBases,
+    MongoDB
+)
 
 from bot.misc.logger import Logger
 
@@ -66,11 +73,7 @@ colums = {
     'economic':get_info_colums('economic', _connection)
 }
 
-
-GuildDateBases = GuildDateBasesInstance(connection)
-EconomyMembedDB = EconomyMembedDBInstance(connection)
-CommandDB = CommandDBInstance(connection)
-RolesDB = RolesDBInstance(connection)
+establish_connection(connection)
 
 def db_forever():
     loop = asyncio.new_event_loop()

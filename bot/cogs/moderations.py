@@ -3,7 +3,7 @@ from nextcord.ext import commands,application_checks
 
 from bot.misc import utils
 from bot.views import views
-from bot.databases.db import RolesDB, GuildDateBases
+from bot.databases.db import RoleDateBases, GuildDateBases
 from bot.resources.ether import Emoji
 
 import io
@@ -50,7 +50,7 @@ class moderations(commands.Cog):
         await member.add_roles(*roles)
         
         if time:
-            rsdb = RolesDB(ctx.guild.id, member.id)
+            rsdb = RoleDateBases(ctx.guild.id, member.id)
             ftime = utils.calculate_time(time)
             if ftime is None:
                 await ctx.send("The role was given forever because you specified the wrong amount of time")
@@ -80,11 +80,11 @@ class moderations(commands.Cog):
         colour = gdb.get('color')
         
         if member:
-            rsdb = RolesDB(ctx.guild.id, member.id)
+            rsdb = RoleDateBases(ctx.guild.id, member.id)
             predata = rsdb.get_as_member()
             datas = [predata] if predata else []
         else:
-            rsdb = RolesDB(ctx.guild.id)
+            rsdb = RoleDateBases(ctx.guild.id)
             datas = rsdb.get_as_guild()
         
         quantity = 0

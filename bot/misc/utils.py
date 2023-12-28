@@ -4,7 +4,7 @@ from nextcord.ext import commands
 from nextcord.utils import escape_markdown
 
 from bot.resources import errors
-from bot.databases.db import GuildDateBases, RolesDB
+from bot.databases.db import GuildDateBases, RoleDateBases
 
 import re
 import string
@@ -157,7 +157,7 @@ async def process_role(
     role: nextcord.Role,
     unix_time: int
 ) -> None:
-    rsdb = RolesDB(
+    rsdb = RoleDateBases(
         guild_id=member.guild.id,
         member_id=member.id
     )

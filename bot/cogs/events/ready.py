@@ -3,7 +3,7 @@ from nextcord.ext import commands
 
 from bot.misc.logger import Logger
 from bot.misc.utils import process_role
-from bot.databases.db import RolesDB
+from bot.databases.db import RoleDateBases
 from bot.views.ideas import (Confirm,IdeaBut)
 
 import asyncio
@@ -30,7 +30,7 @@ class ready_event(commands.Cog):
     
     
     async def process_temp_roles(self):
-        rsdb = RolesDB()
+        rsdb = RoleDateBases()
         datas = rsdb.get_all()
         for dat in datas:
             guild_id = dat[0]
