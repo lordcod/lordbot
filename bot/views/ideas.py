@@ -2,7 +2,7 @@ from cgitb import reset
 import nextcord
 
 from bot.resources.ether import Emoji
-from bot.databases import localdb
+from bot.databases.db import MongoDB
 
 import time
 
@@ -30,7 +30,8 @@ class ConfirmModal(nextcord.ui.Modal):
         self.add_item(self.reason)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        idea_data = localdb.get('ideas', interaction.message.id)
+        mdb = MongoDB('ideas')
+        idea_data = mdb.get(interaction.message.id)
         if idea_data is None:
             await interaction.response.defer(ephemeral=True)
             return
@@ -103,7 +104,8 @@ class Confirm(nextcord.ui.View):
     
     @nextcord.ui.button(label="Отказать", style=nextcord.ButtonStyle.red,custom_id='ideas-confirm:cancel')
     async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        idea_data = localdb.get('ideas', interaction.message.id)
+        mdb = MongoDB('ideas')
+        idea_data = mdb.get(interaction.message.id)
         if idea_data is None:
             await interaction.response.defer(ephemeral=True)
         
@@ -177,11 +179,13 @@ class IdeaModal(nextcord.ui.Modal):
         await mes.add_reaction(Emoji.cross)
         await mes.create_thread(name=f"Обсуждение идеи от {interaction.user.display_name}")
         
+        
         idea_data = {
             'user_id': interaction.user.id,
             'idea':idea
         }
-        localdb.set('ideas', mes.id, idea_data)
+        mdb = MongoDB('ideas')
+        mdb.set(mes.id, idea_data)
         
         timeout[interaction.user.id] = time.time()+(60*30)
 
