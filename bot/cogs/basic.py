@@ -1,6 +1,6 @@
 import nextcord
 from nextcord.ext import commands,application_checks
-from nextcord.utils import find
+from nextcord.utils import oauth_url
 
 from bot import languages
 from bot.resources.ether import Emoji
@@ -53,9 +53,16 @@ class basic(commands.Cog):
     
     @commands.command()
     async def invite(self,ctx: commands.Context):
+        invite_link = oauth_url(
+            client_id=self.bot.user.id,
+            permissions=nextcord.Permissions.all(),
+            redirect_uri=info.site_link,
+            scopes=("bot","applications.commands"),
+        )
+        
         content = (
             "Special bot invitation to the server:\n"
-            f"{info.invite_link}"
+            f"{invite_link}"
         )
         
         await ctx.send(content)

@@ -242,18 +242,6 @@ def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBas
         return escape_markdown(prefix)
     return prefix
 
-async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:
-    if channel.type.value not in [0,2,5,13]:
-        raise  errors.ErrorTypeChannel("Channel error")
-    
-    webhooks = await channel.webhooks()
-    for wh in webhooks:
-        if wh.user==user:
-            return wh
-    else:
-        wh = await channel.create_webhook(name=user.name)
-        return wh
-
 def is_builtin_class_instance(obj):
     return obj in (str, int, float, bool)
 
