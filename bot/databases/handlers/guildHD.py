@@ -50,7 +50,7 @@ class GuildDateBases:
     
     
     @on_error()
-    def get(self, service, default = None) -> Union[dict, int, str]:
+    def get(self, service: str, default: any = None) -> Union[dict, int, str]:
         data = self._get_service(self.guild_id,service)
         data = data[0]
         data = Json.loads(data)

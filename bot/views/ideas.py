@@ -1,13 +1,9 @@
 import nextcord
 
 from bot.resources.ether import Emoji
-from bot.databases.db import MongoDB
+from bot.databases.db import MongoDB, GuildDateBases
 
 import time
-
-channel_suggest = 1189644228834381935
-channel_suggest_accept = 1189644276645240933
-mod_role_ids = [1179070749361840220]
 
 timeout = {}
 
@@ -29,6 +25,10 @@ class ConfirmModal(nextcord.ui.Modal):
         self.add_item(self.reason)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas_data = gdb.get('ideas')
+        channel_approved_id = ideas_data.get('channel-approved-id')
+        
         mdb = MongoDB('ideas')
         idea_data = mdb.get(interaction.message.id)
         if idea_data is None:
@@ -64,7 +64,7 @@ class ConfirmModal(nextcord.ui.Modal):
         await interaction.message.edit(content=content,embed=embed,view=views)
         
         
-        channel = interaction.guild.get_channel(channel_suggest_accept)
+        channel = interaction.guild.get_channel(channel_approved_id)
         
         embed_accept = nextcord.Embed(
             title="Идея одобрена!",
@@ -93,8 +93,12 @@ class Confirm(nextcord.ui.View):
     
     @nextcord.ui.button(label="Одобрить", style=nextcord.ButtonStyle.green,custom_id='ideas-confirm:confirm')
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas_data = gdb.get('ideas')
+        moderation_role_ids = ideas_data.get('moderation-role-ids')
+        
         role_ids = set(interaction.user._roles)
-        moderation_roles = set(mod_role_ids)
+        moderation_roles = set(moderation_role_ids)
         if not role_ids&moderation_roles:
             await interaction.response.defer(ephemeral=True)
             return
@@ -103,6 +107,10 @@ class Confirm(nextcord.ui.View):
     
     @nextcord.ui.button(label="Отказать", style=nextcord.ButtonStyle.red,custom_id='ideas-confirm:cancel')
     async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas_data = gdb.get('ideas')
+        moderation_role_ids = ideas_data.get('moderation-role-ids')
+        
         mdb = MongoDB('ideas')
         idea_data = mdb.get(interaction.message.id)
         if idea_data is None:
@@ -113,7 +121,7 @@ class Confirm(nextcord.ui.View):
         
         
         role_ids = set(interaction.user._roles)
-        moderation_roles = set(mod_role_ids)
+        moderation_roles = set(moderation_role_ids)
         if not interaction.user.id == idea_author_id and not role_ids&moderation_roles:
             await interaction.response.defer(ephemeral=True)
             return
@@ -158,7 +166,12 @@ class IdeaModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
-        channel = interaction.guild.get_channel(channel_suggest)
+        
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas_data = gdb.get('ideas')
+        channel_offers_id = ideas_data.get('channel-offers-id')
+        
+        channel = interaction.guild.get_channel(channel_offers_id)
         idea = self.idea.value
         
         
