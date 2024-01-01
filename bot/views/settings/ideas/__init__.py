@@ -67,9 +67,9 @@ class IdeasView(DefaultSettingsView):
             
             
             self.embed.description = (
-                f"Channel suggest: {channel_suggest.mention}"
-                f"Channel offers: {channel_offers.mention}"
-                f"Channel approved: {channel_approved.mention}"
+                f"Channel suggest: {channel_suggest.mention}\n"
+                f"Channel offers: {channel_offers.mention}\n"
+                f"Channel approved: {channel_approved.mention}\n"
                 f"Moderation roles: {', '.join([role.mention for role in moderation_roles])}"
             )
         

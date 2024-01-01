@@ -28,46 +28,56 @@ def connection():
 
 register_table(
     table_name="guilds",
-    variable=(
-        "id INT8 PRIMARY KEY,"
-        "language TEXT DEFAULT 'en',"
-        "prefix TEXT DEFAULT 'l.',"
-        "color INT8 DEFAULT '1974050',"
-        "economic_settings JSON DEFAULT '{\"emoji\":\"<:diamond:1183363436780978186>\"}',"
-        "auto_roles JSON DEFAULT '{}',"
-        "thread_messages JSON DEFAULT '{}',"
-        "reactions JSON DEFAULT '{}',"
-        "auto_translate JSON DEFAULT '{}',"
-        "greeting_message JSON DEFAULT '{}',"
-        "disabled_commands JSON DEFAULT '{}',"
-        "ideas JSON DEFAULT '{}'"
-    ),
+    variable="""
+        id INT8 PRIMARY KEY,
+        language TEXT DEFAULT 'en',
+        prefix TEXT DEFAULT 'l.',
+        color INT8 DEFAULT '1974050',
+        economic_settings JSON DEFAULT '{"emoji":"<:diamond:1183363436780978186>"}',
+        auto_roles JSON DEFAULT '{}',
+        thread_messages JSON DEFAULT '{}',
+        reactions JSON DEFAULT '{}',
+        auto_translate JSON DEFAULT '{}',
+        greeting_message JSON DEFAULT '{}',
+        command_permissions JSON DEFAULT '{}',
+        ideas JSON DEFAULT '{}'
+    """,
     connection=_connection
 )
 
 register_table(
     table_name="economic",
-    variable=(
-        "guild_id INT8 NOT NULL,"
-        "member_id INT8 NOT NULL,"
-        "balance INT8 DEFAULT '0',"
-        "bank INT8 DEFAULT '0',"
-        "daily INT8 DEFAULT '0',"
-        "weekly INT8 DEFAULT '0',"
-        "monthly INT8 DEFAULT '0'"
-    ),
+    variable="""
+        guild_id INT8 NOT NULL,
+        member_id INT8 NOT NULL,
+        balance INT8 DEFAULT '0',
+        bank INT8 DEFAULT '0',
+        daily INT8 DEFAULT '0',
+        weekly INT8 DEFAULT '0',
+        monthly INT8 DEFAULT '0'
+    """,
     connection=_connection
 )
 
 register_table(
     table_name="roles",
-    variable=(
-        "guild_id INT8 NOT NULL,"
-        "member_id INT8 NOT NULL,"
-        "roles JSON DEFAULT '{}'"
-    ),
+    variable="""
+        guild_id INT8 NOT NULL,
+        member_id INT8 NOT NULL,
+        roles JSON DEFAULT '{}'
+    """,
     connection=_connection
 )
+
+register_table(
+    table_name="mongo",
+    variable="""
+        name TEXT PRIMARY KEY,
+        values JSON DEFAULT '{}'
+    """,
+    connection=_connection
+)
+
 
 colums = {
     'guilds':get_info_colums('guilds', _connection),

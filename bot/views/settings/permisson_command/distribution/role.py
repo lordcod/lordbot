@@ -38,10 +38,9 @@ class DropDown(nextcord.ui.StringSelect):
             opt = nextcord.SelectOption(
                 label=role.name,
                 value=role.id,
-                emoji=Emoji.frame_person
+                emoji=Emoji.frame_person,
+                default=role in roles
             )
-            if role in roles:
-                opt.default = True
             
             options.append(opt)
         
@@ -53,6 +52,7 @@ class DropDown(nextcord.ui.StringSelect):
                 )
             )
             self.current_disabled = True
+        
         super().__init__(
             placeholder="Select the roles in which the command will work",
             min_values=1,
