@@ -16,6 +16,7 @@ from .reactions import AutoReactions
 from .thread_message import AutoThreadMessage
 from .permisson_command import CommandsDataView
 from .greeting import Greeting 
+from .ideas import IdeasView
 
 
 moduls = {
@@ -31,4 +32,5 @@ moduls = {
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
     
+    'Ideas': IdeasView,
 }

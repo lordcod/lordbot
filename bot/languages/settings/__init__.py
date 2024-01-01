@@ -54,6 +54,10 @@ class module_name:
         'en':'Command Settings',
         'ru':'Настройки команды'
     }
+    ideas = {
+        'en':'Ideas',
+        'ru':'Идеи'
+    }
     greeting = {
         'en':'Greeting',
         'ru':'Приветствие'
