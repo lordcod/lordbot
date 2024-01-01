@@ -39,7 +39,8 @@ register_table(
         "reactions JSON DEFAULT '{}',"
         "auto_translate JSON DEFAULT '{}',"
         "greeting_message JSON DEFAULT '{}',"
-        "disabled_commands JSON DEFAULT '{}'"
+        "disabled_commands JSON DEFAULT '{}',"
+        "ideas JSON DEFAULT '{}'"
     ),
     connection=_connection
 )

@@ -1,4 +1,3 @@
-from cgitb import reset
 import nextcord
 
 from bot.resources.ether import Emoji
@@ -145,7 +144,7 @@ class IdeaModal(nextcord.ui.Modal):
     def __init__(self):
         super().__init__(
             "Предложить идею",
-            timeout=5 * 60,  # 5 minutes
+            timeout=5 * 60, 
         )
         
         self.idea = nextcord.ui.TextInput(
@@ -207,7 +206,8 @@ class IdeaBut(nextcord.ui.View):
     ) -> None:
         user_timeout = timeout.get(interaction.user.id)
         if user_timeout and user_timeout > time.time():
-            await interaction.response.send_message(content=(
+            await interaction.response.send_message(
+                content=(
                     "Предложить идею можно только раз в 30 минут\n"
                     f"Следующия возможность подать идею будет через: <t:{user_timeout :.0f}:R>"
                 ),
