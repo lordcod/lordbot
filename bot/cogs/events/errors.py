@@ -74,21 +74,21 @@ class PermissionChecker:
     
     async def _is_allowed_cooldown(self, data: dict) -> bool:
         ctx = self.ctx
-        cooldown = Cooldown(
+        
+        cooldown = Cooldown.from_message(
             ctx.command.qualified_name,
             data,
-            ctx.guild.id,
-            ctx.author.id
+            ctx.message
         )
+        ctx.cooldown = cooldown
         retry = cooldown.get()
-        cooldown.add()
         
-        if isinstance(retry,TrueType):
+        if retry is True:
             return True
-        elif isinstance(retry, NumberType):
+        elif isinstance(retry, float):
             raise CommandOnCooldown(retry)
         else:  
-            raise TypeError()
+            raise TypeError(retry)
     
     allowed_types = {
         'role':_is_allowed_role,
@@ -103,7 +103,8 @@ class command_event(commands.Cog):
         self.bot = bot
         super().__init__()
         
-        # bot.event(self.on_error)
+        bot.after_invoke(self.after_invoke)
+        bot.event(self.on_error)
         bot.event(self.on_command_error)
         bot.event(self.on_application_error)
         
@@ -125,6 +126,9 @@ class command_event(commands.Cog):
         
         return answer
     
+    async def after_invoke(self, ctx: commands.Context) -> None:
+        if hasattr(ctx, 'cooldown'):
+            ctx.cooldown.add()
 
 
 
