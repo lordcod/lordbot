@@ -5,10 +5,11 @@ from typing import (
     TypedDict
 )
 
-
-IdeasPayload = TypedDict(
+ParticleIdeasPayload = TypedDict(
     'IdeasPayload', 
     {
+        "enabled": Optional[bool],
+        
         "channel-suggest-id": int,
         "message-suggest-id": int,
         
@@ -19,3 +20,7 @@ IdeasPayload = TypedDict(
     }
 )
 
+IdeasPayload = Union[
+    ParticleIdeasPayload,
+    dict
+]

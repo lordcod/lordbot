@@ -19,8 +19,17 @@ class DropDown(nextcord.ui.Select):
         
         options = [
             nextcord.SelectOption(
-                label=''
-            )
+                label='Suggest',
+            ),
+            nextcord.SelectOption(
+                label='Offers',
+            ),
+            nextcord.SelectOption(
+                label='Approved',
+            ),
+            nextcord.SelectOption(
+                label='Moderation roles',
+            ),
         ]
         
         
@@ -33,7 +42,7 @@ class DropDown(nextcord.ui.Select):
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         catalog = self.values[0]
-        
+        print(catalog)
         # await interaction.message.edit(embed=view.embed, view=view)
 
 
@@ -48,7 +57,7 @@ class IdeasView(DefaultSettingsView):
         
         self.embed = nextcord.Embed(
             title=disabled_commands_langs.title.get(locale),
-            color = colour
+            color=colour
         )
         
         if ideas:
@@ -72,14 +81,20 @@ class IdeasView(DefaultSettingsView):
                 f"Channel approved: {channel_approved.mention}\n"
                 f"Moderation roles: {', '.join([role.mention for role in moderation_roles])}"
             )
+        else:
+            self.embed.description = "The module is not configured"
         
         super().__init__()
         
         self.back.label = button_name.back.get(locale)
     
     
-    @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = views.SettingsView(interaction.user)
         
         await interaction.message.edit(embed=view.embed,view=view)
+    
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.back.callback(interaction)

@@ -1,6 +1,7 @@
 import nextcord
 
 from bot.resources.ether import Emoji
+from bot.databases.varstructs import IdeasPayload
 from bot.databases.db import MongoDB, GuildDateBases
 
 import time
@@ -226,5 +227,11 @@ class IdeaBut(nextcord.ui.View):
                 ),
                 ephemeral=True
             )
+            return
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas_data: IdeasPayload = gdb.get('ideas')
+        enabled: bool = ideas_data.get('enabled', False)
+        if enabled is False:
+            await interaction.response.send_message('The idea module is disabled on this server', ephemeral=True)
             return
         await interaction.response.send_modal(modal=IdeaModal())
