@@ -39,7 +39,6 @@ class DropDown(nextcord.ui.Select):
         
         
         super().__init__(
-            placeholder=disabled_commands_langs.placeholder.get(locale),
             min_values=1,
             max_values=1,
             options=options,
