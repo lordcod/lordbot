@@ -2,7 +2,7 @@ import nextcord
 
 from ...settings import DefaultSettingsView
 
-from bot.databases.varstructs import IdeasPayload
+from bot.databases.varstructs import ParticleIdeasPayload
 from bot.databases.db import GuildDateBases
 from bot.views import views
 from bot.languages.settings import (
@@ -21,22 +21,18 @@ class DropDown(nextcord.ui.Select):
         options = [
             nextcord.SelectOption(
                 label='Suggest',
-                
                 value='suggest'
             ),
             nextcord.SelectOption(
                 label='Offers',
-                
                 value='offers'
             ),
             nextcord.SelectOption(
                 label='Approved',
-                
                 value='approved'
             ),
             nextcord.SelectOption(
                 label='Moderation roles',
-                
                 value='moderation-roles'
             ),
         ]
@@ -62,7 +58,7 @@ class IdeasView(DefaultSettingsView):
         gdb = GuildDateBases(guild.id)
         colour: int = gdb.get('color')
         locale: str = gdb.get('language')
-        ideas: IdeasPayload = gdb.get('ideas')
+        ideas: ParticleIdeasPayload = gdb.get('ideas')
         
         self.embed = nextcord.Embed(
             title=disabled_commands_langs.title.get(locale),
@@ -109,13 +105,13 @@ class IdeasView(DefaultSettingsView):
     @nextcord.ui.button(label='Enabled', style=nextcord.ButtonStyle.blurple)
     async def switcher(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        ideas: IdeasPayload = gdb.get('ideas')
+        ideas: ParticleIdeasPayload = gdb.get('ideas')
         
         channel_suggest_id = ideas.get("channel-suggest-id")
         channel_offers_id = ideas.get("channel-offers-id")
         
         if not (channel_suggest_id and channel_offers_id):
-            await interaction.response.send_message('')
+            await interaction.response.send_message('You haven\'t set up everything to include ideas')
             return
     
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)

@@ -6,6 +6,7 @@ from nextcord.utils import escape_markdown
 from bot.resources import errors
 from bot.databases.db import GuildDateBases, RoleDateBases
 
+import inspect
 import re
 import string
 import random
@@ -28,116 +29,55 @@ intervals = (
 )
 
 
-class GuildPayload:
-    guild: nextcord.Guild
-    
-    def __init__(self, guild: nextcord.Guild) -> None:
-        self.guild = guild
-    
-    @property
-    def id(self) -> int:
-        return self.guild.id
-    
-    @property
-    def name(self) -> str:
-        return self.guild.name
-    
-    @property
-    def icon(self) -> str:
-        guild = self.guild
-        if not (guild.icon and guild.icon.url):
-            return None
-        return guild.icon.url
-    
-    @property
-    def memberCount(self) -> int:
-        return self.guild.member_count
-    
-    @property
-    def createdAt(self) -> datetime:
-        return self.guild.created_at
-    
-    @property
-    def premiumSubscriptionCount(self) -> int:
-        return self.guild.premium_subscription_count
 
-
-    def to_dict(self):
-        starter = 'guild.'
-        ret = {
-            f'{starter}id':self.id,
-            f'{starter}name':self.name,
-            f'{starter}icon':self.icon,
-            f'{starter}memberCount':self.memberCount,
-            f'{starter}createdAt':self.createdAt,
-            f'{starter}premiumSubscriptionCount':self.premiumSubscriptionCount,
-        }
+class TempletePayload:
+    def to_dict(self, _prefix = None):
+        if _prefix is None:
+            prefix = self.__class__.__name__
+        else:
+            prefix = str(_prefix)
         
-        return ret
+        base = {}
+        
+        for name, arg in inspect.getmembers(self):
+            if name.startswith("_") or name == "to_dict":
+                continue
+            
+            base[f"{prefix}.{name}"] = arg
+        
+        return base
 
-    def __getattr__(self, name: str) -> Any:
-        return f'{"{"}{name}{"}"}'
-    
+class GuildPayload(TempletePayload):
+    def __init__(self, guild: nextcord.Guild) -> None:
+        self.id: int = guild.id
+        self.name: str = guild.name
+        self.memberCount: int = guild.member_count
+        self.createdAt: datetime = guild.created_at
+        self.premiumSubscriptionCount: int = guild.premium_subscription_count
+        
+        if not (guild.icon and guild.icon.url):
+            self.icon = None
+        else:
+            self.icon: str = guild.icon.url
+
     def __str__(self) -> str:
         return self.name
 
-class MemberPayload:
-    member: nextcord.Member
-    
+class MemberPayload(TempletePayload): 
     def __init__(self, member: nextcord.Member) -> None:
-        self.member = member
-    
-    @property
-    def id(self) -> int:
-        return self.member.id
-    
-    @property
-    def mention(self) -> str:
-        return self.member.mention
-    
-    @property 
-    def username(self) -> str:
-        return self.member.name
-    
-    @property 
-    def displayName(self) -> str:
-        return self.member.display_name
-    
-    @property
-    def discriminator(self) -> int:
-        return self.member.discriminator
-    
-    @property
-    def tag(self) -> str:
-        member = self.member
-        tag = f'{member.name}#{member.discriminator}'
-        return tag
-    
-    @property
-    def avatar(self) -> str:
-        member = self.member
-        if not (member.display_avatar and member.display_avatar.url):
-            return None
-        return member.display_avatar.url
-    
-    
-    def to_dict(self):
-        starter = 'member.'
-        ret = {
-            f'{starter}id':self.id,
-            f'{starter}mention':self.mention,
-            f'{starter}username':self.username,
-            f'{starter}displayName':self.displayName,
-            f'{starter}discriminator,':self.discriminator,
-            f'{starter}tag':self.tag,
-            f'{starter}avatar':self.avatar,
-        }
+        self.id: int = member.id
+        self.mention: str = member.mention
+        self.username: str = member.name
+        self.displayName: str = member.display_name
+        self.discriminator: str = member.discriminator
+        self.tag = f'{member.name}#{member.discriminator}'
         
-        return ret
+        if not (member.display_avatar and member.display_avatar.url):
+            self.avatar = None
+        else:
+            self.avatar = member.display_avatar.url
     
-    def __getattr__(self, name: str) -> str:
-        return f'{"{"}{name}{"}"}'
-
+    
     def __str__(self) -> str:
         return self.tag
 

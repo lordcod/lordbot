@@ -19,8 +19,3 @@ ParticleIdeasPayload = TypedDict(
         "moderation-role-ids":List[int]
     }
 )
-
-IdeasPayload = Union[
-    ParticleIdeasPayload,
-    dict
-]
