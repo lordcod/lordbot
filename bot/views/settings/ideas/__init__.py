@@ -160,7 +160,7 @@ class IdeasView(DefaultSettingsView):
         if channel_suggest_id and message_suggest_id:
             try:
                 channel_suggest = interaction.guild.get_channel(channel_suggest_id)
-                message_suggest = await channel_suggest.get_partial_message(message_suggest_id)
+                message_suggest = channel_suggest.get_partial_message(message_suggest_id)
                 await message_suggest.delete()
             except:
                 pass
