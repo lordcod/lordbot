@@ -30,7 +30,6 @@ value = """
 data = """
 {
     "channel-suggest-id": 1189644187772129462,
-    "message-suggest-id": 1189817840283439134,
 
     "channel-offers-id": 1189644228834381935,
     "channel-approved-id": 1189644276645240933,

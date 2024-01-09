@@ -5,7 +5,7 @@ from typing import (
     TypedDict
 )
 
-ParticleIdeasPayload = TypedDict(
+IdeasPayload = TypedDict(
     'IdeasPayload', 
     {
         "enabled": Optional[bool],
