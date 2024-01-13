@@ -8,12 +8,14 @@ from bot.resources.ether import Emoji
 
 import io
 import asyncio
-from time import time as tick
-
+import time
+from typing import Optional
 
 
 class moderations(commands.Cog):
-    def __init__(self, bot):
+    bot: commands.Bot
+    
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command()
@@ -45,37 +47,32 @@ class moderations(commands.Cog):
         ctx: commands.Context, 
         member: nextcord.Member, 
         roles: commands.Greedy[nextcord.Role],
-        time: str = None
+        stime: Optional[str] = None
     ):
         await member.add_roles(*roles)
         
-        if time:
+        if stime:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
-            ftime = utils.calculate_time(time)
+            ftime = utils.calculate_time(stime)
             if ftime is None:
                 await ctx.send("The role was given forever because you specified the wrong amount of time")
                 return
             
-            unix_time = int(tick()+ftime)
             
-            for rol in roles:
+            for role in roles:
                 data = {
-                    'time': unix_time,
-                    'role_id': rol.id
+                    'time': int(time.time()+ftime),
+                    'role_id': role.id
                 }
                 rsdb.add(data)
                 
-                task = utils.process_role(
-                    member,
-                    rol,
-                    unix_time
-                )
-                asyncio.create_task(task)
+                self.bot.loop.call_later(ftime, asyncio.create_task, member.remove_roles(role))
+                self.bot.loop.call_later(ftime, asyncio.create_task, rsdb.aremove(data))
         
         await ctx.send(f"{Emoji.congratulation}The roles were issued successfully")
 
     @temp_role.command(name='list')
-    async def temp_role_list(self, ctx: commands.Context, member: nextcord.Member = None):
+    async def temp_role_list(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')
         
@@ -176,7 +173,7 @@ class moderations(commands.Cog):
         
         messages = []
         
-        minimum_time = int((tick() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
         
         async for message in ctx.channel.history(limit=250):
             if len(messages) >= limit:
@@ -199,7 +196,7 @@ class moderations(commands.Cog):
         
         messages = []
         finder = False
-        minimum_time = int((tick() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
         
         async for message in message_start.channel.history(limit=100):
             if not messsage_finish:

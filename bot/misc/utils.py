@@ -92,26 +92,6 @@ class GreetingTemplate(string.Template):
     '''
 
 
-async def process_role(
-    member: nextcord.Member,
-    role: nextcord.Role,
-    unix_time: int
-) -> None:
-    rsdb = RoleDateBases(
-        guild_id=member.guild.id,
-        member_id=member.id
-    )
-    data = {
-        'time':unix_time,
-        'role_id': role.id
-    }
-    temp = unix_time - int(time.time())
-    
-    await asyncio.sleep(temp)
-    
-    await member.remove_roles(role)
-    rsdb.remove(data)
-
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
     async with aiohttp.ClientSession() as session:

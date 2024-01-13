@@ -105,3 +105,6 @@ class RoleDateBases:
         
         role_datas = Json.dumps(roles_ids)
         self.update(role_datas)
+    
+    async def aremove(self, role_data):
+        self.remove(role_data)

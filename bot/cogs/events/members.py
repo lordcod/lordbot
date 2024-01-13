@@ -47,7 +47,7 @@ class members_event(commands.Cog):
         
         utils.remove_none(roles)
         
-        await member.add_roles(*roles,atomic=False)
+        await member.add_roles(*roles, atomic=False)
     
     @on_error
     async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
@@ -65,8 +65,8 @@ class members_event(commands.Cog):
             return
         
         
-        member_payload = utils.MemberPayload(member)
-        guild_payload = utils.GuildPayload(guild)
+        member_payload = utils.MemberPayload(member).to_dict()
+        guild_payload = utils.GuildPayload(guild).to_dict()
         data_payload = guild_payload|member_payload
         
         content: str = greeting_message.get('message')

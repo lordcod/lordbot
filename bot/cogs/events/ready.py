@@ -2,10 +2,10 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
-from bot.misc.utils import process_role
 from bot.databases.db import RoleDateBases
 from bot.views.ideas import (Confirm,IdeaBut)
 
+import time
 import asyncio
 
 class ready_event(commands.Cog):
@@ -32,6 +32,7 @@ class ready_event(commands.Cog):
     async def process_temp_roles(self):
         rsdb = RoleDateBases()
         datas = rsdb.get_all()
+        
         for dat in datas:
             guild_id = dat[0]
             member_id = dat[1]
@@ -45,15 +46,18 @@ class ready_event(commands.Cog):
             if not member:  
                 continue
             
+            mrsdb = RoleDateBases(guild_id, member_id)
+            
             for tp_data in temp_datas:
-                time = tp_data.get("time")
+                temp = tp_data.get("time", 0) - int(time.time())
                 role_id = tp_data.get("role_id")
                 role = guild.get_role(role_id)
-                if not (time and role):
+                
+                if not (temp and role):
                     continue
                 
-                task = process_role(member, role, time)
-                asyncio.create_task(task)
+                self.bot.loop.call_later(temp, asyncio.create_task, member.remove_roles(role))
+                self.bot.loop.call_later(temp, asyncio.create_task, mrsdb.aremove(tp_data))
 
 
 def setup(bot: commands.Bot):
