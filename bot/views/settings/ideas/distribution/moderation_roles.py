@@ -47,7 +47,7 @@ class ModerationRolesView(DefaultSettingsView):
         super().__init__()
         
         
-        self.embed = None
+        self.embed = nextcord.Embed()
         
         
         cdd = DropDown(
