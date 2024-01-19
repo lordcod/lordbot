@@ -15,11 +15,12 @@ import asyncio
 import aiohttp
 import orjson
 
+from typing import Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 
-
+number_type = Union[int, float]
 intervals = (
     ('weeks', 604800),  # 60 * 60 * 24 * 7
     ('days', 86400),    # 60 * 60 * 24
@@ -91,6 +92,9 @@ class GreetingTemplate(string.Template):
         )
     '''
 
+
+def clamp(val: number_type, minv: number_type, maxv: number_type) -> number_type:
+    return min(maxv, max(minv, val)) 
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"

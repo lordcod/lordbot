@@ -1,6 +1,6 @@
 from typing import List, Dict, Literal, Union
 
-possible_args = Literal['name','category','aliases','arguments','descriptrion','brief_descriptrion','allowed_disabled']
+possible_args = Literal['name', 'category', 'aliases', 'arguments', 'descriptrion', 'brief_descriptrion', 'allowed_disabled']
 CommandOption = Dict[
     possible_args,
     Union[dict,list,bool,str]
@@ -9,6 +9,7 @@ CommandOption = Dict[
 categories_emoji = {
     'economy':'💎',
     'major':'👑',
+    'voice':'🎤',
     'moderation':'⚠',
 }
 
@@ -20,6 +21,10 @@ categories_name = {
     'major':{
         'ru':'Главное',
         'en':'Major'
+    },
+    'voice':{
+        'ru':'Голос',
+        'en':'Voice'
     },
     'moderation':{
         'ru':'Модерационные',
@@ -257,6 +262,102 @@ categories: Dict[str,List[CommandOption]] = {
             },
             'allowed_disabled':True,
         },  
+    ],
+    'voice':[
+        {
+            'name':'join',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Enters the channel with the user who called the command'
+            },
+            'brief_descriptrion':{
+                'en':'Enters the channel'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'leave',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Comes out the channel with the user who called the command'
+            },
+            'brief_descriptrion':{
+                'en':'Comes out the channel'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'play',
+            'category':'voice',
+            'aliases':[],
+            'arguments':['<title/url>'],
+            'descriptrion':{
+                'en':(
+                    'Starts playing the music set by the user\n'
+                    'As a cloud with music is **Yandex Music**'
+                ),
+            },
+            'brief_descriptrion':{
+                'en':'Starts playing music'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'stop',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Stops the current music stream'
+            },
+            'brief_descriptrion':{
+                'en':'Stops the music'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'pause',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Stops the current music stream in the future which can be continued',
+            },
+            'brief_descriptrion':{
+                'en':'Assigns a pause for music'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'resume',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Resumes the music stream that was completed by the necessary means in order to continue in the future',
+            },
+            'brief_descriptrion':{
+                'en':'Resumes music',
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'volume',
+            'category':'voice',
+            'aliases':[],
+            'arguments':['<volume>'],
+            'descriptrion':{
+                'en':'Set the volume to the current music stream from 1 to 100',
+            },
+            'brief_descriptrion':{
+                'en':'Sets the volume',
+            },
+            'allowed_disabled':True,
+        }, 
     ],
     'moderation':[
         {
