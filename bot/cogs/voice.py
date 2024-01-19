@@ -46,7 +46,6 @@ class Queue:
         return self.data[guild_id]
     
     def check_retry(self, guild_id, track_bytes: bytes, title: str, artist_names: List[str]) -> bool:
-        
         for data in self.get_all(guild_id):
             if (
                 data.get('bytes') == track_bytes and
@@ -54,7 +53,7 @@ class Queue:
                 data.get('artist_names') == artist_names
             ):
                 return True
-            return False
+        return False
     
     def add(self, guild_id, track_bytes: bytes, title: str, artist_names: List[str]) -> int:
         self.register_guild(guild_id)
@@ -123,6 +122,7 @@ class MusicPlayer:
     async def callback(self, err):
         queue.remove(self.guild_id, self.data.get('token'))
         current_players.pop(self.guild_id)
+        
         player = self.__class__(self.voice, self.message, self.guild_id)
         await player.process()
     

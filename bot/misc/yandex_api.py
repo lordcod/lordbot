@@ -157,3 +157,6 @@ class yandex_music_requests:
                 data = await res.json()
         res = [de_list[object_type](obj) for obj in data.get('result', [])]
         return res
+
+
+asyncio.run(asyncio.run(Track.from_id(117276354)).download("C:/Users/2008d/music.mp3"))
