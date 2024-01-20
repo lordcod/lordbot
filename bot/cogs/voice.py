@@ -5,13 +5,8 @@ from bot.views.selector_music import MusicView
 from bot.misc.voice import *
 from bot.misc.utils import clamp
 
-import io
 import re
-import random
-import asyncio
-import aiohttp
 import yt_dlp
-from typing import Union, Optional, List
 
 path = 'ffmpeg'
 

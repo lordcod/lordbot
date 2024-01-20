@@ -1,14 +1,10 @@
 import aiohttp
 import asyncio
-import orjson
+from .config import *
 from bs4 import BeautifulSoup
 from hashlib import md5
-from typing import Union, List, Dict, Optional
+from typing import Union, List, Optional
 
-api = 'https://api.music.yandex.net'
-token = 'y0_AgAAAAA8S1W0AAG8XgAAAAD4h-juDmBNcIrGQy-iogg0enrtK802o0k'
-headers = {'Authorization': f'OAuth {token}'}
-SIGN_SALT = 'XGRlBW9FXlekgbPrRHuSiA'
 
 def decode_download_info(bs_data: BeautifulSoup) -> None:
     host = bs_data.find('host').contents[0]
@@ -171,6 +167,7 @@ class yandex_music_requests:
                 data = await res.json()
         res = [de_list[object_type](obj) for obj in data.get('result', [])]
         return res
+
 
 async def main():
     track = (await yandex_music_requests.get_list(117276354))[0]
