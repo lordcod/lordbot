@@ -3,7 +3,7 @@ import asyncio
 import orjson
 from bs4 import BeautifulSoup
 from hashlib import md5
-from typing import Union,List,Dict
+from typing import Union, List, Dict, Optional
 
 api = 'https://api.music.yandex.net'
 token = 'y0_AgAAAAA8S1W0AAG8XgAAAAD4h-juDmBNcIrGQy-iogg0enrtK802o0k'
@@ -18,6 +18,16 @@ def decode_download_info(bs_data: BeautifulSoup) -> None:
     sign = md5((SIGN_SALT + path[1::] + s).encode('utf-8')).hexdigest()
     
     return f'https://{host}/get-mp3/{sign}/{ts}{path}'
+
+class NotFound(Exception):
+    def __init__(self, message: str, *, ids: Optional[Union[List[Union[str, int]], int, str]] = None, request: Optional[str] = None) -> None:
+        super().__init__(message)
+        self.message = message
+        self.ids = ids
+        self.request = request
+    
+    def __str__(self) -> str:
+        return self.message
 
 
 class Playlist:
@@ -48,23 +58,23 @@ class Artist:
         self.avatar:str = self.cover and self.cover.get('uri')
 
 class Track:
-    def __init__(self,data: dict) -> None:
+    def __init__(self, data: dict) -> None:
+        self.data = data
         self.id:int = data.get('id')
         self.title:str = data.get('title')
         self.major:dict = data.get('major')
         self.image:str = data.get('ogImage')
-        self.diration:float = data.get('durationMs', 0)/100
+        self.diration:float = data.get('durationMs', 0)/1000
         self.artists:List[Artist] = [Artist(artist) for artist in data.get('artists', [])]
         self.artist_names:List[str] = [art.name for art in self.artists]
         self.albums:List[Album] = [Album(album) for album in data.get('albums', [])]
     
+    def get_image(self, size = "1080x1080"):
+        return f'https://{self.image.replace("%%", size)}'
+    
     def __str__(self) -> str:
         return f"{self.title} - {' ,'.join(self.artist_names)}"
     
-    @staticmethod
-    async def from_id(id):
-        cls = (await yandex_music_requests.get_list(id))[0]
-        return cls
     
     async def download_link(self) -> str:
         uri = await yandex_music_requests.download_info(self.id)
@@ -137,6 +147,8 @@ class yandex_music_requests:
         }
         async with aiohttp.ClientSession() as session:
             async with session.get(f'{api}/search',headers=headers,params=params) as res:
+                if res.status == 400: raise NotFound(f"{object_type}s not found", request=text)
+                
                 js = await res.json()
                 ostype = object_type+'s' if object_type != 'best' else object_type
                 if object_type == 'best':
@@ -148,15 +160,21 @@ class yandex_music_requests:
         ids: Union[List[Union[str, int]], int, str],
         object_type: str='track',
     ) -> List[Union[Artist, Album, Track, Playlist]]:
-        params = {'with-positions': 'True',f'{object_type}-ids': ids}
+        params = {'with-positions': 'True', f'{object_type}-ids': ids}
 
         url = f"{api}/{object_type}s{'/list' if object_type == 'playlist' else ''}"
         
         async with aiohttp.ClientSession() as session:
             async with session.get(url,params=params) as res:
+                if res.status == 400: raise NotFound(f"{object_type}s not found", ids=ids)
+                
                 data = await res.json()
         res = [de_list[object_type](obj) for obj in data.get('result', [])]
         return res
 
+async def main():
+    track = (await yandex_music_requests.get_list(117276354))[0]
+    print(track.data)
 
-asyncio.run(asyncio.run(Track.from_id(117276354)).download("C:/Users/2008d/music.mp3"))
+if __name__ == "__main__":
+    asyncio.run(main())

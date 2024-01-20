@@ -1,7 +1,8 @@
 import nextcord
-
 from nextcord.ext import commands
-from bot.misc.yandex_api import yandex_music_requests
+
+from bot.views.selector_music import MusicView
+from bot.misc.yandex_api import yandex_music_requests, Track
 from bot.misc.utils import clamp
 
 import io
@@ -11,7 +12,6 @@ import asyncio
 import aiohttp
 import yt_dlp
 from typing import Union, Optional, List
-
 
 path = 'ffmpeg'
 
@@ -45,42 +45,33 @@ class Queue:
         
         return self.data[guild_id]
     
-    def check_retry(self, guild_id, track_bytes: bytes, title: str, artist_names: List[str]) -> bool:
+    def check_retry(self, guild_id, track: Track) -> bool:
         for data in self.get_all(guild_id):
             if (
-                data.get('bytes') == track_bytes and
-                data.get('title') == title and
-                data.get('artist_names') == artist_names
+                data.id == track.id and
+                data.title == track.title
             ):
                 return True
         return False
     
-    def add(self, guild_id, track_bytes: bytes, title: str, artist_names: List[str]) -> int:
+    def add(self, guild_id, track: Track) -> int:
         self.register_guild(guild_id)
-        token = self.token_generator()
         
-        data = {
-            'bytes': track_bytes,
-            'title': title,
-            'artist_names': artist_names,
-            'token': token
-        }
+        self.data[guild_id].append(track)
         
-        self.data[guild_id].append(data)
-        
-        return token
+        return track.id
     
     def remove(self, guild_id, token: Optional[int] = None) -> None:
         self.register_guild(guild_id)
         data = self.get(guild_id)
         
-        if data is not None and (token is None or data.get('token') == token):
+        if data is not None and (token is None or data.id == token):
             self.data[guild_id].pop(0)
     
     def clear(self, guild_id) -> None:
         self.data[guild_id] = []
     
-    def get(self, guild_id) -> Optional[dict]:
+    def get(self, guild_id) -> Optional[Track]:
         self.register_guild(guild_id)
         
         try:
@@ -96,38 +87,50 @@ class MusicPlayer:
         self.voice = voice
         self.message = message
         self.guild_id = guild_id
-        
-        self.data = queue.get(guild_id)
     
     async def process(self, token: Optional[int] = None):
+        self.data = queue.get(self.guild_id)
+        
         if self.data is None:
             return
         elif self.guild_id in current_players:
             return 
-        
-        print(self.data.get('token'), token)
         
         current_players[self.guild_id] = self 
         
         await self.play()
     
     async def update_message(self):
-        await self.message.edit(
-            content=(
-                f"Песня: {self.data.get('title')}\n"
-                f"Артист(ы): {', '.join(self.data.get('artist_names'))}"
+        embed = nextcord.Embed(
+            title=f"{self.data.title} - {', '.join(self.data.artist_names)}",
+            description=(
+                f"Major: {self.data.major}"
+                f"Diration: {self.data.diration}"
             )
         )
+        print(self.data.image)
+        embed.set_thumbnail(self.data.get_image())
+        
+        await self.message.edit(embed=embed)
     
     async def callback(self, err):
-        queue.remove(self.guild_id, self.data.get('token'))
+        queue.remove(self.guild_id, self.data.id)
         current_players.pop(self.guild_id)
         
         player = self.__class__(self.voice, self.message, self.guild_id)
         await player.process()
     
+    async def skip(self):
+        self.voice.stop()
+        await self.callback("Manual shutdown")
+    
+    async def stop(self):
+        self.voice.stop()
+        queue.clear(self.guild_id)
+        current_players.pop(self.guild_id)
+    
     async def play(self):
-        music_bytes = self.data.get('bytes')
+        music_bytes = await self.data.download_bytes()
         byio = io.BytesIO(music_bytes)
         source = nextcord.FFmpegPCMAudio(byio, pipe=True, executable=path)
         source = nextcord.PCMVolumeTransformer(source, volume=0.5)
@@ -172,6 +175,7 @@ class Voice(commands.Cog):
             voice = await channel.connect()
             if voice.channel in ctx.guild.stage_channels: await ctx.guild.me.edit(suppress=False)
         
+        mes = await ctx.send("Загружаем трек")
         
         if finder := YANDEX_MUSIC_SEARCH.fullmatch(request):
             found = finder.group(2)
@@ -179,31 +183,22 @@ class Voice(commands.Cog):
             track = tracks[0]
         else:
             tracks = await yandex_music_requests.search(request)
-            track = tracks[0]
+            view = MusicView(ctx.guild.id, queue, MusicPlayer(voice, mes, ctx.guild.id), tracks)
+            
+            await mes.edit(content=None, embed=view.embed, view=view)
+            return
         
-        mes = await ctx.send("Скачиваем трек")
-        
-        track_bytes = await track.download_bytes()
-        
-        if queue.check_retry(
-            ctx.guild.id,
-            track_bytes,
-            track.title,
-            track.artist_names
-        ):
+        if queue.check_retry(ctx.guild.id, track):
             await ctx.send('Музыка уже добавлена!!!')
             return 
         
         
         token = queue.add(
             ctx.guild.id,
-            track_bytes,
-            track.title,
-            track.artist_names
+            track
         )
-        if current_players.get(ctx.guild.id) is None:
-            player = MusicPlayer(voice, mes, ctx.guild.id)
-            await player.process(token)
+        player = MusicPlayer(voice, mes, ctx.guild.id)
+        await player.process(token)
     
     
     @commands.command(pass_context=True)
@@ -277,11 +272,19 @@ class Voice(commands.Cog):
     
     @commands.command(name="stop")
     async def stop(self,ctx:commands.Context):
-        voice: nextcord.VoiceClient = ctx.guild.voice_client
-        if voice and voice.is_playing():
-            current_players.pop(ctx.guild.id)
-            voice.stop()
+        voice = ctx.guild.voice_client
+        plr = current_players.get(ctx.guild.id)
+        if voice and voice.is_playing() and plr is not None:
+            await plr.stop()
             await ctx.send("Music on stop")
+    
+    @commands.command()
+    async def skip(self, ctx: commands.Context):
+        voice = ctx.guild.voice_client
+        plr = current_players.get(ctx.guild.id)
+        if voice and voice.is_playing() and plr is not None:
+            await plr.skip()
+
 
 
 def setup(bot: commands.Bot):
