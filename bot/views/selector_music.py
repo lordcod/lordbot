@@ -2,7 +2,7 @@ import nextcord
 from nextcord import utils
 
 from bot.databases.db import GuildDateBases
-from bot.misc.yandex_api import Track
+from bot.misc.voice.yandex_api import Track
 
 from typing import List
 
