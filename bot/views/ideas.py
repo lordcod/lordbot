@@ -62,8 +62,10 @@ class ConfirmModal(nextcord.ui.Modal):
         views.confirm.disabled = True
         views.cancel.disabled = True
         
-        await interaction.message.edit(content=content,embed=embed,view=views)
+        await interaction.message.edit(content=content, embed=embed, view=views)
         
+        if channel_approved_id is None:
+            return
         
         channel = interaction.guild.get_channel(channel_approved_id)
         
@@ -96,7 +98,7 @@ class Confirm(nextcord.ui.View):
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         ideas_data = gdb.get('ideas')
-        moderation_role_ids = ideas_data.get('moderation-role-ids')
+        moderation_role_ids = ideas_data.get('moderation-role-ids', [])
         
         role_ids = set(interaction.user._roles)
         moderation_roles = set(moderation_role_ids)
@@ -110,7 +112,7 @@ class Confirm(nextcord.ui.View):
     async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         ideas_data = gdb.get('ideas')
-        moderation_role_ids = ideas_data.get('moderation-role-ids')
+        moderation_role_ids = ideas_data.get('moderation-role-ids', [])
         
         mdb = MongoDB('ideas')
         idea_data = mdb.get(interaction.message.id)
@@ -228,10 +230,12 @@ class IdeaBut(nextcord.ui.View):
                 ephemeral=True
             )
             return
+        
         gdb = GuildDateBases(interaction.guild_id)
         ideas_data: IdeasPayload = gdb.get('ideas')
         enabled: bool = ideas_data.get('enabled', False)
         if enabled is False:
             await interaction.response.send_message('The idea module is disabled on this server', ephemeral=True)
             return
+        
         await interaction.response.send_modal(modal=IdeaModal())

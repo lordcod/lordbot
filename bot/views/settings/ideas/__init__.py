@@ -1,16 +1,17 @@
 import nextcord
 
 from ...settings import DefaultSettingsView
+from .distribution import distrubuters
 
 from bot.databases.varstructs import IdeasPayload
 from bot.databases.db import GuildDateBases
 from bot.views import views
 from bot.views.ideas import IdeaBut
+from bot.resources.ether import Emoji
 from bot.languages.settings import (
     disabled_commands as disabled_commands_langs,
     button as button_name
 )
-from bot.resources.ether import Emoji
 
 
 
@@ -47,8 +48,9 @@ class DropDown(nextcord.ui.Select):
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         catalog = self.values[0]
+        view = distrubuters.get(catalog)(interaction.guild)
         
-        await interaction.response.send_message(catalog, ephemeral=True)
+        await interaction.message.edit(embed=view.embed, view=view)
 
 
 class IdeasView(DefaultSettingsView):
@@ -63,7 +65,7 @@ class IdeasView(DefaultSettingsView):
         enabled = ideas.get('enabled')
         
         self.embed = nextcord.Embed(
-            title="Идеи",
+            title="Ideas",
             description="",
             color=colour
         )

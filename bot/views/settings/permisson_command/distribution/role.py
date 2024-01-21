@@ -20,7 +20,7 @@ class DropDown(nextcord.ui.StringSelect):
         self, 
         guild: nextcord.Guild,
         command_name: str,
-        roles: list[nextcord.Role]
+        roles: List[nextcord.Role]
     ) -> None:
         self.command_name = command_name
         options = []
