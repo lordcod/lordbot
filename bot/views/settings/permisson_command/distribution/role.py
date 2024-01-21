@@ -48,7 +48,7 @@ class DropDown(nextcord.ui.StringSelect):
         if 0 >= len(options):
             options.append(
                 nextcord.SelectOption(
-                    label="To make it work"
+                    label="-"
                 )
             )
             self.current_disabled = True

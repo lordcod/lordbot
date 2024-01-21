@@ -4,12 +4,12 @@ from  ... import ideas
 from ... import DefaultSettingsView
 
 from bot.misc import utils
-from bot.misc.ratelimit import BucketType
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases.db import GuildDateBases
 from bot.languages.settings import (
     button as button_name
 )
+
 
 
 
@@ -18,29 +18,58 @@ class DropDown(nextcord.ui.StringSelect):
     
     def __init__(
         self, 
-        guild_id: int,
-        value = None
+        guild: nextcord.Guild,
+        command_name: str,
+        roles: list[nextcord.Role]
     ) -> None:
-        self.value = value
-        
+        self.command_name = command_name
         options = []
         
+        for role in guild.roles:
+            if (
+                role.is_default() or
+                role.is_premium_subscriber() or
+                role.is_integration() or
+                role.is_bot_managed()
+            ):
+                continue
+            
+            opt = nextcord.SelectOption(
+                label=role.name,
+                value=role.id,
+                emoji=Emoji.frame_person,
+                default=role in roles
+            )
+            
+            options.append(opt)
+        
+        options = options[:25]
+        if 0 >= len(options):
+            options.append(
+                nextcord.SelectOption(
+                    label="-"
+                )
+            )
+            self.current_disabled = True
+        
         super().__init__(
-            options=options
+            placeholder="Select the roles in which the command will work",
+            min_values=1,
+            max_values=len(options),
+            options=options,
+            disabled=self.current_disabled
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        value = self.values[0]
-        
-        view = ModerationRolesView(interaction.guild)
-        
-        await interaction.message.edit(embed=view.embed, view=view)
+        pass
+
+
 
 
 class ModerationRolesView(DefaultSettingsView):
     embed: nextcord.Embed = None
     
-    def __init__(self, guild: nextcord.Guild) -> None:
+    def __init__(self, guild: nextcord.Guild, role_ids: list[int] = None) -> None:
         gdb = GuildDateBases(guild.id)
         colour = gdb.get('color')
         
