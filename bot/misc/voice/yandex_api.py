@@ -68,6 +68,10 @@ class Track:
     def get_image(self, size = "1080x1080"):
         return f'https://{self.image.replace("%%", size)}'
     
+    def get_url(self):
+        album = self.albums[0]
+        return f"https://music.yandex.ru/album/{album.id}/track/{self.id}"
+    
     def __str__(self) -> str:
         return f"{self.title} - {' ,'.join(self.artist_names)}"
     

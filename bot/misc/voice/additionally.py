@@ -8,6 +8,21 @@ import random
 import asyncio
 from typing import Union, Optional
 
+initally_num = 10
+
+def addtional_convert(timestamp: int):
+    if 10 > timestamp:
+        return f"0{timestamp}"
+    return str(timestamp)
+
+def convertor_time(timestamp: Union[int, float]):
+    timestamp = int(timestamp)
+    
+    seconds = addtional_convert(timestamp % 60)
+    minutes = addtional_convert(timestamp // 60)
+    
+    return f"{minutes}:{seconds}"
+
 class Queue:
     def __init__(self) -> None:
         self.data = {}
@@ -69,26 +84,49 @@ class MusicPlayer:
         self.data = queue.get(self.guild_id)
         
         if self.data is None:
+            await self.message.edit(
+                content="Я не нашел треков в очереди, поэтому завершил работу!",
+                embed=None,
+                view=None
+            )
+            await self.voice.disconnect()
             return
         elif self.guild_id in current_players:
+            await self.message.edit(
+                content="Трек добавлен в очередь!", 
+                embed=None,
+                view=None
+            )
             return 
-        
         current_players[self.guild_id] = self 
         
         await self.play()
     
-    async def update_message(self):
+    async def update_message(self, num = 0, diration = 0):
         embed = nextcord.Embed(
             title=f"{self.data.title} - {', '.join(self.data.artist_names)}",
             description=(
-                f"Major: {self.data.major}"
-                f"Diration: {self.data.diration}"
-            )
+                f"{'⬛' * num}"
+                f"{'⬜' * (initally_num-num)}"
+                f" ({convertor_time(diration)} - {convertor_time(self.data.diration)})"
+            ),
+            url=self.data.get_url()
         )
-        print(self.data.image)
         embed.set_thumbnail(self.data.get_image())
         
-        await self.message.edit(embed=embed)
+        await self.message.edit(
+            content=None,
+            embed=embed,
+            view=None
+        )
+    
+    async def start_diration_update(self):
+        loop = asyncio.get_event_loop()
+        track_diration = self.data.diration
+        delay = track_diration//initally_num
+        
+        for i in range(1, initally_num+1):
+            loop.call_later((delay*i), asyncio.create_task, self.update_message(i, (delay*i)))
     
     async def callback(self, err):
         queue.remove(self.guild_id, self.data.id)
@@ -107,13 +145,16 @@ class MusicPlayer:
         current_players.pop(self.guild_id)
     
     async def play(self):
+        asyncio.create_task(self.update_message())
+        
         music_bytes = await self.data.download_bytes()
         byio = io.BytesIO(music_bytes)
         source = nextcord.FFmpegPCMAudio(byio, pipe=True, executable=path)
         source = nextcord.PCMVolumeTransformer(source, volume=0.5)
         
-        asyncio.create_task(self.update_message())
         self.voice.play(source, after=self.callback)
+        
+        asyncio.create_task(self.start_diration_update())
 
 
 current_players = {}

@@ -21,8 +21,7 @@ class MusicDropDown(nextcord.ui.Select):
             max_values=1,
             options=[
                 nextcord.SelectOption(
-                    label=track.title ,
-                    description=", ".join(track.artist_names),
+                    label=str(track),
                     value=track.id
                 )
                 for track in tracks[:25]
@@ -30,8 +29,6 @@ class MusicDropDown(nextcord.ui.Select):
         )
     
     async def callback(self, inter: nextcord.Interaction):
-        await inter.response.defer(ephemeral=True)
-        
         track_id = int(self.values[0])
         track = utils.get(self.tracks, id=track_id)
         
@@ -39,7 +36,7 @@ class MusicDropDown(nextcord.ui.Select):
             inter.guild_id,
             track
         ):
-            await inter.edit_original_message(content="Трек уже присутствует в очереди!")
+            await inter.response.send_message(content="Трек уже присутствует в очереди!", ephemeral=True)
             return 
         
         token = self.queue.add(
@@ -47,8 +44,6 @@ class MusicDropDown(nextcord.ui.Select):
             track
         )
         await self.player.process(token)
-        
-        await self.player.message.edit("Трек добавлен в очередь!", embed=None, view=None)
 
 class MusicView(nextcord.ui.View):
     embed: nextcord.Embed
