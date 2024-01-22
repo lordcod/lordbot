@@ -7,6 +7,7 @@ from bot.misc import utils
 from bot.misc.ratelimit import BucketType
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases.varstructs import IdeasPayload
 from bot.languages.settings import (
     button as button_name
 )
@@ -36,18 +37,20 @@ class ApprovedView(DefaultSettingsView):
     embed: nextcord.Embed = None
     
     def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
-        gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+        self.gdb = GuildDateBases(guild.id)
+        self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
+        channel_approved_id = self.idea_datas.get('channel-approved-id')
         
         super().__init__()
         
-        self.channel = channel
-        self.embed = None
+        if channel is not None:
+            self.channel = channel
+            self.edit.disabled = False
+        if channel_approved_id is not None:
+            self.delete.disabled = False
         
         
-        cdd = DropDown(
-            guild.id
-        )
+        cdd = DropDown(guild.id)
         self.add_item(cdd)
     
     
@@ -59,10 +62,23 @@ class ApprovedView(DefaultSettingsView):
         await interaction.message.edit(embed=view.embed, view=view)
     
     
-    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):    
-        pass
     
-    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
-    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        pass
+    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
+    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):  
+        idea_datas = self.idea_datas
+        idea_datas['channel-approved-id'] = self.channel.id
+        
+        self.gdb.set('ideas', idea_datas) 
+        
+        view = self.__class__(interaction.guild)
+        await interaction.message.edit(embed=view.embed, view=view)
+    
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):  
+        idea_datas = self.idea_datas
+        idea_datas.pop('channel-approved-id')
+        
+        self.gdb.set('ideas', idea_datas) 
+        
+        view = self.__class__(interaction.guild)
+        await interaction.message.edit(embed=view.embed, view=view)

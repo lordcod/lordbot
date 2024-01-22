@@ -19,7 +19,8 @@ class DropDown(nextcord.ui.StringSelect):
     
     def __init__(
         self, 
-        guild: nextcord.Guild
+        guild: nextcord.Guild,
+        app_role_ids: List[int]
     ) -> None:
         self.gdb = GuildDateBases(guild.id)
         self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
@@ -40,7 +41,7 @@ class DropDown(nextcord.ui.StringSelect):
                 label=role.name,
                 value=role.id,
                 emoji=Emoji.frame_person,
-                default=role.id in mod_role_ids
+                default=(role.id in mod_role_ids or role.id in app_role_ids)
             )
             
             options.append(opt)
@@ -66,14 +67,14 @@ class DropDown(nextcord.ui.StringSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         view = ModerationRolesView(
             interaction.guild,
-            self.values
+            list(map(int, self.values))
         )
         await interaction.message.edit(embed=view.embed, view=view)
 
 
 
 class ModerationRolesView(DefaultSettingsView):
-    embed: nextcord.Embed
+    embed: nextcord.Embed = None
     
     def __init__(self, guild: nextcord.Guild, role_ids: List[int] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -89,12 +90,8 @@ class ModerationRolesView(DefaultSettingsView):
         if mod_role_ids:
             self.delete.disabled = False
         
-        self.embed = nextcord.Embed(
-            title="Mod roles",
-        )
         
-        
-        cdd = DropDown(guild)
+        cdd = DropDown(guild, (role_ids or []))
         self.add_item(cdd)
     
     

@@ -94,11 +94,16 @@ class Confirm(nextcord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
     
+    
     @nextcord.ui.button(label="Одобрить", style=nextcord.ButtonStyle.green,custom_id='ideas-confirm:confirm')
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        ideas_data = gdb.get('ideas')
+        ideas_data: IdeasPayload = gdb.get('ideas')
         moderation_role_ids = ideas_data.get('moderation-role-ids', [])
+        enabled: bool = ideas_data.get('enabled', False)
+        if enabled is False:
+            await interaction.response.send_message('The idea module is disabled on this server', ephemeral=True)
+            return
         
         role_ids = set(interaction.user._roles)
         moderation_roles = set(moderation_role_ids)
@@ -111,8 +116,12 @@ class Confirm(nextcord.ui.View):
     @nextcord.ui.button(label="Отказать", style=nextcord.ButtonStyle.red,custom_id='ideas-confirm:cancel')
     async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        ideas_data = gdb.get('ideas')
+        ideas_data: IdeasPayload = gdb.get('ideas')
         moderation_role_ids = ideas_data.get('moderation-role-ids', [])
+        enabled: bool = ideas_data.get('enabled', False)
+        if enabled is False:
+            await interaction.response.send_message('The idea module is disabled on this server', ephemeral=True)
+            return
         
         mdb = MongoDB('ideas')
         idea_data = mdb.get(interaction.message.id)

@@ -7,32 +7,28 @@ from bot.misc import utils
 from bot.misc.ratelimit import BucketType
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases.varstructs import IdeasPayload
 from bot.languages.settings import (
     button as button_name
 )
 
+from typing import Optional
 
 
-class DropDown(nextcord.ui.StringSelect):
-    current_disabled = False
-    
+class DropDown(nextcord.ui.ChannelSelect):
     def __init__(
         self, 
-        guild_id: int,
-        value = None
+        guild_id: int
     ) -> None:
-        self.value = value
+        gdb = GuildDateBases(guild_id)
+        self.idea_data = gdb.get('ideas')
         
-        options = []
-        
-        super().__init__(
-            options=options
-        )
+        super().__init__(channel_types=[nextcord.ChannelType.text])
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        value = self.values[0]
+        channel = self.values[0]
         
-        view = OffersView(interaction.guild)
+        view = OffersView(interaction.guild, channel)
         
         await interaction.message.edit(embed=view.embed, view=view)
 
@@ -40,19 +36,18 @@ class DropDown(nextcord.ui.StringSelect):
 class OffersView(DefaultSettingsView):
     embed: nextcord.Embed = None
     
-    def __init__(self, guild: nextcord.Guild) -> None:
-        gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+    def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
+        self.gdb = GuildDateBases(guild.id)
+        self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
+        channel_approved_id = self.idea_datas.get('channel-offers-id')
         
         super().__init__()
         
+        if channel is not None:
+            self.channel = channel
+            self.edit.disabled = False
         
-        self.embed = None
-        
-        
-        cdd = DropDown(
-            guild.id
-        )
+        cdd = DropDown(guild.id)
         self.add_item(cdd)
     
     
@@ -64,10 +59,13 @@ class OffersView(DefaultSettingsView):
         await interaction.message.edit(embed=view.embed, view=view)
     
     
-    @nextcord.ui.button(label='Edit',style=nextcord.ButtonStyle.blurple)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):    
-        pass
     
-    @nextcord.ui.button(label='Delete',style=nextcord.ButtonStyle.red)
-    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        pass
+    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
+    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):  
+        idea_datas = self.idea_datas
+        idea_datas['channel-offers-id'] = self.channel.id
+        
+        self.gdb.set('ideas', idea_datas) 
+        
+        view = self.__class__(interaction.guild)
+        await interaction.message.edit(embed=view.embed, view=view)

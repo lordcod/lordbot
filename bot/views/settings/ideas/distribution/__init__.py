@@ -4,9 +4,9 @@ from .offers import OffersView
 from .suggest import SuggestView
 
 distrubuters = {
-    'approved': SuggestView,
+    'approved': ApprovedView,
     'moderation-roles': ModerationRolesView,
     'offers': OffersView,
-    'suggest': ApprovedView,
+    'suggest': SuggestView,
 }
 

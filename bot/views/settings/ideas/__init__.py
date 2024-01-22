@@ -157,12 +157,13 @@ class IdeasView(DefaultSettingsView):
         ideas: IdeasPayload = gdb.get('ideas')
         
         channel_suggest_id = ideas.get("channel-suggest-id")
+        channel_suggest = interaction.guild.get_channel(channel_suggest_id)
+        
         message_suggest_id = ideas.get("message-suggest-id")
         
-        if channel_suggest_id and message_suggest_id:
+        if channel_suggest_id and channel_suggest and message_suggest_id:
+            message_suggest = channel_suggest.get_partial_message(message_suggest_id)
             try:
-                channel_suggest = interaction.guild.get_channel(channel_suggest_id)
-                message_suggest = channel_suggest.get_partial_message(message_suggest_id)
                 await message_suggest.delete()
             except:
                 pass
