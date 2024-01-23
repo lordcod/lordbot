@@ -1,6 +1,6 @@
 import nextcord
 from nextcord.ext import commands,application_checks
-from nextcord.utils import find
+from nextcord.utils import oauth_url
 
 from bot import languages
 from bot.resources.ether import Emoji
@@ -13,9 +13,11 @@ import jmespath
 import googletrans
 import asyncio
 import random
+import re
 
 translator = googletrans.Translator()
 
+EMOJI_REGEXP = re.compile(r"<(a?):([a-zA-Z_-]+):(\d{19})>")
 
 class basic(commands.Cog):
     bot: commands.Bot
@@ -23,6 +25,31 @@ class basic(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    @commands.command()
+    async def ping(self, ctx: commands.Context):
+        content = (
+            "Pong!🏓🎉\n"
+            f"Latency: {(self.bot.latency)*100:.1f}ms"
+        )
+        
+        await ctx.send(content)
+    
+    @commands.command()
+    async def invite(self, ctx: commands.Context):
+        invite_link = oauth_url(
+            client_id=self.bot.user.id,
+            permissions=nextcord.Permissions.all(),
+            redirect_uri=info.site_link,
+            scopes=("bot","applications.commands"),
+        )
+        
+        content = (
+            "Special bot invitation to the server:\n"
+            f"{invite_link}"
+        )
+        
+        await ctx.send(content)
+    
     @commands.command()
     async def captcha(self, ctx:commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
@@ -41,24 +68,16 @@ class basic(commands.Cog):
             await ctx.send(f"{Emoji.congratulation}{languages.captcha.congratulation.get(lang)}")
         else:
             await ctx.send(content=languages.captcha.failed.get(lang))
-
-    @commands.command()
-    async def ping(self,ctx: commands.Context):
-        content = (
-            "Pong!🏓🎉\n"
-            f"Latency: {(self.bot.latency)*100:.1f}ms"
-        )
-        
-        await ctx.send(content)
     
-    @commands.command()
-    async def invite(self,ctx: commands.Context):
-        content = (
-            "Special bot invitation to the server:\n"
-            f"{info.invite_link}"
-        )
+    @commands.command("emoji-to-image")
+    async def emoji_to_image(self, ctx: commands.Context, emoji: str):
+        if not (emoji_re := EMOJI_REGEXP.fullmatch(emoji)):
+            return
         
-        await ctx.send(content)
+        emoji_animated = bool(emoji_re.group(1))
+        emoji_name = emoji_re.group(2)
+        emoji_id = emoji_re.group(3)
+        await ctx.send(f"https://cdn.discordapp.com/emojis/{emoji_id}.{'gif' if emoji_animated else 'png'}")
     
     
     @nextcord.slash_command(

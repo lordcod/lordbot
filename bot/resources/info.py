@@ -21,10 +21,12 @@ activities_list = [
 ]
 
 invite_link = (
-    'https://discord.com/api/oauth2/authorize'
+    'https://discord.com/oauth2/authorize'
     '?client_id=1095713975532007434'
+    '&scope=bot+applications.commands'
     '&permissions=-1'
-    '&scope=bot%20applications.commands'
-    # '&response_type=code'
-    # '&redirect_uri=https://lordbot.ru/link-role-callback'
+    '&response_type=code'
+    '&redirect_uri=https%3A%2F%2Flordcord.fun%2Flink-role-callback'
 )
+
+site_link = "https://lordcord.fun/link-role-callback"

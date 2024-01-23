@@ -20,7 +20,7 @@ class DropDown(nextcord.ui.StringSelect):
         self, 
         guild: nextcord.Guild,
         command_name: str,
-        roles: list[nextcord.Role]
+        roles: List[nextcord.Role]
     ) -> None:
         self.command_name = command_name
         options = []
@@ -38,10 +38,9 @@ class DropDown(nextcord.ui.StringSelect):
             opt = nextcord.SelectOption(
                 label=role.name,
                 value=role.id,
-                emoji=Emoji.frame_person
+                emoji=Emoji.frame_person,
+                default=role in roles
             )
-            if role in roles:
-                opt.default = True
             
             options.append(opt)
         
@@ -49,10 +48,11 @@ class DropDown(nextcord.ui.StringSelect):
         if 0 >= len(options):
             options.append(
                 nextcord.SelectOption(
-                    label="To make it work"
+                    label="-"
                 )
             )
             self.current_disabled = True
+        
         super().__init__(
             placeholder="Select the roles in which the command will work",
             min_values=1,

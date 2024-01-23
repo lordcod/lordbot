@@ -28,7 +28,7 @@ class help(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def help(self, ctx: commands.Context, command_name: str = None):
+    async def help(self, ctx: commands.Context, *, command_name: str = None):
         self.gdb = GuildDateBases(ctx.guild.id)
         
         if not command_name:

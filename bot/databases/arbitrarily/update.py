@@ -1,52 +1,50 @@
-import psycopg2
-
-import sys
-sys.path.append(r"C:\Users\2008d\git\lordbot\bot\databases")
-
-from config import (host, port, user, password, db_name)
-
-try:
-    connection = psycopg2.connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        database=db_name,
-    )
-    connection.autocommit = True
-except Exception as err:
-    print(type(err))
-    print(err)
+from _executer import execute
 
 
 
 guild_id = 1179069504186232852
 value = """
-{
-    "operate": 1,
-    "distribution":{
-        "channel":{
-            "permission":1,
-            "values":[1179782301035536514]
+    {
+        "operate": 1,
+        "distribution":{
+            "cooldown":{
+                "type":1,
+                "rate":2,
+                "per":30
+            }
         }
     }
+"""
+# execute(
+#         """
+#             UPDATE 
+#                 guilds 
+#             SET 
+#                 command_permissions = jsonb_set(command_permissions::jsonb, '{balance}', %s) 
+#             WHERE 
+#                 id = %s
+#         """, 
+#         (value, guild_id, )
+# )
+
+data = """
+{
+    "channel-suggest-id": 1189644187772129462,
+
+    "channel-offers-id": 1189644228834381935,
+    "channel-approved-id": 1189644276645240933,
+
+    "moderation-role-ids":[1179070749361840220]
 }
 """
-
-with connection.cursor() as cursor:
-    cursor.execute(
+execute(
         """
             UPDATE 
                 guilds 
             SET 
-                command_permissions = jsonb_set(command_permissions::jsonb, '{balance}', %s) 
+                ideas = %s
             WHERE 
                 id = %s
         """, 
-        (value, guild_id, )
-    )
-
-
-
-print("Finish")
-connection.close()
+        (data, guild_id, )
+)

@@ -4,8 +4,9 @@ from nextcord.ext import commands
 from nextcord.utils import escape_markdown
 
 from bot.resources import errors
-from bot.databases.db import GuildDateBases, RolesDB
+from bot.databases.db import GuildDateBases, RoleDateBases
 
+import inspect
 import re
 import string
 import random
@@ -14,121 +15,70 @@ import asyncio
 import aiohttp
 import orjson
 
+from typing import Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 
-
-class GuildPayload:
-    guild: nextcord.Guild
-    
-    def __init__(self, guild: nextcord.Guild) -> None:
-        self.guild = guild
-    
-    @property
-    def id(self) -> int:
-        return self.guild.id
-    
-    @property
-    def name(self) -> str:
-        return self.guild.name
-    
-    @property
-    def icon(self) -> str:
-        guild = self.guild
-        if not (guild.icon and guild.icon.url):
-            return None
-        return guild.icon.url
-    
-    @property
-    def memberCount(self) -> int:
-        return self.guild.member_count
-    
-    @property
-    def createdAt(self) -> datetime:
-        return self.guild.created_at
-    
-    @property
-    def premiumSubscriptionCount(self) -> int:
-        return self.guild.premium_subscription_count
+number_type = Union[int, float]
+intervals = (
+    ('weeks', 604800),  # 60 * 60 * 24 * 7
+    ('days', 86400),    # 60 * 60 * 24
+    ('hours', 3600),    # 60 * 60
+    ('minutes', 60),
+    ('seconds', 1),
+)
 
 
-    def to_dict(self):
-        starter = 'guild.'
-        ret = {
-            f'{starter}id':self.id,
-            f'{starter}name':self.name,
-            f'{starter}icon':self.icon,
-            f'{starter}memberCount':self.memberCount,
-            f'{starter}createdAt':self.createdAt,
-            f'{starter}premiumSubscriptionCount':self.premiumSubscriptionCount,
-        }
+
+class TempletePayload:
+    def to_dict(self, _prefix = None):
+        if _prefix is None:
+            prefix = self.__class__.__name__
+        else:
+            prefix = str(_prefix)
         
-        return ret
+        base = {}
+        
+        for name, arg in inspect.getmembers(self):
+            if name.startswith("_") or name == "to_dict":
+                continue
+            
+            base[f"{prefix}.{name}"] = arg
+        
+        return base
 
-    def __getattr__(self, name: str) -> Any:
-        return f'{"{"}{name}{"}"}'
-    
+class GuildPayload(TempletePayload):
+    def __init__(self, guild: nextcord.Guild) -> None:
+        self.id: int = guild.id
+        self.name: str = guild.name
+        self.memberCount: int = guild.member_count
+        self.createdAt: datetime = guild.created_at
+        self.premiumSubscriptionCount: int = guild.premium_subscription_count
+        
+        if not (guild.icon and guild.icon.url):
+            self.icon = None
+        else:
+            self.icon: str = guild.icon.url
+
     def __str__(self) -> str:
         return self.name
 
-class MemberPayload:
-    member: nextcord.Member
-    
+class MemberPayload(TempletePayload): 
     def __init__(self, member: nextcord.Member) -> None:
-        self.member = member
-    
-    @property
-    def id(self) -> int:
-        return self.member.id
-    
-    @property
-    def mention(self) -> str:
-        return self.member.mention
-    
-    @property 
-    def username(self) -> str:
-        return self.member.name
-    
-    @property 
-    def displayName(self) -> str:
-        return self.member.display_name
-    
-    @property
-    def discriminator(self) -> int:
-        return self.member.discriminator
-    
-    @property
-    def tag(self) -> str:
-        member = self.member
-        tag = f'{member.name}#{member.discriminator}'
-        return tag
-    
-    @property
-    def avatar(self) -> str:
-        member = self.member
-        if not (member.display_avatar and member.display_avatar.url):
-            return None
-        return member.display_avatar.url
-    
-    
-    def to_dict(self):
-        starter = 'member.'
-        ret = {
-            f'{starter}id':self.id,
-            f'{starter}mention':self.mention,
-            f'{starter}username':self.username,
-            f'{starter}displayName':self.displayName,
-            f'{starter}discriminator,':self.discriminator,
-            f'{starter}tag':self.tag,
-            f'{starter}avatar':self.avatar,
-        }
+        self.id: int = member.id
+        self.mention: str = member.mention
+        self.username: str = member.name
+        self.displayName: str = member.display_name
+        self.discriminator: str = member.discriminator
+        self.tag = f'{member.name}#{member.discriminator}'
         
-        return ret
+        if not (member.display_avatar and member.display_avatar.url):
+            self.avatar = None
+        else:
+            self.avatar = member.display_avatar.url
     
-    def __getattr__(self, name: str) -> str:
-        return f'{"{"}{name}{"}"}'
-
+    
     def __str__(self) -> str:
         return self.tag
 
@@ -142,25 +92,9 @@ class GreetingTemplate(string.Template):
         )
     '''
 
-async def process_role(
-    member: nextcord.Member,
-    role: nextcord.Role,
-    unix_time: int
-) -> None:
-    rsdb = RolesDB(
-        guild_id=member.guild.id,
-        member_id=member.id
-    )
-    data = {
-        'time':unix_time,
-        'role_id': role.id
-    }
-    temp = unix_time - int(time.time())
-    
-    await asyncio.sleep(temp)
-    
-    await member.remove_roles(role)
-    rsdb.remove(data)
+
+def clamp(val: number_type, minv: number_type, maxv: number_type) -> number_type:
+    return min(maxv, max(minv, val)) 
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
@@ -231,18 +165,6 @@ def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBas
     if markdown:
         return escape_markdown(prefix)
     return prefix
-
-async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:
-    if channel.type.value not in [0,2,5,13]:
-        raise  errors.ErrorTypeChannel("Channel error")
-    
-    webhooks = await channel.webhooks()
-    for wh in webhooks:
-        if wh.user==user:
-            return wh
-    else:
-        wh = await channel.create_webhook(name=user.name)
-        return wh
 
 def is_builtin_class_instance(obj):
     return obj in (str, int, float, bool)
@@ -319,9 +241,8 @@ async def generate_message(content) -> dict|str:
 
 async def check_invite(content):
     regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)([a-zA-Z0-9_-]+)(\/|\s|\?|$)'
-    pattern = re.fullmatch(regex_string,content)
-    if pattern:
-        return pattern.groups()[1]
+    if pattern := re.fullmatch(regex_string,content):
+        return pattern.group(2)
 
 async def generator_captcha(num):
     text = "".join([random.choice(string.ascii_uppercase) for _ in range(num)])
@@ -333,3 +254,34 @@ async def generator_captcha(num):
     data:BytesIO = captcha_image.generate(text)
     return data,text
 
+def cut_back(string: str, length: int):
+    ellipsis = "..."
+    current_lenght = len(string)
+    if length >= current_lenght:
+        return string
+    
+    cropped_string = string[:length-len(ellipsis)].strip()
+    new_string = f"{cropped_string}{ellipsis}"
+    return new_string
+
+def is_float(element: any) -> bool:
+    if element is None: 
+        return False
+    
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
+def display_time(seconds, granularity=2):
+    result = []
+
+    for name, count in intervals:
+        value = seconds // count
+        if value:
+            seconds -= value * count
+            if value == 1:
+                name = name.rstrip('s')
+            result.append("{} {}".format(value, name))
+    return ', '.join(result[:granularity])

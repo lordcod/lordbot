@@ -1,5 +1,8 @@
 import time
 import jmespath
+import nextcord
+
+from typing import Union
 
 data = {}
 
@@ -104,7 +107,9 @@ class CooldownMember:
         if self.member_id not in data[self.guild_id][self.command_name]:
             data[self.guild_id][self.command_name][self.member_id] = {}
     
-    def get(self) -> bool:
+    
+    
+    def get(self) -> Union[bool, float]:
         cooldata: dict = data[self.guild_id][self.command_name][self.member_id]
         
         regular_rate: int = self.command_data.get('rate')
@@ -117,6 +122,7 @@ class CooldownMember:
         
         if regular_rate > rate:
             return True
+        
         return round(per-time.time(),2)
     
     def add(self) -> None:
@@ -128,12 +134,12 @@ class CooldownMember:
         
         regular_per: int = self.command_data.get('per')
         
-        datatime = time.time()+regular_per if rate == 0 else per
+        newper = time.time()+regular_per if rate == 0 else per
         
         
         data[self.guild_id][self.command_name][self.member_id] = {
             'rate':rate+1,
-            'per':datatime
+            'per':newper
         }
     
     def take(self) -> None:
@@ -143,11 +149,11 @@ class CooldownMember:
         rate: int = cooldata.get('rate',0)
         per: float = cooldata.get('per',0)
         
-        datarate = 0 if 0>=(rate-1) else rate-1
+        newrate = max(rate-1, 0)
         
         
         data[self.guild_id][self.command_name][self.member_id] = {
-            'rate':datarate,
+            'rate':newrate,
             'per':per
         }
     
@@ -158,61 +164,38 @@ class CooldownMember:
         }
 
 
+CooldownObject = Union[CooldownGuild,CooldownMember]
+
 class Cooldown:
-    def __init__(
-        self, 
+    @classmethod
+    def from_message(
+        cls,
         command_name: str,
         command_data: dict, 
-        guild_id: int,
-        member_id: int
-    ) -> None:
-        self.command_name = command_name
-        self.command_data = command_data
-        self.guild_id = guild_id
-        self.member_id = member_id
-    
-    def get_service(self):
-        cooldata: dict = self.command_data
+        message: nextcord.Message
+    ) -> CooldownObject:
+        cooldata: dict = command_data
         type = cooldata.get('type')
         
         if type == BucketType.member:
             classification = CooldownMember(
-                self.command_name,
-                self.command_data,
-                self.guild_id,
-                self.member_id
+                command_name,
+                command_data,
+                message.guild.id,
+                message.author.id
             )
         elif type == BucketType.server:
             classification = CooldownGuild(
-                self.command_name,
-                self.command_data,
-                self.guild_id
+                command_name,
+                command_data,
+                message.guild.id
             )
         else:
-            return None
+            raise ValueError()
         return classification
-    
-    def get(self):
-        service = self.get_service()
-        
-        return service.get()
-    
-    def add(self):
-        service = self.get_service()
-        
-        service.add()
-    
-    def take(self):
-        service = self.get_service()
-        
-        service.take()
-    
-    def reset(self):
-        service = self.get_service()
-        
-        service.reset()
 
-def reset_data(guild_id, command_name) -> None:
+
+def reset_data(guild_id, command_name) -> None: 
     try:
         del data[guild_id][command_name]
     except:

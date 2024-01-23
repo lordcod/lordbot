@@ -3,6 +3,7 @@ import nextcord
 from  .. import permisson_command
 from .distribution.channel import ChannelsView
 from .distribution.role import RolesView
+from .distribution.cooldown import CooldownsView
 from ...settings import DefaultSettingsView
 
 from bot.misc import utils
@@ -45,6 +46,7 @@ class DropDown(nextcord.ui.StringSelect):
         objections = {
             'channel':ChannelsView,
             'role':RolesView,
+            'cooldown':CooldownsView
         }
         classification = objections.get(value)
         view = classification(

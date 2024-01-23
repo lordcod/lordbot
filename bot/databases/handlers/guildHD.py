@@ -6,10 +6,15 @@ from ..misc.utils import Json,Formating
 
 connection: Callable[[], psycoon]
 
+reserved: list = []
+
 class GuildDateBases:
     def __init__(self, guild_id: int) -> None:
-        if not self._get(guild_id):
-            self._insert(guild_id)
+        if guild_id not in reserved:
+            reserved.append(guild_id)
+            
+            if not self._get(guild_id):
+                self._insert(guild_id)
         self.guild_id = guild_id
 
 
@@ -45,7 +50,7 @@ class GuildDateBases:
     
     
     @on_error()
-    def get(self, service, default = None) -> Union[dict, int, str]:
+    def get(self, service: str, default: any = None) -> Union[dict, int, str]:
         data = self._get_service(self.guild_id,service)
         data = data[0]
         data = Json.loads(data)

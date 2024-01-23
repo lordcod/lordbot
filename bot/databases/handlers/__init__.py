@@ -1,31 +1,15 @@
-from . import economyHD,guildHD, commandHD, rolesHD
+from . import guildHD, economyHD, commandHD, rolesHD, mongoHD
 
+from .guildHD import GuildDateBases
+from .economyHD import EconomyMembedDB
+from .commandHD import CommandDB
+from .rolesHD import RoleDateBases
+from .mongoHD import MongoDB
 
-def GuildDateBasesInstance(conn):
+def establish_connection(conn):
     guildHD.connection = conn
-    
-    classification = guildHD.GuildDateBases
-    
-    return classification
-
-def EconomyMembedDBInstance(conn):
     economyHD.connection = conn
-    
-    classification = economyHD.EconomyMembedDB
-    
-    return classification
-
-def CommandDBInstance(conn):
     commandHD.connection = conn
-    
-    classification = commandHD.CommandDB
-    
-    return classification
-
-
-def RolesDBInstance(conn):
     rolesHD.connection = conn
-    
-    classification = rolesHD.RoleDateBases
-    
-    return classification
+    mongoHD.connection = conn
+

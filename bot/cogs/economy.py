@@ -206,7 +206,7 @@ class Economy(commands.Cog):
             # Find member
             member = ctx.guild.get_member(member_id)
             if not member:
-                del sorted_leaderboard[member_id]
+                leaderboard_indexs.remove(member_id)
                 continue
             
             # Find position leadeboard

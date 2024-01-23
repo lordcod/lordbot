@@ -1,14 +1,15 @@
 from typing import List, Dict, Literal, Union
 
-possible_args = Literal['name','category','aliases','arguments','descriptrion','brief_descriptrion','allowed_disabled']
+possible_args = Literal['name', 'category', 'aliases', 'arguments', 'descriptrion', 'brief_descriptrion', 'allowed_disabled']
 CommandOption = Dict[
     possible_args,
-    Union[dict,list,str,bool]
+    Union[dict,list,bool,str]
 ]   
 
 categories_emoji = {
     'economy':'💎',
     'major':'👑',
+    'voice':'🎤',
     'moderation':'⚠',
 }
 
@@ -20,6 +21,10 @@ categories_name = {
     'major':{
         'ru':'Главное',
         'en':'Major'
+    },
+    'voice':{
+        'ru':'Голос',
+        'en':'Voice'
     },
     'moderation':{
         'ru':'Модерационные',
@@ -258,6 +263,102 @@ categories: Dict[str,List[CommandOption]] = {
             'allowed_disabled':True,
         },  
     ],
+    'voice':[
+        {
+            'name':'join',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Enters the channel with the user who called the command'
+            },
+            'brief_descriptrion':{
+                'en':'Enters the channel'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'leave',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Comes out the channel with the user who called the command'
+            },
+            'brief_descriptrion':{
+                'en':'Comes out the channel'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'play',
+            'category':'voice',
+            'aliases':[],
+            'arguments':['<title/url>'],
+            'descriptrion':{
+                'en':(
+                    'Starts playing the music set by the user\n'
+                    'As a cloud with music is **Yandex Music**'
+                ),
+            },
+            'brief_descriptrion':{
+                'en':'Starts playing music'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'stop',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Stops the current music stream'
+            },
+            'brief_descriptrion':{
+                'en':'Stops the music'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'pause',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Stops the current music stream in the future which can be continued',
+            },
+            'brief_descriptrion':{
+                'en':'Assigns a pause for music'
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'resume',
+            'category':'voice',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Resumes the music stream that was completed by the necessary means in order to continue in the future',
+            },
+            'brief_descriptrion':{
+                'en':'Resumes music',
+            },
+            'allowed_disabled':True,
+        }, 
+        {
+            'name':'volume',
+            'category':'voice',
+            'aliases':[],
+            'arguments':['<volume>'],
+            'descriptrion':{
+                'en':'Set the volume to the current music stream from 1 to 100',
+            },
+            'brief_descriptrion':{
+                'en':'Sets the volume',
+            },
+            'allowed_disabled':True,
+        }, 
+    ],
     'moderation':[
         {
             'name':'purge',
@@ -274,7 +375,60 @@ categories: Dict[str,List[CommandOption]] = {
             },
             'allowed_disabled':True,
         },  
-        
+        {
+            'name':'temp-role',
+            'category':'moderation',
+            'aliases':[],
+            'arguments':['<member>', '<roles>', '[time]'],
+            'descriptrion':{
+                'en':(
+                    'Adds roles to a certain participant for a while or forever\n'
+                    'If the role is not specified, the role will be assigned forever\n'
+                    'You can summarize the roles\n'
+                    'The time is indicated in the format `1d1h1m1s` the values can be combined and also duplicated, for example `1d2h1d`\n\n'
+                    'Example: '
+                    'l.temp-role **@lordcode** **@role1** **@role2** _12h_'
+                ),
+                'ru':(
+                    'Добавляет роли определенному участнику на некоторое время или навсегда\n'
+                    'Если роль не указана, она будет назначена навсегда\n'
+                    'Вы можете суммировать роли\n'
+                    'Время указано в формате `1d1h1m1s` значения могут комбинироваться, а также дублироваться, например `1d2h1d`\n\n'
+                    'Пример: '
+                    'l.temp-role **@user** **@role1** **@role2** _12h_'
+                )
+            },
+            'brief_descriptrion':{
+                'en':'Adds roles to a certain participant for a while or forever',
+                'ru':'Добавляет роли определенному участнику на некоторое время или навсегда'
+            },
+            'allowed_disabled':True,
+        },
+        {
+            'name':'temp-role list',
+            'category':'moderation',
+            'aliases':[],
+            'arguments':['[member]'],
+            'descriptrion':{
+                'en':(
+                    'Provides a list of temporary roles for the server or member.\n'
+                    'If `member` is n2ot specified, it shows a list of all temporary roles on the server.\n'
+                    'If specified, it shows only those roles that belong to the participant.\n'
+                    'The roles assigned to are always not shown in the list.'
+                ),
+                'ru':(
+                    'Предоставляет список временных ролей для сервера или участника.\n'
+                    'Если `member` не указан, то отображается список всех временных ролей на сервере.\n'
+                    'Если указано, то отображаются только те роли, которые принадлежат участнику.\n'
+                    'Роли назначенные на всегда не отображаются в списке.'
+                )
+            },
+            'brief_descriptrion':{
+                'en':'Provides a list of temporary roles for the server or member',
+                'ru':'Предоставляет список временных ролей для сервера или участника'
+            },
+            'allowed_disabled':True,
+        },
         {
             'name':'say',
             'category':'moderation',

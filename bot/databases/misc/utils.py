@@ -60,7 +60,7 @@ def register_table(table_name: str, variable: str, connection: connection):
             f"CREATE TABLE IF NOT EXISTS {table_name} ({variable})"
         )
 
-def get_info_colums(table_name: str, connection: connection):
+def get_info_colums(table_name: str, connection: connection) -> Union[list,None]:
     query = """
         SELECT
             column_name,

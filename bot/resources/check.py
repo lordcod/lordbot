@@ -1,6 +1,6 @@
+from nextcord.ext import commands
 from bot.resources import errors
 import asyncio
-from nextcord.ext import commands
 
 def team_only():
     async def predicate(ctx: commands.Context) -> bool:
