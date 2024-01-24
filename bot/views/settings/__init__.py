@@ -15,7 +15,8 @@ from .languages import Languages
 from .reactions import AutoReactions
 from .thread_message import AutoThreadMessage
 from .permisson_command import CommandsDataView
-from .greeting import Greeting 
+from .auto_role import AutoRoleView
+from .welcomer import WelcomerView
 from .ideas import IdeasView
 
 
@@ -28,7 +29,9 @@ moduls = {
     
     'CommandPermission': CommandsDataView,
     
-    'Greeting':Greeting,
+    'Welcomer': WelcomerView,
+    'AutoRoles': AutoRoleView,
+    
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
     

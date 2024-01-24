@@ -13,7 +13,7 @@ from .help import HelpView
 
 
 class SetDropdown(nextcord.ui.Select):
-    def __init__(self,guild_id):
+    def __init__(self, guild_id):
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
         
@@ -31,7 +31,10 @@ class SetDropdown(nextcord.ui.Select):
                 label=module_name.color.get(locale), emoji=Emoji.colour, value='Color'
             ),
             nextcord.SelectOption(
-                label=module_name.greeting.get(locale), emoji=Emoji.greeting, value='Greeting'
+                label=module_name.auto_roles.get(locale), emoji=Emoji.auto_role, value='AutoRoles'
+            ),
+            nextcord.SelectOption(
+                label=module_name.welcomer.get(locale), emoji=Emoji.frame_person, value='Welcomer'
             ),
             nextcord.SelectOption(
                 label=module_name.reactions.get(locale), emoji=Emoji.reactions, value='Reactions'
@@ -62,7 +65,7 @@ class SetDropdown(nextcord.ui.Select):
 class SettingsView(settings.DefaultSettingsView):
     embed: nextcord.Embed
     
-    def __init__(self,member: nextcord.Member) -> None:
+    def __init__(self, member: nextcord.Member) -> None:
         gdb = GuildDateBases(member.guild.id)
         colour = gdb.get('color')
         locale = gdb.get('language')

@@ -1,14 +1,12 @@
 import nextcord
 
-from ..greeting import Greeting
-from ...settings import DefaultSettingsView
+from . import DefaultSettingsView
 
 from bot.misc import utils
-from bot.resources.ether import Emoji
 from bot.views import views
 from bot.databases.db import GuildDateBases
-from bot.languages.settings.greeting import welcome as welcome_lang
-from bot.languages.settings import button as button_name
+from bot.languages.settings import (welcome as welcome_lang,
+                                    button as button_name)
 
 
 
@@ -33,10 +31,10 @@ class Modal(nextcord.ui.Modal):
             'channel_id': self.channel.id,
             'message':message,
         }
-        self.gdb.set('greeting_message',data)
+        self.gdb.set('greeting_message', data)
         
         
-        view = ViewBuilder(interaction.guild, self.channel)
+        view = WelcomerView(interaction.guild, self.channel)
         
         await interaction.message.edit(embed=view.embed, view=view)
 
@@ -54,15 +52,14 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
         
-        view = ViewBuilder(interaction.guild, channel)
+        view = WelcomerView(interaction.guild, channel)
         
         await interaction.message.edit(embed=view.embed, view=view)
 
-class ViewBuilder(DefaultSettingsView):
+class WelcomerView(DefaultSettingsView):
     embed: nextcord.Embed
     
-    def __init__(self, guild: nextcord.Guild, channel: nextcord.TextChannel = None) -> None:
-        self.channel = channel
+    def __init__(self, guild: nextcord.Guild, select_channel: nextcord.TextChannel = None) -> None:
         self.gdb = GuildDateBases(guild.id)
         
         locale = self.gdb.get('language')
@@ -73,7 +70,7 @@ class ViewBuilder(DefaultSettingsView):
         
         self.back.label = button_name.back.get(locale)
         self.install.label = welcome_lang.button_install.get(locale)
-        self.view.label = welcome_lang.button_view.get(locale)
+        self.preview.label = welcome_lang.button_view.get(locale)
         self.delete.label = welcome_lang.button_delete.get(locale)
         
         
@@ -86,45 +83,38 @@ class ViewBuilder(DefaultSettingsView):
             color=colour
         )
         
-        if greeting_message:
-            channel_id = greeting_message.get('channel_id')
-            channel_data = guild.get_channel(channel_id)
-            if not channel:
-                self.channel = channel_data
+        if (
+            select_channel is not None or 
+            (greeting_message and 
+            (channel := guild.get_channel(greeting_message.get('channel_id')))
+        )):
+            self.channel = select_channel or channel
+        else:
+            self.install.disabled = True
+            self.preview.disabled = True
+            self.delete.disabled = True
             
-            if channel_data:
-                self.view.disabled = False
-                self.delete.disabled = False
-                
-                
-                self.embed.add_field(
-                    name=welcome_lang.field_successful.get(locale),
-                    value=channel_data.mention
-                )
-            else:
-                self.embed.add_field(
-                    name=welcome_lang.field_failure.get(locale),
-                    value=''
-                )
+            self.embed.add_field(
+                name=welcome_lang.field_failure.get(locale),
+                value=''
+            )
         
-        if self.channel:
-            self.install.disabled = False
     
-    @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red,row=1)
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = Greeting(interaction.guild)
+        view = views.SettingsView(interaction.guild)
         
         await interaction.message.edit(embed=view.embed, view=view)
     
-    @nextcord.ui.button(label='Install message',style=nextcord.ButtonStyle.success,disabled=True,row=1)
+    @nextcord.ui.button(label='Install message', style=nextcord.ButtonStyle.success, row=1)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = Modal(interaction.guild, self.channel)
         
         await interaction.response.send_modal(modal)
     
     
-    @nextcord.ui.button(label='View message',style=nextcord.ButtonStyle.blurple,disabled=True,row=2)
-    async def view(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='View message', style=nextcord.ButtonStyle.blurple, row=2)
+    async def preview(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         greeting_message: dict  = self.gdb.get('greeting_message')
         
         content: str = greeting_message.get('message')
@@ -137,13 +127,13 @@ class ViewBuilder(DefaultSettingsView):
         message_format = templete.safe_substitute(data_payload)
         message_data = await utils.generate_message(message_format)
         
-        await interaction.response.send_message(**message_data,ephemeral=True)
+        await interaction.response.send_message(**message_data, ephemeral=True)
     
-    @nextcord.ui.button(label='Delete message',style=nextcord.ButtonStyle.red,disabled=True,row=2)
+    @nextcord.ui.button(label='Delete message', style=nextcord.ButtonStyle.red, row=2)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         self.gdb.set('greeting_message',{})
         
         
-        view = ViewBuilder(interaction.guild)
+        view = self.__class__(interaction.guild)
         
         await interaction.message.edit(embed=view.embed, view=view)

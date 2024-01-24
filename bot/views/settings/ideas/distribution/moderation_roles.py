@@ -14,7 +14,7 @@ from typing import List
 
 
 
-class DropDown(nextcord.ui.StringSelect):
+class RolesDropDown(nextcord.ui.StringSelect):
     current_disabled = False
     
     def __init__(
@@ -91,7 +91,7 @@ class ModerationRolesView(DefaultSettingsView):
             self.delete.disabled = False
         
         
-        cdd = DropDown(guild, (role_ids or []))
+        cdd = RolesDropDown(guild, (role_ids or []))
         self.add_item(cdd)
     
     
