@@ -14,7 +14,14 @@ class EconomyMembedDB:
     @on_error()
     def get_leaderboards(self):
         with connection().cursor() as cursor:
-            cursor.execute('SELECT * FROM economic WHERE guild_id = %s', (self.guild_id,))
+            cursor.execute(
+                """SELECT 
+                member_id, balance, bank, balance+bank as total
+                FROM economic
+                WHERE guild_id = %s
+                ORDER BY total DESC;""", 
+                (self.guild_id,)
+            )
             
             guild = cursor.fetchall()
             

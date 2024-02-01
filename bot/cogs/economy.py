@@ -16,7 +16,7 @@ class MemberDB:
         self.guild_id = guild_id
         self.member_id = member_id
         
-        self.emdb = EconomyMembedDB(guild_id,member_id)
+        self.emdb = EconomyMembedDB(guild_id, member_id)
         data = self.emdb.get()
         
         colums_name = [cl[0] for cl in colums['economic']][2:] # Get name colums from economic except guild_id and member_id 
@@ -45,6 +45,8 @@ class MemberDB:
         self.data[key] = value
         
         self.emdb.update(key, value)
+
+from functools import wraps
 
 
 class Economy(commands.Cog):
@@ -171,29 +173,14 @@ class Economy(commands.Cog):
         currency_emoji = economy_settings.get("emoji")
         
         emdb = MemberDB(ctx.guild.id, ctx.author.id)
-        leaderboard_empty = emdb.get_leaderboards()
+        leaderboard = emdb.get_leaderboards()
         
-        leaderboard_ids = {}
-        
-        for leader in leaderboard_empty[:15]:
-            member_id = leader[1]
-            balance = leader[2]
-            bank = leader[3]
-            total = balance+bank
-            
-            leaderboard_ids[member_id] = {
-                'balance':balance,
-                'bank':bank,
-                'total':total
-            }
-        sorted_leaderboard = dict(sorted(leaderboard_ids.items(), key=lambda item: item[1]['total'], reverse=True))
-        sld = list(sorted_leaderboard.items())
-        leaderboard_indexs = list(sorted_leaderboard)
-        index = leaderboard_indexs.index(ctx.author.id)+1
+        leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
+        user_index = leaderboard_indexs.index(ctx.author.id)+1
         
         embed = nextcord.Embed(
             title="Список лидеров по балансу",
-            description=f"**{ctx.author.display_name}**, Ваша позиция в топе: **{index}**",
+            description=f"**{ctx.author.display_name}**, Ваша позиция в топе: **{user_index}**",
             color=colour
         )
         embed.set_thumbnail("https://cdn.discordapp.com/attachments/1179069504651796562/1183659540324036638/1426727.png")
@@ -202,19 +189,17 @@ class Economy(commands.Cog):
             icon_url=ctx.guild.icon
         )
         
-        for member_id, data in sld[:10]:
+        for (member_id, balance, bank, total) in leaderboard[:10]:
             # Find member
             member = ctx.guild.get_member(member_id)
-            if not member:
+            if not member or 0 >= total:
                 leaderboard_indexs.remove(member_id)
                 continue
+              
             
             # Find position leadeboard
             index = leaderboard_indexs.index(member_id)+1
             award = get_award(index)
-            balance = data['balance']
-            bank = data['bank']
-            total = data['total']
             
             embed.add_field(
                 name=f"{award}. {member.display_name}",
@@ -226,7 +211,7 @@ class Economy(commands.Cog):
                 inline=False
             )
         
-        await message.edit(content=None,embed=embed)
+        await message.edit(content=None, embed=embed)
     
     @commands.command(name="pay")
     async def pay(self,ctx: commands.Context, member: nextcord.Member, sum: int):
