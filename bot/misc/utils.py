@@ -1,17 +1,12 @@
-from typing import Any
 import nextcord
-from nextcord.ext import commands
 from nextcord.utils import escape_markdown
 
-from bot.resources import errors
-from bot.databases.db import GuildDateBases, RoleDateBases
+from bot.databases.db import GuildDateBases
 
 import inspect
 import re
 import string
 import random
-import time
-import asyncio
 import aiohttp
 import orjson
 
@@ -19,6 +14,8 @@ from typing import Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
+
+from functools import lru_cache
 
 number_type = Union[int, float]
 intervals = (
@@ -123,6 +120,7 @@ def calculate_time(string: str) -> (int|None):
     
     return ftime
 
+@lru_cache()
 def get_award(number):
     awards = {
         1:'🥇',
@@ -181,7 +179,7 @@ def clord(value,cls,default=None):
         except:
             return default
 
-async def generate_message(content) -> dict|str:
+async def generate_message(content: str) -> dict:
     content = str(content)
     message = {}
     try:
@@ -190,13 +188,9 @@ async def generate_message(content) -> dict|str:
         message_content = content.get('plainText')
         
         title = content.get('title')
-        description=content.get('description')
-        color=content.get('color')
-        url=content.get('url')
-        
-        thumbnail = content.get('thumbnail')
-        author = content.get('author')
-        footer = content.get('footer')
+        description = content.get('description')
+        color = content.get('color')
+        url = content.get('url')
         fields = content.get('fields', [])
         
         message['content'] = message_content
@@ -208,17 +202,17 @@ async def generate_message(content) -> dict|str:
             url=url,
         )
         
-        if thumbnail:
+        if thumbnail := content.get('thumbnail'):
             embed.set_thumbnail(thumbnail)
         
-        if author:
+        if author := content.get('author'):
             embed.set_author(
-                name=author.get('name',None),
-                url=author.get('url',None),
-                icon_url=author.get('icon_url',None),
+                name=author.get('name'),
+                url=author.get('url'),
+                icon_url=author.get('icon_url'),
             )
         
-        if footer:
+        if footer := content.get('footer'):
             embed.set_footer(
                 text=footer.get('text'),
                 icon_url=footer.get('icon_url'),
@@ -231,17 +225,18 @@ async def generate_message(content) -> dict|str:
                 inline=field.get('inline',None)
             )
         
-        if title or description or thumbnail or author or footer or fields:
+        if (title or description or thumbnail
+            or author or footer or fields):
             message['embed'] = embed
         elif not message_content:
             raise ValueError()
-    except:
+    except (ValueError | orjson.JSONDecodeError):
         message['content'] = content
     return message
 
 async def check_invite(content):
     regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)([a-zA-Z0-9_-]+)(\/|\s|\?|$)'
-    if pattern := re.fullmatch(regex_string,content):
+    if pattern := re.fullmatch(regex_string, content):
         return pattern.group(2)
 
 async def generator_captcha(num):

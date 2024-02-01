@@ -1,5 +1,6 @@
 import time
-import functools
+import aiohttp
+import asyncio
 
 class text_colors:
     RESET = '\033[0m'
@@ -7,24 +8,39 @@ class text_colors:
     UNDERLINE = '\033[4m'
     OBLIQUE = '\033[3m'
     
-    GREY = '\033[90m'#
-    RED = '\033[91m'#
-    GREEN = '\033[92m'#
-    YELLOW = '\033[93m'#
-    BLUE = '\033[94m'#
-    VIOLET = '\033[95m'#
+    GREY = '\033[90m'
+    RED = '\033[91m'
+    GREEN = '[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    VIOLET = '\033[95m'
     CYAN = '\033[96m'
+
+async def post_mes(text):
+    url = "https://discord.com/api/webhooks/1202680614772285450/GL1vm6jvvoaNLxb3hXeECOfGH2NuMdjB34h7SBazhDDYK18OMy-x_WV0sIEbRZ0r1BBj"
+    data = {
+        "content": f"```ansi\n{text}\n```"
+    }
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=data) as responce:
+            pass
+
 
 @lambda cls: cls(True)
 class Logger:
+    loop = None
+    
     def __init__(self, prints=True) -> None:
         self.prints = prints
+        self.loop = asyncio.get_event_loop()
         pass
     
     def callback(self, text):
         if self.prints:
             print(text)
-        pass
+        self.loop.create_task(post_mes(text))
+    
     
     def on_logs(func):
         def redirect(self, txt):

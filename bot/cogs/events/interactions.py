@@ -1,11 +1,6 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc.ratelimit import Cooldown
-from bot.misc.logger import Logger
-from bot.resources import errors
-from bot.databases.db import GuildDateBases, CommandDB
-from bot.resources.errors import CallbackCommandError, MissingRole, MissingChannel, CommandOnCooldown
 
 
 class interactions_event(commands.Cog):
@@ -18,7 +13,7 @@ class interactions_event(commands.Cog):
         bot.event(self.on_interaction)
     
     async def on_interaction(self, interaction: nextcord.Interaction):
-        print(interaction.permissions.administrator)
+        await self.bot.process_application_commands(interaction)
 
 
 

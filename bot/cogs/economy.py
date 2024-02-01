@@ -99,15 +99,15 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name='daily')
-    async def daily(self,ctx: commands.Context):
+    async def daily(self, ctx: commands.Context):
         await self.handler_rewards(ctx)
     
     @commands.command(name='weekly')
-    async def weekly(self,ctx: commands.Context):
+    async def weekly(self, ctx: commands.Context):
         await self.handler_rewards(ctx)
     
     @commands.command(name='monthly')
-    async def monthly(self,ctx: commands.Context):
+    async def monthly(self, ctx: commands.Context):
         await self.handler_rewards(ctx)
     
     
@@ -115,7 +115,6 @@ class Economy(commands.Cog):
     async def balance(self,ctx:commands.Context, member: nextcord.Member = None):
         if not member:
             member = ctx.author
-        
         
         gdb = GuildDateBases(ctx.guild.id)
         prefix = get_prefix(ctx.guild.id, markdown=True, GuildData=gdb)
@@ -130,18 +129,18 @@ class Economy(commands.Cog):
         
         description = ""
         if account.get('daily',0) < time:
-            description = f"{description}— Ежедневный бонус ({prefix}daily)\n"
+            description += f"— Ежедневный бонус ({prefix}daily)\n"
         if account.get('weekly',0) < time:
-            description = f"{description}— Еженедельный бонус ({prefix}weekly)\n"
+            description += f"— Еженедельный бонус ({prefix}weekly)\n"
         if account.get('monthly',0) < time:
-            description = f"{description}— Ежемесячный бонус ({prefix}monthly)\n"
+            description += f"— Ежемесячный бонус ({prefix}monthly)\n"
         if description:
             description = f"{Emoji.award} Доступные награды:\n{description}"
         
         embed = nextcord.Embed(
             title="Баланс",
             color=colour,
-            description = description
+            description=description
         )
         embed.set_author(name=member.display_name, icon_url=member.display_avatar)
         
@@ -169,7 +168,7 @@ class Economy(commands.Cog):
         
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get("color")
-        economy_settings: dict = gdb.get('economic_settings',{})
+        economy_settings: dict = gdb.get('economic_settings')
         currency_emoji = economy_settings.get("emoji")
         
         emdb = MemberDB(ctx.guild.id, ctx.author.id)
@@ -183,6 +182,7 @@ class Economy(commands.Cog):
             description=f"**{ctx.author.display_name}**, Ваша позиция в топе: **{user_index}**",
             color=colour
         )
+        
         embed.set_thumbnail("https://cdn.discordapp.com/attachments/1179069504651796562/1183659540324036638/1426727.png")
         embed.set_footer(
             text=ctx.guild.name,
@@ -190,22 +190,18 @@ class Economy(commands.Cog):
         )
         
         for (member_id, balance, bank, total) in leaderboard[:10]:
-            # Find member
             member = ctx.guild.get_member(member_id)
             if not member or 0 >= total:
                 leaderboard_indexs.remove(member_id)
                 continue
-              
             
-            # Find position leadeboard
             index = leaderboard_indexs.index(member_id)+1
             award = get_award(index)
             
             embed.add_field(
                 name=f"{award}. {member.display_name}",
                 value=(
-                    f"Наличные: {balance}{currency_emoji} | В банке: {bank}{currency_emoji}"
-                    "\n"
+                    f"Наличные: {balance}{currency_emoji} | В банке: {bank}{currency_emoji}\n"
                     f"Всего: {total}{currency_emoji}"
                 ),
                 inline=False
@@ -218,23 +214,23 @@ class Economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')
         prefix = gdb.get('prefix')
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
-        from_account = MemberDB(ctx.guild.id,ctx.author.id)
-        to_account = MemberDB(ctx.guild.id,member.id)
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+        from_account = MemberDB(ctx.guild.id, ctx.author.id)
+        to_account = MemberDB(ctx.guild.id, member.id)
         
         if sum <= 0:
             await ctx.send(content="Specify the amount more **0**")
             return
-        elif (from_account.get('balance',0)-sum) < 0:
+        elif (from_account.get('balance', 0)-sum) < 0:
             await ctx.send(content=f"Not enough funds to check your balance use `{prefix}bal`")
             return
         
         embed = nextcord.Embed(
-                title="Transfer of currency", 
-                color=colour,
-                description=f"You were given **{sum}**{currency_emoji}"
-            )
+            title="Transfer of currency", 
+            color=colour,
+            description=f"You were given **{sum}**{currency_emoji}"
+        )
         embed.set_footer(text=f'From {ctx.author.display_name}', icon_url=ctx.author.display_avatar)
         
         await ctx.send(embed=embed)

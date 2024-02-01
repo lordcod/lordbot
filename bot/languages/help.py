@@ -248,6 +248,21 @@ categories: Dict[str,List[CommandOption]] = {
             'allowed_disabled':False,
         },  
         {
+            'name':'invite',
+            'category':'major',
+            'aliases':[],
+            'arguments':[],
+            'descriptrion':{
+                'en':'Issues a link inviting the bot to the server',
+                'ru':'Выдает ссылку, приглашающую бота на сервер'
+            },
+            'brief_descriptrion':{
+                'en':'Bot invitation link',
+                'ru':'Ссылка на приглашение бота'
+            },
+            'allowed_disabled':False,
+        }, 
+        {
             'name':'captcha',
             'category':'major',
             'aliases':[],
