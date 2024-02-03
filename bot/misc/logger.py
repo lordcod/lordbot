@@ -2,7 +2,7 @@ import time
 import aiohttp
 import asyncio
 
-class text_colors:
+class TextColors:
     RESET = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
@@ -10,16 +10,33 @@ class text_colors:
     
     GREY = '\033[90m'
     RED = '\033[91m'
-    GREEN = '[92m'
+    GREEN = '\033[92m'
     YELLOW = '\033[93m'
     BLUE = '\033[94m'
     VIOLET = '\033[95m'
     CYAN = '\033[96m'
 
-async def post_mes(text):
+class DiscordTextColors:
+    RESET = '[0m'
+    
+    GREY = '[2;30m'
+    RED = '[2;31m'
+    GREEN = '[2;32m'
+    YELLOW = '[2;33m'
+    BLUE = '[2;34m'
+    VIOLET = '[2;35m'
+    CYAN = '[2;36m'
+
+async def post_mes(data, time_string):
     url = "https://discord.com/api/webhooks/1202680614772285450/GL1vm6jvvoaNLxb3hXeECOfGH2NuMdjB34h7SBazhDDYK18OMy-x_WV0sIEbRZ0r1BBj"
     data = {
-        "content": f"```ansi\n{text}\n```"
+        "content": (
+            "```ansi\n"
+            f"{data.get('discord_color')}"
+            f"[{time_string}][{data.get('service')}]: {data.get('text')}"
+            f"{DiscordTextColors.RESET}"
+            "```"
+        )
     }
     
     async with aiohttp.ClientSession() as session:
@@ -39,7 +56,6 @@ class Logger:
     def callback(self, text):
         if self.prints:
             print(text)
-        self.loop.create_task(post_mes(text))
     
     
     def on_logs(func):
@@ -48,10 +64,12 @@ class Logger:
             time_string = time.strftime("%m-%d-%Y %H:%M:%S", named_tuple)
             
             data:dict = func(self, txt)
+            self.loop.create_task(post_mes(data, time_string))
+            
             text = (
                 f"{data.get('color')}"
                 f"[{time_string}][{data.get('service')}]: {data.get('text')}"
-                f"{text_colors.RESET}"
+                f"{TextColors.RESET}"
             )
             
             self.callback(text)
@@ -61,70 +79,84 @@ class Logger:
     
     @on_logs
     def info(self, text):
-        color = text_colors.GREY
+        color = TextColors.GREY
+        discord_color = DiscordTextColors.GREY
         service = 'INFO'
         return {
             'text':text,
             'color':color,
+            'discord_color': discord_color,
             'service':service
         }
     
     @on_logs
     def warn(self, text):
-        color = text_colors.YELLOW
+        color = TextColors.YELLOW
+        discord_color = DiscordTextColors.YELLOW
         service = 'WARN'
         return {
             'text':text,
             'color':color,
+            'discord_color': discord_color,
             'service':service
         }
     
     @on_logs
     def error(self, text):
-        color = text_colors.RED
+        color = TextColors.RED
+        discord_color = DiscordTextColors.RED
         service = 'ERROR'
         return {
             'text':text,
             'color':color,
+            'discord_color': discord_color,
             'service':service
         }
     
     @on_logs
     def critical(self, text):
-        color = text_colors.VIOLET
+        color = TextColors.VIOLET
+        discord_color = DiscordTextColors.VIOLET
         service = 'CRITICAL'
         return {
             'text':text,
             'color':color,
+            'discord_color': discord_color,
             'service':service
         }
     
     @on_logs
     def success(self, text):
-        color = text_colors.GREEN
+        color = TextColors.GREEN
+        discord_color = DiscordTextColors.GREEN
         service = 'SUCCESS'
         return {
             'text':text,
             'color':color,
+            'discord_color': discord_color,
             'service':service
         }
     
     @on_logs
     def inportent(self, text):
-        color = text_colors.BLUE
+        color = TextColors.BLUE
+        discord_color = DiscordTextColors.BLUE
         service = 'IMPORTENT'
         return {
             'text':text,
             'color':color,
+            'discord_color': discord_color,
             'service':service
         }
     
     @on_logs
     def core(self, text):
-        color = text_colors.CYAN
+        color = TextColors.CYAN
+        discord_color = DiscordTextColors.CYAN
         service = 'CORE'
         return {
             'text':text,
             'color':color,
+            'discord_color': discord_color,
             'service':service
         }
