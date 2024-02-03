@@ -14,8 +14,8 @@ from typing import Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
-
 from functools import lru_cache
+from easy_pil import Editor, Font, load_image_async
 
 number_type = Union[int, float]
 intervals = (
@@ -130,25 +130,6 @@ def get_award(number):
     award = awards.get(number,number)
     return award
 
-def remove_none(dlist: list) -> None:
-    for arg in dlist:
-        if arg is None:
-            dlist.remove(arg)
-
-def is_emoji(emoji):
-    pattern = ":(.+):"
-    check = re.fullmatch(pattern,emoji)
-    
-    if not check:
-        return False
-    
-    groups = check.groups()
-    payload = {
-        'name':groups[0],
-        'id':groups[1]
-    }
-    return payload
-
 def to_color(colour: int) -> str:
     color = hex(colour).replace('0x', '#').upper()
     return color
@@ -163,21 +144,6 @@ def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBas
     if markdown:
         return escape_markdown(prefix)
     return prefix
-
-def is_builtin_class_instance(obj):
-    return obj in (str, int, float, bool)
-
-def clord(value,cls,default=None):
-        if type(value) == cls:
-            return value
-        
-        if not is_builtin_class_instance(cls):
-            return default
-        
-        try:
-            return cls(value)
-        except:
-            return default
 
 async def generate_message(content: str) -> dict:
     content = str(content)
@@ -234,11 +200,6 @@ async def generate_message(content: str) -> dict:
         message['content'] = content
     return message
 
-async def check_invite(content):
-    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)([a-zA-Z0-9_-]+)(\/|\s|\?|$)'
-    if pattern := re.fullmatch(regex_string, content):
-        return pattern.group(2)
-
 async def generator_captcha(num):
     text = "".join([random.choice(string.ascii_uppercase) for _ in range(num)])
     captcha_image = ImageCaptcha(
@@ -259,24 +220,34 @@ def cut_back(string: str, length: int):
     new_string = f"{cropped_string}{ellipsis}"
     return new_string
 
-def is_float(element: any) -> bool:
-    if element is None: 
-        return False
+def get_szie_with_text(text: str, normal_size: int = 50) -> int:
+    lenght = len(text)
+    if 12 >= lenght:
+        return normal_size
+    return max(28, normal_size-2*(lenght-12))
+
+async def generate_welcome_message(member: nextcord.Member) -> bytes:
+    background = Editor("assets/background.jpeg").resize((800, 450))
     
-    try:
-        float(element)
-        return True
-    except ValueError:
-        return False
+    nunito = Font("assets/Nunito-ExtraBold.ttf", 50)
+    nunito_small = Font("assets/Nunito-Black.ttf", 25)
+    nunito_light = Font("assets/Nunito-Black.ttf", 20)
 
-def display_time(seconds, granularity=2):
-    result = []
+    profile_image = await load_image_async(member.display_avatar.with_size(128).url)
+    profile = Editor(profile_image).resize((150, 150)).circle_image()
 
-    for name, count in intervals:
-        value = seconds // count
-        if value:
-            seconds -= value * count
-            if value == 1:
-                name = name.rstrip('s')
-            result.append("{} {}".format(value, name))
-    return ', '.join(result[:granularity])
+    background.paste(profile, (325, 90))
+    background.ellipse((325, 90), 150, 150, outline=(125, 249, 255), stroke_width=4)
+    background.text((400, 260), f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}", color="white", font=nunito, align="center")
+    background.text(
+        (400, 320), member.display_name, color="white", font=nunito_small, align="center"
+    )
+    background.text(
+        (400, 360),
+        f"You are the {member.guild.member_count}th Member",
+        color="#F5923B",
+        font=nunito_light,
+        align="center",
+    )
+
+    return background.image_bytes

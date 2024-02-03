@@ -13,7 +13,6 @@ universeId = 4284784630
 
 
 class DataStore:
-    _is_enter = False
     def __init__(self, universeId: Union[str, int], datastore: str, api_key: str, _session: Optional[aiohttp.ClientSession] = None):
         self.universeId = universeId
         self.datastore = datastore
@@ -30,7 +29,6 @@ class DataStore:
         self._version_url = f"{self._objects_url}/versions/version"
     
     async def __aenter__(self):
-        self._is_enter = True
         return self
     
     async def __aexit__(self, universeId: Union[str, int], datastore: str, api_key: str, _session: Optional[aiohttp.ClientSession] = None):

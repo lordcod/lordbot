@@ -11,7 +11,6 @@ import asyncio
 import time
 from typing import Optional
 
-
 class moderations(commands.Cog):
     bot: commands.Bot
     
@@ -40,6 +39,7 @@ class moderations(commands.Cog):
         
         await ctx.send(embed=view.embed,view=view)
 
+
     @commands.group(name='temp-role',invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
     async def temp_role(
@@ -51,7 +51,7 @@ class moderations(commands.Cog):
     ):
         await member.add_roles(*roles)
         
-        if stime:
+        if stime is not None:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
             ftime = utils.calculate_time(stime)
             if ftime is None:
@@ -76,7 +76,7 @@ class moderations(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         colour = gdb.get('color')
         
-        if member:
+        if member is not None:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
             predata = rsdb.get_as_member()
             datas = [predata] if predata else []
@@ -100,10 +100,7 @@ class moderations(commands.Cog):
                 member = ctx.guild.get_member(member_id)
                 role = ctx.guild.get_role(role_id)
                 
-                message = (
-                    f"{message}"
-                    f"{quantity}. {member.mention} → {role.mention} (<t:{time}:R>)\n"
-                )
+                message += f"{quantity}. {member.mention} → {role.mention} (<t:{time}:R>)\n"
         
         message = message or "There are no registered temporary roles on this server"
         embed = nextcord.Embed(
@@ -113,7 +110,8 @@ class moderations(commands.Cog):
         )
         
         await ctx.send(embed=embed)
-
+    
+    
     @nextcord.slash_command(
         name='clone',
         default_member_permissions=268435456
@@ -155,6 +153,7 @@ class moderations(commands.Cog):
         )
         
         await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}', ephemeral=True)
+
 
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(manage_messages=True)

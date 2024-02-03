@@ -51,7 +51,7 @@ class basic(commands.Cog):
         await ctx.send(content)
     
     @commands.command()
-    async def captcha(self, ctx:commands.Context):
+    async def captcha(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
         lang = gdb.get('language')
         data,text = await utils.generator_captcha(random.randint(3,7))
@@ -69,16 +69,13 @@ class basic(commands.Cog):
         else:
             await ctx.send(content=languages.captcha.failed.get(lang))
     
-    @commands.command("emoji-to-image")
-    async def emoji_to_image(self, ctx: commands.Context, emoji: str):
-        if not (emoji_re := EMOJI_REGEXP.fullmatch(emoji)):
-            return
-        
-        emoji_animated = bool(emoji_re.group(1))
-        emoji_name = emoji_re.group(2)
-        emoji_id = emoji_re.group(3)
-        await ctx.send(f"https://cdn.discordapp.com/emojis/{emoji_id}.{'gif' if emoji_animated else 'png'}")
-    
+    @commands.command(name="welcome-message")
+    async def welcome_message(self, ctx: commands.Context):
+        image_bytes = await utils.generate_welcome_message(ctx.author)
+        file = nextcord.File(image_bytes, "welcome-message.png")
+        embed = nextcord.Embed()
+        embed.set_image("attachment://welcome-message.png")
+        await ctx.send(embed=embed, file=file)
     
     @nextcord.slash_command(
         name="activiti",
@@ -87,17 +84,17 @@ class basic(commands.Cog):
     @application_checks.guild_only()
     async def activiti(
         self,
-        interaction:nextcord.Interaction,
-        voice:nextcord.VoiceChannel=nextcord.SlashOption(
+        interaction: nextcord.Interaction,
+        voice: nextcord.VoiceChannel = nextcord.SlashOption(
             required=True,
             name="voice",
             description="Select the voice channel in which the activity will work!"
         ),
-        act=nextcord.SlashOption(
+        act = nextcord.SlashOption(
             required=True,
             name="activiti",
             description="Select the activity you want to use!",
-            choices=[activ['label'] for activ in info.activities_list],
+            choices=[activ.get('label') for activ in info.activities_list],
         ),
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)

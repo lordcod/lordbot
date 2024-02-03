@@ -29,12 +29,8 @@ class members_event(commands.Cog):
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
         
-        tasks = [
-            self.auto_roles(member, gdb),
-            self.auto_message(member, gdb)
-        ]
-        
-        await asyncio.gather(*tasks)
+        asyncio.create_task(self.auto_roles(member, gdb))
+        asyncio.create_task(self.auto_message(member, gdb))
     
     @on_error
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
@@ -43,20 +39,14 @@ class members_event(commands.Cog):
         if not roles_ids:
             return
         
-        roles = [member.guild.get_role(role_id) for role_id in roles_ids]
-        
-        utils.remove_none(roles)
+        roles = filter(lambda item: item is not None, [member.guild.get_role(role_id) for role_id in roles_ids])
         
         await member.add_roles(*roles, atomic=False)
     
     @on_error
     async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
         guild = member.guild
-        greeting_message: dict = gdb.get('greeting_message')
-        
-        if not greeting_message:
-            return
-        
+        greeting_message: dict = gdb.get('greeting_message', {})
         
         channel_id: int = greeting_message.get("channel_id")
         channel = guild.get_channel(channel_id)
@@ -116,12 +106,6 @@ class members_event(commands.Cog):
         
         self.bot.timeouts[after.id] = (temp, timing)
         self.bot.loop.call_later(temp, asyncio.create_task, self.process_untimeout(before, after))
-    
-    
-    
-    @commands.command()
-    async def istimeout(self, ctx: commands.Context, member: nextcord.Member):
-        await ctx.send(f"{member.name} - {member.communication_disabled_until: '%m-%d-%Y %H:%M:%S'}")
 
 
 

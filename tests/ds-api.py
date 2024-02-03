@@ -30,5 +30,3 @@ async def main():
 
 res = asyncio.run(main())
 pprint.pprint(res, width=160)
-
-pprint.pformat

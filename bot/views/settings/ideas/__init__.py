@@ -84,10 +84,7 @@ class IdeasView(DefaultSettingsView):
             self.embed.description += f"Channel approved: {channel_approved.mention}\n"
         
         if moderation_role_ids := ideas.get("moderation-role-ids"):
-            moderation_roles = filter(
-                lambda item: item is not None,
-                [guild.get_role(role_id) for role_id in moderation_role_ids]
-            )
+            moderation_roles = filter(lambda item: item is not None, [guild.get_role(role_id) for role_id in moderation_role_ids])
             if moderation_roles: self.embed.description += f"Moderation roles: {', '.join([role.mention for role in moderation_roles])}"
         
         
