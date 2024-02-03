@@ -18,14 +18,6 @@ from functools import lru_cache
 from easy_pil import Editor, Font, load_image_async
 
 number_type = Union[int, float]
-intervals = (
-    ('weeks', 604800),  # 60 * 60 * 24 * 7
-    ('days', 86400),    # 60 * 60 * 24
-    ('hours', 3600),    # 60 * 60
-    ('minutes', 60),
-    ('seconds', 1),
-)
-
 
 
 class TempletePayload:
@@ -130,13 +122,13 @@ def get_award(number):
     award = awards.get(number,number)
     return award
 
-def to_color(colour: int) -> str:
-    color = hex(colour).replace('0x', '#').upper()
+def to_color(color: int) -> str:
+    color = hex(color).replace('0x', '#').upper()
     return color
 
 def from_color(color: str) -> int:
-    colour = int(color[1:], 16)
-    return colour
+    color = int(color[1:], 16)
+    return color
 
 def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBases = None) -> str:
     gdb = GuildData or GuildDateBases(guild_id)

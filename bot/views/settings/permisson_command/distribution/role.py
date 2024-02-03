@@ -94,7 +94,7 @@ class RolesView(DefaultSettingsView):
         self.command_name = command_name
         
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         
         cdb = CommandDB(guild.id)
         command_data = cdb.get(command_name, {})
@@ -107,7 +107,7 @@ class RolesView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title="Allowed roles",
             description="The selected command will only work in the roles that you select",
-            color=colour
+            color=color
         )
         
         if role_perms:

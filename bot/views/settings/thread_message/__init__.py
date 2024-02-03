@@ -18,7 +18,7 @@ class DropDown(nextcord.ui.Select):
     def __init__(self,guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
         locale = self.gdb.get('language')
-        self.forum_message = self.gdb.get('thread_messages',{})
+        self.forum_message = self.gdb.get('thread_messages')
         channels = [guild.get_channel(key) for key in self.forum_message]
         
         if len(channels) <= 0:
@@ -47,13 +47,13 @@ class DropDown(nextcord.ui.Select):
         channel = await interaction.guild.fetch_channel(value)
         channel_data = self.forum_message.get(value)
         locale = self.gdb.get('language')
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         
         
         embed = nextcord.Embed(
             title=thread_langs.init.brief_title.get(locale),
             description=f"{thread_langs.init.channel.get(locale)}: {channel.mention}",
-            color=colour
+            color=color
         )
         await interaction.message.edit(embed=embed,view=ThreadData(channel,channel_data))
 
@@ -64,12 +64,12 @@ class AutoThreadMessage(DefaultSettingsView):
     def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         locale = gdb.get('language')
-        colour = gdb.get('color')
+        color = gdb.get('color')
         
         self.embed = nextcord.Embed(
             title=thread_langs.init.title.get(locale),
             description=thread_langs.init.description.get(locale),
-            color = colour
+            color = color
         )
         
         super().__init__()

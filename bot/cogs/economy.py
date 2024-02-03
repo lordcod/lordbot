@@ -70,7 +70,7 @@ class Economy(commands.Cog):
         time = tick()
         account = MemberDB(ctx.guild.id,ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
         award = eco_sets.get(ctx.command.name,0)
@@ -85,7 +85,7 @@ class Economy(commands.Cog):
             embed = nextcord.Embed(
                 title="You have received a gift",
                 description=f"In size {award}{currency_emoji} come through <t:{wait_long :.0f}:R>",
-                color = colour
+                color = color
             )
             
             account[ctx.command.name] = wait_long
@@ -94,7 +94,7 @@ class Economy(commands.Cog):
             embed = nextcord.Embed(
                 title="The reward is not available",
                 description=f'Try again after <t:{account.get(ctx.command.name) :.0f}:R>',
-                color = colour
+                color = color
             )
         await ctx.send(embed=embed)
     
@@ -118,7 +118,7 @@ class Economy(commands.Cog):
         
         gdb = GuildDateBases(ctx.guild.id)
         prefix = get_prefix(ctx.guild.id, markdown=True, GuildData=gdb)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
         
@@ -139,7 +139,7 @@ class Economy(commands.Cog):
         
         embed = nextcord.Embed(
             title="Баланс",
-            color=colour,
+            color=color,
             description=description
         )
         embed.set_author(name=member.display_name, icon_url=member.display_avatar)
@@ -167,7 +167,7 @@ class Economy(commands.Cog):
         message = await ctx.send("Загрузка данных...")
         
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get("color")
+        color = gdb.get("color")
         economy_settings: dict = gdb.get('economic_settings')
         currency_emoji = economy_settings.get("emoji")
         
@@ -180,7 +180,7 @@ class Economy(commands.Cog):
         embed = nextcord.Embed(
             title="Список лидеров по балансу",
             description=f"**{ctx.author.display_name}**, Ваша позиция в топе: **{user_index}**",
-            color=colour
+            color=color
         )
         
         embed.set_thumbnail("https://cdn.discordapp.com/attachments/1179069504651796562/1183659540324036638/1426727.png")
@@ -212,7 +212,7 @@ class Economy(commands.Cog):
     @commands.command(name="pay")
     async def pay(self,ctx: commands.Context, member: nextcord.Member, sum: int):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         prefix = gdb.get('prefix')
         economic_settings: dict = gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
@@ -228,7 +228,7 @@ class Economy(commands.Cog):
         
         embed = nextcord.Embed(
             title="Transfer of currency", 
-            color=colour,
+            color=color,
             description=f"You were given **{sum}**{currency_emoji}"
         )
         embed.set_footer(text=f'From {ctx.author.display_name}', icon_url=ctx.author.display_avatar)
@@ -242,7 +242,7 @@ class Economy(commands.Cog):
     @commands.command(name="deposit",aliases=["dep"])
     async def deposit(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         prefix = gdb.get('prefix')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
@@ -263,7 +263,7 @@ class Economy(commands.Cog):
 
         embed = nextcord.Embed(
             title="Transfer of currency", 
-            color=colour, 
+            color=color, 
             description=f"You have transferred **{sum}**{currency_emoji} to the bank account"
         )
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar)
@@ -273,7 +273,7 @@ class Economy(commands.Cog):
     @commands.command(name="withdraw",aliases=["wd"])
     async def withdraw(self,ctx: commands.Context, sum: Union[Literal['all'],int]):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         prefix = gdb.get('prefix')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
@@ -294,7 +294,7 @@ class Economy(commands.Cog):
 
         embed = nextcord.Embed(
             title="Transfer of currency", 
-            color=colour, 
+            color=color, 
             description=f"You have transferred **{sum}**{currency_emoji} to the account"
         )
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar)

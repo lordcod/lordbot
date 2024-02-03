@@ -12,8 +12,8 @@ class Modal(nextcord.ui.Modal):
     def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
 
-        colour = self.gdb.get("color", 1974050)
-        color = to_color(colour)
+        color = self.gdb.get("color", 1974050)
+        color = to_color(color)
 
         super().__init__("Rewards", timeout=300)
 
@@ -28,8 +28,8 @@ class Modal(nextcord.ui.Modal):
             await interaction.response.send_message("Hex is not valid", ephemeral=True)
             return
 
-        colour = from_color(color)
-        self.gdb.set("color", colour)
+        color = from_color(color)
+        self.gdb.set("color", color)
 
         view = ColorView(interaction.guild)
 
@@ -42,13 +42,13 @@ class ColorView(DefaultSettingsView):
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         locale = gdb.get("language")
-        colour = gdb.get("color")
-        color = to_color(colour)
+        color = gdb.get("color")
+        color = to_color(color)
 
         self.embed = nextcord.Embed(
             title=color_langs.title.get(locale),
             description=color_langs.description.get(locale),
-            color=colour,
+            color=color,
         )
         self.embed._fields = [
             {"name": f"{color_langs.current.get(locale)}: `{color}`", "value": ""}
@@ -77,8 +77,8 @@ class ColorView(DefaultSettingsView):
         self, button: nextcord.ui.Button, interaction: nextcord.Interaction
     ):
         gdb = GuildDateBases(interaction.guild_id)
-        colour = DEFAULT_COLOR
-        gdb.set("color", colour)
+        color = DEFAULT_COLOR
+        gdb.set("color", color)
 
         view = ColorView(interaction.guild)
 

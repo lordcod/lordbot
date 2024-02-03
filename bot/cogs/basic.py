@@ -99,7 +99,7 @@ class basic(commands.Cog):
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)
         lang = gdb.get('language')
-        colour = gdb.get('color')
+        color = gdb.get('color')
         
         
         activiti: dict = jmespath.search(f"[?label=='{act}']|[0]",info.activities_list)
@@ -118,7 +118,7 @@ class basic(commands.Cog):
         
         emb = nextcord.Embed(
             title=f"**{languages.activiti.embed_title.get(lang)}**",
-            color=colour,
+            color=color,
             description=languages.activiti.embed_description.get(lang)
         )
         emb.add_field(

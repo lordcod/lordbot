@@ -49,12 +49,12 @@ class help(commands.Cog):
     
     async def generate_message(self, ctx: commands.Context):
         locale = self.gdb.get('language')
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         
         embed = nextcord.Embed(
             title=help_info.Embed.title.get(locale),
             description=help_info.Embed.description.get(locale),
-            color=colour
+            color=color
         )
         
         for category, coms in help_info.categories.items():
@@ -77,14 +77,14 @@ class help(commands.Cog):
     
     async def generate_command(self, ctx: commands.Context, command_data: help_info.CommandOption):
         locale = self.gdb.get('language')
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         aliases = command_data.get('aliases')
         arguments = command_data.get('arguments')
         
         embed = nextcord.Embed(
             title=help_info.Embed.title.get(locale),
             description=help_info.Embed.description.get(locale),
-            color=colour
+            color=color
         )
         
         
@@ -139,24 +139,24 @@ class help(commands.Cog):
 
     async def generate_not_found(self, ctx: commands.Context):
         locale = self.gdb.get('language')
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         
         embed = nextcord.Embed(
             title=help_info.CommandNotFound.title.get(locale),
             description=help_info.CommandNotFound.description.get(locale),
-            color=colour
+            color=color
         )
         
         await ctx.send(embed=embed)
 
     async def generate_not_valid(self, ctx: commands.Context):
         locale = self.gdb.get('language')
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         
         embed = nextcord.Embed(
             title=help_info.CommandNotValid.title.get(locale),
             description=help_info.CommandNotValid.description.get(locale),
-            color=colour
+            color=color
         )
         
         await ctx.send(embed=embed)

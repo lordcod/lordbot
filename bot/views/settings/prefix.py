@@ -43,13 +43,13 @@ class PrefixView(DefaultSettingsView):
     def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         prefix = get_prefix(guild.id,markdown=False)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         locale = gdb.get('language')
         
         self.embed = nextcord.Embed(
             title=prefix_langs.title.get(locale),
             description=prefix_langs.description.get(locale),
-            color = colour
+            color = color
         )
         self.embed._fields = [
             {

@@ -28,7 +28,7 @@ class SetDropdown(nextcord.ui.Select):
                 label=module_name.prefix.get(locale), emoji=Emoji.prefix, value='Prefix'
             ),
             nextcord.SelectOption(
-                label=module_name.color.get(locale), emoji=Emoji.colour, value='Color'
+                label=module_name.color.get(locale), emoji=Emoji.color, value='Color'
             ),
             nextcord.SelectOption(
                 label=module_name.auto_roles.get(locale), emoji=Emoji.auto_role, value='AutoRoles'
@@ -67,12 +67,12 @@ class SettingsView(settings.DefaultSettingsView):
     
     def __init__(self, member: nextcord.Member) -> None:
         gdb = GuildDateBases(member.guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         locale = gdb.get('language')
         
         self.embed = nextcord.Embed(
             description=start_langs.description.get(locale),
-            color=colour
+            color=color
         )
         self.embed.set_author(name=start_langs.author.get(locale),icon_url=member.guild.icon)
         self.embed.set_footer(text=f'{start_langs.request.get(locale)} {member.display_name}',icon_url=member.avatar)

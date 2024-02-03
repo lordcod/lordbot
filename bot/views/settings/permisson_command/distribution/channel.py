@@ -84,7 +84,7 @@ class ChannelsView(DefaultSettingsView):
         self.command_name = command_name
         
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         
         cdb = CommandDB(guild.id)
         command_data = cdb.get(command_name, {})
@@ -97,7 +97,7 @@ class ChannelsView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title="Allowed channels",
             description="The selected command will only work in the channels that you select",
-            color=colour
+            color=color
         )
         
         if channel_perms:

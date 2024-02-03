@@ -36,7 +36,7 @@ class MusicDropDown(nextcord.ui.Select):
             inter.guild_id,
             track
         ):
-            await inter.response.send_message(content="Трек уже присутствует в очереди!", ephemeral=True)
+            await inter.response.send_message(content="The track is already in the queue!", ephemeral=True)
             return 
         
         token = self.queue.add(
@@ -49,11 +49,12 @@ class MusicView(nextcord.ui.View):
     embed: nextcord.Embed
     
     def __init__(self, guild_id, queue, player, tracks: List[Track]) -> None:
-        super().__init__(timeout=None)
-        
-        self.embed = nextcord.Embed(
-            title="Выбери интересующий тебя трек!",
-        )
+        gdb = GuildDateBases(guild_id)
+        color = gdb.get('color')
+        self.embed = nextcord.Embed(title="Choose the track you are interested in!", color=color)
         
         TDD = MusicDropDown(guild_id, queue, player, tracks)
         self.add_item(TDD)
+        
+        
+        super().__init__(timeout=None)

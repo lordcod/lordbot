@@ -56,13 +56,13 @@ class CommandsDataView(DefaultSettingsView):
         self.step = step
         
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         locale = gdb.get('language')
         
         self.embed = nextcord.Embed(
             title=disabled_commands_langs.title.get(locale),
             description=disabled_commands_langs.description.get(locale),
-            color = colour
+            color = color
         )
         
         super().__init__()

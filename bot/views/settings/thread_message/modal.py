@@ -24,7 +24,7 @@ class ModalBuilder(nextcord.ui.Modal):
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        forum_message = gdb.get('thread_messages',{})
+        forum_message = gdb.get('thread_messages')
         
         content = self.content.value
         channel_id = self.channel_id

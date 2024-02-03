@@ -37,17 +37,17 @@ class EmojiView(DefaultSettingsView):
     
     def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        economy_settings: dict = gdb.get('economic_settings',{})
+        economy_settings: dict = gdb.get('economic_settings')
         self.emoji = economy_settings.get("emoji")
         
-        colour = gdb.get('color',1974050)
+        color = gdb.get('color',1974050)
         self.embed = nextcord.Embed(
             title='Custom emoji',
             description=(
                 "You are on the way to creating a good economy.\n"
                 "You can set emojis for your economy"
             ),
-            color=colour
+            color=color
         )
         self.embed.add_field(
             name=f'The current emoji: {self.emoji}',

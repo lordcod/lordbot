@@ -19,7 +19,7 @@ class Emoji:
     economy = '<:economy:1178742518553256026>'
     languages = '<:languages:1178742515420106906>'
     prefix = '<:prefix:1178742513083875368>' 
-    colour = '<:colour:1178742511649431573>'
+    color = '<:color:1178742511649431573>'
     greeting = '<:greeting:1180603831378255974>'
     reactions = '<:reactions:1178742501109145740>'
     translate = '<:translate:1178742517190107287>'

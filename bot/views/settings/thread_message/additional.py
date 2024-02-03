@@ -23,7 +23,7 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel: nextcord.TextChannel = self.values[0]
         locale = self.gdb.get('language')
-        forum_message = self.gdb.get('thread_messages',{})
+        forum_message = self.gdb.get('thread_messages')
         
         
         if channel.id in forum_message:

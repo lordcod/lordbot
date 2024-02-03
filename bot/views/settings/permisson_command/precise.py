@@ -64,12 +64,12 @@ class CommandData(DefaultSettingsView):
         self.command_name = command_name
         
         self.gdb = GuildDateBases(guild.id)
-        colour: int = self.gdb.get('color')
+        color: int = self.gdb.get('color')
         locale: str = self.gdb.get('language')
         
         self.cdb = CommandDB(guild.id)
         self.command_data: dict = get_command(command_name)
-        self.command_info: dict = self.cdb.get(command_name,{})
+        self.command_info: dict = self.cdb.get(command_name)
         
         self.operate = self.command_info.get("operate",1)
         
@@ -80,7 +80,7 @@ class CommandData(DefaultSettingsView):
                 f"{self.command_data.get('name')}"
             ),
             description=self.command_data.get('brief_descriptrion').get(locale),
-            color=colour
+            color=color
         )
         
         

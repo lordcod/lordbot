@@ -20,7 +20,7 @@ class DropDown(nextcord.ui.Select):
     def __init__(self,guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
         locale = self.gdb.get('language')
-        self.reactions = self.gdb.get('reactions',{})
+        self.reactions = self.gdb.get('reactions')
         channels = filter(lambda item: item is not None, [guild.get_channel(id) for id in self.reactions])
         
         if len(channels) <= 0:
@@ -45,7 +45,7 @@ class DropDown(nextcord.ui.Select):
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         locale = gdb.get('language')
         
         value = self.values[0]
@@ -60,7 +60,7 @@ class DropDown(nextcord.ui.Select):
                 f"{reaction_langs.init.channel.get(locale)}: {channel.mention}\n"
                 f"{reaction_langs.init.emoji.get(locale)}: {', '.join([emo for emo in channel_data])}"
             ),
-            color=colour
+            color=color
         )
         
         await interaction.message.edit(embed=embed,view=ReactData(channel,channel_data))
@@ -70,13 +70,13 @@ class AutoReactions(DefaultSettingsView):
     
     def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         locale = gdb.get('language')
         
         self.embed = nextcord.Embed(
             title=reaction_langs.init.title.get(locale),
             description=reaction_langs.init.description.get(locale),
-            color = colour
+            color = color
         )
         
         super().__init__()

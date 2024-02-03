@@ -22,7 +22,7 @@ class DropDown(nextcord.ui.Select):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         locale = self.gdb.get('language')
         
         category_key = self.values[0]
@@ -40,7 +40,7 @@ class DropDown(nextcord.ui.Select):
         embed = nextcord.Embed(
             title=category_name,
             description=text,
-            color=colour
+            color=color
         )
         
         await interaction.response.send_message(embed=embed, ephemeral=True)

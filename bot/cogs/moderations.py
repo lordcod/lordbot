@@ -74,7 +74,7 @@ class moderations(commands.Cog):
     @temp_role.command(name='list')
     async def temp_role_list(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
         gdb = GuildDateBases(ctx.guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         
         if member is not None:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
@@ -106,7 +106,7 @@ class moderations(commands.Cog):
         embed = nextcord.Embed(
             title="Temp Roles",
             description=message,
-            color=colour
+            color=color
         )
         
         await ctx.send(embed=embed)
@@ -146,7 +146,7 @@ class moderations(commands.Cog):
             reason="Copying a role with rights",
             name=role_name,
             permissions=role.permissions,
-            colour=role.colour,
+            color=role.color,
             hoist=role.hoist,
             mentionable=role.mentionable,
             icon=role.icon

@@ -123,7 +123,7 @@ class CooldownsView(DefaultSettingsView):
         self.command_name = command_name
         
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         
         cdb = CommandDB(guild.id)
         command_data = cdb.get(command_name, {})
@@ -146,7 +146,7 @@ class CooldownsView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title=f"Command: {command_name}",
             description=description,
-            color=colour
+            color=color
         )  
         
         

@@ -15,7 +15,7 @@ class ReactData(DefaultSettingsView):
     def __init__(self,channel,channel_data) -> None:
         self.gdb = GuildDateBases(channel.guild.id)
         locale = self.gdb.get('language')
-        self.forum_message  = self.gdb.get('reactions',{})
+        self.forum_message  = self.gdb.get('reactions')
         
         self.channel_data = channel_data
         self.channel = channel

@@ -12,7 +12,7 @@ class DropDown(nextcord.ui.Select):
     def __init__(self):
         options = [
             nextcord.SelectOption(
-                label='Изменить сумму бонусов',emoji=Emoji.bagmoney, value='bonus'
+                label='Change the amount of bonuses',emoji=Emoji.bagmoney, value='bonus'
             ),
             nextcord.SelectOption(
                 label='Change the emoji',emoji=Emoji.emoji, value='emoji'
@@ -20,7 +20,7 @@ class DropDown(nextcord.ui.Select):
         ]
 
         super().__init__(
-            placeholder="Настройки экономики:",
+            placeholder="Economy Settings:",
             min_values=1,
             max_values=1,
             options=options,
@@ -37,21 +37,21 @@ class DropDown(nextcord.ui.Select):
 
 class Economy(DefaultSettingsView):
     embed = nextcord.Embed(
-        title='Система экономики',
+        title='The economic system',
         description=(
-            "Экономическая система позволит вашему серверу подняться на совершенно другой уровень.\n"
-            "Игры, уровни, рекламные акции, конкурсы и многое другое.\n"
-            "Все это есть в нашей экономической системе.\n"
+            "The economic system will allow your server to rise to a completely different level.\n"
+            "Games, levels, promotions, contests and more.\n"
+            "All this is in our economic system.\n"
         )
     )
     
     def __init__(self,guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
-        self.es: dict = self.gdb.get('economic_settings',{})
-        operate: bool = self.es.get('operate',False)
-        colour: int = self.gdb.get('color',1974050)
+        self.es: dict = self.gdb.get('economic_settings')
+        operate: bool = self.es.get('operate')
+        color: int = self.gdb.get('color')
         
-        self.embed.color = colour
+        self.embed.color = color
         
         super().__init__()
         
@@ -70,7 +70,7 @@ class Economy(DefaultSettingsView):
             
             self.economy_dd.disabled = True
     
-    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red,row=1)
+    @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red,row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = views.SettingsView(interaction.user)
         

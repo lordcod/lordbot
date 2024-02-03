@@ -63,7 +63,7 @@ class WelcomerView(DefaultSettingsView):
         self.gdb = GuildDateBases(guild.id)
         
         locale = self.gdb.get('language')
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         greeting_message: dict  = self.gdb.get('greeting_message')
         
         super().__init__()
@@ -80,7 +80,7 @@ class WelcomerView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title=welcome_lang.embed_title.get(locale),
             description=welcome_lang.embed_description.get(locale),
-            color=colour
+            color=color
         )
         
         if (
@@ -131,7 +131,7 @@ class WelcomerView(DefaultSettingsView):
     
     @nextcord.ui.button(label='Delete message', style=nextcord.ButtonStyle.red, row=2)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        self.gdb.set('greeting_message',{})
+        self.gdb.set('greeting_message', {})
         
         
         view = self.__class__(interaction.guild)

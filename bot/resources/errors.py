@@ -99,7 +99,7 @@ class CallbackCommandError:
                 f' {self.error.retry_after :.0f} '
                 f'{errors.CommandOnCooldown.seconds.get(self.locale)}'
             ),
-            colour=nextcord.Color.red()
+            color=nextcord.Color.red()
         )
         
         await self.ctx.send(embed=embed, delete_after=5.0)

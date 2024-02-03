@@ -58,7 +58,7 @@ class IdeasView(DefaultSettingsView):
     
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        colour: int = gdb.get('color')
+        color: int = gdb.get('color')
         locale: str = gdb.get('language')
         ideas: IdeasPayload|None = gdb.get('ideas')
         
@@ -67,7 +67,7 @@ class IdeasView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title="Ideas",
             description="",
-            color=colour
+            color=color
         )
         
         super().__init__()
@@ -109,7 +109,7 @@ class IdeasView(DefaultSettingsView):
     @nextcord.ui.button(label='Enabled', style=nextcord.ButtonStyle.blurple)
     async def enabled(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         ideas: IdeasPayload = gdb.get('ideas')
         
         channel_suggest_id = ideas.get("channel-suggest-id")
@@ -134,7 +134,7 @@ class IdeasView(DefaultSettingsView):
                 "И ты уверен что она всем понравится!\n"
                 "Прежде чем ты ее напишешь, убедитесь, что таких идей еще не было!"
             ),
-            colour=colour
+            color=color
         )
         view = IdeaBut(interaction.guild_id)
         

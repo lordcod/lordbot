@@ -75,7 +75,7 @@ class AutoRoleView(DefaultSettingsView):
     
     def __init__(self, guild: nextcord.Guild, select_roles: List[int] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
-        colour = self.gdb.get('color')
+        color = self.gdb.get('color')
         locale = self.gdb.get('language')
         roles_ids = self.gdb.get('auto_roles')
         
@@ -93,7 +93,7 @@ class AutoRoleView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title=role_lang.embed_title.get(locale),
             description=role_lang.embed_description.get(locale),
-            color=colour
+            color=color
         )
         
         

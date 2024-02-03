@@ -30,12 +30,12 @@ class Translates:
         self,
         message: nextcord.Message, 
         data: dict, 
-        colour: int,
+        color: int,
         lang:str,
     ) -> None:
         self.mes = message
         self.data = data
-        self.colour = colour
+        self.color = color
         self.lang = lang
     
     async def process(self):
@@ -50,7 +50,7 @@ class Translates:
     
     async def message(self,dest,whitelist):
         mes = self.mes
-        colour  = self.colour
+        color  = self.color
         
         result = translator.translate(
             text=mes.content,
@@ -64,7 +64,7 @@ class Translates:
         embed = nextcord.Embed(
             title='Auto Translator',
             description=result.text,
-            color=colour
+            color=color
         )
         embed.set_author(
             name=mes.author.display_name,
@@ -92,7 +92,7 @@ class message_event(commands.Cog):
         
         guild_data = GuildDateBases(message.guild.id)
         
-        colour = guild_data.get('color')
+        color = guild_data.get('color')
         lang = guild_data.get('language')
         prefix = guild_data.get('prefix')
         locale = guild_data.get('language')
@@ -108,14 +108,14 @@ class message_event(commands.Cog):
             await reaction_handelers.process()
         
         if data_translate:
-            translate_handelers = Translates(message,data_translate,colour,lang)
+            translate_handelers = Translates(message,data_translate,color,lang)
             # await translate_handelers.process()
         
         if message.content.strip() == self.bot.user.mention:
             embed = nextcord.Embed(
                 title=f'{self.bot.user.display_name} — {BotInfo.title.get(locale)}',
                 description=BotInfo.description.get(locale),
-                color=colour
+                color=color
             )
             embed.add_field(
                 name=BotInfo.info_server.get(locale),

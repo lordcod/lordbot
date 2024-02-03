@@ -17,7 +17,7 @@ class Modal(nextcord.ui.Modal):
     
     async def callback(self, interaction: nextcord.Interaction) :
         gdb = GuildDateBases(interaction.guild_id)
-        economy_settings = gdb.get('economic_settings',{})
+        economy_settings = gdb.get('economic_settings')
         bonus = self.bonus.value
         
         if not bonus.isdigit():
@@ -70,12 +70,12 @@ class Bonus(DefaultSettingsView):
     
     def __init__(self,guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        economy_settings = gdb.get('economic_settings',{})
+        economy_settings = gdb.get('economic_settings')
         
-        colour = gdb.get('color',1974050)
+        color = gdb.get('color',1974050)
         self.embed = nextcord.Embed(
             title='Бонусы',
-            color=colour
+            color=color
         )
         self.embed.add_field(
             name="Daily",

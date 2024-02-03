@@ -50,13 +50,13 @@ class Languages(DefaultSettingsView):
     
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        colour = gdb.get('color')
+        color = gdb.get('color')
         locale = gdb.get('language')
         
         self.embed = nextcord.Embed(
             title=languages_trans.title.get(locale),
             description=languages_trans.description.get(locale),
-            color = colour
+            color = color
         )
         
         super().__init__()
