@@ -71,7 +71,7 @@ class members_event(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before: nextcord.Member, after: nextcord.Member, *, timeout: float = None):
         if timeout is not None:
-            await self.tmoutmm(f"Прошел {after.name} - {timeout}")
+            await self.tmoutmm()
         elif (
             before.communication_disabled_until is not None and
             after.communication_disabled_until is None

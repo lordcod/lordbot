@@ -53,7 +53,7 @@ class DropDown(nextcord.ui.Select):
         ]
 
         super().__init__(
-            placeholder="Настройка сумм бонусов",
+            placeholder="Setting up bonus amounts",
             min_values=1,
             max_values=1,
             options=options,
@@ -74,7 +74,7 @@ class Bonus(DefaultSettingsView):
         
         color = gdb.get('color',1974050)
         self.embed = nextcord.Embed(
-            title='Бонусы',
+            title='Bonuses',
             color=color
         )
         self.embed.add_field(
@@ -96,7 +96,7 @@ class Bonus(DefaultSettingsView):
         
         self.add_item(self.bonus)
     
-    @nextcord.ui.button(label='Назад',style=nextcord.ButtonStyle.red,row=1)
+    @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red,row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = economy.Economy(interaction.guild)
         

@@ -85,7 +85,7 @@ class MusicPlayer:
         
         if self.data is None:
             await self.message.edit(
-                content="Я не нашел треков в очереди, поэтому завершил работу!",
+                content="I didn't find any tracks in the queue, so I finished the job!",
                 embed=None,
                 view=None
             )
@@ -93,7 +93,7 @@ class MusicPlayer:
             return
         elif self.guild_id in current_players:
             await self.message.edit(
-                content="Трек добавлен в очередь!", 
+                content="The track has been added to the queue!", 
                 embed=None,
                 view=None
             )

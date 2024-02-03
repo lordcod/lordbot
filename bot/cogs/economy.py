@@ -129,33 +129,33 @@ class Economy(commands.Cog):
         
         description = ""
         if account.get('daily',0) < time:
-            description += f"— Ежедневный бонус ({prefix}daily)\n"
+            description += f"— Daily Bonus ({prefix}daily)\n"
         if account.get('weekly',0) < time:
-            description += f"— Еженедельный бонус ({prefix}weekly)\n"
+            description += f"— Weekly Bonus ({prefix}weekly)\n"
         if account.get('monthly',0) < time:
-            description += f"— Ежемесячный бонус ({prefix}monthly)\n"
+            description += f"— Monthly Bonus ({prefix}monthly)\n"
         if description:
-            description = f"{Emoji.award} Доступные награды:\n{description}"
+            description = f"{Emoji.award} Available Rewards:\n{description}"
         
         embed = nextcord.Embed(
-            title="Баланс",
+            title="Balance",
             color=color,
             description=description
         )
         embed.set_author(name=member.display_name, icon_url=member.display_avatar)
         
         embed.add_field(
-            name=f"{Emoji.money} Наличные:",
+            name=f"{Emoji.money} Cash:",
             value=f'{balance}{currency_emoji}', 
             inline=True
         )
         embed.add_field(
-            name=f"{Emoji.bank} В банке:",
+            name=f"{Emoji.bank} In bank:",
             value=f'{bank}{currency_emoji}',
             inline=True
         )
         embed.add_field(
-            name=f"{Emoji.bagmoney} Общий баланс:",
+            name=f"{Emoji.bagmoney} Total balance:",
             value=f'{balance+bank}{currency_emoji}',
             inline=False
         )
@@ -164,7 +164,7 @@ class Economy(commands.Cog):
     
     @commands.command(name="leaderboard")
     async def leaderboard(self, ctx: commands.Context):
-        message = await ctx.send("Загрузка данных...")
+        message = await ctx.send("Uploading data...")
         
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get("color")
@@ -178,8 +178,8 @@ class Economy(commands.Cog):
         user_index = leaderboard_indexs.index(ctx.author.id)+1
         
         embed = nextcord.Embed(
-            title="Список лидеров по балансу",
-            description=f"**{ctx.author.display_name}**, Ваша позиция в топе: **{user_index}**",
+            title="List of leaders by balance",
+            description=f"**{ctx.author.display_name}**, Your position in the top: **{user_index}**",
             color=color
         )
         
@@ -201,8 +201,8 @@ class Economy(commands.Cog):
             embed.add_field(
                 name=f"{award}. {member.display_name}",
                 value=(
-                    f"Наличные: {balance}{currency_emoji} | В банке: {bank}{currency_emoji}\n"
-                    f"Всего: {total}{currency_emoji}"
+                    f"Cash: {balance}{currency_emoji} | In bank: {bank}{currency_emoji}\n"
+                    f"Total balance: {total}{currency_emoji}"
                 ),
                 inline=False
             )

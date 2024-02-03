@@ -12,12 +12,12 @@ timeout = {}
 class ConfirmModal(nextcord.ui.Modal):
     def __init__(self):
         super().__init__(
-            "Предложить идею",
-            timeout = 5 * 60,  # 5 minutes
+            "Suggest an idea",
+            timeout = 5 * 60,
         )
 
         self.reason = nextcord.ui.TextInput(
-            label="Аргумент:",
+            label="Argument:",
             required=False,
             style=nextcord.TextInputStyle.paragraph,
             min_length=0,
@@ -43,7 +43,7 @@ class ConfirmModal(nextcord.ui.Modal):
         reason = self.reason.value
         
         embed = nextcord.Embed(
-            title='Новая идея!',
+            title='New idea!',
             color=nextcord.Color.green()
         )
         embed.set_author(
@@ -51,12 +51,12 @@ class ConfirmModal(nextcord.ui.Modal):
             icon_url=interaction.user.display_avatar
         )
         embed.add_field(
-            name='Прежняя идея!',
+            name='Old idea!',
             value=idea_content
         )
         
         author = interaction.guild.get_member(idea_author_id)
-        content = f'{author.mention} твоя идея одобрена!'
+        content = f'{author.mention} Your idea is approved!'
         
         views = Confirm()
         views.confirm.disabled = True
@@ -70,17 +70,17 @@ class ConfirmModal(nextcord.ui.Modal):
         channel = interaction.guild.get_channel(channel_approved_id)
         
         embed_accept = nextcord.Embed(
-            title="Идея одобрена!",
+            title="The idea is approved!",
             color=nextcord.Color.green()
         )
         embed_accept.add_field(
-            name='Суть идеи:',
+            name='The essence of the idea:',
             value=reason,
             inline=False
         )
         if reason:
             embed_accept.add_field(
-                name='Аргумент подтверждения:', 
+                name='Confirmation argument:', 
                 value=reason, 
                 inline=False
             )
@@ -95,7 +95,7 @@ class Confirm(nextcord.ui.View):
         super().__init__(timeout=None)
     
     
-    @nextcord.ui.button(label="Одобрить", style=nextcord.ButtonStyle.green,custom_id='ideas-confirm:confirm')
+    @nextcord.ui.button(label="Approve", style=nextcord.ButtonStyle.green,custom_id='ideas-confirm:confirm')
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         ideas_data: IdeasPayload = gdb.get('ideas')
@@ -113,7 +113,7 @@ class Confirm(nextcord.ui.View):
         
         await interaction.response.send_modal(ConfirmModal())
     
-    @nextcord.ui.button(label="Отказать", style=nextcord.ButtonStyle.red,custom_id='ideas-confirm:cancel')
+    @nextcord.ui.button(label="Deny", style=nextcord.ButtonStyle.red,custom_id='ideas-confirm:cancel')
     async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         ideas_data: IdeasPayload = gdb.get('ideas')
@@ -141,18 +141,18 @@ class Confirm(nextcord.ui.View):
         
         name = interaction.user.display_name
         embed = nextcord.Embed(
-            title='Прежняя идея!',
+            title='Old idea!',
             color=nextcord.Color.red()
         )
         embed.set_author(
             name=interaction.user.display_name,
             icon_url=interaction.user.display_avatar
         )
-        embed.add_field(name='Идея:',value=idea_content)
-        embed.set_footer(text=f'Отказано | {name}',icon_url=interaction.user.display_avatar)
+        embed.add_field(name='Idea:',value=idea_content)
+        embed.set_footer(text=f'Refused | {name}',icon_url=interaction.user.display_avatar)
         
         author = interaction.guild.get_member(idea_author_id)
-        content = f'{author.mention} твоей идеи отказано!'
+        content = f'{author.mention} Your idea has been rejected!'
         
         self.confirm.disabled = True
         self.cancel.disabled = True
@@ -163,14 +163,14 @@ class Confirm(nextcord.ui.View):
 class IdeaModal(nextcord.ui.Modal):
     def __init__(self):
         super().__init__(
-            "Предложить идею",
+            "Suggest an idea",
             timeout=5 * 60, 
         )
         
         self.idea = nextcord.ui.TextInput(
-            label="Расскажи нам о своей идее",
+            label="Tell us about your idea",
             style=nextcord.TextInputStyle.paragraph,
-            placeholder="Опиши свою идею как можно более подробно с примерами использования.",
+            placeholder="Describe your idea in as much detail as possible with usage examples.",
             min_length=10,
             max_length=1500,
         )
@@ -188,20 +188,20 @@ class IdeaModal(nextcord.ui.Modal):
         
         
         embed = nextcord.Embed(
-            title='Новая идея!',
-            description='Одобрят идею или нет, зависит от вас!',
+            title='New idea!',
+            description='Whether the idea is approved or not depends on you!',
             color=0xffba08
         )
         embed.set_author(
             name=interaction.user.display_name,
             icon_url=interaction.user.display_avatar
         )
-        embed.add_field(name='Идея:', value=idea)
+        embed.add_field(name='Idea:', value=idea)
         
         mes = await channel.send(content=interaction.user.mention,embed=embed,view=Confirm())
         await mes.add_reaction(Emoji.tickmark)
         await mes.add_reaction(Emoji.cross)
-        await mes.create_thread(name=f"Обсуждение идеи от {interaction.user.display_name}")
+        await mes.create_thread(name=f"Discussion of the idea from{interaction.user.display_name}")
         
         
         idea_data = {
@@ -220,7 +220,7 @@ class IdeaBut(nextcord.ui.View):
             return
     
     @nextcord.ui.button(
-        label="Предложить идею",
+        label="Suggest an idea",
         style=nextcord.ButtonStyle.green,
         custom_id="ideas-main-button:suggest"
     )
@@ -233,8 +233,8 @@ class IdeaBut(nextcord.ui.View):
         if user_timeout and user_timeout > time.time():
             await interaction.response.send_message(
                 content=(
-                    "Предложить идею можно только раз в 30 минут\n"
-                    f"Следующия возможность подать идею будет через: <t:{user_timeout :.0f}:R>"
+                    "You can only propose an idea once every 30 minutes\n"
+                    f"The next opportunity to submit an idea will be through:<t:{user_timeout :.0f}:R>"
                 ),
                 ephemeral=True
             )

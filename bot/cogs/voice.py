@@ -35,17 +35,17 @@ class Voice(commands.Cog):
         if (ctx.author.voice):
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
-            await ctx.send("Бот зашел в голосовой канал")
+            await ctx.send("The bot entered the voice channel")
         else:
-            await ctx.send("Вы не находетесь в голосовом канале")
+            await ctx.send("You are not in the voice channel")
     
     @commands.command()
     async def leave(self, ctx: commands.Context):
         if ctx.voice_client:
             await ctx.guild.voice_client.disconnect()
-            await ctx.send("Бот покинул голосовой канал")
+            await ctx.send("The bot has left the voice channel")
         else:
-            await ctx.send("Бот не находится в голосовом канале")
+            await ctx.send("The bot is not in the voice channel")
     
     @commands.command()
     async def play(self, ctx:commands.Context, *, request: str):
@@ -53,14 +53,14 @@ class Voice(commands.Cog):
         
         if voice is None:
             if not (ctx.author.voice):
-                await ctx.send("Вы не находетесь в голосовом канале")
+                await ctx.send("You are not in the voice channel")
                 return
             
             channel = ctx.message.author.voice.channel
             voice = await channel.connect()
             if voice.channel in ctx.guild.stage_channels: await ctx.guild.me.edit(suppress=False)
         
-        mes = await ctx.send("Загружаем трек")
+        mes = await ctx.send("Uploading a track")
         
         if finder := YANDEX_MUSIC_SEARCH.fullmatch(request):
             found = finder.group(2)
@@ -74,7 +74,7 @@ class Voice(commands.Cog):
             return
         
         if queue.check_retry(ctx.guild.id, track):
-            await ctx.send('Музыка уже добавлена!!!')
+            await ctx.send('Music has already been added!')
             return 
         
         
@@ -91,7 +91,7 @@ class Voice(commands.Cog):
         voice = ctx.guild.voice_client
         
         if not arg:
-            await ctx.send("Вы не указали название или id")
+            await ctx.send("You did not specify the name or id")
             return
         elif not voice:
             if (ctx.author.voice):
@@ -100,10 +100,10 @@ class Voice(commands.Cog):
                 if voice.channel in ctx.guild.stage_channels:
                     await ctx.guild.me.edit(suppress=False)
             else:
-                await ctx.send("Вы не находетесь в голосовом канале")
+                await ctx.send("You are not in the voice channel")
                 return
         elif voice.is_playing():
-            await ctx.send("Музыка уже производиться, повторите попытку позже")
+            await ctx.send("The music is already being produced, please try again later")
             return
         
         mes = await ctx.send("Download track")
@@ -137,9 +137,9 @@ class Voice(commands.Cog):
             vol = clamp(vol, 1, 100)
             
             voice.source.volume = vol/100
-            await ctx.send(f"Текущая громкость: {vol}")
+            await ctx.send(f"Current volume: {vol}")
         elif voice and voice.is_playing():
-            await ctx.send(f"Текущая громкость: {voice.source.volume * 100}")
+            await ctx.send(f"Current volume: {voice.source.volume * 100}")
     
     @commands.command(name="pause")
     async def pause(self, ctx:commands.Context):

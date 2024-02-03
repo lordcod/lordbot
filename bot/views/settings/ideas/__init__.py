@@ -128,11 +128,11 @@ class IdeasView(DefaultSettingsView):
             return
         
         embed = nextcord.Embed(
-            title="Идеи",
+            title="Ideas",
             description=(
-                "У тебя есть хорошая идея?\n"
-                "И ты уверен что она всем понравится!\n"
-                "Прежде чем ты ее напишешь, убедитесь, что таких идей еще не было!"
+                "Do you have a good idea?\n"
+                "And you are sure that everyone will like it!\n"
+                "Before you write it, make sure that there have been no such ideas yet!"
             ),
             color=color
         )
