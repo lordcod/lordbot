@@ -1,5 +1,4 @@
 import nextcord
-from bot.misc.utils import clord
 from bot.databases.db import GuildDateBases
 from .. import economy
 from ...settings import DefaultSettingsView

@@ -5,6 +5,7 @@ from bot.views.selector_music import MusicView
 from bot.misc.voice import *
 from bot.misc.utils import clamp
 
+import pprint
 import re
 import yt_dlp
 
@@ -23,6 +24,9 @@ FFMPEG_OPTIONS = {'options': '-vn'}
 YOUTUBE_LINK_SEARCH = re.compile(r'https://www.youtube.com/watch?v=([a-zA-Z0-9_]+)')
 YANDEX_MUSIC_SEARCH = re.compile(r'https://music.yandex.ru/album/(\d+)/track/(\d+)(.*)')
 
+def encode_info(path, info):
+    import json
+    json.dump(info, open(path, "w"))
 
 class Voice(commands.Cog):
     bot: commands.Bot
@@ -114,19 +118,13 @@ class Voice(commands.Cog):
             else:
                 info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
         
-        for i in info['formats']:
-            if i["audio_ext"] == "webm":
-                url = i["url"]
-                break
-        else:
-            print('Stop!')
-            return
+        url = info.get("url")
         
-        source = nextcord.FFmpegPCMAudio(url, pipe=True, executable=path)
+        source = nextcord.FFmpegPCMAudio(url, pipe=False, executable=path)
         source = nextcord.PCMVolumeTransformer(source, volume=0.5)
         async def callback(err):
             await voice.disconnect()
-        voice.play(source,after=callback)
+        voice.play(source, after=callback)
         await mes.edit(content=f"Title: {info['title']}")
     
     

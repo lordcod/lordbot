@@ -53,8 +53,8 @@ class MusicView(nextcord.ui.View):
         color = gdb.get('color')
         self.embed = nextcord.Embed(title="Choose the track you are interested in!", color=color)
         
+        super().__init__(timeout=None)
+        
         TDD = MusicDropDown(guild_id, queue, player, tracks)
         self.add_item(TDD)
-        
-        
-        super().__init__(timeout=None)
+

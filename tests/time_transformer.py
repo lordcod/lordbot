@@ -54,8 +54,53 @@ def time_convert(timestamp: (int|float)) -> dict[str, int]:
         "seconds": round(timestamp % 60)
     }
 
+def sub_convertor(timestamp):
+    timestamp = int(timestamp)
+    
+    years = 0
+    months = 0
+    days = 0
+    hours = 0
+    minutes = 0
+    seconds = 0
+    
+    while timestamp > 0:
+        timestamp -= 1
+        seconds += 1
+        
+        if seconds == 60:
+            seconds = 0
+            minutes += 1
+        if minutes == 60:
+            minutes = 0
+            hours += 1
+        if hours == 24:
+            hours = 0
+            days += 1
+        if days == 30:
+            days = 0
+            months += 1
+        if months == 12:
+            months = 0
+            years += 1
+    
+    return {
+        "years": years,
+        "months": months,
+        "days": days,
+        "hours": hours,
+        "minutes": minutes,
+        "seconds": seconds
+    }
 
-current_time = time_convert(60*60*24*30*12)
+
+
+current_time = time_convert(1_000_000_000)
+cur_sub_time = sub_convertor(1_000_000_000)
+
+print(current_time, cur_sub_time)
+
+
 for key, num in current_time.items():
     if num == 0:
         continue

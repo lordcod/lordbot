@@ -105,11 +105,7 @@ class MusicPlayer:
     async def update_message(self, num = 0, diration = 0):
         embed = nextcord.Embed(
             title=f"{self.data.title} - {', '.join(self.data.artist_names)}",
-            description=(
-                f"{'⬛' * num}"
-                f"{'⬜' * (initally_num-num)}"
-                f" ({convertor_time(diration)} - {convertor_time(self.data.diration)})"
-            ),
+            description=convertor_time(self.data.diration),
             url=self.data.get_url()
         )
         embed.set_thumbnail(self.data.get_image())
@@ -119,15 +115,7 @@ class MusicPlayer:
             embed=embed,
             view=None
         )
-    
-    async def start_diration_update(self):
-        loop = asyncio.get_event_loop()
-        track_diration = self.data.diration
-        delay = track_diration//initally_num
-        
-        for i in range(1, initally_num+1):
-            loop.call_later((delay*i), asyncio.create_task, self.update_message(i, (delay*i)))
-    
+
     async def callback(self, err):
         queue.remove(self.guild_id, self.data.id)
         current_players.pop(self.guild_id)
@@ -147,14 +135,11 @@ class MusicPlayer:
     async def play(self):
         asyncio.create_task(self.update_message())
         
-        music_bytes = await self.data.download_bytes()
-        byio = io.BytesIO(music_bytes)
-        source = nextcord.FFmpegPCMAudio(byio, pipe=True, executable=path)
+        music_url = await self.data.download_link()
+        source = nextcord.FFmpegPCMAudio(music_url, pipe=False, executable=path)
         source = nextcord.PCMVolumeTransformer(source, volume=0.5)
         
         self.voice.play(source, after=self.callback)
-        
-        asyncio.create_task(self.start_diration_update())
 
 
 current_players = {}
