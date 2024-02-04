@@ -21,21 +21,22 @@ number_type = Union[int, float]
 
 
 class TempletePayload:
-    def to_dict(self, _prefix = None):
+    def to_dict(self, _prefix=None):
         if _prefix is None:
             prefix = self.__class__.__name__
         else:
             prefix = str(_prefix)
-        
+
         base = {}
-        
+
         for name, arg in inspect.getmembers(self):
             if name.startswith("_") or name == "to_dict":
                 continue
-            
+
             base[f"{prefix}.{name}"] = arg
-        
+
         return base
+
 
 class GuildPayload(TempletePayload):
     def __init__(self, guild: nextcord.Guild) -> None:
@@ -44,7 +45,7 @@ class GuildPayload(TempletePayload):
         self.memberCount: int = guild.member_count
         self.createdAt: datetime = guild.created_at
         self.premiumSubscriptionCount: int = guild.premium_subscription_count
-        
+
         if not (guild.icon and guild.icon.url):
             self.icon = None
         else:
@@ -53,7 +54,8 @@ class GuildPayload(TempletePayload):
     def __str__(self) -> str:
         return self.name
 
-class MemberPayload(TempletePayload): 
+
+class MemberPayload(TempletePayload):
     def __init__(self, member: nextcord.Member) -> None:
         self.id: int = member.id
         self.mention: str = member.mention
@@ -61,15 +63,15 @@ class MemberPayload(TempletePayload):
         self.displayName: str = member.display_name
         self.discriminator: str = member.discriminator
         self.tag = f'{member.name}#{member.discriminator}'
-        
+
         if not (member.display_avatar and member.display_avatar.url):
             self.avatar = None
         else:
             self.avatar = member.display_avatar.url
-    
-    
+
     def __str__(self) -> str:
         return self.tag
+
 
 class GreetingTemplate(string.Template):
     pattern = r'''
@@ -83,7 +85,8 @@ class GreetingTemplate(string.Template):
 
 
 def clamp(val: number_type, minv: number_type, maxv: number_type) -> number_type:
-    return min(maxv, max(minv, val)) 
+    return min(maxv, max(minv, val))
+
 
 async def getRandomQuote(lang='en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
@@ -92,43 +95,48 @@ async def getRandomQuote(lang='en'):
             json = await responce.json()
             return json
 
-def calculate_time(string: str) -> (int|None):
+
+def calculate_time(string: str) -> (int | None):
     coefficients = {
-        's':1,
-        'm':60,
-        'h':3600,
-        'd':86400
+        's': 1,
+        'm': 60,
+        'h': 3600,
+        'd': 86400
     }
     timedate = re.findall(r'(\d+)([a-zA-Z]+)', string)
     ftime = 0
     for number, word in timedate:
         if word not in coefficients:
             return None
-        
+
         number = int(number)
         multiplier = coefficients[word]
-        
+
         ftime += number*multiplier
-    
+
     return ftime
+
 
 @lru_cache()
 def get_award(number):
     awards = {
-        1:'🥇',
-        2:'🥈',
-        3:'🥉'
+        1: '🥇',
+        2: '🥈',
+        3: '🥉'
     }
-    award = awards.get(number,number)
+    award = awards.get(number, number)
     return award
+
 
 def to_color(color: int) -> str:
     color = hex(color).replace('0x', '#').upper()
     return color
 
+
 def from_color(color: str) -> int:
     color = int(color[1:], 16)
     return color
+
 
 def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBases = None) -> str:
     gdb = GuildData or GuildDateBases(guild_id)
@@ -137,57 +145,58 @@ def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBas
         return escape_markdown(prefix)
     return prefix
 
+
 async def generate_message(content: str) -> dict:
     content = str(content)
     message = {}
     try:
         content: dict = orjson.loads(content)
-        
+
         message_content = content.get('plainText')
-        
+
         title = content.get('title')
         description = content.get('description')
         color = content.get('color')
         url = content.get('url')
         fields = content.get('fields', [])
-        
+
         message['content'] = message_content
-        
+
         embed = nextcord.Embed(
             title=title,
             description=description,
             color=color,
             url=url,
         )
-        
+
         if thumbnail := content.get('thumbnail'):
             embed.set_thumbnail(thumbnail)
-        
+
         if author := content.get('author'):
             embed.set_author(
                 name=author.get('name'),
                 url=author.get('url'),
                 icon_url=author.get('icon_url'),
             )
-        
+
         if footer := content.get('footer'):
             embed.set_footer(
                 text=footer.get('text'),
                 icon_url=footer.get('icon_url'),
             )
-        
+
         if image := content.get('image'):
             embed.set_image(image)
-        
+
         for field in fields:
             embed.add_field(
-                name=field.get('name',None),
-                value=field.get('value',None),
-                inline=field.get('inline',None)
+                name=field.get('name', None),
+                value=field.get('value', None),
+                inline=field.get('inline', None)
             )
-        
+
         if (title or description or image or thumbnail
-            or author or footer or fields):
+                or author or footer or fields):
             message['embed'] = embed
         elif not message_content:
             raise ValueError()
@@ -195,25 +204,28 @@ async def generate_message(content: str) -> dict:
         message['content'] = content
     return message
 
+
 async def generator_captcha(num):
     text = "".join([random.choice(string.ascii_uppercase) for _ in range(num)])
     captcha_image = ImageCaptcha(
         width=400,
         height=220,
-        font_sizes=(40,70,100)
+        font_sizes=(40, 70, 100)
     )
-    data:BytesIO = captcha_image.generate(text)
-    return data,text
+    data: BytesIO = captcha_image.generate(text)
+    return data, text
+
 
 def cut_back(string: str, length: int):
     ellipsis = "..."
     current_lenght = len(string)
     if length >= current_lenght:
         return string
-    
+
     cropped_string = string[:length-len(ellipsis)].strip()
     new_string = f"{cropped_string}{ellipsis}"
     return new_string
+
 
 def get_szie_with_text(text: str, normal_size: int = 50) -> int:
     lenght = len(text)
@@ -221,9 +233,10 @@ def get_szie_with_text(text: str, normal_size: int = 50) -> int:
         return normal_size
     return max(28, normal_size-2*(lenght-12))
 
+
 async def generate_welcome_message(member: nextcord.Member) -> bytes:
     background = Editor("assets/background.jpeg").resize((800, 450))
-    
+
     nunito = Font("assets/Nunito-ExtraBold.ttf", 50)
     nunito_small = Font("assets/Nunito-Black.ttf", 25)
     nunito_light = Font("assets/Nunito-Black.ttf", 20)
@@ -232,8 +245,10 @@ async def generate_welcome_message(member: nextcord.Member) -> bytes:
     profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     background.paste(profile, (325, 90))
-    background.ellipse((325, 90), 150, 150, outline=(125, 249, 255), stroke_width=4)
-    background.text((400, 260), f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}", color="white", font=nunito, align="center")
+    background.ellipse((325, 90), 150, 150, outline=(
+        125, 249, 255), stroke_width=4)
+    background.text(
+        (400, 260), f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}", color="white", font=nunito, align="center")
     background.text(
         (400, 320), member.display_name, color="white", font=nunito_small, align="center"
     )

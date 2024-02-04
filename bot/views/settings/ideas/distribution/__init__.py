@@ -9,4 +9,3 @@ distrubuters = {
     'offers': OffersView,
     'suggest': SuggestView,
 }
-

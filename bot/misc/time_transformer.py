@@ -20,42 +20,45 @@ class DatePluralRussia:
     def months(timestamp: int):
         forms = ['месяц', 'месяца', 'месяцов']
         return DatePluralRussia.plural(timestamp, forms)
-    
+
     @staticmethod
     def days(timestamp: int):
         forms = ['день', 'дня', 'дней']
         return DatePluralRussia.plural(timestamp, forms)
-    
+
     @staticmethod
     def hours(timestamp: int):
         forms = ['час', 'часа', 'часов']
         return DatePluralRussia.plural(timestamp, forms)
-    
+
     @staticmethod
     def minutes(timestamp: int):
         forms = ['минута', 'минуты', 'минут']
         return DatePluralRussia.plural(timestamp, forms)
-    
+
     @staticmethod
     def seconds(timestamp: int):
         forms = ['секунда', 'секунды', 'секунд']
         return DatePluralRussia.plural(timestamp, forms)
-    
+
     def convertor(timestamp: int, great: str):
         method = getattr(DatePluralRussia, great)
         return method(timestamp)
+
 
 def DataPluralEnglish(timestamp: int, great: str):
     if timestamp == 1:
         return f"{timestamp} {great.rstrip('s')}"
     return f"{timestamp} {great}"
 
+
 distributing = {
     'ru': DatePluralRussia.convertor,
     'en': DataPluralEnglish
 }
 
-def time_convert(timestamp: (int|float)) -> dict[str, int]:
+
+def time_convert(timestamp: (int | float)) -> dict[str, int]:
     return {
         "months": round(timestamp / 2_631_600 % 12),
         "days": round(timestamp / 86_400 % 30),
@@ -64,7 +67,9 @@ def time_convert(timestamp: (int|float)) -> dict[str, int]:
         "seconds": round(timestamp % 60)
     }
 
+
 def display_time(number: int, lang: str = "en") -> str:
     current_time = time_convert(number)
-    time_strings = [distributing[lang](num, key) for key, num in current_time.items() if num != 0]
+    time_strings = [distributing[lang](num, key)
+                    for key, num in current_time.items() if num != 0]
     return ", ".join(time_strings)

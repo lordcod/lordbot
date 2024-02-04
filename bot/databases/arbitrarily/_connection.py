@@ -1,9 +1,8 @@
+from config import (host, port, user, password, db_name)
 import psycopg2
 
 import sys
 sys.path.append(r"C:\Users\2008d\git\lordbot\bot\databases")
-
-from config import (host, port, user, password, db_name)
 
 
 try:

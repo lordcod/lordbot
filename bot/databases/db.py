@@ -17,14 +17,16 @@ from bot.misc.logger import Logger
 
 _connection = load_db()
 
+
 def connection():
     global _connection
-    
+
     if not _connection.closed == 0:
         Logger.core("[Closed connection] Starting a database reboot")
         _connection = load_db()
-    
+
     return _connection
+
 
 register_table(
     table_name="guilds",
@@ -80,11 +82,12 @@ register_table(
 
 
 colums = {
-    'guilds':get_info_colums('guilds', _connection),
-    'economic':get_info_colums('economic', _connection)
+    'guilds': get_info_colums('guilds', _connection),
+    'economic': get_info_colums('economic', _connection)
 }
 
 establish_connection(connection)
+
 
 def db_forever():
     loop = asyncio.new_event_loop()
@@ -96,5 +99,6 @@ def db_forever():
         loop.close()
         exit()
 
-thread = threading.Thread(target=db_forever,name='DataBase')
+
+thread = threading.Thread(target=db_forever, name='DataBase')
 thread.start()

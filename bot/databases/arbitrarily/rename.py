@@ -6,5 +6,3 @@ execute(
         RENAME COLUMN disabled_commands TO command_permissions;
     """
 )
-
-

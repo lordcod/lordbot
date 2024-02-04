@@ -1,7 +1,6 @@
 from _executer import execute
 
 
-
 guild_id = 1179069504186232852
 value = """
     {
@@ -17,13 +16,13 @@ value = """
 """
 # execute(
 #         """
-#             UPDATE 
-#                 guilds 
-#             SET 
-#                 command_permissions = jsonb_set(command_permissions::jsonb, '{balance}', %s) 
-#             WHERE 
+#             UPDATE
+#                 guilds
+#             SET
+#                 command_permissions = jsonb_set(command_permissions::jsonb, '{balance}', %s)
+#             WHERE
 #                 id = %s
-#         """, 
+#         """,
 #         (value, guild_id, )
 # )
 
@@ -38,13 +37,13 @@ data = """
 }
 """
 execute(
-        """
+    """
             UPDATE 
                 guilds 
             SET 
                 ideas = %s
             WHERE 
                 id = %s
-        """, 
-        (data, guild_id, )
+        """,
+    (data, guild_id, )
 )

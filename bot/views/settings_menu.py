@@ -16,7 +16,7 @@ class SetDropdown(nextcord.ui.Select):
     def __init__(self, guild_id):
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
-        
+
         options = [
             nextcord.SelectOption(
                 label=module_name.economy.get(locale), emoji=Emoji.economy, value='Economy'
@@ -60,25 +60,27 @@ class SetDropdown(nextcord.ui.Select):
     async def callback(self, interaction: nextcord.Interaction):
         value = self.values[0]
         view = settings.moduls[value](interaction.guild)
-        await interaction.message.edit(embed=view.embed,view=view)
+        await interaction.message.edit(embed=view.embed, view=view)
+
 
 class SettingsView(settings.DefaultSettingsView):
     embed: nextcord.Embed
-    
+
     def __init__(self, member: nextcord.Member) -> None:
         gdb = GuildDateBases(member.guild.id)
         color = gdb.get('color')
         locale = gdb.get('language')
-        
+
         self.embed = nextcord.Embed(
             description=start_langs.description.get(locale),
             color=color
         )
-        self.embed.set_author(name=start_langs.author.get(locale),icon_url=member.guild.icon)
-        self.embed.set_footer(text=f'{start_langs.request.get(locale)} {member.display_name}',icon_url=member.avatar)
-        
-        
+        self.embed.set_author(name=start_langs.author.get(
+            locale), icon_url=member.guild.icon)
+        self.embed.set_footer(
+            text=f'{start_langs.request.get(locale)} {member.display_name}', icon_url=member.avatar)
+
         super().__init__()
-        
+
         sd = SetDropdown(member.guild.id)
         self.add_item(sd)

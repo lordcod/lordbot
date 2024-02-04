@@ -18,10 +18,10 @@ def load_db():
     except Exception as err:
         Logger.error(err)
         Logger.error('Failed connection')
-        Logger.critical('The database could not be loaded and the program is terminated because of this')
-        
+        Logger.critical(
+            'The database could not be loaded and the program is terminated because of this')
+
         sys.exit()
     else:
         Logger.success("Successful connection")
         return connection
-

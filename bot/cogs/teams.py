@@ -3,7 +3,7 @@ from nextcord.ext import commands
 
 from bot.resources import check
 
-import sys, os
+import os
 
 
 class teams(commands.Cog):
@@ -34,9 +34,9 @@ class teams(commands.Cog):
     @commands.command()
     @check.team_only()
     async def unload_extension(self, ctx: commands.Context, name):
-        if name=="teams":
+        if name == "teams":
             return
-        
+
         self.bot.unload_extension(f"bot.cogs.{name}")
         await ctx.send(f"Service **{name}** successfully shut down")
 
@@ -53,7 +53,7 @@ class teams(commands.Cog):
         for ext in list(exts.values()):
             name = ext.__name__
             self.bot.reload_extension(name)
-        
+
         await ctx.send(f"All services have been successfully restarted")
 
     @commands.command()

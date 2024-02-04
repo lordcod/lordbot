@@ -6,10 +6,11 @@ from bot.resources.info import DEFAULT_EMOJI
 from .. import economy
 from ...settings import DefaultSettingsView
 
+
 class Modal(nextcord.ui.Modal):
     def __init__(self, guild_id, present) -> None:
         super().__init__("Rewards", timeout=300)
-        
+
         self.present = present
         self.emoji = nextcord.ui.TextInput(
             label="Custom Emoji",
@@ -17,31 +18,31 @@ class Modal(nextcord.ui.Modal):
             max_length=250
         )
         self.add_item(self.emoji)
-    
+
     async def callback(self, interaction: nextcord.Interaction):
         value = self.emoji.value
-        
+
         gdb = GuildDateBases(interaction.guild_id)
         economy_settings = gdb.get('economic_settings')
-        
+
         economy_settings['emoji'] = value
-        
-        gdb.set('economic_settings',economy_settings)
-        
-        
+
+        gdb.set('economic_settings', economy_settings)
+
         view = EmojiView(interaction.guild)
-        
+
         await interaction.message.edit(embed=view.embed, view=view)
+
 
 class EmojiView(DefaultSettingsView):
     embed: nextcord.Embed
-    
-    def __init__(self,guild: nextcord.Guild) -> None:
+
+    def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         economy_settings: dict = gdb.get('economic_settings')
         self.emoji = economy_settings.get("emoji")
-        
-        color = gdb.get('color',1974050)
+
+        color = gdb.get('color', 1974050)
         self.embed = nextcord.Embed(
             title='Custom emoji',
             description=(
@@ -54,34 +55,33 @@ class EmojiView(DefaultSettingsView):
             name=f'The current emoji: {self.emoji}',
             value=""
         )
-        
+
         super().__init__()
-    
-    @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red,row=1)
+
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = economy.Economy(interaction.guild)
-        
-        await interaction.message.edit(embed=view.embed,view=view)
-    
-    @nextcord.ui.button(label='Install',style=nextcord.ButtonStyle.blurple,row=1)
+
+        await interaction.message.edit(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.blurple, row=1)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = Modal(
             guild_id=interaction.guild_id,
             present=self.emoji
         )
-        
+
         await interaction.response.send_modal(modal)
-    
-    @nextcord.ui.button(label='Reset',style=nextcord.ButtonStyle.success,row=1)
+
+    @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.success, row=1)
     async def reset(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         economy_settings = gdb.get('economic_settings')
-        
+
         economy_settings['emoji'] = DEFAULT_EMOJI
-        
-        gdb.set('economic_settings',economy_settings)
-        
-        
+
+        gdb.set('economic_settings', economy_settings)
+
         view = EmojiView(interaction.guild)
-        
+
         await interaction.message.edit(embed=view.embed, view=view)

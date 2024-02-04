@@ -6,16 +6,16 @@ from typing import (
 )
 
 IdeasPayload = TypedDict(
-    'IdeasPayload', 
+    'IdeasPayload',
     {
         "enabled": Optional[bool],
-        
+
         "channel-suggest-id": int,
         "message-suggest-id": int,
-        
-        "channel-offers-id":int,
-        "channel-approved-id":int,
-        
-        "moderation-role-ids":List[int]
+
+        "channel-offers-id": int,
+        "channel-approved-id": int,
+
+        "moderation-role-ids": List[int]
     }
 )

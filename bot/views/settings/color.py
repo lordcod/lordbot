@@ -51,7 +51,8 @@ class ColorView(DefaultSettingsView):
             color=color,
         )
         self.embed._fields = [
-            {"name": f"{color_langs.current.get(locale)}: `{color}`", "value": ""}
+            {"name": f"{color_langs.current.get(locale)}: `{color}`",
+             "value": ""}
         ]
 
         super().__init__()
