@@ -118,7 +118,6 @@ class MusicPlayer:
     
     async def skip(self):
         self.voice.stop()
-        await self.callback("Manual shutdown")
     
     async def stop(self):
         self.voice.stop()
