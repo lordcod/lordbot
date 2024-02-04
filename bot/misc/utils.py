@@ -1,7 +1,4 @@
 import nextcord
-from nextcord.utils import escape_markdown
-
-from bot.databases.db import GuildDateBases
 
 import inspect
 import re
@@ -84,7 +81,9 @@ class GreetingTemplate(string.Template):
     '''
 
 
-def clamp(val: number_type, minv: number_type, maxv: number_type) -> number_type:
+def clamp(val: number_type,
+          minv: number_type,
+          maxv: number_type) -> number_type:
     return min(maxv, max(minv, val))
 
 
@@ -136,14 +135,6 @@ def to_color(color: int) -> str:
 def from_color(color: str) -> int:
     color = int(color[1:], 16)
     return color
-
-
-def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBases = None) -> str:
-    gdb = GuildData or GuildDateBases(guild_id)
-    prefix = gdb.get('prefix')
-    if markdown:
-        return escape_markdown(prefix)
-    return prefix
 
 
 async def generate_message(content: str) -> dict:
@@ -241,14 +232,20 @@ async def generate_welcome_message(member: nextcord.Member) -> bytes:
     nunito_small = Font("assets/Nunito-Black.ttf", 25)
     nunito_light = Font("assets/Nunito-Black.ttf", 20)
 
-    profile_image = await load_image_async(member.display_avatar.with_size(128).url)
+    profile_image = await load_image_async(
+        member.display_avatar.with_size(128).url)
     profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     background.paste(profile, (325, 90))
     background.ellipse((325, 90), 150, 150, outline=(
         125, 249, 255), stroke_width=4)
     background.text(
-        (400, 260), f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}", color="white", font=nunito, align="center")
+        (400, 260),
+        f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}",
+        color="white",
+        font=nunito,
+        align="center"
+    )
     background.text(
         (400, 320), member.display_name, color="white", font=nunito_small, align="center"
     )

@@ -5,7 +5,7 @@ from .config import path
 
 import random
 import asyncio
-from typing import Union, Optional, Self
+from typing import Union, Optional
 
 initally_num = 10
 
@@ -68,7 +68,10 @@ class Queue:
 
 
 class MusicPlayer:
-    def __init__(self, voice: Union[nextcord.VoiceClient, nextcord.VoiceProtocol], message: nextcord.Message, guild_id: int) -> None:
+    def __init__(self,
+                 voice: Union[nextcord.VoiceClient, nextcord.VoiceProtocol],
+                 message: nextcord.Message,
+                 guild_id: int) -> None:
         self.voice = voice
         self.message = message
         self.guild_id = guild_id
@@ -78,7 +81,8 @@ class MusicPlayer:
 
         if self.data is None:
             await self.message.edit(
-                content="I didn't find any tracks in the queue, so I finished the job!",
+                content=("I didn't find any tracks in the queue, "
+                         "so I finished the job!"),
                 embed=None,
                 view=None
             )

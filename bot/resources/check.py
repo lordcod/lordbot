@@ -1,6 +1,5 @@
 from nextcord.ext import commands
 from bot.resources import errors
-import asyncio
 
 
 def team_only():

@@ -1,10 +1,8 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc import (
-    utils,
-    env
-)
+from bot.databases.db import GuildDateBases
+from bot.misc import env
 
 import os
 from typing import List
@@ -15,7 +13,8 @@ async def get_command_prefixs(
     msg: nextcord.Message
 ) -> List[str]:
     "Returns a list of prefixes that can be used when using bot commands"
-    prefix = utils.get_prefix(msg.guild.id)
+    gdb = GuildDateBases(msg.guild.id)
+    prefix = gdb.get('prefix')
     return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
 bot = commands.Bot(

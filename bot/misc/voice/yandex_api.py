@@ -1,6 +1,6 @@
 import aiohttp
 import asyncio
-from .config import *
+from .config import api, headers, SIGN_SALT
 from bs4 import BeautifulSoup
 from hashlib import md5
 from typing import Union, List, Optional
@@ -131,7 +131,8 @@ class yandex_music_requests:
         bitrateInKbps: int = 192
     ) -> str:
         async with aiohttp.ClientSession() as session:
-            async with session.get(f'{api}/tracks/{track_id}/download-info', headers=headers) as res:
+            async with session.get(f'{api}/tracks/{track_id}/download-info',
+                                   headers=headers) as res:
                 js = await res.json()
                 results = js.get('result', [])
                 for res in results:
@@ -145,7 +146,8 @@ class yandex_music_requests:
     async def search(
         text: str,
         object_type: str = 'track',
-    ) -> Union[List[Union[Artist, Album, Track, Playlist]], Artist, Album, Track, Playlist]:
+    ) -> Union[List[Union[Artist, Album, Track, Playlist]],
+               Artist, Album, Track, Playlist]:
         params = {
             'text': text,
             'nocorrect': 'False',
@@ -154,7 +156,9 @@ class yandex_music_requests:
             'playlist-in-best': 'True'
         }
         async with aiohttp.ClientSession() as session:
-            async with session.get(f'{api}/search', headers=headers, params=params) as res:
+            async with session.get(f'{api}/search',
+                                   headers=headers,
+                                   params=params) as res:
                 if res.status == 400:
                     raise NotFound(f"{object_type}s not found", request=text)
 

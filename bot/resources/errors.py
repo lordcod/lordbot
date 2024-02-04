@@ -95,7 +95,10 @@ class CallbackCommandError:
 
         embed = nextcord.Embed(
             title=errors.CommandOnCooldown.title.get(self.locale),
-            description=f'{errors.CommandOnCooldown.description.get(self.locale)} {display_time(self.error.retry_after, self.locale)}',
+            description=(
+                f'{errors.CommandOnCooldown.description.get(self.locale)} '
+                f"{display_time(self.error.retry_after, self.locale)}"
+            ),
             color=color
         )
 
@@ -123,7 +126,8 @@ class CallbackCommandError:
 
     async def MissingRequiredArgument(self):
         param: Parameter = self.error.param
-        content = f'{errors.MissingRequiredArgument.get(self.locale)} - {param.name}'
+        content = (f'{errors.MissingRequiredArgument.get(self.locale)} - '
+                   f'{param.name}')
 
         await self.ctx.send(content)
 
@@ -146,12 +150,22 @@ class CallbackCommandError:
         await self.BadArgument()
 
     async def OfterError(self):
-        content = f'OfterError, {self.error.__class__.__name__}'
-        # await self.ctx.send(content)
+        pass
 
     errors = [
-        MissingPermissions, MissingRole, MissingChannel, BotMissingPermissions,
-        DisabledCommand, CommandNotFound, CommandOnCooldown, NotOwner, CheckFailure,
-        BadArgument, MissingRequiredArgument, OnlyTeamError, NotActivateEconomy,
-        MemberNotFound, BadUnionArgument
+        MissingPermissions,
+        MissingRole,
+        MissingChannel,
+        BotMissingPermissions,
+        DisabledCommand,
+        CommandNotFound,
+        CommandOnCooldown,
+        NotOwner,
+        CheckFailure,
+        BadArgument,
+        MissingRequiredArgument,
+        OnlyTeamError,
+        NotActivateEconomy,
+        MemberNotFound,
+        BadUnionArgument
     ]

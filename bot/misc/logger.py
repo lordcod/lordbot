@@ -43,7 +43,7 @@ async def post_mes(data, time_string):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=data) as responce:
+        async with session.post(url, data=data):
             pass
 
 

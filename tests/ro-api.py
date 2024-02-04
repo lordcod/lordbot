@@ -1,10 +1,9 @@
-import random
+
 # import rblxopencloud
 import orjson
 import aiohttp
 import asyncio
 
-from pprint import pprint
 from typing import Union, Optional
 
 token = "MS8Vu1W5GUq60aOXZ+7ZIMMXqsh9QDSdNaTHK1jAEdDlO+k/"
@@ -12,7 +11,11 @@ universeId = 4284784630
 
 
 class DataStore:
-    def __init__(self, universeId: Union[str, int], datastore: str, api_key: str, _session: Optional[aiohttp.ClientSession] = None):
+    def __init__(self,
+                 universeId: Union[str, int],
+                 datastore: str,
+                 api_key: str,
+                 _session: Optional[aiohttp.ClientSession] = None):
         self.universeId = universeId
         self.datastore = datastore
         self.api_key = api_key
@@ -22,7 +25,8 @@ class DataStore:
         self._session = _session
 
         self.base_url = "https://apis.roblox.com/datastores/v1/universes"
-        self._list_objects_url = f"{self.base_url}/{universeId}/standard-datastores/datastore/entries"
+        self._list_objects_url = (f"{self.base_url}/{universeId}/"
+                                  "standard-datastores/datastore/entries")
         self._objects_url = f"{self._list_objects_url}/entry"
         self._increment_url = f"{self._objects_url}/increment"
         self._version_url = f"{self._objects_url}/versions/version"
@@ -30,7 +34,10 @@ class DataStore:
     async def __aenter__(self):
         return self
 
-    async def __aexit__(self, universeId: Union[str, int], datastore: str, api_key: str, _session: Optional[aiohttp.ClientSession] = None):
+    async def __aexit__(self,
+                        universeId: Union[str, int],
+                        datastore: str, api_key: str,
+                        _session: Optional[aiohttp.ClientSession] = None):
         await self._session.close()
 
     def sesseion_requsts(self, method: str, url: str, **kwargs):
@@ -53,7 +60,7 @@ class DataStore:
                 params=params
             )
             data = await response.json()
-            if not 'keys' in data:
+            if 'keys' not in data:
                 break
             for key in data["keys"]:
                 yield key["key"]

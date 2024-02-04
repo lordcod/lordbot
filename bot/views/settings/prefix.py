@@ -5,7 +5,6 @@ from ._view import DefaultSettingsView
 from bot.databases.db import GuildDateBases
 from bot.views import settings_menu
 from bot.resources.info import DEFAULT_PREFIX
-from bot.misc.utils import get_prefix
 from bot.languages.settings import (
     prefix as prefix_langs,
     button as button_name
@@ -16,7 +15,7 @@ class Modal(nextcord.ui.Modal):
     def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
-        prefix = get_prefix(guild_id, markdown=True)
+        prefix = gdb.get('prefix')
 
         super().__init__(title=prefix_langs.title.get(locale, 'en'))
 
@@ -42,7 +41,8 @@ class PrefixView(DefaultSettingsView):
 
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        prefix = get_prefix(guild.id, markdown=False)
+        prefix = gdb.get('prefix')
+
         color = gdb.get('color')
         locale = gdb.get('language')
 

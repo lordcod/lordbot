@@ -10,7 +10,6 @@ from typing import List
 class MusicDropDown(nextcord.ui.Select):
     def __init__(self, guild_id, queue, player, tracks: List[Track]) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
         self.tracks = tracks
         self.queue = queue
         self.player = player

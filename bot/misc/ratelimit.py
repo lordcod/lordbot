@@ -191,7 +191,6 @@ class Cooldown:
             )
         else:
             raise ValueError()
-        return classification
 
 
 def reset_cooldown(guild_id: int, command_name: str) -> None:

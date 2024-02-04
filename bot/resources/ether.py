@@ -13,7 +13,7 @@ class Emoji:
     bagmoney = '<:bagmoney:1178745646128300083>'
     bank = '<:bank:1178745652352663663> '
     money = '<:money:1178745649248882770>'
-    award = '<:award:1178745644714831954>'  # Gift
+    award = '<:award:1178745644714831954>'
 
     # Settings
     economy = '<:economy:1178742518553256026>'

@@ -4,7 +4,8 @@ from nextcord.ext import commands
 from bot.databases.db import EconomyMembedDB, colums, GuildDateBases
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
-from bot.misc.utils import get_prefix, get_award
+from bot.misc.utils import get_award
+from nextcord.utils import escape_markdown
 
 from time import time as tick
 from typing import Optional, Union, Literal
@@ -112,12 +113,14 @@ class Economy(commands.Cog):
         await self.handler_rewards(ctx)
 
     @commands.command(name="balance", aliases=["bal"])
-    async def balance(self, ctx: commands.Context, member: nextcord.Member = None):
+    async def balance(self,
+                      ctx: commands.Context,
+                      member: nextcord.Member = None):
         if not member:
             member = ctx.author
 
         gdb = GuildDateBases(ctx.guild.id)
-        prefix = get_prefix(ctx.guild.id, markdown=True, GuildData=gdb)
+        prefix = escape_markdown(gdb.get('prefix'))
         color = gdb.get('color')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
