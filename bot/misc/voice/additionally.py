@@ -39,15 +39,6 @@ class Queue:
         
         return self.data[guild_id]
     
-    def check_retry(self, guild_id, track: Track) -> bool:
-        for data in self.get_all(guild_id):
-            if (
-                data.id == track.id and
-                data.title == track.title
-            ):
-                return True
-        return False
-    
     def add(self, guild_id, track: Track) -> int:
         self.register_guild(guild_id)
         
@@ -123,6 +114,7 @@ class MusicPlayer:
         await player.process()
     
     async def skip(self):
+        print(self.data.get(self.guild_id))
         self.voice.stop()
         await self.callback("Manual shutdown")
     
