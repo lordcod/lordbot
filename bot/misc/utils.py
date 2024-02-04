@@ -176,6 +176,9 @@ async def generate_message(content: str) -> dict:
                 icon_url=footer.get('icon_url'),
             )
         
+        if image := content.get('image'):
+            embed.set_image(image)
+        
         for field in fields:
             embed.add_field(
                 name=field.get('name',None),
@@ -183,7 +186,7 @@ async def generate_message(content: str) -> dict:
                 inline=field.get('inline',None)
             )
         
-        if (title or description or thumbnail
+        if (title or description or image or thumbnail
             or author or footer or fields):
             message['embed'] = embed
         elif not message_content:
