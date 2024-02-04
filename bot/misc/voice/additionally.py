@@ -109,6 +109,7 @@ class MusicPlayer:
         )
 
     async def callback(self, err):
+        print('CALLBACK')
         queue.remove(self.guild_id, self.data.id)
         current_players.pop(self.guild_id)
         
