@@ -142,11 +142,11 @@ class basic(commands.Cog):
         if not message.content:
             await inters.response.send_message("This message has no content, so we will not be able to translate it.")
         
-        data = jmespath.search(f"[?discord_language=='{inters.locale}']|[0]",languages.data)
+        data = jmespath.search(f"[?discord_language=='{inters.locale}']|[0]", languages.data)
         
         result = translator.translate(text=message.content, dest=data.get('google_language'))
         
-        view = TranslateView(inters.guild_id)
+        view = TranslateView(inters.guild_id, data.get('google_language'))
         
         await inters.response.send_message(content=result.text,view=view,ephemeral=True)
 
