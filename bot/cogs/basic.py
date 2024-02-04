@@ -7,7 +7,7 @@ from bot.resources.ether import Emoji
 from bot.misc import utils
 from bot.databases.db import GuildDateBases
 from bot.resources import info
-from bot.views.views import TranslateView
+from bot.views.settings_menu import TranslateView
 
 import jmespath
 import googletrans

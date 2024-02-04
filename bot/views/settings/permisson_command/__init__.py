@@ -4,7 +4,7 @@ from .precise import CommandData
 from ...settings import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
-from bot.views import views
+from bot.views import settings_menu
 from bot.languages.settings import (
     disabled_commands as disabled_commands_langs,
     button as button_name
@@ -75,7 +75,7 @@ class CommandsDataView(DefaultSettingsView):
     
     @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = views.SettingsView(interaction.user)
+        view = settings_menu.SettingsView(interaction.user)
         
         await interaction.message.edit(embed=view.embed,view=view)
     

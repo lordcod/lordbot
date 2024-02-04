@@ -2,7 +2,7 @@ import nextcord
 from nextcord.ext import commands,application_checks
 
 from bot.misc import utils
-from bot.views import views
+from bot.views import settings_menu
 from bot.databases.db import RoleDateBases, GuildDateBases
 from bot.resources.ether import Emoji
 
@@ -35,7 +35,7 @@ class moderations(commands.Cog):
     @commands.command(aliases=["set","setting"])
     @commands.has_permissions(manage_guild=True)
     async def settings(self, ctx: commands.Context):
-        view = views.SettingsView(ctx.author)
+        view = settings_menu.SettingsView(ctx.author)
         
         await ctx.send(embed=view.embed,view=view)
 

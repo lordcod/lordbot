@@ -3,7 +3,7 @@ import nextcord
 from . import DefaultSettingsView
 
 from bot.resources.ether import Emoji
-from bot.views import views
+from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import (button as button_name,
                                     auto_role as role_lang)
@@ -121,7 +121,7 @@ class AutoRoleView(DefaultSettingsView):
     
     @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = views.SettingsView(interaction.user)
+        view = settings_menu.SettingsView(interaction.user)
         
         await interaction.message.edit(embed=view.embed, view=view)
     

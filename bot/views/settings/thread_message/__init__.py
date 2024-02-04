@@ -4,7 +4,7 @@ from .additional import ViewBuilder
 from .precise import ThreadData
 from ...settings import DefaultSettingsView
 
-from bot.views import views
+from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
 from bot.resources.ether import Channel_Type
 from bot.languages.settings import (
@@ -84,7 +84,7 @@ class AutoThreadMessage(DefaultSettingsView):
     
     @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = views.SettingsView(interaction.user)
+        view = settings_menu.SettingsView(interaction.user)
         
         await interaction.message.edit(embed=view.embed,view=view)
     

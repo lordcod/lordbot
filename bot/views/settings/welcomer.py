@@ -3,7 +3,7 @@ import nextcord
 from . import DefaultSettingsView
 
 from bot.misc import utils
-from bot.views import views
+from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import (welcome as welcome_lang,
                                     button as button_name)
@@ -102,7 +102,7 @@ class WelcomerView(DefaultSettingsView):
     
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = views.SettingsView(interaction.guild)
+        view = settings_menu.SettingsView(interaction.guild)
         
         await interaction.message.edit(embed=view.embed, view=view)
     

@@ -1,6 +1,6 @@
 import nextcord
 from bot import languages
-from bot.views import views
+from bot.views import settings_menu
 from ..settings import DefaultSettingsView
 from bot.databases.db import GuildDateBases
 from nextcord.utils import find
@@ -70,7 +70,7 @@ class Languages(DefaultSettingsView):
     
     @nextcord.ui.button(label='Back',style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = views.SettingsView(interaction.user) 
+        view = settings_menu.SettingsView(interaction.user) 
         
         await interaction.message.edit(embed=view.embed,view=view)
 

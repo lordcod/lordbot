@@ -82,6 +82,3 @@ class SettingsView(settings.DefaultSettingsView):
         
         sd = SetDropdown(member.guild.id)
         self.add_item(sd)
-
-
-

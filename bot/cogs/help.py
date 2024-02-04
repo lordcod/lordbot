@@ -3,7 +3,7 @@ from nextcord.ext import commands
 
 from bot.languages import help as help_info
 from bot.databases.db import GuildDateBases
-from bot.views.views import HelpView
+from bot.views.settings_menu import HelpView
 
 import re
 import jmespath
