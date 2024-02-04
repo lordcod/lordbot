@@ -27,10 +27,12 @@ class TranslateDropDown(nextcord.ui.Select):
         )
     
     async def callback(self, inter: nextcord.Interaction):
+        await inter.response.defer()
+        
         dest = self.values[0]
         result = translator.translate(text=inter.message.content, dest=dest)
         
-        await inter.response.edit_message(content=result.text)
+        await inter.edit_original_message(content=result.text)
 
 class TranslateView(nextcord.ui.View):
     def __init__(self, guild_id) -> None:
