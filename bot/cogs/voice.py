@@ -136,14 +136,14 @@ class Voice(commands.Cog):
     
     @commands.command(name="pause")
     async def pause(self, ctx:commands.Context):
-        voice:nextcord.VoiceClient = ctx.guild.voice_client
+        voice: nextcord.VoiceClient = ctx.guild.voice_client
         if voice and voice.is_playing():
             voice.pause()
             await ctx.send("Music on pause")
     
     @commands.command(name="resume")
     async def resume(self,ctx:commands.Context):
-        voice:nextcord.VoiceClient = ctx.guild.voice_client
+        voice: nextcord.VoiceClient = ctx.guild.voice_client
         if voice and voice.is_paused():
             voice.resume()
             await ctx.send("Music on resume")

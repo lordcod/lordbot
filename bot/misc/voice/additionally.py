@@ -114,7 +114,7 @@ class MusicPlayer:
         await player.process()
     
     async def skip(self):
-        print(self.data.get(self.guild_id))
+        print(queue.get_all(self.guild_id))
         self.voice.stop()
         await self.callback("Manual shutdown")
     
