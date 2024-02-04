@@ -1,7 +1,7 @@
 import nextcord
 from bot.databases.db import GuildDateBases
 from .. import economy
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 
 class Modal(nextcord.ui.Modal):
@@ -96,7 +96,9 @@ class Bonus(DefaultSettingsView):
         self.add_item(self.bonus)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = economy.Economy(interaction.guild)
 
         await interaction.message.edit(embed=view.embed, view=view)

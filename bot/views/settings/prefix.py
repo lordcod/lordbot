@@ -1,6 +1,6 @@
 import nextcord
 
-from ..settings import DefaultSettingsView
+from ._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.views import settings_menu
@@ -30,7 +30,6 @@ class Modal(nextcord.ui.Modal):
     async def callback(self, interaction: nextcord.Interaction):
         prefix = self.prefix.value
         gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
         gdb.set('prefix', prefix)
 
         view = PrefixView(interaction.guild)
@@ -66,19 +65,25 @@ class PrefixView(DefaultSettingsView):
         self.reset.label = button_name.reset.get(locale)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def edit(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         modal = Modal(interaction.guild_id)
 
         await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.success)
-    async def reset(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def reset(self,
+                    button: nextcord.ui.Button,
+                    interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         prefix = DEFAULT_PREFIX
 

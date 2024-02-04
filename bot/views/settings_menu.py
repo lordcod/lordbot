@@ -1,15 +1,11 @@
 import nextcord
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases
-from . import settings
+from .settings import _view
 from bot.languages.settings import (
     start as start_langs,
     module_name
 )
-
-
-from .translate import TranslateView
-from .help import HelpView
 
 
 class SetDropdown(nextcord.ui.Select):
@@ -19,34 +15,54 @@ class SetDropdown(nextcord.ui.Select):
 
         options = [
             nextcord.SelectOption(
-                label=module_name.economy.get(locale), emoji=Emoji.economy, value='Economy'
+                label=module_name.economy.get(locale),
+                emoji=Emoji.economy,
+                value='Economy'
             ),
             nextcord.SelectOption(
-                label=module_name.languages.get(locale), emoji=Emoji.languages, value='Languages'
+                label=module_name.languages.get(locale),
+                emoji=Emoji.languages,
+                value='Languages'
             ),
             nextcord.SelectOption(
-                label=module_name.prefix.get(locale), emoji=Emoji.prefix, value='Prefix'
+                label=module_name.prefix.get(locale),
+                emoji=Emoji.prefix,
+                value='Prefix'
             ),
             nextcord.SelectOption(
-                label=module_name.color.get(locale), emoji=Emoji.color, value='Color'
+                label=module_name.color.get(locale),
+                emoji=Emoji.color,
+                value='Color'
             ),
             nextcord.SelectOption(
-                label=module_name.auto_roles.get(locale), emoji=Emoji.auto_role, value='AutoRoles'
+                label=module_name.auto_roles.get(locale),
+                emoji=Emoji.auto_role,
+                value='AutoRoles'
             ),
             nextcord.SelectOption(
-                label=module_name.welcomer.get(locale), emoji=Emoji.frame_person, value='Welcomer'
+                label=module_name.welcomer.get(locale),
+                emoji=Emoji.frame_person,
+                value='Welcomer'
             ),
             nextcord.SelectOption(
-                label=module_name.reactions.get(locale), emoji=Emoji.reactions, value='Reactions'
+                label=module_name.reactions.get(locale),
+                emoji=Emoji.reactions,
+                value='Reactions'
             ),
             nextcord.SelectOption(
-                label=module_name.thread.get(locale), emoji=Emoji.thread_message, value='ThreadMessage'
+                label=module_name.thread.get(locale),
+                emoji=Emoji.thread_message,
+                value='ThreadMessage'
             ),
             nextcord.SelectOption(
-                label=module_name.ideas.get(locale), emoji=Emoji.lightbulb, value='Ideas'
+                label=module_name.ideas.get(locale),
+                emoji=Emoji.lightbulb,
+                value='Ideas'
             ),
             nextcord.SelectOption(
-                label=module_name.command_permission.get(locale), emoji=Emoji.command, value='CommandPermission'
+                label=module_name.command_permission.get(locale),
+                emoji=Emoji.command,
+                value='CommandPermission'
             ),
         ]
 
@@ -59,11 +75,11 @@ class SetDropdown(nextcord.ui.Select):
 
     async def callback(self, interaction: nextcord.Interaction):
         value = self.values[0]
-        view = settings.moduls[value](interaction.guild)
+        view = _view.moduls[value](interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-class SettingsView(settings.DefaultSettingsView):
+class SettingsView(_view.DefaultSettingsView):
     embed: nextcord.Embed
 
     def __init__(self, member: nextcord.Member) -> None:
@@ -78,7 +94,8 @@ class SettingsView(settings.DefaultSettingsView):
         self.embed.set_author(name=start_langs.author.get(
             locale), icon_url=member.guild.icon)
         self.embed.set_footer(
-            text=f'{start_langs.request.get(locale)} {member.display_name}', icon_url=member.avatar)
+            text=f'{start_langs.request.get(locale)} {member.display_name}',
+            icon_url=member.avatar)
 
         super().__init__()
 

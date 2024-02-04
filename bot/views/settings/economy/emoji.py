@@ -4,7 +4,7 @@ from bot.databases.db import GuildDateBases
 from bot.resources.info import DEFAULT_EMOJI
 
 from .. import economy
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 
 class Modal(nextcord.ui.Modal):
@@ -58,14 +58,18 @@ class EmojiView(DefaultSettingsView):
 
         super().__init__()
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = economy.Economy(interaction.guild)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.blurple, row=1)
-    async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.blurple)
+    async def install(self,
+                      button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
         modal = Modal(
             guild_id=interaction.guild_id,
             present=self.emoji
@@ -73,8 +77,10 @@ class EmojiView(DefaultSettingsView):
 
         await interaction.response.send_modal(modal)
 
-    @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.success, row=1)
-    async def reset(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.success)
+    async def reset(self,
+                    button: nextcord.ui.Button,
+                    interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         economy_settings = gdb.get('economic_settings')
 

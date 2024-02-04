@@ -2,7 +2,7 @@ import nextcord
 from bot.databases.db import GuildDateBases
 import re
 from bot.views import settings_menu
-from ..settings import DefaultSettingsView
+from ._view import DefaultSettingsView
 from bot.resources.info import DEFAULT_COLOR
 from bot.misc.utils import to_color, from_color
 from bot.languages.settings import color as color_langs, button as button_name
@@ -25,7 +25,8 @@ class Modal(nextcord.ui.Modal):
         color = self.color.value
         match = re.search(r"#([0-9a-fA-F]{6})", color)
         if not match:
-            await interaction.response.send_message("Hex is not valid", ephemeral=True)
+            await interaction.response.send_message("Hex is not valid",
+                                                    ephemeral=True)
             return
 
         color = from_color(color)
@@ -62,13 +63,19 @@ class ColorView(DefaultSettingsView):
         self.reset.label = button_name.reset.get(locale)
 
     @nextcord.ui.button(label="Back", style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction
+                   ):
         view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
     @nextcord.ui.button(label="Edit", style=nextcord.ButtonStyle.blurple)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def edit(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction
+                   ):
         modal = Modal(interaction.guild_id)
 
         await interaction.response.send_modal(modal)

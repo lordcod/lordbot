@@ -2,7 +2,7 @@ import nextcord
 
 from .modal import ModalBuilder
 from .. import reactions
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import (

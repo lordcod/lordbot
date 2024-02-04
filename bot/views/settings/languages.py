@@ -1,7 +1,7 @@
 import nextcord
 from bot import languages
 from bot.views import settings_menu
-from ..settings import DefaultSettingsView
+from ._view import DefaultSettingsView
 from bot.databases.db import GuildDateBases
 from nextcord.utils import find
 from bot.languages.settings import (
@@ -17,7 +17,8 @@ class DropDown(nextcord.ui.Select):
 
         options = [
             nextcord.SelectOption(
-                label=f"{data.get('english_name')} ({data.get('native_name')})",
+                label=(f"{data.get('english_name')} "
+                       "({data.get('native_name')})"),
                 value=data.get('locale'),
                 emoji=data.get('flag', None),
                 default=True if locale == data.get('locale') else False
@@ -69,7 +70,9 @@ class Languages(DefaultSettingsView):
         self.add_item(lang)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)

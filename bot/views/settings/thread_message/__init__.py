@@ -2,7 +2,7 @@ import nextcord
 
 from .additional import ViewBuilder
 from .precise import ThreadData
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
@@ -52,10 +52,12 @@ class DropDown(nextcord.ui.Select):
 
         embed = nextcord.Embed(
             title=thread_langs.init.brief_title.get(locale),
-            description=f"{thread_langs.init.channel.get(locale)}: {channel.mention}",
+            description=(f"{thread_langs.init.channel.get(locale)}: "
+                         f"{channel.mention}"),
             color=color
         )
-        await interaction.message.edit(embed=embed, view=ThreadData(channel, channel_data))
+        await interaction.message.edit(embed=embed,
+                                       view=ThreadData(channel, channel_data))
 
 
 class AutoThreadMessage(DefaultSettingsView):
@@ -83,13 +85,17 @@ class AutoThreadMessage(DefaultSettingsView):
             self.add_item(self.auto)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
-    async def addtion(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def addtion(self,
+                      button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
         view = ViewBuilder(interaction.guild_id)
 
         await interaction.message.edit(embed=None, view=view)

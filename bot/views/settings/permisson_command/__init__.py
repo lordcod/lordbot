@@ -1,7 +1,7 @@
 import nextcord
 
 from .precise import CommandData
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.views import settings_menu
@@ -10,7 +10,6 @@ from bot.languages.settings import (
     button as button_name
 )
 from bot.languages import help
-from bot.resources.ether import Emoji
 
 
 class DropDown(nextcord.ui.Select):
@@ -72,7 +71,9 @@ class CommandsDataView(DefaultSettingsView):
         self.back.label = button_name.back.get(locale)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)
@@ -82,7 +83,9 @@ class CommandsDataView(DefaultSettingsView):
         await interaction.message.edit(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Previous', style=nextcord.ButtonStyle.grey)
-    async def previous(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def previous(self,
+                       button: nextcord.ui.Button,
+                       interaction: nextcord.Interaction):
         if 0 > (self.step - 1):
             return
 
@@ -91,7 +94,9 @@ class CommandsDataView(DefaultSettingsView):
         await self.visual_handler(interaction)
 
     @nextcord.ui.button(label='Next', style=nextcord.ButtonStyle.grey)
-    async def next(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def next(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         if (self.step + 1) > self.maximum:
             return
 

@@ -4,9 +4,8 @@ from .. import permisson_command
 from .distribution.channel import ChannelsView
 from .distribution.role import RolesView
 from .distribution.cooldown import CooldownsView
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
-from bot.misc import utils
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases, CommandDB
 from bot.languages import help as help_info
@@ -91,7 +90,7 @@ class CommandData(DefaultSettingsView):
         DDD = DropDown(guild.id, command_name)
         self.add_item(DDD)
 
-        if self.command_data.get("allowed_disabled") == False:
+        if self.command_data.get("allowed_disabled") is False:
             self.switcher.label = "Forbidden"
             self.switcher.style = nextcord.ButtonStyle.grey
             self.switcher.disabled = True
@@ -106,7 +105,9 @@ class CommandData(DefaultSettingsView):
         self.back.label = button_name.back.get(locale)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         cat_name = self.command_data.get('category')
         index = list(help_info.categories).index(cat_name)
 
@@ -115,7 +116,9 @@ class CommandData(DefaultSettingsView):
         await interaction.message.edit(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Switcher')
-    async def switcher(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def switcher(self,
+                       button: nextcord.ui.Button,
+                       interaction: nextcord.Interaction):
         command_info = self.command_info
         desperate = 0 if self.operate == 1 else 1
 

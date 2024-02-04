@@ -2,9 +2,8 @@ import nextcord
 
 from .additional import ViewBuilder
 from .precise import ReactData
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
-from bot.misc import utils
 from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
 from bot.resources.ether import Channel_Type
@@ -58,13 +57,16 @@ class DropDown(nextcord.ui.Select):
         embed = nextcord.Embed(
             title=reaction_langs.init.brief_title.get(locale),
             description=(
-                f"{reaction_langs.init.channel.get(locale)}: {channel.mention}\n"
-                f"{reaction_langs.init.emoji.get(locale)}: {', '.join([emo for emo in channel_data])}"
+                f"{reaction_langs.init.channel.get(locale)}: "
+                f"{channel.mention}\n"
+                f"{reaction_langs.init.emoji.get(locale)}: "
+                f"{', '.join([emo for emo in channel_data])}"
             ),
             color=color
         )
 
-        await interaction.message.edit(embed=embed, view=ReactData(channel, channel_data))
+        await interaction.message.edit(embed=embed,
+                                       view=ReactData(channel, channel_data))
 
 
 class AutoReactions(DefaultSettingsView):
@@ -92,13 +94,17 @@ class AutoReactions(DefaultSettingsView):
             self.add_item(auto)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
-    async def addtion(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def addtion(self,
+                      button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
         view = ViewBuilder(interaction.guild_id)
 
         await interaction.message.edit(embed=None, view=view)

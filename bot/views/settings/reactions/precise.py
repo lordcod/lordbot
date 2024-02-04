@@ -2,7 +2,7 @@ import nextcord
 
 from .modal import ModalBuilder
 from .. import reactions
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import (
@@ -26,19 +26,27 @@ class ReactData(DefaultSettingsView):
         self.delete_reactions.label = reaction_langs.datas.delreact.get(locale)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = reactions.AutoReactions(interaction.guild)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Edit reaction', style=nextcord.ButtonStyle.primary)
-    async def edit_reactions(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Edit reaction',
+                        style=nextcord.ButtonStyle.primary)
+    async def edit_reactions(self,
+                             button: nextcord.ui.Button,
+                             interaction: nextcord.Interaction):
         modal = ModalBuilder(interaction.guild_id, self.channel.id)
 
         await interaction.response.send_modal(modal)
 
-    @nextcord.ui.button(label='Delete reaction', style=nextcord.ButtonStyle.red)
-    async def delete_reactions(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Delete reaction',
+                        style=nextcord.ButtonStyle.red)
+    async def delete_reactions(self,
+                               button: nextcord.ui.Button,
+                               interaction: nextcord.Interaction):
         channel_id = self.channel.id
         del self.forum_message[channel_id]
 

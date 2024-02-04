@@ -1,14 +1,13 @@
-from ._view import DefaultSettingsView
 from .ideas import IdeasView
 from .welcomer import WelcomerView
 from .auto_role import AutoRoleView
 from .permisson_command import CommandsDataView
 from .thread_message import AutoThreadMessage
-from .reactions import AutoReactions
-from .languages import Languages
-from .prefix import PrefixView as Prefix
-from .economy import Economy
 from .color import ColorView as Color
+from .economy import Economy
+from .prefix import PrefixView as Prefix
+from .languages import Languages
+from .reactions import AutoReactions
 
 
 moduls = {

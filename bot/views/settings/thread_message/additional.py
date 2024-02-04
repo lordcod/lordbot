@@ -2,7 +2,7 @@ import nextcord
 
 from .modal import ModalBuilder
 from .. import thread_message
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import (
@@ -27,7 +27,8 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         forum_message = self.gdb.get('thread_messages')
 
         if channel.id in forum_message:
-            await interaction.response.send_message(thread_langs.addptional.channel_error.get(locale))
+            await interaction.response.send_message(
+                thread_langs.addptional.channel_error.get(locale))
             return
 
         view = ViewBuilder(channel.guild.id, channel.id)
@@ -53,13 +54,19 @@ class ViewBuilder(DefaultSettingsView):
         self.add_item(DDB)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = thread_message.AutoThreadMessage(interaction.guild)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install message', style=nextcord.ButtonStyle.blurple, disabled=True)
-    async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Install message',
+                        style=nextcord.ButtonStyle.blurple,
+                        disabled=True)
+    async def install(self,
+                      button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
         modal = ModalBuilder(interaction.guild_id, self.installer)
 
         await interaction.response.send_modal(modal)

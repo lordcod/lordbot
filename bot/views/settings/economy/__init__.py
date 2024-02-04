@@ -2,7 +2,7 @@ import nextcord
 
 from .emoji import EmojiView
 from .bonuses import Bonus
-from ...settings import DefaultSettingsView
+from .._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases

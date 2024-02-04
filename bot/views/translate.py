@@ -1,5 +1,4 @@
 from typing import Optional
-from httpx import options
 import nextcord
 from bot import languages
 from bot.databases.db import GuildDateBases
