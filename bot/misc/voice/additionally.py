@@ -50,17 +50,14 @@ class Queue:
         self.register_guild(guild_id)
         data = self.get(guild_id)
         
-        print('DELETE', '1', self.data[guild_id])
         if data is not None and (token is None or data.id == token):
             self.data[guild_id].pop(0)
-        print('DELETE', '2', self.data[guild_id])
     
     def clear(self, guild_id) -> None:
         self.data[guild_id] = []
     
     def get(self, guild_id) -> Optional[Track]:
         self.register_guild(guild_id)
-        print('GET', self.data[guild_id])
         try:
             return self.data[guild_id][0]
         except IndexError:
@@ -109,7 +106,6 @@ class MusicPlayer:
         )
 
     async def callback(self, err):
-        print('CALLBACK', err)
         queue.remove(self.guild_id, self.data.id)
         current_players.pop(self.guild_id)
         
