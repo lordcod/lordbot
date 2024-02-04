@@ -51,14 +51,16 @@ class Queue:
         data = self.get(guild_id)
         
         if data is not None and (token is None or data.id == token):
+            print(self.data[guild_id])
             self.data[guild_id].pop(0)
+            print(self.data[guild_id])
     
     def clear(self, guild_id) -> None:
         self.data[guild_id] = []
     
     def get(self, guild_id) -> Optional[Track]:
         self.register_guild(guild_id)
-        
+        print(self.data[guild_id])
         try:
             return self.data[guild_id][0]
         except IndexError:
@@ -114,7 +116,6 @@ class MusicPlayer:
         await player.process()
     
     async def skip(self):
-        print(queue.get_all(self.guild_id))
         self.voice.stop()
         await self.callback("Manual shutdown")
     
