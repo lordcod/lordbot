@@ -32,13 +32,6 @@ class MusicDropDown(nextcord.ui.Select):
         track_id = int(self.values[0])
         track = utils.get(self.tracks, id=track_id)
         
-        if self.queue.check_retry(
-            inter.guild_id,
-            track
-        ):
-            await inter.response.send_message(content="The track is already in the queue!", ephemeral=True)
-            return 
-        
         token = self.queue.add(
             inter.guild_id,
             track
