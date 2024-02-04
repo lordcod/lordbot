@@ -7,13 +7,14 @@ from .. import economy
 from ...settings import DefaultSettingsView
 
 class Modal(nextcord.ui.Modal):
-    def __init__(self,guild_id,present) -> None:
+    def __init__(self, guild_id, present) -> None:
         super().__init__("Rewards", timeout=300)
+        
         self.present = present
         self.emoji = nextcord.ui.TextInput(
             label="Custom Emoji",
             placeholder=present,
-            max_length=25
+            max_length=250
         )
         self.add_item(self.emoji)
     

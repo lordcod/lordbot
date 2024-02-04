@@ -3,12 +3,12 @@ import nextcord
 from .yandex_api import Track
 from .config import path
 
-import io
 import random
 import asyncio
-from typing import Union, Optional
+from typing import Union, Optional, Self
 
 initally_num = 10
+current_players = {}
 
 def addtional_convert(timestamp: int):
     if 10 > timestamp:
@@ -24,6 +24,9 @@ def convertor_time(timestamp: Union[int, float]):
     return f"{minutes}:{seconds}"
 
 class Queue:
+    def __new__(cls) -> Self:
+        pass
+    
     def __init__(self) -> None:
         self.data = {}
     
@@ -141,6 +144,4 @@ class MusicPlayer:
         
         self.voice.play(source, after=self.callback)
 
-
-current_players = {}
 queue = Queue()

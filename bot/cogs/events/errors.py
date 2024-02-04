@@ -83,7 +83,7 @@ class PermissionChecker:
         ctx.cooldown = cooldown
         retry = cooldown.get()
         
-        if retry is True:
+        if retry is None:
             return True
         elif isinstance(retry, float):
             raise CommandOnCooldown(retry)

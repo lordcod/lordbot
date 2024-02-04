@@ -4,8 +4,8 @@ from  ... import permisson_command
 from ... import DefaultSettingsView
 
 from bot.misc import utils
-from bot.misc.ratelimit import BucketType
-from bot.resources.ether import Emoji
+from bot.misc.time_transformer import display_time
+from bot.misc.ratelimit import BucketType, reset_cooldown
 from bot.databases.db import GuildDateBases, CommandDB
 from bot.languages import help as help_info
 from bot.languages.settings import (
@@ -15,22 +15,21 @@ from bot.languages.settings import (
 from typing import List, Optional
 
 cd_types = {
-    0:'Member',
-    1:'Server(global)'
+    0: 'Member',
+    1: 'Server(global)'
 }
-
 
 
 class CoolModal(nextcord.ui.Modal):
     def __init__(
         self,
-        type: int,
+        cooltype: int,
         command_name: str,
         *,
         rate: int = None,
         per: float = None
     ) -> None:
-        self.type = type
+        self.type = cooltype
         self.command_name = command_name
         
         super().__init__("Cooldown")
@@ -109,9 +108,9 @@ class DropDown(nextcord.ui.StringSelect):
         )
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        typ = int(self.values[0])
+        cooltype = int(self.values[0])
         
-        modal = CoolModal(typ, self.command_name)
+        modal = CoolModal(cooltype, self.command_name)
         
         await interaction.response.send_modal(modal)
 
@@ -123,6 +122,7 @@ class CooldownsView(DefaultSettingsView):
         self.command_name = command_name
         
         gdb = GuildDateBases(guild.id)
+        lang = gdb.get('language')
         color = gdb.get('color')
         
         cdb = CommandDB(guild.id)
@@ -136,7 +136,7 @@ class CooldownsView(DefaultSettingsView):
             description = (
                 "The current delay for the command\n"
                 f"Type: **{cd_types.get(cooldate.get('type'))}**\n"
-                f"Frequency of use: **{cooldate.get('rate')}** → **{utils.display_time(cooldate.get('per'))}**\n"
+                f"Frequency of use: **{cooldate.get('rate')}** → **{display_time(cooldate.get('per', lang))}**\n"
             )
         else:
             self.remove_item(self.edit)
@@ -170,9 +170,9 @@ class CooldownsView(DefaultSettingsView):
     
     @nextcord.ui.button(label='Edit',style=nextcord.ButtonStyle.blurple)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        typ = self.cooldate.get('type')
+        cooltype = self.cooldate.get('type')
         
-        modal = CoolModal(typ, self.command_name)
+        modal = CoolModal(cooltype, self.command_name)
         
         await interaction.response.send_modal(modal)
     
@@ -185,6 +185,7 @@ class CooldownsView(DefaultSettingsView):
         
         cdb.update(self.command_name, command_data)
         
+        reset_cooldown(interaction.guild_id, self.command_name)
         
         view = CooldownsView(
             interaction.guild,

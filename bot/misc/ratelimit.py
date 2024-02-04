@@ -4,6 +4,9 @@ import nextcord
 
 from typing import Union
 
+data_structures = None
+
+
 data = {}
 
 
@@ -31,7 +34,7 @@ class CooldownGuild:
         if self.command_name not in data[self.guild_id]:
             data[self.guild_id][self.command_name] = {}
     
-    def get(self) -> bool:
+    def get(self) -> Union[None, float]:
         cooldata: dict = data[self.guild_id][self.command_name] 
         
         regular_rate: int = self.command_data.get('rate')
@@ -40,23 +43,23 @@ class CooldownGuild:
         
         if time.time() >= per:
             self.reset()
-            return True
+            return None
         
         if regular_rate > rate:
-            return True
-        return round(per-time.time(),2)
+            return None
+        
+        return round(per-time.time(), 2)
     
     def add(self) -> None:
         global data
         
         cooldata: dict = data[self.guild_id][self.command_name] 
-        rate: int = cooldata.get('rate',0)
-        per: float = cooldata.get('per',0)
+        rate: int = cooldata.get('rate', 0)
+        per: float = cooldata.get('per', 0)
         
         regular_per: int = self.command_data.get('per')
         
         datatime = time.time()+regular_per if rate == 0 else per
-        
         
         data[self.guild_id][self.command_name] = {
             'rate':rate+1,
@@ -109,7 +112,7 @@ class CooldownMember:
     
     
     
-    def get(self) -> Union[bool, float]:
+    def get(self) -> Union[None, float]:
         cooldata: dict = data[self.guild_id][self.command_name][self.member_id]
         
         regular_rate: int = self.command_data.get('rate')
@@ -118,10 +121,10 @@ class CooldownMember:
         
         if time.time() >= per:
             self.reset()
-            return True
+            return None
         
         if regular_rate > rate:
-            return True
+            return None
         
         return round(per-time.time(),2)
     
@@ -164,7 +167,7 @@ class CooldownMember:
         }
 
 
-CooldownObject = Union[CooldownGuild,CooldownMember]
+CooldownObject = Union[CooldownGuild, CooldownMember]
 
 class Cooldown:
     @classmethod
@@ -178,14 +181,14 @@ class Cooldown:
         type = cooldata.get('type')
         
         if type == BucketType.member:
-            classification = CooldownMember(
+            return CooldownMember(
                 command_name,
                 command_data,
                 message.guild.id,
                 message.author.id
             )
         elif type == BucketType.server:
-            classification = CooldownGuild(
+            return CooldownGuild(
                 command_name,
                 command_data,
                 message.guild.id
@@ -195,8 +198,5 @@ class Cooldown:
         return classification
 
 
-def reset_data(guild_id, command_name) -> None: 
-    try:
-        del data[guild_id][command_name]
-    except:
-        pass
+def reset_cooldown(guild_id: int, command_name: str) -> None: 
+    return data.get(guild_id, {}).pop(command_name)

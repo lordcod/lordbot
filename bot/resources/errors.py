@@ -2,6 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
+from bot.misc.time_transformer import display_time
 from bot.databases.db import GuildDateBases
 from bot.languages import errors
 
@@ -57,30 +58,22 @@ class CallbackCommandError:
     async def MissingPermissions(self):
         content = errors.MissingPermissions.get(self.locale)
         
-        await self.ctx.send(
-            content=content
-        )
+        await self.ctx.send(content)
     
     async def BotMissingPermissions(self):
         content = errors.BotMissingPermissions.get(self.locale)
         
-        await self.ctx.send(
-            content=content
-        )
+        await self.ctx.send(content)
     
     async def MissingRole(self):
         content = errors.MissingRole.get(self.locale)
         
-        await self.ctx.send(
-            content=content
-        )
+        await self.ctx.send(content)
     
     async def MissingChannel(self):
         content = errors.MissingChannel.get(self.locale)
         
-        await self.ctx.send(
-            content=content
-        )
+        await self.ctx.send(content)
     
     
     async def CommandNotFound(self):
@@ -92,14 +85,12 @@ class CallbackCommandError:
         )
     
     async def CommandOnCooldown(self):
+        color = self.gdb.get('color')
+        
         embed = nextcord.Embed(
             title=errors.CommandOnCooldown.title.get(self.locale),
-            description=(
-                f'{errors.CommandOnCooldown.description.get(self.locale)}'
-                f' {self.error.retry_after :.0f} '
-                f'{errors.CommandOnCooldown.seconds.get(self.locale)}'
-            ),
-            color=nextcord.Color.red()
+            description=f'{errors.CommandOnCooldown.description.get(self.locale)} {display_time(self.error.retry_after, self.locale)}',
+            color=color
         )
         
         await self.ctx.send(embed=embed, delete_after=5.0)
@@ -107,23 +98,17 @@ class CallbackCommandError:
     async def NotOwner(self):
         content = errors.NotOwner.get(self.locale)
         
-        await self.ctx.send(
-            content=content
-        )
+        await self.ctx.send(content=content)
     
     async def CheckFailure(self):
         content = errors.CheckFailure.get(self.locale)
         
-        await self.ctx.send(
-            content=content
-        )
+        await self.ctx.send(content)
     
     async def BadArgument(self):
         content = errors.BadArgument.get(self.locale)
         
-        await self.ctx.send(
-            content=content
-        )
+        await self.ctx.send(content)
     
     async def DisabledCommand(self):
         content = errors.DisabledCommand.get(self.locale)

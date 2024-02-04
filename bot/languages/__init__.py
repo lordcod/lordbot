@@ -204,16 +204,16 @@ class errors:
         'en':(
             'The participant could not be found.\n'
             'In order for us to find him, you can use the following arguments:\n'
-            '* Nickname\n'
-            '* Id\n'
-            '* Mention\n'
+            '- Nickname\n'
+            '- Id\n'
+            '- Mention\n'
         ),
         'ru':(
             'Участника не удалось найти.\n'
             'Для того, чтобы мы могли его найти, вы можете использовать следующие аргументы:\n'
-            '* Ник\n'
-            '* Идентификатор\n' 
-            '* Упоминание\n'
+            '- Ник\n'
+            '- Идентификатор\n' 
+            '- Упоминание\n'
         )
     }
     
@@ -225,8 +225,4 @@ class errors:
         description = {
             'en':'Try again after',
             'ru':'Повторите попытку через'
-        }
-        seconds = {
-            'en':'seconds',
-            'ru':'секунд'
         }
