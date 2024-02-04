@@ -77,11 +77,6 @@ class Voice(commands.Cog):
             await mes.edit(content=None, embed=view.embed, view=view)
             return
         
-        if queue.check_retry(ctx.guild.id, track):
-            await ctx.send('Music has already been added!')
-            return 
-        
-        
         token = queue.add(
             ctx.guild.id,
             track
