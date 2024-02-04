@@ -50,17 +50,17 @@ class Queue:
         self.register_guild(guild_id)
         data = self.get(guild_id)
         
-        print(self.data[guild_id])
+        print('DELETE', '1', self.data[guild_id])
         if data is not None and (token is None or data.id == token):
             self.data[guild_id].pop(0)
-        print(self.data[guild_id])
+        print('DELETE', '2', self.data[guild_id])
     
     def clear(self, guild_id) -> None:
         self.data[guild_id] = []
     
     def get(self, guild_id) -> Optional[Track]:
         self.register_guild(guild_id)
-        print(self.data[guild_id])
+        print('GET', self.data[guild_id])
         try:
             return self.data[guild_id][0]
         except IndexError:
