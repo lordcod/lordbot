@@ -40,7 +40,7 @@ class MemberDB:
     def get(self, __name, __default=None):
         try:
             return self.__getitem__(__name)
-        except:
+        except KeyError:
             return __default
 
     def __getitem__(self, item):
