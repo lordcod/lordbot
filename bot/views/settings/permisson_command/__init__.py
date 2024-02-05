@@ -6,7 +6,6 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.databases.db import GuildDateBases
 from bot.views import settings_menu
 from bot.languages.settings import (
-    disabled_commands as disabled_commands_langs,
     button as button_name
 )
 from bot.languages import help
@@ -31,7 +30,7 @@ class DropDown(nextcord.ui.Select):
             options.append(selectOption)
 
         super().__init__(
-            placeholder=disabled_commands_langs.placeholder.get(locale),
+            placeholder="Choose command:",
             min_values=1,
             max_values=1,
             options=options,
@@ -59,8 +58,8 @@ class CommandsDataView(DefaultSettingsView):
         locale = gdb.get('language')
 
         self.embed = nextcord.Embed(
-            title=disabled_commands_langs.title.get(locale),
-            description=disabled_commands_langs.description.get(locale),
+            title="Command Permission",
+            description="",
             color=color
         )
 

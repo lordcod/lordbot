@@ -15,7 +15,9 @@ class CommandDB:
     def get(self, command, default=None) -> dict:
         with connection().cursor() as cursor:
             cursor.execute(
-                "SELECT command_permissions ->> %s FROM guilds WHERE id = %s", (command, self.guild_id,))
+                "SELECT command_permissions ->> %s FROM guilds WHERE id = %s",
+                (command, self.guild_id,)
+            )
 
             data = cursor.fetchone()
             if not data[0]:

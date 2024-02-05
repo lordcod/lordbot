@@ -242,42 +242,6 @@ class activiti:
     }
 
 
-class auto_translate:
-    title = {
-        'ru': 'Авто перевод',
-        'en': 'Automatic translation',
-        'id': '',
-        'da': '',
-        'de': '',
-        'es': '',
-        'fr': '',
-        'pl': '',
-        'tr': ''
-    }
-    field_name_from = {
-        'ru': 'Переведено c',
-        'en': 'Translated from',
-        'id': '',
-        'da': '',
-        'de': '',
-        'es': '',
-        'fr': '',
-        'pl': '',
-        'tr': ''
-    }
-    field_name_to = {
-        'ru': 'Переведено на',
-        'en': 'Translated to',
-        'id': '',
-        'da': '',
-        'de': '',
-        'es': '',
-        'fr': '',
-        'pl': '',
-        'tr': ''
-    }
-
-
 class errors:
     MissingPermissions = {
         'en': 'You don\'t have enough rights',

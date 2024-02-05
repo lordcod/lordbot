@@ -100,7 +100,7 @@ class WelcomerView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = settings_menu.SettingsView(interaction.guild)
+        view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)
 

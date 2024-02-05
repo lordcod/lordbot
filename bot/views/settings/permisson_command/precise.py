@@ -69,7 +69,7 @@ class CommandData(DefaultSettingsView):
 
         self.cdb = CommandDB(guild.id)
         self.command_data: dict = get_command(command_name)
-        self.command_info: dict = self.cdb.get(command_name)
+        self.command_info: dict = self.cdb.get(command_name, {})
 
         self.operate = self.command_info.get("operate", 1)
 
