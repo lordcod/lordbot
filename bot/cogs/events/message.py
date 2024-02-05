@@ -2,7 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
-from bot.views.settings_menu import TranslateView
+from bot.views.translate import TranslateView
 from bot.languages import BotInfo
 
 import googletrans

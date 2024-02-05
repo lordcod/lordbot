@@ -1,7 +1,7 @@
 import nextcord
 
 from .precise import CommandData
-from .._view import DefaultSettingsView
+from bot.views.settings._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.views import settings_menu

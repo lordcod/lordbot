@@ -1,6 +1,6 @@
 import nextcord
 
-from .._view import DefaultSettingsView
+from bot.views.settings._view import DefaultSettingsView
 from .distribution import distrubuters
 
 from bot.databases.varstructs import IdeasPayload

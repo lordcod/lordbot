@@ -4,7 +4,7 @@ from .. import permisson_command
 from .distribution.channel import ChannelsView
 from .distribution.role import RolesView
 from .distribution.cooldown import CooldownsView
-from .._view import DefaultSettingsView
+from bot.views.settings._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases, CommandDB

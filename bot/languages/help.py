@@ -1,7 +1,8 @@
 from typing import List, Dict, Literal, Union
 
-possible_args = Literal['name', 'category', 'aliases', 'arguments',
-                        'descriptrion', 'brief_descriptrion', 'allowed_disabled']
+possible_args = Literal['name', 'category', 'aliases',
+                        'arguments', 'descriptrion', 'brief_descriptrion',
+                        'allowed_disabled']
 CommandOption = Dict[
     possible_args,
     Union[dict, list, bool, str]

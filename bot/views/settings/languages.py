@@ -13,15 +13,15 @@ from bot.languages.settings import (
 class DropDown(nextcord.ui.Select):
     def __init__(self, guild_id):
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language', 'en')
+        locale = gdb.get('language')
 
         options = [
             nextcord.SelectOption(
                 label=(f"{data.get('english_name')} "
-                       "({data.get('native_name')})"),
+                       f"({data.get('native_name')})"),
                 value=data.get('locale'),
                 emoji=data.get('flag', None),
-                default=True if locale == data.get('locale') else False
+                default=locale == data.get('locale')
             )
             for data in languages.current[:24]
         ]

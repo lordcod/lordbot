@@ -1,6 +1,6 @@
 import nextcord
 
-from . import DefaultSettingsView
+from bot.views.settings._view import DefaultSettingsView
 
 from bot.misc import utils
 from bot.views import settings_menu

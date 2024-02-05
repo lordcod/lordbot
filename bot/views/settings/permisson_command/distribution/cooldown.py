@@ -1,7 +1,7 @@
 import nextcord
 
 from ... import permisson_command
-from ... import DefaultSettingsView
+from bot.views.settings._view import DefaultSettingsView
 
 from bot.misc import utils
 from bot.misc.time_transformer import display_time

@@ -1,6 +1,6 @@
 import nextcord
 
-from . import DefaultSettingsView
+from bot.views.settings._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
 from bot.views import settings_menu
