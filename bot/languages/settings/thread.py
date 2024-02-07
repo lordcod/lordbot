@@ -2,8 +2,8 @@
 
 class init:
     title = {
-        'ru': 'Автоматические сообщения в форумах/ветках',
         'en': 'Automatic messages in forums/threads',
+        'ru': 'Автоматические сообщения в форумах/ветках',
         'id': 'Pesan otomatis di forum/utas',
         'da': 'Automatiske meddelelser i fora/tråde',
         'de': 'Automatische Nachrichten in Foren/Threads',
@@ -15,7 +15,6 @@ class init:
     brief_title = {
         'en': 'Auto-messages',
         'ru': 'Авто-сообщения',
-        'en': 'Auto-messages',
         'id': 'Pesan otomatis',
         'da': 'Auto-beskeder',
         'de': 'Automatische Nachrichten',
@@ -25,9 +24,8 @@ class init:
         'tr': 'Otomatik mesajlar'
     }
     description = {
-        'en': 'Add or change your automatic posts in forums/branches',
-        'ru': 'Добавляйте или изменяйте свои автоматические сообщения в форумах/ветках',
         'en': 'Add or change your automatic posts in forums/threads',
+        'ru': 'Добавляйте или изменяйте свои автоматические сообщения в форумах/ветках',
         'id': 'Menambah atau mengubah postingan otomatis Anda di forum/utas',
         'da': 'Tilføj eller skift dine automatiske indlæg i fora/tråde',
         'de': 'Automatische Beiträge in Foren/Threads hinzufügen oder ändern',
@@ -37,8 +35,8 @@ class init:
         'tr': 'Forumlara/iş parçacıklarına otomatik gönderilerinizi ekleyin veya değiştirin'
     }
     placeholder = {
-        'ru': 'Настройки авто-сообщений в ветках/форумах:',
         'en': 'Auto-message settings in branches/forums:',
+        'ru': 'Настройки авто-сообщений в ветках/форумах:',
         'id': 'Pengaturan pesan otomatis di cabang/forum:',
         'da': 'Indstillinger for automatisk besked i filialer/fora:',
         'de': 'Einstellungen für automatische Nachrichten in Filialen/Foren:',
@@ -102,8 +100,8 @@ class addptional:
 
 class thread:
     mes_not_found = {
-        'ru': 'Сообщения не найдено',
         'en': 'No message found',
+        'ru': 'Сообщения не найдено',
         'id': 'Tidak ada pesan yang ditemukan',
         'da': 'Ingen besked fundet',
         'de': 'Keine Nachricht gefunden',
@@ -113,8 +111,8 @@ class thread:
         'tr': 'Mesaj bulunamadı'
     }
     watch_message = {
-        'ru': 'Посмотреть сообщение',
         'en': 'View the message',
+        'ru': 'Посмотреть сообщение',
         'id': 'Lihat pesan',
         'da': 'Se meddelelsen',
         'de': 'Nachricht anzeigen',
@@ -126,7 +124,6 @@ class thread:
     edit_message = {
         'en': 'Edit a message',
         'ru': 'Изменить сообщение',
-        'en': 'Edit a message',
         'id': 'Mengedit pesan',
         'da': 'Rediger en meddelelse',
         'de': 'Eine Nachricht bearbeiten',
@@ -138,7 +135,6 @@ class thread:
     delete_message = {
         'en': 'Delete a message',
         'ru': 'Удалить сообщение',
-        'en': 'Delete a message',
         'id': 'Menghapus pesan',
         'da': 'Slet en besked',
         'de': 'Eine Nachricht löschen',
@@ -164,7 +160,6 @@ class modal:
     label = {
         'en': 'Message:',
         'ru': 'Сообщение:',
-        'en': 'Message:',
         'id': 'Pesan:',
         'da': 'Besked:',
         'de': 'Nachricht:',
@@ -176,7 +171,6 @@ class modal:
     placeholder = {
         'en': 'You can also use embed-builder',
         'ru': 'Вы также можете пользоваться embed-builder',
-        'en': 'You can also use embed-builder',
         'id': 'Anda juga dapat menggunakan pembuat sematan',
         'da': 'Du kan også bruge embed-builder',
         'de': 'Sie können auch embed-builder verwenden',
