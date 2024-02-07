@@ -147,8 +147,8 @@ class thread:
 
 class modal:
     title = {
-        'ru': 'Авто-сообщения',
         'en': 'Auto-messages',
+        'ru': 'Авто-сообщения',
         'id': 'Pesan otomatis',
         'da': 'Auto-beskeder',
         'de': 'Automatische Nachrichten',
