@@ -2,7 +2,6 @@ import threading
 import asyncio
 
 from .load import load_db
-from .misc.error_handler import on_error
 from .misc.utils import get_info_colums, register_table
 from .handlers import (
     establish_connection,
@@ -36,6 +35,7 @@ register_table(
         prefix TEXT DEFAULT 'l.',
         color INT8 DEFAULT '1974050',
         economic_settings JSON DEFAULT '{"emoji":"<:diamond:1183363436780978186>"}',
+        music_settings JSON DEFAULT '{}',
         auto_roles JSON DEFAULT '{}',
         thread_messages JSON DEFAULT '{}',
         reactions JSON DEFAULT '{}',

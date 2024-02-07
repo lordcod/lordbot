@@ -1,4 +1,5 @@
 
+
 class start:
     author = {
         'ru': 'Настройка модулей бота.',
@@ -79,6 +80,17 @@ class module_name:
         'fr': 'Préfixe',
         'pl': 'Przedrostek',
         'tr': 'Önek'
+    }
+    music = {
+        'en': "Music",
+        'ru': "Музыка",
+        'id': 'Musik',
+        'da': 'Musik',
+        'de': 'Musik',
+        'es': 'Música',
+        'fr': 'Musique',
+        'pl': 'Muzyka',
+        'tr': 'Müzik'
     }
     color = {
         'en': "Color of system messages",

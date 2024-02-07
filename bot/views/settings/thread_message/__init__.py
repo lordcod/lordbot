@@ -1,8 +1,8 @@
 import nextcord
 
-from .additional import InstallThreadView
-from .precise import ThreadData
-from .._view import DefaultSettingsView
+from bot.views.settings.thread_message.additional import InstallThreadView
+from bot.views.settings.thread_message.precise import ThreadData
+from bot.views.settings._view import DefaultSettingsView
 
 from bot.views import settings_menu
 from bot.databases.db import GuildDateBases

@@ -98,19 +98,19 @@ class WelcomerView(DefaultSettingsView):
                 value=''
             )
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install message', style=nextcord.ButtonStyle.success, row=1)
+    @nextcord.ui.button(label='Install message', style=nextcord.ButtonStyle.success)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = Modal(interaction.guild, self.channel)
 
         await interaction.response.send_modal(modal)
 
-    @nextcord.ui.button(label='View message', style=nextcord.ButtonStyle.blurple, row=2)
+    @nextcord.ui.button(label='View message', style=nextcord.ButtonStyle.blurple)
     async def preview(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         greeting_message: dict = self.gdb.get('greeting_message')
 
@@ -126,7 +126,7 @@ class WelcomerView(DefaultSettingsView):
 
         await interaction.response.send_message(**message_data, ephemeral=True)
 
-    @nextcord.ui.button(label='Delete message', style=nextcord.ButtonStyle.red, row=2)
+    @nextcord.ui.button(label='Delete message', style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         self.gdb.set('greeting_message', {})
 

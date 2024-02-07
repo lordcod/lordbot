@@ -36,6 +36,11 @@ class SetDropdown(nextcord.ui.Select):
                 value='Color'
             ),
             nextcord.SelectOption(
+                label=module_name.music.get(locale),
+                emoji=Emoji.channel_voice,
+                value='Music'
+            ),
+            nextcord.SelectOption(
                 label=module_name.auto_roles.get(locale),
                 emoji=Emoji.auto_role,
                 value='AutoRoles'

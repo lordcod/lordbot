@@ -1,3 +1,4 @@
+from .voice import MusicView
 from .ideas import IdeasView
 from .welcomer import WelcomerView
 from .auto_role import AutoRoleView
@@ -16,6 +17,7 @@ moduls = {
     'Languages': Languages,
     'Prefix': Prefix,
     'CommandPermission':   CommandsDataView,
+    'Music': MusicView,
     'Welcomer': WelcomerView,
     'AutoRoles': AutoRoleView,
     'Reactions': AutoReactions,

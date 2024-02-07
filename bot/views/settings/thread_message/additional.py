@@ -1,8 +1,8 @@
 import nextcord
 
-from .modal import ModalBuilder
-from ..thread_message import AutoThreadMessage
-from .._view import DefaultSettingsView
+from bot.views.settings.thread_message.modal import ModalBuilder
+from bot.views.settings.thread_message import AutoThreadMessage
+from bot.views.settings._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import (
