@@ -13,6 +13,7 @@ class init:
         'tr': 'Forumlarda/iş parçacıklarında otomatik mesajlar'
     }
     brief_title = {
+        'en': 'Auto-messages',
         'ru': 'Авто-сообщения',
         'en': 'Auto-messages',
         'id': 'Pesan otomatis',
@@ -24,6 +25,7 @@ class init:
         'tr': 'Otomatik mesajlar'
     }
     description = {
+        'en': 'Add or change your automatic posts in forums/branches',
         'ru': 'Добавляйте или изменяйте свои автоматические сообщения в форумах/ветках',
         'en': 'Add or change your automatic posts in forums/threads',
         'id': 'Menambah atau mengubah postingan otomatis Anda di forum/utas',
@@ -46,6 +48,7 @@ class init:
         'tr': 'Şubelerde/forumlarda otomatik mesaj ayarları:'
     }
     channel = {
+        'en': 'Channel',
         'ru': 'Канал',
         'en': 'Channel',
         'id': 'Kanal',
@@ -60,6 +63,7 @@ class init:
 
 class addptional:
     channel_error = {
+        'en': 'Auto-messages have already been installed on this channel',
         'ru': 'На этот канал уже установлено авто-сообщения',
         'en': 'Auto-messages have already been installed on this channel',
         'id': 'Pesan otomatis telah diinstal di saluran ini',
@@ -71,6 +75,7 @@ class addptional:
         'tr': 'Bu kanala otomatik mesajlar zaten yüklenmiştir'
     }
     placeholder = {
+        'en': 'Select a channel for auto-messages',
         'ru': 'Выберете канал для авто-сообщений',
         'en': 'Select a channel for auto-messages',
         'id': 'Pilih saluran untuk pesan otomatis',
@@ -82,6 +87,7 @@ class addptional:
         'tr': 'Otomatik mesajlar için bir kanal seçin'
     }
     install_mes = {
+        'en': 'Install message',
         'ru': 'Установить сообщение',
         'en': 'Install message',
         'id': 'Instal pesan',
@@ -118,6 +124,7 @@ class thread:
         'tr': 'Mesajı görüntüle'
     }
     edit_message = {
+        'en': 'Edit a message',
         'ru': 'Изменить сообщение',
         'en': 'Edit a message',
         'id': 'Mengedit pesan',
@@ -129,6 +136,7 @@ class thread:
         'tr': 'Bir mesajı düzenleme'
     }
     delete_message = {
+        'en': 'Delete a message',
         'ru': 'Удалить сообщение',
         'en': 'Delete a message',
         'id': 'Menghapus pesan',
@@ -154,6 +162,7 @@ class modal:
         'tr': 'Otomatik mesajlar'
     }
     label = {
+        'en': 'Message:',
         'ru': 'Сообщение:',
         'en': 'Message:',
         'id': 'Pesan:',
@@ -165,6 +174,7 @@ class modal:
         'tr': 'Mesaj:'
     }
     placeholder = {
+        'en': 'You can also use embed-builder',
         'ru': 'Вы также можете пользоваться embed-builder',
         'en': 'You can also use embed-builder',
         'id': 'Anda juga dapat menggunakan pembuat sematan',
