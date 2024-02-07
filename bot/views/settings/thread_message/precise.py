@@ -13,7 +13,7 @@ from bot.languages.settings import (
 
 
 class ThreadData(DefaultSettingsView):
-    def __init__(self, channel, channel_data) -> None:
+    def __init__(self, channel: nextcord.abc.GuildChannel, channel_data) -> None:
         self.channel_data = channel_data
         self.channel = channel
 

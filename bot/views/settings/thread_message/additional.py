@@ -1,7 +1,7 @@
 import nextcord
 
 from .modal import ModalBuilder
-from .. import thread_message
+from ..thread_message import AutoThreadMessage
 from .._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
@@ -11,7 +11,7 @@ from bot.languages.settings import (
 )
 
 
-class DropDownBuilder(nextcord.ui.ChannelSelect):
+class ChannelDropDown(nextcord.ui.ChannelSelect):
     def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
         locale = self.gdb.get('language')
@@ -31,14 +31,14 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
                 thread_langs.addptional.channel_error.get(locale))
             return
 
-        view = ViewBuilder(channel.guild.id, channel.id)
+        view = InstallThreadView(channel.guild.id, channel.id)
 
         view.install.disabled = False
 
         await interaction.message.edit(view=view)
 
 
-class ViewBuilder(DefaultSettingsView):
+class InstallThreadView(DefaultSettingsView):
     def __init__(self, guild_id, installer=None) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
@@ -49,7 +49,7 @@ class ViewBuilder(DefaultSettingsView):
         self.back.label = button_name.back.get(locale)
         self.install.label = thread_langs.addptional.install_mes.get(locale)
 
-        DDB = DropDownBuilder(guild_id)
+        DDB = ChannelDropDown(guild_id)
 
         self.add_item(DDB)
 
@@ -57,7 +57,7 @@ class ViewBuilder(DefaultSettingsView):
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = thread_message.AutoThreadMessage(interaction.guild)
+        view = AutoThreadMessage(interaction.guild)
 
         await interaction.message.edit(embed=view.embed, view=view)
 

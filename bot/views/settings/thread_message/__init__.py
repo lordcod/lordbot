@@ -1,6 +1,6 @@
 import nextcord
 
-from .additional import ViewBuilder
+from .additional import InstallThreadView
 from .precise import ThreadData
 from .._view import DefaultSettingsView
 
@@ -13,18 +13,14 @@ from bot.languages.settings import (
 )
 
 
-class DropDown(nextcord.ui.Select):
-    is_option = False
+class DropDown(nextcord.ui.StringSelect):
+    current_disabled = False
 
     def __init__(self, guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
         locale = self.gdb.get('language')
         self.forum_message = self.gdb.get('thread_messages')
         channels = [guild.get_channel(key) for key in self.forum_message]
-
-        if len(channels) <= 0:
-            self.is_option = True
-            return
 
         options = [
             nextcord.SelectOption(
@@ -35,11 +31,16 @@ class DropDown(nextcord.ui.Select):
             for chnl in channels
         ]
 
+        if len(options) <= 0:
+            options.append(nextcord.SelectOption(label="-"))
+            self.current_disabled = True
+
         super().__init__(
-            placeholder=thread_langs.init.pc.get(locale),
+            placeholder=thread_langs.init.placeholder.get(locale),
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
+            disabled=self.current_disabled
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -79,10 +80,7 @@ class AutoThreadMessage(DefaultSettingsView):
         self.back.label = button_name.back.get(locale)
         self.addtion.label = button_name.add.get(locale)
 
-        self.auto = DropDown(guild)
-
-        if not self.auto.is_option:
-            self.add_item(self.auto)
+        self.add_item(DropDown(guild))
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -96,6 +94,6 @@ class AutoThreadMessage(DefaultSettingsView):
     async def addtion(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        view = ViewBuilder(interaction.guild_id)
+        view = InstallThreadView(interaction.guild_id)
 
         await interaction.message.edit(embed=None, view=view)

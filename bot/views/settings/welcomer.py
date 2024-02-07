@@ -37,7 +37,7 @@ class Modal(nextcord.ui.Modal):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-class DropDownBuilder(nextcord.ui.ChannelSelect):
+class ChannelsDropDown(nextcord.ui.ChannelSelect):
     def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
@@ -73,7 +73,7 @@ class WelcomerView(DefaultSettingsView):
         self.preview.label = welcome_lang.button_view.get(locale)
         self.delete.label = welcome_lang.button_delete.get(locale)
 
-        DDB = DropDownBuilder(guild.id)
+        DDB = ChannelsDropDown(guild.id)
         self.add_item(DDB)
 
         self.embed = nextcord.Embed(

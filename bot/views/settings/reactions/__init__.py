@@ -1,6 +1,6 @@
 import nextcord
 
-from .additional import ViewBuilder
+from .additional import InstallEmojiView
 from .precise import ReactData
 from .._view import DefaultSettingsView
 
@@ -105,6 +105,6 @@ class AutoReactions(DefaultSettingsView):
     async def addtion(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        view = ViewBuilder(interaction.guild_id)
+        view = InstallEmojiView(interaction.guild_id)
 
         await interaction.message.edit(embed=None, view=view)

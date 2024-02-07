@@ -31,21 +31,21 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
             await interaction.response.send_message(reaction_langs.addres.channel_error.get(locale), ephemeral=True)
             return
 
-        view = ViewBuilder(channel.guild.id, channel.id)
-
-        view.install.disabled = False
+        view = InstallEmojiView(channel.guild.id, channel.id)
 
         await interaction.message.edit(view=view)
 
 
-class ViewBuilder(DefaultSettingsView):
-    def __init__(self, guild_id: int, installer=None) -> None:
+class InstallEmojiView(DefaultSettingsView):
+    def __init__(self, guild_id: int, channel_id: int = None) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
 
-        self.installer = installer
-
         super().__init__()
+
+        if channel_id is not None:
+            self.channel_id = channel_id
+            self.install.disabled = False
 
         self.back.label = button_name.back.get(locale)
         self.install.label = reaction_langs.addres.install_emoji.get(locale)
@@ -62,6 +62,6 @@ class ViewBuilder(DefaultSettingsView):
 
     @nextcord.ui.button(label='Install emoji', style=nextcord.ButtonStyle.blurple, disabled=True)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = ModalBuilder(interaction.guild_id, self.installer)
+        modal = ModalBuilder(interaction.guild_id, self.channel_id)
 
         await interaction.response.send_modal(modal)
