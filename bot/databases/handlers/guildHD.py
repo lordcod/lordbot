@@ -44,8 +44,6 @@ class GuildDateBases:
 
     @on_error()
     def _update(self, guild_id, arg, value):
-        if not self._get(guild_id):
-            self._insert(guild_id)
         with connection().cursor() as cursor:
             cursor.execute(
                 f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value, guild_id))
@@ -70,6 +68,8 @@ class GuildDateBases:
     @on_error()
     def delete(self):
         with connection().cursor() as cursor:
+            reserved.remove(self.guild_id)
+
             cursor.execute('DELETE FROM guilds WHERE id = %s',
                            (self.guild_id,))
 
