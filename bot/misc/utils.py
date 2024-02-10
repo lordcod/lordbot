@@ -1,7 +1,7 @@
 import nextcord
 
 import inspect
-import re
+import regex
 import string
 import random
 import aiohttp
@@ -14,17 +14,18 @@ from io import BytesIO
 from functools import lru_cache
 from easy_pil import Editor, Font, load_image_async
 
-from bot.misc.logger import Logger
 
 number_type = Union[int, float]
 
 
 class TempletePayload:
-    def to_dict(self, _prefix=None):
-        if _prefix is None:
-            prefix = self.__class__.__name__
+    _prefix = None
+
+    def to_dict(self):
+        if self._prefix is not None:
+            prefix = str(self._prefix)
         else:
-            prefix = str(_prefix)
+            prefix = self.__class__.__name__
 
         base = {}
 
@@ -38,6 +39,8 @@ class TempletePayload:
 
 
 class GuildPayload(TempletePayload):
+    _prefix = 'guild'
+
     def __init__(self, guild: nextcord.Guild) -> None:
         self.id: int = guild.id
         self.name: str = guild.name
@@ -55,6 +58,8 @@ class GuildPayload(TempletePayload):
 
 
 class MemberPayload(TempletePayload):
+    _prefix = 'member'
+
     def __init__(self, member: nextcord.Member) -> None:
         self.id: int = member.id
         self.mention: str = member.mention
@@ -74,10 +79,10 @@ class MemberPayload(TempletePayload):
 
 class GreetingTemplate(string.Template):
     pattern = r'''
-        \{(?:
+        \{(\s*)(?:
         (?P<escaped>\{) |
-        (?P<named>[\._a-z][\._a-z0-9]*)\} |
-        (?P<braced>[\._a-z][\._a-z0-9]*)\} |
+        (?P<named>[\._a-z][\._a-z0-9]*)(\s*)\} |
+        (?P<braced>[\._a-z][\._a-z0-9]*)(\s*)\} |
         (?P<invalid>)
         )
     '''

@@ -6,9 +6,7 @@ from bot.misc import utils
 from bot.misc.logger import Logger
 from bot.databases.db import GuildDateBases
 
-import time
 import functools
-import asyncio
 
 
 def on_error(func):
@@ -33,8 +31,8 @@ class members_event(commands.Cog):
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
 
-        asyncio.create_task(self.auto_roles(member, gdb))
-        asyncio.create_task(self.auto_message(member, gdb))
+        await self.auto_roles(member, gdb)
+        await self.auto_message(member, gdb)
 
     @on_error
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
@@ -43,8 +41,8 @@ class members_event(commands.Cog):
         if not roles_ids:
             return
 
-        roles = filter(lambda item: item is not None, [
-                       member.guild.get_role(role_id) for role_id in roles_ids])
+        roles = filter(lambda item: item is not None,
+                       [member.guild.get_role(role_id) for role_id in roles_ids])
 
         await member.add_roles(*roles, atomic=False)
 

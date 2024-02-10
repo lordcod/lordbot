@@ -4,7 +4,14 @@ import asyncio
 async def ttask(arg):
     print(arg)
 
-int.send()
+
+def sstest(*args):
+    print(*args)
+
+
+ft = filter(lambda item: item is not None, [None, 1, 0, None])
+
+sstest(*ft)
 
 
 async def main():

@@ -122,6 +122,9 @@ class WelcomerView(DefaultSettingsView):
 
         templete = utils.GreetingTemplate(content)
         message_format = templete.safe_substitute(data_payload)
+
+        print(message_format, data_payload)
+
         message_data = await utils.generate_message(message_format)
 
         await interaction.response.send_message(**message_data, ephemeral=True)
