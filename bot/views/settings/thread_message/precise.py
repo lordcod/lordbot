@@ -41,17 +41,16 @@ class ThreadData(DefaultSettingsView):
     async def message(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        channel_data = self.channel_data
+        channel_content = self.channel_data
 
         gdb = GuildDateBases(interaction.guild_id)
         locale = gdb.get('language')
 
-        if not channel_data:
+        if not channel_content:
             await interaction.response.send_message(
                 thread_langs.thread.mes_not_found.get(locale))
 
-        content = channel_data.get('content')
-        content = await utils.generate_message(content)
+        content = await utils.generate_message(channel_content)
         await interaction.response.send_message(**content, ephemeral=True)
 
     @nextcord.ui.button(label='Edit message',

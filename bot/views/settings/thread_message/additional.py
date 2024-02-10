@@ -1,8 +1,8 @@
 import nextcord
 
-from bot.views.settings.thread_message.modal import ModalBuilder
-from bot.views.settings.thread_message import AutoThreadMessage
-from bot.views.settings._view import DefaultSettingsView
+from .modal import ModalBuilder
+from .. import thread_message
+from .._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import (
@@ -57,7 +57,7 @@ class InstallThreadView(DefaultSettingsView):
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = AutoThreadMessage(interaction.guild)
+        view = thread_message.AutoThreadMessage(interaction.guild)
 
         await interaction.message.edit(embed=view.embed, view=view)
 

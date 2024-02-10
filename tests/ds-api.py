@@ -11,6 +11,13 @@ guild_id = 1165681101294030898
 member_id = 636824998123798531
 channel_id = 1165681102590050316
 
+try:
+    int("grg")
+except (ValueError, TypeError) as err:
+    print(err)
+
+exit()
+
 
 async def main():
     url = f"{api}/channels/{channel_id}/messages?limit=1"
@@ -55,7 +62,8 @@ async def main():
             },
         ],
     }
-    headers = {"Authorization": f"Bot {token}", "Content-Type": "application/json"}
+    headers = {"Authorization": f"Bot {token}",
+               "Content-Type": "application/json"}
 
     data = orjson.dumps(data)
 

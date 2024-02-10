@@ -14,6 +14,8 @@ from io import BytesIO
 from functools import lru_cache
 from easy_pil import Editor, Font, load_image_async
 
+from bot.misc.logger import Logger
+
 number_type = Union[int, float]
 
 
@@ -191,7 +193,7 @@ async def generate_message(content: str) -> dict:
             message['embed'] = embed
         elif not message_content:
             raise ValueError()
-    except (ValueError | orjson.JSONDecodeError):
+    except (TypeError, ValueError, orjson.JSONDecodeError):
         message['content'] = content
     return message
 

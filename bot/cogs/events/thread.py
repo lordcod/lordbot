@@ -21,11 +21,11 @@ class thread_event(commands.Cog):
         guild_data = GuildDateBases(thread.guild.id)
         afm = guild_data.get('thread_messages')
         thread_data = afm.get(thread.parent_id, None)
+
         if not thread_data:
             return
 
-        content = thread_data.get('content', '')
-        content = await utils.generate_message(content)
+        content = await utils.generate_message(thread_data)
         await thread.send(**content)
 
 

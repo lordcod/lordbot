@@ -3,14 +3,8 @@ import nextcord
 from ... import ideas
 from bot.views.settings._view import DefaultSettingsView
 
-from bot.misc import utils
-from bot.misc.ratelimit import BucketType
-from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases.db import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
-from bot.languages.settings import (
-    button as button_name
-)
 
 from typing import Optional
 

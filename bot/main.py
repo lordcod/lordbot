@@ -22,6 +22,7 @@ bot = commands.Bot(
     intents=nextcord.Intents.all(),
     help_command=None
 )
+bot.timeouts = {}
 
 
 def load_dir(dirpath: str) -> None:

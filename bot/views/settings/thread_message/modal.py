@@ -29,8 +29,7 @@ class ModalBuilder(nextcord.ui.Modal):
         content = self.content.value
         channel_id = self.channel_id
 
-        forum_message[channel_id] = {}
-        forum_message[channel_id]['content'] = content
+        forum_message[channel_id] = content
 
         gdb.set('thread_messages', forum_message)
 

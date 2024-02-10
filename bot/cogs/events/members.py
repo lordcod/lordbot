@@ -1,3 +1,4 @@
+from typing import Optional
 import nextcord
 from nextcord.ext import commands
 
@@ -6,10 +7,12 @@ from bot.misc.logger import Logger
 from bot.databases.db import GuildDateBases
 
 import time
+import functools
 import asyncio
 
 
 def on_error(func):
+    @functools.wraps(func)
     async def wrapped(self, member, gdb):
         try:
             result = await func(self, member, gdb)
@@ -67,47 +70,6 @@ class members_event(commands.Cog):
         message_data = await utils.generate_message(message_format)
 
         await channel.send(**message_data)
-
-    @commands.Cog.listener()
-    async def on_member_update(self, before: nextcord.Member, after: nextcord.Member, *, timeout: float = None):
-        if timeout is not None:
-            await self.tmoutmm()
-        elif (
-            before.communication_disabled_until is not None and
-            after.communication_disabled_until is None
-        ):
-            await self.process_untimeout(before, after)
-        elif (
-            before.communication_disabled_until is None and
-            after.communication_disabled_until is not None
-        ):
-            await self.process_timeout(before, after)
-
-    async def tmoutmm(self, t):
-        print(t)
-
-    async def process_untimeout(self, before: nextcord.Member, after: nextcord.Member):
-        if not hasattr(self.bot, 'timeouts'):
-            return
-
-        if self.bot.timeouts[after.id] is None:
-            return
-
-        self.bot.dispatch("member_update", before, after,
-                          timeout=self.bot.timeouts[after.id][0])
-
-        self.bot.timeouts[after.id] = None
-
-    async def process_timeout(self, before: nextcord.Member, after: nextcord.Member):
-        timing = after.communication_disabled_until.timestamp()
-        temp = timing-time.time()
-
-        if not hasattr(self.bot, 'timeouts'):
-            self.bot.timeouts = {}
-
-        self.bot.timeouts[after.id] = (temp, timing)
-        self.bot.loop.call_later(
-            temp, asyncio.create_task, self.process_untimeout(before, after))
 
 
 def setup(bot: commands.Bot):

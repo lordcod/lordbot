@@ -7,12 +7,6 @@ from bot.misc import utils
 from bot.misc.time_transformer import display_time
 from bot.misc.ratelimit import BucketType, reset_cooldown
 from bot.databases.db import GuildDateBases, CommandDB
-from bot.languages import help as help_info
-from bot.languages.settings import (
-    button as button_name
-)
-
-from typing import List, Optional
 
 cd_types = {
     0: 'Member',
@@ -93,17 +87,15 @@ class DropDown(nextcord.ui.StringSelect):
         options = [
             nextcord.SelectOption(
                 label="Member",
-                value=BucketType.member
+                value=BucketType.MEMBER.value
             ),
             nextcord.SelectOption(
                 label="Server",
-                value=BucketType.server
+                value=BucketType.SERVER.value
             )
         ]
 
-        super().__init__(
-            options=options
-        )
+        super().__init__(options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         cooltype = int(self.values[0])

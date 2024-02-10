@@ -1,17 +1,16 @@
 import time
 import nextcord
 
+import enum
 from typing import Union
-
-data_structures = None
 
 
 data = {}
 
 
-class BucketType:
-    member = 0
-    server = 1
+class BucketType(enum.IntEnum):
+    MEMBER = 0
+    SERVER = 1
 
 
 class CooldownGuild:
@@ -174,16 +173,16 @@ class Cooldown:
         message: nextcord.Message
     ) -> CooldownObject:
         cooldata: dict = command_data
-        type = cooldata.get('type')
+        cooltype = cooldata.get('type')
 
-        if type == BucketType.member:
+        if cooltype == BucketType.MEMBER:
             return CooldownMember(
                 command_name,
                 command_data,
                 message.guild.id,
                 message.author.id
             )
-        elif type == BucketType.server:
+        elif cooltype == BucketType.SERVER:
             return CooldownGuild(
                 command_name,
                 command_data,
