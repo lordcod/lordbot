@@ -624,7 +624,7 @@ categories: Dict[str, List[CommandOption]] = {
             "arguments": [],
             "descriptrion": {
                 "en": "Comes out the channel with the user who called the command",
-                "ru": "",
+                "ru": "Выходит канал с пользователем, который вызвал команду",
                 "id": "",
                 "da": "",
                 "de": "",
