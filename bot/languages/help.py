@@ -625,24 +625,24 @@ categories: Dict[str, List[CommandOption]] = {
             "descriptrion": {
                 "en": "Comes out the channel with the user who called the command",
                 "ru": "Выходит канал с пользователем, который вызвал команду",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": "Keluar dari saluran dengan pengguna yang memanggil perintah",
+                "da": "Kommer ud af kanalen med den bruger, der kaldte kommandoen",
+                "de": "Gibt den Kanal mit dem Benutzer aus, der den Befehl aufgerufen hat",
+                "es": "Sale del canal con el usuario que llamó al comando",
+                "fr": "Sort le canal avec l'utilisateur qui a appelé la commande",
+                "pl": "Wychodzi kanał z użytkownikiem, który wywołał polecenie",
+                "tr": "Komutu çağıran kullanıcıyla birlikte kanaldan çıkar"
             },
             "brief_descriptrion": {
                 "en": "Comes out the channel",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Выходит из канала",
+                "id": "Keluar dari saluran",
+                "da": "Kommer ud af kanalen",
+                "de": "Kommt aus dem Kanal",
+                "es": "Sale del canal",
+                "fr": "Sort le canal",
+                "pl": "Wychodzi z kanału",
+                "tr": "Kanaldan çıkıyor"
             },
             "allowed_disabled": True,
         },
@@ -654,27 +654,51 @@ categories: Dict[str, List[CommandOption]] = {
             "descriptrion": {
                 "en": (
                     "Starts playing the music set by the user\n"
-                    "As a cloud with music is **Yandex Music**"
+                    "As a cloud with music is [**Yandex Music**](<https://music.yandex.ru>)"
                 ),
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": (
+                    "Начинает воспроизводиться музыка, установленная пользователем\n"
+                    "В качестве облака с музыкой используется [**Яндекс Музыка**](<https://music.yandex.ru>)"
+                ),
+                "id": (
+                    "Mulai memutar musik yang disetel oleh pengguna\n"
+                    "Sebagai awan dengan musik adalah [**Yandex Music**](<https://music.yandex.ru>)"
+                ),
+                "da": (
+                    "Begynder at afspille musik indstillet af brugeren\n"
+                    "Som en sky med musik er [**Yandeks Musik**](<https://music.yandex.ru>)"
+                ),
+                "de": (
+                    "Startet die Wiedergabe der vom Benutzer eingestellten Musik\n"
+                    "Als Wolke mit Musik ist [**Yandex Music**](https://music.yandex.ru )"
+                ),
+                "es": (
+                    "Comienza a reproducir la música configurada por el usuario\n"
+                    "Como una nube con música es [**Yandex Music**](<https://music.yandex.ru>)"
+                ),
+                "fr": (
+                    "Démarre la lecture de la musique définie par l'utilisateur\n"
+                    "Comme un nuage avec de la musique est [**Yandex Music**](<https://music.yandex.ru>)"
+                ),
+                "pl": (
+                    "Rozpoczyna odtwarzanie muzyki ustawionej przez użytkownika\n"
+                    "Jako chmura z muzyką jest [**Yandex Music**](<https://music.yandex.ru>)"
+                ),
+                "tr": (
+                    "Kullanıcı tarafından ayarlanan müziği çalmaya başlar\n"
+                    "Müzikli bir bulut gibi [**Yandex Müzik**](<https://music.yandex.ru>)"
+                ),
             },
             "brief_descriptrion": {
                 "en": "Starts playing music",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Начинает воспроизводиться музыка",
+                "id": "Mulai memutar musik",
+                "da": "Begynder at spille musik",
+                "de": "Startet die Musikwiedergabe",
+                "es": "Comienza a reproducir música",
+                "fr": "Commence à jouer de la musique",
+                "pl": "Rozpoczyna odtwarzanie muzyki",
+                "tr": "Müzik çalmaya başlar"
             },
             "allowed_disabled": True,
         },
@@ -685,25 +709,25 @@ categories: Dict[str, List[CommandOption]] = {
             "arguments": [],
             "descriptrion": {
                 "en": "Stops the current music stream",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Останавливает текущий музыкальный поток",
+                "id": "Menghentikan aliran musik saat ini",
+                "da": "Stopper den aktuelle musikstrøm",
+                "de": "Startet die Musikwiedergabe Stoppt den aktuellen Musikstream",
+                "es": "Detiene la transmisión de música actual",
+                "fr": "Arrête le flux de musique en cours",
+                "pl": "Zatrzymuje bieżący strumień muzyki",
+                "tr": "Geçerli müzik akışını durdurur"
             },
             "brief_descriptrion": {
                 "en": "Stops the music",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Останавливает музыку",
+                "id": "Menghentikan musik",
+                "da": "Stopper musikken",
+                "de": "Stoppt die Musik",
+                "es": "Detiene la música",
+                "fr": "Arrête la musique",
+                "pl": "Zatrzymuje muzykę",
+                "tr": "Müziği durdurur"
             },
             "allowed_disabled": True,
         },
@@ -714,25 +738,25 @@ categories: Dict[str, List[CommandOption]] = {
             "arguments": [],
             "descriptrion": {
                 "en": "Stops the current music stream in the future which can be continued",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Останавливает текущий музыкальный поток в будущем, который может быть продолжен",
+                "id": "Menghentikan aliran musik saat ini di masa mendatang yang dapat dilanjutkan",
+                "da": "Stopper den aktuelle musikstrøm i fremtiden, som kan fortsættes",
+                "de": "Stoppt den aktuellen Musikstream in der Zukunft, der fortgesetzt werden kann",
+                "es": "Detiene la transmisión de música actual en el futuro, que puede continuar",
+                "fr": "Arrête le flux de musique actuel à l'avenir qui peut être poursuivi",
+                "pl": "Zatrzymuje bieżący strumień muzyki w przyszłości, który może być kontynuowany",
+                "tr": "Gelecekte devam edebilecek mevcut müzik akışını durdurur"
             },
             "brief_descriptrion": {
                 "en": "Assigns a pause for music",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Назначает музыкальную паузу",
+                "id": "Menetapkan jeda untuk musik",
+                "da": "Tildeler en pause til musik",
+                "de": "Weist eine Pause für Musik zu",
+                "es": "Asigna una pausa para la música",
+                "fr": "Attribue une pause pour la musique",
+                "pl": "Przypisuje pauzę dla muzyki",
+                "tr": "Müzik için bir duraklama atar"
             },
             "allowed_disabled": True,
         },
@@ -743,25 +767,25 @@ categories: Dict[str, List[CommandOption]] = {
             "arguments": [],
             "descriptrion": {
                 "en": "Resumes the music stream that was completed by the necessary means in order to continue in the future",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Возобновляет музыкальный поток, который был завершен необходимыми средствами для продолжения в будущем",
+                "id": "Melanjutkan aliran musik yang diselesaikan dengan cara yang diperlukan untuk melanjutkan di masa mendatang",
+                "da": "Genoptager musikstrømmen, der blev afsluttet med de nødvendige midler for at fortsætte i fremtiden",
+                "de": "Setzt den Musikstream fort, der mit den erforderlichen Mitteln abgeschlossen wurde, um in Zukunft fortzufahren",
+                "es": "Reanuda la transmisión de música que se completó por los medios necesarios para continuar en el futuro",
+                "fr": "Reprend le flux de musique qui a été complété par les moyens nécessaires pour continuer à l'avenir",
+                "pl": "Wznawia strumień muzyczny, który został ukończony niezbędnymi środkami, aby kontynuować w przyszłości",
+                "tr": "Gelecekte de devam edebilmek için gerekli araçlarla tamamlanan müzik akışını sürdürür"
             },
             "brief_descriptrion": {
                 "en": "Resumes music",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Возобновляет воспроизведение музыки",
+                "id": "Melanjutkan musik",
+                "da": "Genoptager Musik",
+                "de": "Setzt die Musik fort",
+                "es": "Reanuda la música",
+                "fr": "Reprend la musique",
+                "pl": "Wznawia muzykę",
+                "tr": "Müziğe devam eder"
             },
             "allowed_disabled": True,
         },
@@ -772,25 +796,25 @@ categories: Dict[str, List[CommandOption]] = {
             "arguments": ["<volume>"],
             "descriptrion": {
                 "en": "Set the volume to the current music stream from 1 to 100",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Установите громкость текущего музыкального потока в диапазоне от 1 до 100",
+                "id": "Atur volume ke aliran musik saat ini dari 1 hingga 100",
+                "da": "Indstil lydstyrken til den aktuelle musikstrøm fra 1 til 100",
+                "de": "Stellen Sie die Lautstärke auf den aktuellen Musikstream von 1 bis 100 ein",
+                "es": "Ajuste el volumen de la transmisión de música actual de 1 a 100",
+                "fr": "Réglez le volume sur le flux de musique actuel de 1 à 100",
+                "pl": "Ustaw głośność na bieżący strumień muzyki od 1 do 100",
+                "tr": "Ses seviyesini geçerli müzik akışına 1'den 100'e ayarlayın"
             },
             "brief_descriptrion": {
                 "en": "Sets the volume",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Устанавливает громкость",
+                "id": "Mengatur volume",
+                "da": "Indstiller lydstyrken",
+                "de": "Stellt die Lautstärke ein",
+                "es": "Ajusta el volumen",
+                "fr": "Règle le volume",
+                "pl": "Ustawia głośność",
+                "tr": "Ses seviyesini ayarlar"
             },
             "allowed_disabled": True,
         },
@@ -799,29 +823,29 @@ categories: Dict[str, List[CommandOption]] = {
         {
             "name": "purge",
             "category": "moderation",
-            "aliases": [],
+            "aliases": ['<limit>'],
             "arguments": [],
             "descriptrion": {
-                "en": "Subcommands that help clean the chat",
-                "ru": "Подкоманды, которые помогают очистить чат",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "en": "Clears the chat the specified number of times",
+                "ru": "Очищает чат указанное количество раз",
+                "id": "Menghapus obrolan beberapa kali yang ditentukan",
+                "da": "Rydder chatten det angivne antal gange",
+                "de": "Löscht den Chat die angegebene Anzahl von Malen",
+                "es": "Borra el chat el número especificado de veces",
+                "fr": "Efface le chat le nombre de fois spécifié",
+                "pl": "Czyści czat określoną liczbę razy",
+                "tr": "Sohbeti belirtilen sayıda temizler"
             },
             "brief_descriptrion": {
                 "en": "Commands to clear the chat",
                 "ru": "Команды для очистки чата",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": "Perintah untuk menghapus obrolan",
+                "da": "Kommandoer til at rydde chatten",
+                "de": "Befehle zum Löschen des Chats",
+                "es": "Comandos para borrar el chat",
+                "fr": "Commandes pour effacer le chat",
+                "pl": "Polecenia, aby wyczyścić czat",
+                "tr": "Sohbeti temizleme komutları"
             },
             "allowed_disabled": True,
         },
@@ -847,24 +871,73 @@ categories: Dict[str, List[CommandOption]] = {
                     "Пример: "
                     "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
                 ),
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": (
+                    "Menambahkan peran ke peserta tertentu untuk sementara atau selamanya\n"
+                    "Jika peran tidak ditentukan, peran tersebut akan ditetapkan selamanya\n"
+                    "Anda dapat meringkas peran\n"
+                    "Waktu ditunjukkan dalam format '1d1h1m1s' nilainya dapat digabungkan dan juga digandakan, misalnya `1d2h1d '\n\n"
+                    "Contoh:"
+                    "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
+                ),
+                "da": (
+                    "Tilføjer roller til en bestemt deltager i et stykke tid eller for evigt\n"
+                    "Hvis rollen ikke er angivet, vil rollen blive tildelt for evigt\n"
+                    "Du kan opsummere rollerne\n"
+                    "Tiden er angivet i formatet '1d1h1m1s' værdierne kan kombineres og også duplikeres, for eksempel `1d2h1d`\n \ n"
+                    "Eksempel: "
+                    "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
+                ),
+                "de": (
+                    "Fügt einem bestimmten Teilnehmer für eine Weile oder für immer Rollen hinzu\n"
+                    "Wenn die Rolle nicht angegeben ist, wird die Rolle für immer zugewiesen\n"
+                    "Sie können die Rollen zusammenfassen\n"
+                    "Die Uhrzeit wird im Format `1t1h1m1s' angegeben Die Werte können kombiniert und auch dupliziert werden, zum Beispiel `1t2h1d`\n\n"
+                    "Beispiel: "
+                    "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
+                ),
+                "es": (
+                    "Agrega roles a un determinado participante por un tiempo o para siempre\n"
+                    "Si no se especifica el rol, el rol se asignará para siempre\n"
+                    "Puedes resumir los roles\n"
+                    "La hora se indica en el formato` 1d1h1m1s' los valores se pueden combinar y también duplicar, por ejemplo `1d2h1d`\n\n"
+                    "Ejemplo:"
+                    "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
+                ),
+                "fr": (
+                    "Ajoute des rôles à un certain participant pendant un certain temps ou pour toujours\n"
+                    "Si le rôle n'est pas spécifié, le rôle sera attribué pour toujours\n"
+                    "Vous pouvez résumer les rôles\n"
+                    "L'heure est indiquée au format '1d1h1m1s' les valeurs peuvent être combinées et également dupliquées, par exemple `1d2h1d '\n\n"
+                    "Exemple:"
+                    "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
+                ),
+                "pl": (
+                    "Dodaje role do określonego uczestnika na chwilę lub na zawsze\n"
+                    "Jeśli rola nie jest określona, rola zostanie przypisana na zawsze\n"
+                    "Możesz podsumować role\n"
+                    "Czas jest wskazany w formacie '1d1h1m1s' wartości można łączyć, a także powielać, na przykład '1d2h1d' \n\n"
+                    "PrzykładЖ"
+                    "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
+                ),
+                "tr": (
+                    "Belirli bir katılımcıya bir süre veya sonsuza kadar roller ekler\n"
+                    "Rol belirtilmezse, rol sonsuza dek atanacaktır\n"
+                    "Rolleri özetleyebilirsiniz\n"
+                    "Zaman '1d1h1m1s' biçiminde gösterilir değerler birleştirilebilir ve ayrıca çoğaltılabilir, örneğin '1d2h1d'\n \n"
+                    "Örnek: "
+                    "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
+                ),
             },
             "brief_descriptrion": {
                 "en": "Adds roles to a certain participant for a while or forever",
                 "ru": "Добавляет роли определенному участнику на некоторое время или навсегда",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": "Menambahkan peran ke peserta tertentu untuk sementara atau selamanya",
+                "da": "Tilføjer roller til en bestemt deltager i et stykke tid eller for evigt",
+                "de": "Fügt einem bestimmten Teilnehmer für eine Weile oder für immer Rollen hinzu",
+                "es": "Agrega roles a un determinado participante por un tiempo o para siempre",
+                "fr": "Ajoute des rôles à un certain participant pendant un certain temps ou pour toujours",
+                "pl": "Dodaje role do określonego uczestnika na chwilę lub na zawsze",
+                "tr": "Belirli bir katılımcıya bir süre veya sonsuza kadar roller ekler"
             },
             "allowed_disabled": True,
         },
@@ -886,24 +959,59 @@ categories: Dict[str, List[CommandOption]] = {
                     "Если указано, то отображаются только те роли, которые принадлежат участнику.\n"
                     "Роли назначенные на всегда не отображаются в списке."
                 ),
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": (
+                    "Menyediakan daftar peran sementara untuk server atau anggota.\n"
+                    "Jika `member` tidak ditentukan, ini menampilkan daftar semua peran sementara di server.\n"
+                    "Jika ditentukan, itu hanya menunjukkan peran yang menjadi milik peserta.\n"
+                    "Peran yang ditugaskan selalu tidak ditampilkan dalam daftar."
+                ),
+                "da": (
+                    "Indeholder en liste over midlertidige roller for serveren eller medlemmet.\n"
+                    "Hvis `member` ikke er angivet, viser den en liste over alle midlertidige roller på serveren.\n"
+                    "Hvis det er angivet, viser det kun de roller, der tilhører deltageren.\n"
+                    "De roller, der er tildelt, vises altid ikke på listen."
+                ),
+                "de": (
+                    "Stellt eine Liste temporärer Rollen für den Server oder das Mitglied bereit.\n"
+                    "Wenn `member` nicht angegeben ist, wird eine Liste aller temporären Rollen auf dem Server angezeigt.\n"
+                    "Wenn angegeben, werden nur die Rollen angezeigt, die dem Teilnehmer gehören.\n"
+                    "Die zugewiesenen Rollen werden immer nicht in der Liste angezeigt."
+                ),
+                "es": (
+                    "Proporciona una lista de roles temporales para el servidor o miembro .\n"
+                    "Si no se especifica `member`, muestra una lista de todos los roles temporales en el servidor.\n"
+                    "Si se especifica, muestra solo los roles que pertenecen al participante.\n"
+                    "Los roles asignados no siempre se muestran en la lista."
+                ),
+                "fr": (
+                    "Fournit une liste de rôles temporaires pour le serveur ou le membre.\n"
+                    "Si `member`  n'est pas spécifié, il affiche une liste de tous les rôles temporaires sur le serveur.\n"
+                    "Si spécifié, il n'affiche que les rôles qui appartiennent au participant.\n"
+                    "Les rôles attribués à ne sont toujours pas affichés dans la liste."
+                ),
+                "pl": (
+                    "Zawiera listę tymczasowych ról dla serwera lub członka.\n"
+                    "Jeśli `member` nie jest określony, wyświetla listę wszystkich tymczasowych ról na serwerze.\n"
+                    "Jeśli określono, pokazuje tylko te role, które należą do uczestnika.\n"
+                    "Przypisane role zawsze nie są wyświetlane na liście."
+                ),
+                "tr": (
+                    "Sunucu veya üye için geçici rollerin bir listesini sağlar.\n"
+                    "`member` belirtilmemişse, sunucudaki tüm geçici rollerin bir listesini gösterir.\n"
+                    "Belirtilirse, yalnızca katılımcıya ait olan rolleri gösterir.\n"
+                    "Atanan roller her zaman listede gösterilmez."
+                ),
             },
             "brief_descriptrion": {
                 "en": "Provides a list of temporary roles for the server or member",
                 "ru": "Предоставляет список временных ролей для сервера или участника",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": "Menyediakan daftar peran sementara untuk server atau anggota",
+                "da": "Indeholder en liste over midlertidige roller for serveren eller medlemmet",
+                "de": "Stellt eine Liste temporärer Rollen für den Server oder das Mitglied bereit",
+                "es": "Proporciona una lista de roles temporales para el servidor o miembro",
+                "fr": "Fournit une liste de rôles temporaires pour le serveur ou le membre",
+                "pl": "Udostępnia listę tymczasowych ról dla serwera lub członka",
+                "tr": "Sunucu veya üye için geçici rollerin bir listesini sağlar"
             },
             "allowed_disabled": True,
         },
@@ -921,13 +1029,34 @@ categories: Dict[str, List[CommandOption]] = {
                     "Отправляет сообщение от имени бота, используя уникальный "
                     "[**embed конструктор**](<https://lordcord.fun/embed-builder>) или обычный текст"
                 ),
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": (
+                    "Mengirim pesan atas nama bot menggunakan unik "
+                    "[**pembuat sematan**](<https://lordcord.fun/embed-builder>) atau teks biasa"
+                ),
+                "da": (
+                    "Sender en besked på vegne af bot ved hjælp af en unik "
+                    "[**embed builder**](<https://lordcord.fun/embed-builder>) eller almindelig tekst"
+                ),
+                "de": (
+                    "Sendet eine Nachricht im Namen des Bots mit einem eindeutigen "
+                    "[**Einbettungsersteller *](<https://lordcord.fun/embed-builder>) oder Klartext"
+                ),
+                "es": (
+                    "Envía un mensaje en nombre del bot usando un único "
+                    "[**constructor de incrustaciones**](<https://lordcord.fun/embed-builder>) o texto sin formato"
+                ),
+                "fr": (
+                    "Envoie un message au nom du bot en utilisant un unique "
+                    "[**constructeur d'intégration**](<https://lordcord.fun/embed-builder>) ou texte brut"
+                ),
+                "pl": (
+                    "Wysyła wiadomość w imieniu bota za pomocą unikalnego "
+                    "[**embed builder**](<https://lordcord.fun / embed-builder>) lub zwykły tekst"
+                ),
+                "tr": (
+                    "Bot adına benzersiz bir mesaj gönderir "
+                    "[**gömme oluşturucu**](<https://lordcord.fun/embed-builder>) veya düz metin"
+                ),
             },
             "brief_descriptrion": {
                 "en": "Sends a message",
@@ -950,24 +1079,24 @@ categories: Dict[str, List[CommandOption]] = {
             "descriptrion": {
                 "en": "Opens special bot management settings as well as its extensions",
                 "ru": "Открывает специальные настройки управления ботом, а также его расширения",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": "Mengirim pesan",
+                "da": "Sender en besked",
+                "de": "Sendet eine Nachricht",
+                "es": "Envía un mensaje",
+                "fr": "Envoie un message",
+                "pl": "Wysyła wiadomość",
+                "tr": "Mesaj gönderir"
             },
             "brief_descriptrion": {
                 "en": "Opens the bot settings",
                 "ru": "Открывает настройки бота",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "id": "Membuka pengaturan bot",
+                "da": "Åbner botindstillingerne",
+                "de": "Öffnet die Bot-Einstellungen",
+                "es": "Abre la configuración del bot",
+                "fr": "Ouvre les paramètres du bot",
+                "pl": "Otwiera ustawienia bota",
+                "tr": "Bot ayarlarını açar"
             },
             "allowed_disabled": False,
         },
@@ -983,37 +1112,37 @@ class Embed:
     title = {
         "ru": "Справочник",
         "en": "Help Book",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Buku Bantuan",
+        "da": "Hjælp Bog",
+        "de": "Hilfebuch",
+        "es": "Libro de Ayuda",
+        "fr": "Livre d'Aide",
+        "pl": "Help Book",
+        "tr": "Yardım Kitabı"
     }
 
     description = {
         "ru": "Справка по командам бота",
         "en": "Help on bot commands",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Bantuan untuk perintah bot",
+        "da": "Hjælp til bot-kommandoer",
+        "de": "Hilfe zu Bot-Befehlen",
+        "es": "Ayuda sobre comandos de bot",
+        "fr": "Aide sur les commandes du bot",
+        "pl": "Pomoc w poleceniach bota",
+        "tr": "Bot komutlarında yardım"
     }
 
     footer = {
         "ru": "[] = Необязательно | <> = Обязательно",
         "en": "[] = Optional | <> = Required",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "[] = Opsional | <> = Wajib Diisi",
+        "da": "[] = Valgfrit | <> = Påkrævet",
+        "de": "[] = Optional | <> = Erforderlich",
+        "es": "[] = Opcional | <> = Requerido",
+        "fr": "[] = Facultatif | <> = Obligatoire",
+        "pl": "[] = Opcjonalne | <> = Wymagane",
+        "tr": "[] = Opcjonalne | <> = Wymagane"
     }
 
 
@@ -1021,92 +1150,92 @@ class CommandEmbed:
     name = {
         "ru": "Имя команды",
         "en": "Command name",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Nama perintah",
+        "da": "Kommandonavn",
+        "de": "Befehlsnamen",
+        "es": "Nombre del comando",
+        "fr": "Nom de la commande",
+        "pl": "Nazwa polecenia",
+        "tr": "Komut adı"
     }
     category = {
         "ru": "Категория",
         "en": "Category",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Kategori",
+        "da": "Kategori",
+        "de": "Kategori",
+        "es": "Categoría",
+        "fr": "Catégorie",
+        "pl": "Kategoria",
+        "tr": "Kategori"
     }
     aliases = {
         "ru": "Псевдонимы",
         "en": "Aliases",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Alias",
+        "da": "Alias",
+        "de": "Aliase",
+        "es": "Alias",
+        "fr": "Alias",
+        "pl": "Aliasy",
+        "tr": "Takma Adlar"
     }
     arguments = {
         "ru": "Аргументы",
         "en": "Arguments",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Argumen",
+        "da": "Argumenter",
+        "de": "Argument",
+        "es": "Argumentos",
+        "fr": "Arguments",
+        "pl": "Argumenty",
+        "tr": "Argümanlar"
     }
     disable_command = {
         "ru": "Можно отключить?",
         "en": "Can I turn it off?",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Bisakah saya mematikannya?",
+        "da": "Kan jeg slukke den?",
+        "de": "Kann ich es ausschalten?",
+        "es": "¿Puedo apagarlo?",
+        "fr": "Puis-je l'éteindre?",
+        "pl": "Mogę to wyłączyć?",
+        "tr": "Kapatabilir miyim?"
     }
     connection_disabled = {
         0: {
             "ru": "Да",
             "en": "Yeah",
-            "id": "",
-            "da": "",
-            "de": "",
-            "es": "",
-            "fr": "",
-            "pl": "",
-            "tr": ""
+            "id": "Ya",
+            "da": "Ja",
+            "de": "Ja",
+            "es": "Sí",
+            "fr": "Ouais",
+            "pl": "Yeah",
+            "tr": "Evet"
         },
         1: {
             "ru": "Нет",
             "en": "Nope",
-            "id": "",
-            "da": "",
-            "de": "",
-            "es": "",
-            "fr": "",
-            "pl": "",
-            "tr": ""
+            "id": "Nggak",
+            "da": "Nope",
+            "de": "Nein",
+            "es": "No",
+            "fr": "Non",
+            "pl": "Nie",
+            "tr": "Hayır"
         }
     }
     description = {
         "ru": "Описание",
         "en": "Descriptrion",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Deskripsi",
+        "da": "Beskrivelse",
+        "de": "Beschreibung",
+        "es": "Descripción",
+        "fr": "Descriptif",
+        "pl": "Opis",
+        "tr": "Tanım"
     }
 
 
@@ -1114,24 +1243,24 @@ class CommandNotFound:
     title = {
         "en": "Command Not Found",
         "ru": "Команда не найдена",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Perintah Tidak Ditemukan",
+        "da": "Kommando Ikke Fundet",
+        "de": "Befehl nicht gefunden",
+        "es": "Comando No Encontrado",
+        "fr": "Commande Non Trouvée",
+        "pl": "Nie Znaleziono Polecenia",
+        "tr": "Komut Bulunamadı"
     }
     description = {
         "en": "When searching for command, we did not find it, look at it again in the general list of commands",
         "ru": "При поиске команды мы ее не нашли, посмотрите на нее еще раз в общем списке команд",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "When searching for command, we did not find it, look at it again in the general list of commands",
+        "da": "Når vi søgte efter kommando, fandt vi det ikke, se på det igen i den generelle liste over kommandoer",
+        "de": "Bei der Suche nach Befehl haben wir ihn nicht gefunden, schauen Sie ihn sich noch einmal in der allgemeinen Befehlsliste an",
+        "es": "Al buscar el comando, no lo encontramos, vuelva a mirarlo en la lista general de comandos",
+        "fr": "Lors de la recherche de commande, nous ne l'avons pas trouvée, regardez-la à nouveau dans la liste générale des commandes",
+        "pl": "Szukając polecenia, nie znaleźliśmy go, spójrz na to ponownie na ogólnej liście poleceń",
+        "tr": "Komutu ararken bulamadık, genel komutlar listesinde tekrar bakın"
     }
 
 
@@ -1139,22 +1268,22 @@ class CommandNotValid:
     title = {
         "en": "The command is invalid",
         "ru": "Команда недействительна",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Perintah tidak valid",
+        "da": "Kommandoen er ugyldig",
+        "de": "Der Befehl ist ungültig",
+        "es": "El comando no es válido",
+        "fr": "La commande n'est pas valide",
+        "pl": "Polecenie jest nieprawidłowe",
+        "tr": "Komut geçersiz"
     }
     description = {
         "en": "Most likely you entered the name of the team incorrectly, perhaps it contains some strange characters",
         "ru": "Скорее всего, вы неправильно ввели название команды, возможно, оно содержит какие-то странные символы",
-        "id": "",
-        "da": "",
-        "de": "",
-        "es": "",
-        "fr": "",
-        "pl": "",
-        "tr": ""
+        "id": "Kemungkinan besar Anda salah memasukkan nama tim, mungkin berisi beberapa karakter aneh",
+        "da": "Mest sandsynligt indtastede du navnet på holdet forkert, måske indeholder det nogle mærkelige tegn",
+        "de": "Höchstwahrscheinlich haben Sie den Namen des Teams falsch eingegeben, vielleicht enthält es einige seltsame Zeichen",
+        "es": "Lo más probable es que haya ingresado el nombre del equipo incorrectamente, tal vez contenga algunos caracteres extraños",
+        "fr": "Très probablement, vous avez entré le nom de l'équipe de manière incorrecte, peut-être qu'il contient des caractères étranges",
+        "pl": "Najprawdopodobniej niepoprawnie wpisałeś nazwę zespołu, być może zawiera ona dziwne postacie",
+        "tr": "Büyük olasılıkla takımın adını yanlış girdiniz, belki de bazı garip karakterler içeriyor"
     }
