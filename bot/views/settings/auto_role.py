@@ -105,8 +105,8 @@ class AutoRoleView(DefaultSettingsView):
 
             self.remove_item(self.install)
 
-            roles = filter(lambda item: item is not None, [
-                           guild.get_role(role_id) for role_id in roles_ids])
+            roles = filter(lambda item: item is not None,
+                           [guild.get_role(role_id) for role_id in roles_ids])
 
             self.embed.add_field(
                 name=role_lang.embed_field.get(locale),

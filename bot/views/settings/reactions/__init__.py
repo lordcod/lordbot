@@ -20,8 +20,9 @@ class DropDown(nextcord.ui.Select):
         self.gdb = GuildDateBases(guild.id)
         locale = self.gdb.get('language')
         self.reactions = self.gdb.get('reactions')
-        channels = filter(lambda item: item is not None, [
-                          guild.get_channel(id) for id in self.reactions])
+        channels = list(filter(lambda item: item is not None,
+                               [guild.get_channel(id)
+                                for id in self.reactions]))
 
         if len(channels) <= 0:
             self.is_option = True

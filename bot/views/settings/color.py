@@ -12,7 +12,7 @@ class Modal(nextcord.ui.Modal):
     def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
 
-        color = self.gdb.get("color", 1974050)
+        color = self.gdb.get("color")
         color = to_color(color)
 
         super().__init__("Rewards", timeout=300)
@@ -44,7 +44,7 @@ class ColorView(DefaultSettingsView):
         gdb = GuildDateBases(guild.id)
         locale = gdb.get("language")
         color = gdb.get("color")
-        color = to_color(color)
+        hex_color = to_color(color)
 
         self.embed = nextcord.Embed(
             title=color_langs.title.get(locale),
@@ -52,7 +52,7 @@ class ColorView(DefaultSettingsView):
             color=color,
         )
         self.embed._fields = [
-            {"name": f"{color_langs.current.get(locale)}: `{color}`",
+            {"name": f"{color_langs.current.get(locale)}: `{hex_color}`",
              "value": ""}
         ]
 

@@ -46,7 +46,8 @@ class GuildDateBases:
     def _update(self, guild_id, arg, value):
         with connection().cursor() as cursor:
             cursor.execute(
-                f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value, guild_id))
+                f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value,
+                                                                guild_id))
 
     @on_error()
     def get(self, service: str, default: any = None) -> Union[dict, int, str]:
@@ -67,10 +68,8 @@ class GuildDateBases:
 
     @on_error()
     def delete(self):
-        with connection().cursor() as cursor:
-            reserved.remove(self.guild_id)
+        reserved.remove(self.guild_id)
 
+        with connection().cursor() as cursor:
             cursor.execute('DELETE FROM guilds WHERE id = %s',
                            (self.guild_id,))
-
-            connection().commit()

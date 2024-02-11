@@ -4,7 +4,10 @@ from bot.misc.ratelimit import Cooldown
 from bot.misc.logger import Logger
 from bot.resources import errors
 from bot.databases.db import CommandDB
-from bot.resources.errors import CallbackCommandError, MissingRole, MissingChannel, CommandOnCooldown
+from bot.resources.errors import (CallbackCommandError,
+                                  MissingRole,
+                                  MissingChannel,
+                                  CommandOnCooldown)
 
 TrueType = type(True)
 NumberType = (int, float)

@@ -1,7 +1,6 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc.logger import Logger
 from bot.databases.db import GuildDateBases
 
 
@@ -18,16 +17,8 @@ class guilds_event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: nextcord.Guild):
-        GuildDateBases(guild.id)
-
-    def on_error(func):
-        async def wrapped(self, member, gdb):
-            try:
-                result = await func(self, member, gdb)
-                return result
-            except Exception as err:
-                Logger.error(err)
-        return wrapped
+        gdb = GuildDateBases(guild.id)
+        self.bot.loop.call_later(60 * 60 * 24 * 3, gdb.delete)
 
 
 def setup(bot: commands.Bot):
