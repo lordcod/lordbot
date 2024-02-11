@@ -585,7 +585,6 @@ categories: Dict[str, List[CommandOption]] = {
                 "tr": "Test komutu"
             },
             "allowed_disabled": True,
-
         },
     ],
     "voice": [
@@ -596,17 +595,25 @@ categories: Dict[str, List[CommandOption]] = {
             "arguments": [],
             "descriptrion": {
                 "en": "Enters the channel with the user who called the command",
-                "ru": "",
-                "id": "",
-                "da": "",
-                "de": "",
-                "es": "",
-                "fr": "",
-                "pl": "",
-                "tr": ""
+                "ru": "Входит в канал с пользователем, который вызвал команду",
+                "id": "Memasuki saluran dengan pengguna yang memanggil perintah",
+                "da": "Går ind i kanalen med den bruger, der kaldte kommandoen",
+                "de": "Betritt den Kanal mit dem Benutzer, der den Befehl aufgerufen hat",
+                "es": "Ingresa al canal con el usuario que llamó al comando",
+                "fr": "Entre dans le canal avec l'utilisateur qui a appelé la commande",
+                "pl": "Wchodzi do kanału z użytkownikiem, który wywołał polecenie",
+                "tr": "Komutu çağıran kullanıcı ile kanala girer"
             },
             "brief_descriptrion": {
-                "en": "Enters the channel"
+                "en": "Enters the channel",
+                "ru": "Входит в канал",
+                "id": "Memasuki saluran",
+                "da": "Går ind i kanalen",
+                "de": "Betritt den Kanal",
+                "es": "Entra en el canal",
+                "fr": "Entre dans le canal",
+                "pl": "Wchodzi do kanału",
+                "tr": "Kanala girer"
             },
             "allowed_disabled": True,
         },
