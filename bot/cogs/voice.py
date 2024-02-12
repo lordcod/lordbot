@@ -2,10 +2,10 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.views.selector_music import MusicView
-from bot.misc.voice import *
+from bot.misc.voice import (yandex_music_requests, queue,
+                            MusicPlayer, current_players)
 from bot.misc.utils import clamp
 
-import pprint
 import re
 import yt_dlp
 
@@ -27,11 +27,6 @@ YANDEX_MUSIC_SEARCH = re.compile(
     r'https://music.yandex.ru/album/(\d+)/track/(\d+)(.*)')
 
 
-def encode_info(path, info):
-    import json
-    json.dump(info, open(path, "w"))
-
-
 class Voice(commands.Cog):
     bot: commands.Bot
 
@@ -42,7 +37,7 @@ class Voice(commands.Cog):
     async def join(self, ctx: commands.Context):
         if (ctx.author.voice):
             channel = ctx.message.author.voice.channel
-            voice = await channel.connect()
+            await channel.connect()
             await ctx.send("The bot entered the voice channel")
         else:
             await ctx.send("You are not in the voice channel")

@@ -1,5 +1,7 @@
 import aiohttp
 import asyncio
+
+import orjson
 from .config import api, headers, SIGN_SALT
 from bs4 import BeautifulSoup
 from hashlib import md5
@@ -17,7 +19,12 @@ def decode_download_info(bs_data: BeautifulSoup) -> None:
 
 
 class NotFound(Exception):
-    def __init__(self, message: str, *, ids: Optional[Union[List[Union[str, int]], int, str]] = None, request: Optional[str] = None) -> None:
+    def __init__(self,
+                 message: str,
+                 *,
+                 ids: Optional[Union[List[Union[str, int]], int, str]] = None,
+                 request: Optional[str] = None
+                 ) -> None:
         super().__init__(message)
         self.message = message
         self.ids = ids
@@ -115,9 +122,7 @@ de_list = {
 
 class yandex_music_requests:
     @staticmethod
-    async def download_track(
-        downloadInfoUrl: str
-    ) -> str:
+    async def download_track(downloadInfoUrl: str) -> str:
         async with aiohttp.ClientSession() as session:
             async with session.get(downloadInfoUrl) as res:
                 data = await res.read()
@@ -133,7 +138,7 @@ class yandex_music_requests:
         async with aiohttp.ClientSession() as session:
             async with session.get(f'{api}/tracks/{track_id}/download-info',
                                    headers=headers) as res:
-                js = await res.json()
+                js = await res.json(loads=orjson.loads)
                 results = js.get('result', [])
                 for res in results:
                     if res['bitrateInKbps'] == bitrateInKbps:
@@ -162,16 +167,17 @@ class yandex_music_requests:
                 if res.status == 400:
                     raise NotFound(f"{object_type}s not found", request=text)
 
-                js = await res.json()
+                js = await res.json(loads=orjson.loads)
                 ostype = object_type+'s' if object_type != 'best' else object_type
                 if object_type == 'best':
                     return de_list[js['result']['best']['type']](js['result']['best']['result'])
-                return [de_list[object_type](res) for res in js['result'][ostype]['results']]
+                return [de_list[object_type](res)
+                        for res in js['result'][ostype]['results']]
 
     @staticmethod
     async def get_list(
         ids: Union[List[Union[str, int]], int, str],
-        object_type: str = 'track',
+        object_type: str = 'track'
     ) -> List[Union[Artist, Album, Track, Playlist]]:
         params = {'with-positions': 'True', f'{object_type}-ids': ids}
 
@@ -182,14 +188,14 @@ class yandex_music_requests:
                 if res.status == 400:
                     raise NotFound(f"{object_type}s not found", ids=ids)
 
-                data = await res.json()
+                data = await res.json(loads=orjson.loads)
         res = [de_list[object_type](obj) for obj in data.get('result', [])]
         return res
 
 
 async def main():
     track = (await yandex_music_requests.get_list(117276354))[0]
-    print(track.data)
+    print(await track.download_link())
 
 if __name__ == "__main__":
     asyncio.run(main())

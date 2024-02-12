@@ -7,8 +7,6 @@ DEFAULT_LANGUAGE = 'en'
 DEFAULT_EMOJI = '<:diamond:1183363436780978186>'
 DEFAULT_ECONOMY_SETTINGS = orjson.dumps({'emoji': DEFAULT_EMOJI}).decode()
 
-print(DEFAULT_ECONOMY_SETTINGS)
-
 activities_list = [
     {'id': 880218394199220334,
      'label': 'Watch Together',
