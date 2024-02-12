@@ -2,7 +2,8 @@ import threading
 import asyncio
 
 from .load import load_db
-from .misc.utils import get_info_colums, register_table
+from .settings import Table, Colum
+from .misc.utils import get_info_colums
 from .handlers import (
     establish_connection,
     GuildDateBases,
@@ -12,6 +13,7 @@ from .handlers import (
     MongoDB
 )
 
+from bot.resources import info
 from bot.misc.logger import Logger
 
 _connection = load_db()
@@ -27,58 +29,44 @@ def connection():
     return _connection
 
 
-register_table(
-    table_name="guilds",
-    variable="""
-        id INT8 PRIMARY KEY,
-        language TEXT DEFAULT 'en',
-        prefix TEXT DEFAULT 'l.',
-        color INT8 DEFAULT '1974050',
-        economic_settings JSON DEFAULT '{"emoji":"<:diamond:1183363436780978186>"}',
-        music_settings JSON DEFAULT '{}',
-        auto_roles JSON DEFAULT '{}',
-        thread_messages JSON DEFAULT '{}',
-        reactions JSON DEFAULT '{}',
-        auto_translate JSON DEFAULT '{}',
-        greeting_message JSON DEFAULT '{}',
-        command_permissions JSON DEFAULT '{}',
-        ideas JSON DEFAULT '{}'
-    """,
-    connection=_connection
-)
+class GuildsDB(Table, name="guilds", _connection=_connection):
+    id = Colum(data_type="BIGINT", primary_key=True)
+    language = Colum(data_type="TEXT",
+                     default=info.DEFAULT_LANGUAGE)
+    prefix = Colum(data_type="TEXT",
+                   default=info.DEFAULT_PREFIX)
+    color = Colum(data_type="BIGINT", default=info.DEFAULT_COLOR)
+    economic_settings = Colum(data_type="JSON",
+                              default=info.DEFAULT_ECONOMY_SETTINGS)
+    music_settings = Colum(data_type="JSON", default="{}")
+    auto_roles = Colum(data_type="JSON", default="{}")
+    thread_messages = Colum(data_type="JSON", default="{}")
+    reactions = Colum(data_type="JSON", default="{}")
+    auto_translate = Colum(data_type="JSON", default="{}")
+    greeting_message = Colum(data_type="JSON", default="{}")
+    command_permissions = Colum(data_type="JSON", default="{}")
+    ideas = Colum(data_type="JSON", default="{}")
 
-register_table(
-    table_name="economic",
-    variable="""
-        guild_id INT8 NOT NULL,
-        member_id INT8 NOT NULL,
-        balance INT8 DEFAULT '0',
-        bank INT8 DEFAULT '0',
-        daily INT8 DEFAULT '0',
-        weekly INT8 DEFAULT '0',
-        monthly INT8 DEFAULT '0'
-    """,
-    connection=_connection
-)
 
-register_table(
-    table_name="roles",
-    variable="""
-        guild_id INT8 NOT NULL,
-        member_id INT8 NOT NULL,
-        roles JSON DEFAULT '{}'
-    """,
-    connection=_connection
-)
+class EconomicDB(Table, name="economic", _connection=_connection):
+    guild_id = Colum(data_type="BIGINT", not_null=True)
+    member_id = Colum(data_type="BIGINT", not_null=True)
+    balance = Colum(data_type="BIGINT", default="0")
+    bank = Colum(data_type="BIGINT", default="0")
+    daily = Colum(data_type="BIGINT", default="0")
+    weekly = Colum(data_type="BIGINT", default="0")
+    monthly = Colum(data_type="BIGINT", default="0")
 
-register_table(
-    table_name="mongo",
-    variable="""
-        name TEXT PRIMARY KEY,
-        values JSON DEFAULT '{}'
-    """,
-    connection=_connection
-)
+
+class RolesDB(Table, name="roles", _connection=_connection):
+    guild_id = Colum(data_type="BIGINT", not_null=True)
+    member_id = Colum(data_type="BIGINT", not_null=True)
+    roles = Colum(data_type="JSON", default="{}")
+
+
+class MongoDataBases(Table, name="mongo", _connection=_connection):
+    name = Colum(data_type="TEXT", primary_key=True)
+    values = Colum(data_type="JSON", default="{}")
 
 
 colums = {

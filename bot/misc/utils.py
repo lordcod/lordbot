@@ -109,7 +109,7 @@ def calculate_time(string: str) -> (int | None):
         'h': 3600,
         'd': 86400
     }
-    timedate = re.findall(r'(\d+)([a-zA-Z]+)', string)
+    timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
     ftime = 0
     for number, word in timedate:
         if word not in coefficients:
