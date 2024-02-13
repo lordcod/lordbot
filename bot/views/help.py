@@ -28,15 +28,12 @@ class DropDown(nextcord.ui.Select):
 
         category_key = self.values[0]
         category_data = help_info.categories.get(category_key)
-        category_name = f"{help_info.categories_emoji.get(category_key)}{help_info.categories_name.get(category_key).get(locale)}"
+        category_name = (f"{help_info.categories_emoji.get(category_key)}"
+                         f"{help_info.categories_name.get(category_key).get(locale)}")
 
         text = ''
         for command in category_data:
-            text = (
-                f"{text}"
-                f"`{command.get('name')}` - {command.get('brief_descriptrion').get(locale)}"
-                "\n"
-            )
+            text += f"`{command.get('name')}` - {command.get('brief_descriptrion').get(locale)}\n"
 
         embed = nextcord.Embed(
             title=category_name,

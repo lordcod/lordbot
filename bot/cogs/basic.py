@@ -156,9 +156,9 @@ class basic(commands.Cog):
         message: nextcord.Message
     ):
         if not message.content:
-            await inters.response.send_message(("This message has no content, "
-                                                "so we will not be able to "
-                                                "translate it."))
+            await inters.response.send_message("This message has no content, "
+                                               "so we will not be able to "
+                                               "translate it.")
 
         data = jmespath.search(
             f"[?discord_language=='{inters.locale}']|[0]", lang_datas)

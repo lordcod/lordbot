@@ -27,7 +27,8 @@ bot.timeouts = {}
 
 def load_dir(dirpath: str) -> None:
     for filename in os.listdir(dirpath):
-        if os.path.isfile(f'{dirpath}/{filename}') and filename.endswith(".py"):
+        if (os.path.isfile(f'{dirpath}/{filename}')
+                and filename.endswith(".py")):
             fmp = filename[:-3]
             supath = dirpath[2:].replace("/", ".")
 
