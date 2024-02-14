@@ -7,7 +7,7 @@ import random
 import aiohttp
 import orjson
 
-from typing import Union
+from typing import Mapping, Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -77,7 +77,7 @@ class MemberPayload(TempletePayload):
         return self.tag
 
 
-class GreetingTemplate(string.Template):
+class __LordFormatingTemplate(string.Template):
     pattern = r'''
         \{(\s*)(?:
         (?P<escaped>\{) |
@@ -86,6 +86,20 @@ class GreetingTemplate(string.Template):
         (?P<invalid>)
         )
     '''
+
+    def format(
+        self,
+        __mapping: Mapping[str, object],
+        **kwargs
+    ) -> str:
+        return self.safe_substitute(__mapping, **kwargs)
+
+
+def lord_format(
+    __value: object,
+    __mapping: Mapping[str, object]
+) -> str:
+    return __LordFormatingTemplate(__value).format(__mapping)
 
 
 def clamp(val: number_type,

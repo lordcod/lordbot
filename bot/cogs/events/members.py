@@ -63,8 +63,7 @@ class members_event(commands.Cog):
 
         content: str = greeting_message.get('message')
 
-        templete = utils.GreetingTemplate(content)
-        message_format = templete.safe_substitute(data_payload)
+        message_format = utils.lord_format(content, data_payload)
         message_data = await utils.generate_message(message_format)
 
         await channel.send(**message_data)
