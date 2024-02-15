@@ -254,7 +254,11 @@ async def generate_welcome_message(member: nextcord.Member) -> bytes:
         align="center"
     )
     background.text(
-        (400, 320), member.display_name, color="white", font=nunito_small, align="center"
+        (400, 320),
+        member.display_name,
+        color="white",
+        font=nunito_small,
+        align="center"
     )
     background.text(
         (400, 360),
