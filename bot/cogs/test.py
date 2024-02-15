@@ -10,7 +10,7 @@ class tests(commands.Cog):
     @commands.command()
     async def ticket(self, ctx: commands.Context):
         ticket = ModuleTicket(ctx.guild, ctx.channel.category)
-        await ticket.create_ticket(ctx.author)
+        await ticket.create(ctx.author)
 
 
 def setup(bot):

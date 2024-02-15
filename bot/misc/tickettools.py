@@ -8,7 +8,6 @@ from bot.views import tickets
 
 class ModuleTicket:
     ticket_channel = None
-    __created = False
     __closed = False
     __deleted = False
 
