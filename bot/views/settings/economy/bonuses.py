@@ -32,7 +32,7 @@ class Modal(nextcord.ui.Modal):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-class DropDown(nextcord.ui.Select):
+class DropDown(nextcord.ui.StringSelect):
     def __init__(self, guild_id):
         self.gdb = GuildDateBases(guild_id)
         self.economy_settings = self.gdb.get('economic_settings', {})

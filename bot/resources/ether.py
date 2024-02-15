@@ -40,6 +40,7 @@ class Emoji:
     # Music settings
     music = '<:music:1207674677816991784>'
     playlist = '<:playlist:1207675618322550804>'
+    volume_up = '<:volume_up:1207676856300478525>'
 
     # Ofher
     cooldown = '<:cooldown:1185277451295793192>'
