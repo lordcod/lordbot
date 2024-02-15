@@ -1,10 +1,38 @@
 import nextcord
-
+from bot.resources.ether import Emoji
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
 from bot.languages.settings import button as button_name
+
+
+distribution = {}
+
+
+class MusicDropDown(nextcord.ui.StringSelect):
+    def __init__(self) -> None:
+        options = [
+            nextcord.SelectOption(
+                label="Dj-roles",
+                value="dj_roles",
+                description="Roles that can control music.",
+                emoji=Emoji.music
+            ),
+            nextcord.SelectOption(
+                label="Max size",
+                value="max_size",
+                description="Maximum track queue length.",
+                emoji=Emoji.playlist
+            ),
+            nextcord.SelectOption(
+                label="Default volume",
+                value="volume",
+                description="Maximum track queue length.",
+                emoji=Emoji.playlist
+            ),
+        ]
+        super().__init__(options=options)
 
 
 class MusicView(DefaultSettingsView):

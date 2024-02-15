@@ -1,4 +1,4 @@
-from .voice import MusicView
+from .music import MusicView
 from .ideas import IdeasView
 from .welcomer import WelcomerView
 from .auto_role import AutoRoleView
