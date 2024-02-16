@@ -272,13 +272,6 @@ def cut_back(string: str, length: int):
     return new_string
 
 
-def get_szie_with_text(text: str, normal_size: int = 50) -> int:
-    lenght = len(text)
-    if 12 >= lenght:
-        return normal_size
-    return max(28, normal_size-2*(lenght-12))
-
-
 async def generate_welcome_message(member: nextcord.Member) -> bytes:
     background = Editor("assets/background.jpeg").resize((800, 450))
 

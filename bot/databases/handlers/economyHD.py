@@ -19,8 +19,7 @@ class EconomyMembedDB:
                  member_id, balance, bank, balance+bank as total
                 FROM economic
                 WHERE guild_id = %s
-                ORDER BY total DESC
-                OFFSET 0 LIMIT 10;""",
+                ORDER BY total DESC""",
                 (self.guild_id,)
             )
 
