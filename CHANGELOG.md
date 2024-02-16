@@ -23,10 +23,5 @@
 ## Дополнение для типа refactor
 refactor(<номер тикета jira>): сообщение
 
-# Пример + разбор
-feat: добавить колебание шапки
-^ — ^ ^ — — — — — — ^
-| |
-| +-> Резюме в настоящем времени.
-|
-+ - - - -> Type: chore, docs, feat, fix, refactor, style или test.
+# Пример
+feat(cap): add wobble
