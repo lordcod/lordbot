@@ -35,30 +35,26 @@ class ready_event(commands.Cog):
         for dat in datas:
             guild_id = dat[0]
             member_id = dat[1]
-            temp_datas = dat[2]
+            role_id = dat[2]
+            role_time = dat[3]
 
-            guild = self.bot.get_guild(guild_id)
-            if not guild:
-                continue
-
-            member = guild.get_member(member_id)
-            if not member:
+            if not (
+                (guild := self.bot.get_guild(guild_id)) and
+                (member := guild.get_member(member_id)) and
+                (role := guild.get_role(role_id))
+            ):
                 continue
 
             mrsdb = RoleDateBases(guild_id, member_id)
 
-            for tp_data in temp_datas:
-                temp = tp_data.get("time", 0) - int(time.time())
-                role_id = tp_data.get("role_id")
-                role = guild.get_role(role_id)
+            rth = self.bot.loop.call_later(
+                role_time-time.time(),
+                asyncio.create_task,
+                mrsdb.remove_role(member, role)
+            )
 
-                if not (temp and role):
-                    continue
-
-                self.bot.loop.call_later(
-                    temp, asyncio.create_task, member.remove_roles(role))
-                self.bot.loop.call_later(
-                    temp, asyncio.create_task, mrsdb.aremove(tp_data))
+            self.bot.role_timer_handlers.add_th(
+                guild.id, member.id, role.id, rth)
 
 
 def setup(bot: commands.Bot):

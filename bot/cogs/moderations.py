@@ -1,7 +1,8 @@
 import nextcord
-from nextcord.ext import commands, application_checks
+from nextcord.ext import commands
 
 from bot.misc import utils
+from bot.misc.time_transformer import display_time
 from bot.views.settings_menu import SettingsView
 from bot.databases.db import RoleDateBases, GuildDateBases
 from bot.resources.ether import Emoji
@@ -45,31 +46,59 @@ class moderations(commands.Cog):
         self,
         ctx: commands.Context,
         member: nextcord.Member,
-        roles: commands.Greedy[nextcord.Role],
-        stime: Optional[str] = None
+        role: nextcord.Role,
+        stime: str
     ):
-        await member.add_roles(*roles)
+        gdb = GuildDateBases(ctx.guild.id)
+        rsdb = RoleDateBases(ctx.guild.id, member.id)
+        color = gdb.get('color')
+        _role_time = rsdb.get_as_role(role.id)
 
-        if stime is not None:
-            rsdb = RoleDateBases(ctx.guild.id, member.id)
-            ftime = utils.calculate_time(stime)
-            if ftime is None:
-                await ctx.send("The role was given forever because you specified the wrong amount of time")
-                return
+        ftime = utils.calculate_time(stime)
 
-            for role in roles:
-                data = {
-                    'time': int(time.time()+ftime),
-                    'role_id': role.id
-                }
-                rsdb.add(data)
+        if _role_time is not None:
+            self.bot.role_timer_handlers.cancel_th(ctx.guild.id,
+                                                   member.id,
+                                                   role.id)
+            embed = nextcord.Embed(
+                title="The duration of the role has been changed",
+                color=color)
+            embed.add_field(
+                name='Role',
+                value=f'{member.mention} → {role.mention} (ROLE ID: {role.id})',
+                inline=False
+            )
+            embed.add_field(
+                name='New time of action',
+                value=f'<t:{_role_time[0]}:f> → <t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})',
+                inline=False
+            )
+        else:
+            embed = nextcord.Embed(
+                title="Temporary role granted!",
+                color=color)
+            embed.add_field(
+                name="Role",
+                value=f'{member.mention} → {role.mention} (ROLE ID: {role.id})',
+                inline=False
+            )
+            embed.add_field(
+                name="Time of action",
+                value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
+                inline=False
+            )
 
-                self.bot.loop.call_later(
-                    ftime, asyncio.create_task, member.remove_roles(role))
-                self.bot.loop.call_later(
-                    ftime, asyncio.create_task, rsdb.aremove(data))
+        rsdb.set_role(role.id, ftime+time.time())
 
-        await ctx.send(f"{Emoji.congratulation}The roles were issued successfully")
+        rth = self.bot.loop.call_later(
+            ftime, asyncio.create_task, rsdb.remove_role(member, role))
+
+        self.bot.role_timer_handlers.add_th(
+            ctx.guild.id, member.id, role.id, rth)
+
+        await member.add_roles(role)
+
+        await ctx.send(embed=embed)
 
     @temp_role.command(name='list')
     async def temp_role_list(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
@@ -78,29 +107,25 @@ class moderations(commands.Cog):
 
         if member is not None:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
-            predata = rsdb.get_as_member()
-            datas = [predata] if predata else []
+            datas = rsdb.get_as_member()
         else:
             rsdb = RoleDateBases(ctx.guild.id)
             datas = rsdb.get_as_guild()
 
-        quantity = 0
         message = ""
 
-        for dat in datas:
-            member_id = dat[1]
-            roles_data = dat[2]
+        for quantity, role_data in enumerate(datas):
+            member_id = role_data[0]
+            role_id = role_data[1]
+            role_time = role_data[2]
 
-            for rol_data in roles_data:
-                quantity += 1
+            member = ctx.guild.get_member(member_id)
+            role = ctx.guild.get_role(role_id)
 
-                time = rol_data.get("time")
-                role_id = rol_data.get("role_id")
+            if not (role and member):
+                continue
 
-                member = ctx.guild.get_member(member_id)
-                role = ctx.guild.get_role(role_id)
-
-                message += f"{quantity}. {member.mention} → {role.mention} (<t:{time}:R>)\n"
+            message += f"{quantity}. {member.mention} → {role.mention} (<t:{role_time}:R>)\n"
 
         message = message or "There are no registered temporary roles on this server"
         embed = nextcord.Embed(

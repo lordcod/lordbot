@@ -1,4 +1,4 @@
 from _executer import execute
 
 
-execute("DROP TABLE guilds")
+execute("DROP TABLE roles")

@@ -7,7 +7,8 @@ import random
 import aiohttp
 import orjson
 
-from typing import Union
+from asyncio import TimerHandle
+from typing import Coroutine, Self, Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -88,6 +89,52 @@ class GreetingTemplate(string.Template):
     '''
 
 
+class DataRoleTimerHandlers:
+    __instance = None
+    data = None
+
+    def __new__(cls) -> Self:
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            cls.data = {}
+        return cls.__instance
+
+    def __init__(self) -> None:
+        pass
+
+    def register(self,
+                 guild_id: int,
+                 member_id: int):
+        if guild_id not in self.data:
+            self.data[guild_id] = {}
+        if member_id not in self.data[guild_id]:
+            self.data[guild_id][member_id] = {}
+
+    def add_th(self,
+               guild_id: int,
+               member_id: int,
+               role_id: int,
+               rth: TimerHandle):
+        self.register(guild_id, member_id)
+        self.data[guild_id][member_id][role_id] = rth
+
+    def cancel_th(self,
+                  guild_id: int,
+                  member_id: int,
+                  role_id: int):
+        self.register(guild_id, member_id)
+        th = self.data[guild_id][member_id].get(role_id)
+        if th is None:
+            return
+        cancel_atimerhandler(th)
+
+
+def cancel_atimerhandler(th: TimerHandle):
+    coro: Coroutine = th._args[0]
+    coro.close()
+    th.cancel()
+
+
 def clamp(val: number_type,
           minv: number_type,
           maxv: number_type) -> number_type:
@@ -113,7 +160,7 @@ def calculate_time(string: str) -> (int | None):
     ftime = 0
     for number, word in timedate:
         if word not in coefficients:
-            return None
+            raise TypeError('Format time is not valid!')
 
         number = int(number)
         multiplier = coefficients[word]

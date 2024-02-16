@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import Callable
+import select
+from typing import Callable, Optional
+import nextcord
 from psycopg2.extensions import connection as psycoon
 
-from ..misc.utils import Json, Formating
+from ..misc.utils import Json
 from ..misc.error_handler import on_error
 
 connection: Callable[[], psycoon]
@@ -11,8 +13,8 @@ connection: Callable[[], psycoon]
 class RoleDateBases:
     def __init__(
         self,
-        guild_id: int = None,
-        member_id: int = None
+        guild_id: Optional[int] = None,
+        member_id: Optional[int] = None
     ) -> None:
         self.guild_id = guild_id
         self.member_id = member_id
@@ -20,7 +22,7 @@ class RoleDateBases:
     @on_error()
     def get_all(self):
         with connection().cursor() as cursor:
-            cursor.execute(f'SELECT * FROM roles')
+            cursor.execute('SELECT * FROM roles')
 
             datas = cursor.fetchall()
 
@@ -32,11 +34,11 @@ class RoleDateBases:
     def get_as_guild(self):
         with connection().cursor() as cursor:
             cursor.execute(
-                'SELECT * FROM roles WHERE guild_id = %s', [self.guild_id])
+                ('SELECT member_id, role_id, time '
+                 'FROM roles WHERE guild_id = %s'),
+                [self.guild_id])
 
             datas = cursor.fetchall()
-
-            datas = Json.loads(datas)
 
             return datas
 
@@ -44,68 +46,71 @@ class RoleDateBases:
     def get_as_member(self):
         with connection().cursor() as cursor:
             cursor.execute(
-                'SELECT * FROM roles WHERE guild_id = %s AND member_id = %s',
+                ('SELECT member_id, role_id, time FROM roles '
+                 'WHERE guild_id = %s AND member_id = %s'),
                 (self.guild_id, self.member_id)
+            )
+
+            datas = cursor.fetchall()
+
+            return datas
+
+    @on_error()
+    def get_as_role(self, role_id: int):
+        with connection().cursor() as cursor:
+            cursor.execute(
+                ('SELECT time FROM roles '
+                 'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
+                (self.guild_id, self.member_id, role_id)
             )
 
             data = cursor.fetchone()
 
-            data = Json.loads(data)
-
             return data
 
     @on_error()
-    def insert(self, roles):
+    def insert(self, role_id: int, time: int):
         with connection().cursor() as cursor:
             cursor.execute(
-                'INSERT INTO roles (guild_id, member_id, roles) VALUES (%s, %s, %s)',
-                (self.guild_id, self.member_id, roles)
+                ('INSERT INTO roles '
+                 '(guild_id, member_id, role_id, time) '
+                 'VALUES (%s, %s, %s, %s)'),
+                (self.guild_id, self.member_id, role_id, time)
             )
 
     @on_error()
-    def update(self, roles):
-        try:
-            with connection().cursor() as cursor:
-                cursor.execute(
-                    f'UPDATE roles SET roles = %s WHERE guild_id = %s AND member_id = %s',
-                    (roles, self.guild_id, self.member_id)
-                )
-        except Exception as err:
-            print('err hand', err)
+    def update(self, role_id: int, time: int):
+        with connection().cursor() as cursor:
+            cursor.execute(
+                ('UPDATE roles '
+                 'SET time = %s '
+                 'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
+                (time, self.guild_id, self.member_id, role_id)
+            )
 
     @on_error()
-    def add(self, role_data) -> None:
-        _roles_dat = self.get_as_member()
-
-        if not _roles_dat:
-            roles_ids = [role_data]
-            role_datas = Json.dumps(roles_ids)
-            self.insert(role_datas)
-            return
-
-        roles_ids = list(_roles_dat[2])
-        if role_data in roles_ids:
-            return
-
-        roles_ids.append(role_data)
-
-        role_datas = Json.dumps(roles_ids)
-        self.update(role_datas)
+    def delete(self, role_id: int):
+        with connection().cursor() as cursor:
+            cursor.execute(
+                ('DELETE FROM roles '
+                 'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
+                (self.guild_id, self.member_id, role_id)
+            )
 
     @on_error()
-    def remove(self, role_data):
-        _roles_dat = self.get_as_member()
-        if not _roles_dat:
-            return
+    def remove(self, role_id):
+        _role_data = self.get_as_role(role_id)
+        if _role_data is not None:
+            self.delete(role_id)
 
-        roles_ids = list(_roles_dat[2])
-        if role_data not in roles_ids:
-            return
+    @on_error()
+    def set_role(self, role_id: int, time: int) -> None:
+        _role_data = self.get_as_role(role_id)
+        if _role_data is None:
+            self.insert(role_id, time)
+        else:
+            self.update(role_id, time)
 
-        roles_ids.remove(role_data)
-
-        role_datas = Json.dumps(roles_ids)
-        self.update(role_datas)
-
-    async def aremove(self, role_data):
-        self.remove(role_data)
+    async def remove_role(self, member: nextcord.Member, role: nextcord.Role):
+        await member.remove_roles(role)
+        self.remove(role.id)

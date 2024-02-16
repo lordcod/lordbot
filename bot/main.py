@@ -3,6 +3,7 @@ from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
 from bot.misc import env
+from bot.misc.utils import DataRoleTimerHandlers
 
 import os
 from typing import List
@@ -23,6 +24,7 @@ bot = commands.Bot(
     help_command=None
 )
 bot.timeouts = {}
+bot.role_timer_handlers = DataRoleTimerHandlers()
 
 
 def load_dir(dirpath: str) -> None:
