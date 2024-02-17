@@ -4,7 +4,6 @@ import re
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
 from bot.resources.info import DEFAULT_COLOR
-from bot.misc.utils import to_color, from_color
 from bot.languages.settings import color as color_langs, button as button_name
 
 
@@ -13,23 +12,25 @@ class Modal(nextcord.ui.Modal):
         self.gdb = GuildDateBases(guild_id)
 
         color = self.gdb.get("color")
-        color = to_color(color)
+        hex_color = f"#{color:0>6x}".upper()
 
-        super().__init__("Rewards", timeout=300)
+        super().__init__("Color")
 
-        self.color = nextcord.ui.TextInput(label="Color", placeholder=color)
+        self.color = nextcord.ui.TextInput(
+            label="Color", placeholder=hex_color)
 
         self.add_item(self.color)
 
     async def callback(self, interaction: nextcord.Interaction):
-        color = self.color.value
-        match = re.search(r"#([0-9a-fA-F]{6})", color)
-        if not match:
-            await interaction.response.send_message("Hex is not valid",
+        locale = self.gdb.get('language')
+
+        hex_color = self.color.value
+        if not (result := re.fullmatch(r"#?([0-9a-fA-F]{6})", hex_color)):
+            await interaction.response.send_message(color_langs.not_valid.get(locale),
                                                     ephemeral=True)
             return
 
-        color = from_color(color)
+        color = int(result.group(1), 16)
         self.gdb.set("color", color)
 
         view = ColorView(interaction.guild)
@@ -44,7 +45,7 @@ class ColorView(DefaultSettingsView):
         gdb = GuildDateBases(guild.id)
         locale = gdb.get("language")
         color = gdb.get("color")
-        hex_color = to_color(color)
+        hex_color = f"#{color:0>6x}".upper()
 
         self.embed = nextcord.Embed(
             title=color_langs.title.get(locale),
@@ -85,8 +86,7 @@ class ColorView(DefaultSettingsView):
         self, button: nextcord.ui.Button, interaction: nextcord.Interaction
     ):
         gdb = GuildDateBases(interaction.guild_id)
-        color = DEFAULT_COLOR
-        gdb.set("color", color)
+        gdb.set("color", DEFAULT_COLOR)
 
         view = ColorView(interaction.guild)
 

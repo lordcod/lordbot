@@ -411,3 +411,28 @@ class errors:
             'pl': 'Spróbuj ponownie przez',
             'tr': 'Tekrar deneyin'
         }
+
+
+class selector_music:
+    placeholder = {
+        'en': 'Select a track',
+        'ru': 'Выберите трек',
+        'id': 'Pilih trek',
+        'da': 'Vælg et spor',
+        'de': 'Wählen Sie eine Spur',
+        'es': 'Seleccione una pista',
+        'fr': 'Sélectionnez une piste',
+        'pl': 'Wybierz ścieżkę',
+        'tr': 'Bir parça seçin'
+    }
+    title = {
+        'en': 'Choose the track you are interested in!',
+        'ru': 'Выберите интересующий вас трек!',
+        'id': 'Pilih trek yang Anda minati!',
+        'da': 'Vælg det spor, du er interesseret i!',
+        'de': 'Wählen Sie die Strecke, die Sie interessiert!',
+        'es': '¡Elige la pista que te interesa!',
+        'fr': 'Choisissez la piste qui vous intéresse!',
+        'pl': 'Wybierz utwór, który Cię interesuje!',
+        'tr': 'İlgilendiğiniz parçayı seçin!'
+    }
