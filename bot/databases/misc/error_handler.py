@@ -2,10 +2,11 @@ from typing import Any, Callable
 from bot.misc.logger import Logger
 import psycopg2
 
+
 class on_error:
     def __init__(self) -> None:
         pass
-    
+
     def __call__(self, func: Callable) -> Any:
         def wrapped(*args, **kwargs):
             try:

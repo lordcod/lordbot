@@ -1,1 +1,5 @@
 __pycache__/
+.vscode/
+start_view.py
+.gitignore
+.env

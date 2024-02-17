@@ -1,42 +1,139 @@
 import nextcord
-from nextcord.ext import commands,application_checks
+from nextcord.ext import commands
 
 from bot.misc import utils
-from bot.resources import errors
-from bot.views import views
+from bot.misc.lordbot import LordBot
+from bot.misc.time_transformer import display_time
+from bot.views.settings_menu import SettingsView
+from bot.databases.db import RoleDateBases, GuildDateBases
+from bot.resources.ether import Emoji
 
 import io
 import asyncio
 import time
-
+from typing import Optional
 
 
 class moderations(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: LordBot):
         self.bot = bot
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def say(self, ctx:commands.Context, *, message: str):
+    async def say(self, ctx: commands.Context, *, message: str):
         files = []
         for attach in ctx.message.attachments:
             data = io.BytesIO(await attach.read())
             files.append(nextcord.File(data, attach.filename))
-        
+
         res = await utils.generate_message(message)
-        
-        await ctx.send(**res,files=files)
-        
+
+        await ctx.send(**res, files=files)
+
         await ctx.message.delete()
 
-    
-    @commands.command(aliases=["set","setting"])
+    @commands.command(aliases=["set", "setting"])
     @commands.has_permissions(manage_guild=True)
-    @commands.guild_only()
     async def settings(self, ctx: commands.Context):
-        view = views.SettingsView(ctx.author)
-        
-        await ctx.send(embed=view.embed,view=view)
+        view = SettingsView(ctx.author)
+
+        await ctx.send(embed=view.embed, view=view)
+
+    @commands.group(name='temp-role', invoke_without_command=True)
+    @commands.has_permissions(manage_roles=True)
+    async def temp_role(
+        self,
+        ctx: commands.Context,
+        member: nextcord.Member,
+        role: nextcord.Role,
+        stime: str
+    ):
+        gdb = GuildDateBases(ctx.guild.id)
+        rsdb = RoleDateBases(ctx.guild.id, member.id)
+        color = gdb.get('color')
+        _role_time = rsdb.get_as_role(role.id)
+
+        ftime = utils.calculate_time(stime)
+
+        if _role_time is not None:
+            self.bot.role_timer_handlers.cancel_th(ctx.guild.id,
+                                                   member.id,
+                                                   role.id)
+            embed = nextcord.Embed(
+                title="The duration of the role has been changed",
+                color=color)
+            embed.add_field(
+                name='Role',
+                value=f'{member.mention} → {role.mention} (ROLE ID: {role.id})',
+                inline=False
+            )
+            embed.add_field(
+                name='New time of action',
+                value=f'<t:{_role_time[0]}:f> → <t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})',
+                inline=False
+            )
+        else:
+            embed = nextcord.Embed(
+                title="Temporary role granted!",
+                color=color)
+            embed.add_field(
+                name="Role",
+                value=f'{member.mention} → {role.mention} (ROLE ID: {role.id})',
+                inline=False
+            )
+            embed.add_field(
+                name="Time of action",
+                value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
+                inline=False
+            )
+
+        rsdb.set_role(role.id, ftime+time.time())
+
+        rth = self.bot.loop.call_later(
+            ftime, asyncio.create_task, rsdb.remove_role(member, role))
+
+        self.bot.role_timer_handlers.add_th(
+            ctx.guild.id, member.id, role.id, rth)
+
+        await member.add_roles(role)
+
+        await ctx.send(embed=embed)
+
+    @temp_role.command(name='list')
+    async def temp_role_list(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
+        gdb = GuildDateBases(ctx.guild.id)
+        color = gdb.get('color')
+
+        if member is not None:
+            rsdb = RoleDateBases(ctx.guild.id, member.id)
+            datas = rsdb.get_as_member()
+        else:
+            rsdb = RoleDateBases(ctx.guild.id)
+            datas = rsdb.get_as_guild()
+
+        message = ""
+
+        for quantity, role_data in enumerate(datas):
+            member_id = role_data[0]
+            role_id = role_data[1]
+            role_time = role_data[2]
+
+            member = ctx.guild.get_member(member_id)
+            role = ctx.guild.get_role(role_id)
+
+            if not (role and member):
+                continue
+
+            message += f"{quantity}. {member.mention} → {role.mention} (<t:{role_time}:R>)\n"
+
+        message = message or "There are no registered temporary roles on this server"
+        embed = nextcord.Embed(
+            title="Temp Roles",
+            description=message,
+            color=color
+        )
+
+        await ctx.send(embed=embed)
 
     @nextcord.slash_command(
         name='clone',
@@ -67,78 +164,85 @@ class moderations(commands.Cog):
         )
     ) -> None:
         role_name = name or role.name
-        
+
         new_role = await interaction.guild.create_role(
             reason="Copying a role with rights",
             name=role_name,
             permissions=role.permissions,
-            colour=role.colour,
+            color=role.color,
             hoist=role.hoist,
             mentionable=role.mentionable,
             icon=role.icon
         )
-        
+
         await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}', ephemeral=True)
 
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(manage_messages=True)
-    async def purge(self,ctx: commands.Context, limit: int):
+    async def purge(self, ctx: commands.Context, limit: int):
         if limit > 200:
-            raise commands.CommandError("The maximum number of messages to delete is `100`")
-        
+            raise commands.CommandError(
+                "The maximum number of messages to delete is `100`")
+
         deleted = await ctx.channel.purge(limit=limit)
-        await ctx.send(f'Deleted {len(deleted)} message(s)',delete_after=5.0)
+        await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5.0)
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
-    async def user(self,ctx: commands.Context,member: nextcord.Member,limit: int):
+    async def user(self, ctx: commands.Context, member: nextcord.Member, limit: int):
         if limit > 100:
-            raise commands.CommandError("The maximum number of messages to delete is `100`")
-        
+            raise commands.CommandError(
+                "The maximum number of messages to delete is `100`")
+
         messages = []
-        
-        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
-        
+
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60)
+                           * 1000.0 - 1420070400000) << 22
+
         async for message in ctx.channel.history(limit=250):
             if len(messages) >= limit:
                 break
             if message.author == member:
                 messages.append(message)
-            
+
             if message.id < minimum_time:
                 break
-        
+
         await ctx.channel.delete_messages(messages)
-        
-        await ctx.send(f'Deleted {len(messages)} message(s)',delete_after=5.0)
+
+        await ctx.send(f'Deleted {len(messages)} message(s)', delete_after=5.0)
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
-    async def between(self,ctx: commands.Context, message_start:nextcord.Message, messsage_finish:nextcord.Message=None):
-        if messsage_finish and message_start.channel != messsage_finish.channel:
+    async def between(self, ctx: commands.Context,
+                      message_start: nextcord.Message,
+                      messsage_finish: Optional[nextcord.Message] = None):
+        if (messsage_finish and
+                message_start.channel != messsage_finish.channel):
             raise commands.CommandError("Channel error")
-        
+
         messages = []
         finder = False
-        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
-        
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60)
+                           * 1000.0 - 1420070400000) << 22
+
         async for message in message_start.channel.history(limit=100):
             if not messsage_finish:
                 messsage_finish = message
-            
+
             if message == messsage_finish:
                 finder = True
-            
+
             if finder:
                 messages.append(message)
-            
+
             if message == message_start or len(messages) >= 50 or message.id < minimum_time:
                 break
-        
+
         await ctx.channel.delete_messages(messages)
-        
-        await ctx.send(f'Deleted {len(messages)} message(s)',delete_after=5.0)
+
+        await ctx.send(f'Deleted {len(messages)} message(s)', delete_after=5.0)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(moderations(bot))

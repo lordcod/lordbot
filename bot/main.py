@@ -1,38 +1,39 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc import (utils,env)
-from bot.misc.logger import Logger
+from bot.databases.db import GuildDateBases
+from bot.misc import env
+from bot.misc.lordbot import LordBot
 
-from typing import List
 import os
+from typing import List
 
 
-
-def get_command_prefixs(
-    bot: commands.Bot, 
+async def get_command_prefixs(
+    bot: commands.Bot,
     msg: nextcord.Message
 ) -> List[str]:
-    prefix = utils.get_prefix(msg.guild.id)
+    "Returns a list of prefixes that can be used when using bot commands"
+    gdb = GuildDateBases(msg.guild.id)
+    prefix = gdb.get('prefix')
     return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
-bot = commands.Bot(
-    command_prefix=get_command_prefixs,
-    intents=nextcord.Intents.all(),
-    help_command=None
-)
+bot = LordBot(get_command_prefixs)
+
 
 def load_dir(dirpath: str) -> None:
     for filename in os.listdir(dirpath):
-        if os.path.isfile(f'{dirpath}/{filename}') and filename.endswith(".py") and not filename.startswith("__"):
+        if (os.path.isfile(f'{dirpath}/{filename}')
+                and filename.endswith(".py")):
             fmp = filename[:-3]
-            supdirpath = dirpath[2:].split("/")
-            findirpatch = '.'.join(supdirpath)
-            bot.load_extension(f"{findirpatch}.{fmp}")
+            supath = dirpath[2:].replace("/", ".")
+
+            bot.load_extension(f"{supath}.{fmp}")
         elif os.path.isdir(f'{dirpath}/{filename}'):
             load_dir(f'{dirpath}/{filename}')
 
+
 def start_bot():
     load_dir("./bot/cogs")
-    
+
     bot.run(env.Tokens.token)

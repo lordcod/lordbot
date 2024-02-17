@@ -1,144 +1,144 @@
-from typing import Any
 import nextcord
-from nextcord.ext import commands
-from nextcord.utils import escape_markdown
 
-from bot.resources import errors
-from bot.databases.db import GuildDateBases
-
-import re
+import inspect
+import regex
 import string
 import random
 import aiohttp
 import orjson
 
+from asyncio import TimerHandle
+from typing import Coroutine, Self, Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
+from functools import lru_cache
+from easy_pil import Editor, Font, load_image_async
 
 
-class GuildPayload:
-    guild: nextcord.Guild
-    
-    def __init__(self, guild: nextcord.Guild) -> None:
-        self.guild = guild
-    
-    @property
-    def id(self) -> int:
-        return self.guild.id
-    
-    @property
-    def name(self) -> str:
-        return self.guild.name
-    
-    @property
-    def icon(self) -> str:
-        guild = self.guild
-        if not (guild.icon and guild.icon.url):
-            return None
-        return guild.icon.url
-    
-    @property
-    def memberCount(self) -> int:
-        return self.guild.member_count
-    
-    @property
-    def createdAt(self) -> datetime:
-        return self.guild.created_at
-    
-    @property
-    def premiumSubscriptionCount(self) -> int:
-        return self.guild.premium_subscription_count
+number_type = Union[int, float]
 
+
+class TempletePayload:
+    _prefix = None
 
     def to_dict(self):
-        starter = 'guild.'
-        ret = {
-            f'{starter}id':self.id,
-            f'{starter}name':self.name,
-            f'{starter}icon':self.icon,
-            f'{starter}memberCount':self.memberCount,
-            f'{starter}createdAt':self.createdAt,
-            f'{starter}premiumSubscriptionCount':self.premiumSubscriptionCount,
-        }
-        
-        return ret
+        if self._prefix is not None:
+            prefix = str(self._prefix)
+        else:
+            prefix = self.__class__.__name__
 
-    def __getattr__(self, name: str) -> Any:
-        return f'{"{"}{name}{"}"}'
-    
+        base = {}
+
+        for name, arg in inspect.getmembers(self):
+            if name.startswith("_") or name == "to_dict":
+                continue
+
+            base[f"{prefix}.{name}"] = arg
+
+        return base
+
+
+class GuildPayload(TempletePayload):
+    _prefix = 'guild'
+
+    def __init__(self, guild: nextcord.Guild) -> None:
+        self.id: int = guild.id
+        self.name: str = guild.name
+        self.memberCount: int = guild.member_count
+        self.createdAt: datetime = guild.created_at
+        self.premiumSubscriptionCount: int = guild.premium_subscription_count
+
+        if not (guild.icon and guild.icon.url):
+            self.icon = None
+        else:
+            self.icon: str = guild.icon.url
+
     def __str__(self) -> str:
         return self.name
 
-class MemberPayload:
-    member: nextcord.Member
-    
+
+class MemberPayload(TempletePayload):
+    _prefix = 'member'
+
     def __init__(self, member: nextcord.Member) -> None:
-        self.member = member
-    
-    @property
-    def id(self) -> int:
-        return self.member.id
-    
-    @property
-    def mention(self) -> str:
-        return self.member.mention
-    
-    @property 
-    def username(self) -> str:
-        return self.member.name
-    
-    @property 
-    def displayName(self) -> str:
-        return self.member.display_name
-    
-    @property
-    def discriminator(self) -> int:
-        return self.member.discriminator
-    
-    @property
-    def tag(self) -> str:
-        member = self.member
-        tag = f'{member.name}#{member.discriminator}'
-        return tag
-    
-    @property
-    def avatar(self) -> str:
-        member = self.member
+        self.id: int = member.id
+        self.mention: str = member.mention
+        self.username: str = member.name
+        self.displayName: str = member.display_name
+        self.discriminator: str = member.discriminator
+        self.tag = f'{member.name}#{member.discriminator}'
+
         if not (member.display_avatar and member.display_avatar.url):
-            return None
-        return member.display_avatar.url
-    
-    
-    def to_dict(self):
-        starter = 'member.'
-        ret = {
-            f'{starter}id':self.id,
-            f'{starter}mention':self.mention,
-            f'{starter}username':self.username,
-            f'{starter}displayName':self.displayName,
-            f'{starter}discriminator,':self.discriminator,
-            f'{starter}tag':self.tag,
-            f'{starter}avatar':self.avatar,
-        }
-        
-        return ret
-    
-    def __getattr__(self, name: str) -> str:
-        return f'{"{"}{name}{"}"}'
+            self.avatar = None
+        else:
+            self.avatar = member.display_avatar.url
 
     def __str__(self) -> str:
         return self.tag
 
+
 class GreetingTemplate(string.Template):
     pattern = r'''
-        \{(?:
+        \{(\s*)(?:
         (?P<escaped>\{) |
-        (?P<named>[\._a-z][\._a-z0-9]*)\} |
-        (?P<braced>[\._a-z][\._a-z0-9]*)\} |
+        (?P<named>[\._a-z][\._a-z0-9]*)(\s*)\} |
+        (?P<braced>[\._a-z][\._a-z0-9]*)(\s*)\} |
         (?P<invalid>)
         )
     '''
+
+
+class DataRoleTimerHandlers:
+    __instance = None
+    data = None
+
+    def __new__(cls) -> Self:
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            cls.data = {}
+        return cls.__instance
+
+    def __init__(self) -> None:
+        pass
+
+    def register(self,
+                 guild_id: int,
+                 member_id: int):
+        if guild_id not in self.data:
+            self.data[guild_id] = {}
+        if member_id not in self.data[guild_id]:
+            self.data[guild_id][member_id] = {}
+
+    def add_th(self,
+               guild_id: int,
+               member_id: int,
+               role_id: int,
+               rth: TimerHandle):
+        self.register(guild_id, member_id)
+        self.data[guild_id][member_id][role_id] = rth
+
+    def cancel_th(self,
+                  guild_id: int,
+                  member_id: int,
+                  role_id: int):
+        self.register(guild_id, member_id)
+        th = self.data[guild_id][member_id].get(role_id)
+        if th is None:
+            return
+        cancel_atimerhandler(th)
+
+
+def cancel_atimerhandler(th: TimerHandle):
+    coro: Coroutine = th._args[0]
+    coro.close()
+    th.cancel()
+
+
+def clamp(val: number_type,
+          minv: number_type,
+          maxv: number_type) -> number_type:
+    return min(maxv, max(minv, val))
 
 
 async def getRandomQuote(lang='en'):
@@ -148,138 +148,154 @@ async def getRandomQuote(lang='en'):
             json = await responce.json()
             return json
 
-def remove_none(dlist: list) -> None:
-    for arg in dlist:
-        if arg is None:
-            dlist.remove(arg)
 
-def is_emoji(emoji):
-    pattern = ":(.+):"
-    check = re.fullmatch(pattern,emoji)
-    
-    if not check:
-        return False
-    
-    groups = check.groups()
-    payload = {
-        'name':groups[0],
-        'id':groups[1]
+def calculate_time(string: str) -> (int | None):
+    coefficients = {
+        's': 1,
+        'm': 60,
+        'h': 3600,
+        'd': 86400
     }
-    return payload
+    timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
+    ftime = 0
+    for number, word in timedate:
+        if word not in coefficients:
+            raise TypeError('Format time is not valid!')
 
-def to_color(colour: int) -> str:
-    color = hex(colour).replace('0x', '#').upper()
-    return color
+        number = int(number)
+        multiplier = coefficients[word]
 
-def from_color(color: str) -> int:
-    colour = int(color[1:], 16)
-    return colour
+        ftime += number*multiplier
 
-def get_prefix(guild_id: int, *, markdown: bool = False, GuildData: GuildDateBases = None) -> str:
-    gdb = GuildData or GuildDateBases(guild_id)
-    prefix = gdb.get('prefix')
-    if markdown:
-        return escape_markdown(prefix)
-    return prefix
+    return ftime
 
-async def get_webhook(channel: nextcord.TextChannel, user) -> nextcord.Webhook:
-    if channel.type.value not in [0,2,5,13]:
-        raise  errors.ErrorTypeChannel("Channel error")
-    
-    webhooks = await channel.webhooks()
-    for wh in webhooks:
-        if wh.user==user:
-            return wh
-    else:
-        wh = await channel.create_webhook(name=user.name)
-        return wh
 
-def is_builtin_class_instance(obj):
-    return obj in (str, int, float, bool)
+@lru_cache()
+def get_award(number):
+    awards = {
+        1: '🥇',
+        2: '🥈',
+        3: '🥉'
+    }
+    award = awards.get(number, number)
+    return award
 
-def clord(value,cls,default=None):
-        if type(value) == cls:
-            return value
-        
-        if not is_builtin_class_instance(cls):
-            return default
-        
-        try:
-            return cls(value)
-        except:
-            return default
 
-async def generate_message(content) -> dict|str:
+async def generate_message(content: str) -> dict:
     content = str(content)
     message = {}
     try:
         content: dict = orjson.loads(content)
-        
+
         message_content = content.get('plainText')
-        
+
         title = content.get('title')
-        description=content.get('description')
-        color=content.get('color')
-        url=content.get('url')
-        
-        thumbnail = content.get('thumbnail')
-        author = content.get('author')
-        footer = content.get('footer')
+        description = content.get('description')
+        color = content.get('color')
+        url = content.get('url')
         fields = content.get('fields', [])
-        
+
         message['content'] = message_content
-        
+
         embed = nextcord.Embed(
             title=title,
             description=description,
             color=color,
             url=url,
         )
-        
-        if thumbnail:
+
+        if thumbnail := content.get('thumbnail'):
             embed.set_thumbnail(thumbnail)
-        
-        if author:
+
+        if author := content.get('author'):
             embed.set_author(
-                name=author.get('name',None),
-                url=author.get('url',None),
-                icon_url=author.get('icon_url',None),
+                name=author.get('name'),
+                url=author.get('url'),
+                icon_url=author.get('icon_url'),
             )
-        
-        if footer:
+
+        if footer := content.get('footer'):
             embed.set_footer(
                 text=footer.get('text'),
                 icon_url=footer.get('icon_url'),
             )
-        
+
+        if image := content.get('image'):
+            embed.set_image(image)
+
         for field in fields:
             embed.add_field(
-                name=field.get('name',None),
-                value=field.get('value',None),
-                inline=field.get('inline',None)
+                name=field.get('name', None),
+                value=field.get('value', None),
+                inline=field.get('inline', None)
             )
-        
-        if title or description or thumbnail or author or footer or fields:
+
+        if (title or description or image or thumbnail
+                or author or footer or fields):
             message['embed'] = embed
         elif not message_content:
             raise ValueError()
-    except:
+    except (TypeError, ValueError, orjson.JSONDecodeError):
         message['content'] = content
     return message
 
-async def check_invite(content):
-    regex_string = '(https:\/\/discord.gg\/|https:\/\/discord.com\/invite\/)([a-zA-Z0-9_-]+)(\/|\s|\?|$)'
-    pattern = re.fullmatch(regex_string,content)
-    if pattern:
-        return pattern.groups()[1]
 
 async def generator_captcha(num):
     text = "".join([random.choice(string.ascii_uppercase) for _ in range(num)])
     captcha_image = ImageCaptcha(
         width=400,
         height=220,
-        font_sizes=(40,70,100)
+        font_sizes=(40, 70, 100)
     )
-    data:BytesIO = captcha_image.generate(text)
-    return data,text
+    data: BytesIO = captcha_image.generate(text)
+    return data, text
 
+
+def cut_back(string: str, length: int):
+    ellipsis = "..."
+    current_lenght = len(string)
+    if length >= current_lenght:
+        return string
+
+    cropped_string = string[:length-len(ellipsis)].strip()
+    new_string = f"{cropped_string}{ellipsis}"
+    return new_string
+
+
+async def generate_welcome_message(member: nextcord.Member) -> bytes:
+    background = Editor("assets/background.jpeg").resize((800, 450))
+
+    nunito = Font("assets/Nunito-ExtraBold.ttf", 50)
+    nunito_small = Font("assets/Nunito-Black.ttf", 25)
+    nunito_light = Font("assets/Nunito-Black.ttf", 20)
+
+    profile_image = await load_image_async(
+        member.display_avatar.with_size(128).url)
+    profile = Editor(profile_image).resize((150, 150)).circle_image()
+
+    background.paste(profile, (325, 90))
+    background.ellipse((325, 90), 150, 150, outline=(
+        125, 249, 255), stroke_width=4)
+    background.text(
+        (400, 260),
+        f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}",
+        color="white",
+        font=nunito,
+        align="center"
+    )
+    background.text(
+        (400, 320),
+        member.display_name,
+        color="white",
+        font=nunito_small,
+        align="center"
+    )
+    background.text(
+        (400, 360),
+        f"You are the {member.guild.member_count}th Member",
+        color="#F5923B",
+        font=nunito_light,
+        align="center",
+    )
+
+    return background.image_bytes
