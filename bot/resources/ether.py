@@ -37,11 +37,16 @@ class Emoji:
     enabled = '<:enabled:1178742503822852248>'
     disabled = '<:disabled:1178742506544955522>'
 
+    # Music settings
+    music = '<:music:1207674677816991784>'
+    playlist = '<:playlist:1207675618322550804>'
+    volume_up = '<:volume_up:1207676856300478525>'
+
     # Ofher
     cooldown = '<:cooldown:1185277451295793192>'
+    lightbulb = '<:lightbulb:1191467123462119554>'
     congratulation = '<a:congratulation:1165684808844845176>'
     roketa = '<a:rocketa:1165684783754522704>'
-    lightbulb = '<:lightbulb:1191467123462119554>'
 
     undo = '<:undo:1191377269143388250>'
     redo = '<:redo:1191377267574710372>'
