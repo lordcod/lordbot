@@ -823,7 +823,7 @@ categories: Dict[str, List[CommandOption]] = {
         {
             "name": "purge",
             "category": "moderation",
-            "aliases": ['<limit>'],
+            "aliases": ["<limit>"],
             "arguments": [],
             "descriptrion": {
                 "en": "Clears the chat the specified number of times",
