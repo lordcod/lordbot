@@ -3,12 +3,11 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
+from bot.misc.lordbot import LordBot
 
 
 class guilds_event(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
@@ -28,7 +27,5 @@ class guilds_event(commands.Cog):
         self.bot.guild_timer_handlers[guild.id] = (gth, delay+time.time())
 
 
-def setup(bot: commands.Bot):
-    event = guilds_event(bot)
-
-    bot.add_cog(event)
+def setup(bot):
+    bot.add_cog(guilds_event(bot))

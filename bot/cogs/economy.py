@@ -2,6 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases.db import EconomyMembedDB, colums, GuildDateBases
+from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
 from bot.misc.utils import get_award
@@ -52,10 +53,8 @@ class MemberDB:
         self.emdb.update(key, value)
 
 
-class Economy(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+class economy(commands.Cog):
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
         super().__init__()
@@ -358,5 +357,5 @@ class Economy(commands.Cog):
         await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Economy(bot))
+def setup(bot):
+    bot.add_cog(economy(bot))

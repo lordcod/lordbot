@@ -2,6 +2,7 @@ from nextcord.ext import commands
 
 from bot.misc.logger import Logger
 from bot.databases.db import RoleDateBases
+from bot.misc.lordbot import LordBot
 from bot.views.ideas import (Confirm, IdeaBut)
 
 import time
@@ -9,9 +10,7 @@ import asyncio
 
 
 class ready_event(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
@@ -57,7 +56,5 @@ class ready_event(commands.Cog):
                 guild.id, member.id, role.id, rth)
 
 
-def setup(bot: commands.Bot):
-    event = ready_event(bot)
-
-    bot.add_cog(event)
+def setup(bot):
+    bot.add_cog(ready_event(bot))

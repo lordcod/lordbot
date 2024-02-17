@@ -1,5 +1,6 @@
 import nextcord
 from nextcord.ext import commands
+from bot.misc.lordbot import LordBot
 
 from bot.resources import check
 
@@ -7,7 +8,7 @@ import os
 
 
 class teams(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: LordBot):
         self.bot = bot
 
     @commands.command(name="shutdown")
