@@ -2,6 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc import utils
+from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.views.settings_menu import SettingsView
 from bot.databases.db import RoleDateBases, GuildDateBases
@@ -14,9 +15,7 @@ from typing import Optional
 
 
 class moderations(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: LordBot):
         self.bot = bot
 
     @commands.command()
@@ -215,8 +214,11 @@ class moderations(commands.Cog):
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
-    async def between(self, ctx: commands.Context, message_start: nextcord.Message, messsage_finish: nextcord.Message = None):
-        if messsage_finish and message_start.channel != messsage_finish.channel:
+    async def between(self, ctx: commands.Context,
+                      message_start: nextcord.Message,
+                      messsage_finish: Optional[nextcord.Message] = None):
+        if (messsage_finish and
+                message_start.channel != messsage_finish.channel):
             raise commands.CommandError("Channel error")
 
         messages = []
@@ -242,5 +244,5 @@ class moderations(commands.Cog):
         await ctx.send(f'Deleted {len(messages)} message(s)', delete_after=5.0)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(moderations(bot))

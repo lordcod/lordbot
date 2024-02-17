@@ -291,6 +291,17 @@ class languages:
 
 
 class color:
+    not_valid = {
+        'en': 'The hex code format is incorrect',
+        'ru': 'Неверный формат hex кода',
+        'id': 'Format kode hex salah',
+        'da': 'Sekskodeformatet er forkert',
+        'de': 'Das Hex-Code-Format ist falsch',
+        'es': 'El formato del código hexadecimal es incorrecto',
+        'fr': 'Le Format de code hexadécimal est incorrect',
+        'pl': 'Format kodu szesnastkowego jest nieprawidłowy',
+        'tr': 'Onaltılık kod biçimi yanlış'
+    }
     title = {
         'ru': 'Цвет системных сообщений',
         'en': 'Color of system messages',
@@ -354,6 +365,17 @@ class color:
 
 
 class auto_role:
+    placeholder = {
+        'en': 'Select automatically assigned roles for new members',
+        'ru': 'Выберите автоматически назначаемые роли для новых участников',
+        'id': 'Pilih peran yang ditetapkan secara otomatis untuk anggota baru',
+        'da': 'Vælg automatisk tildelte roller for nye medlemmer',
+        'de': 'Automatisch zugewiesene Rollen für neue Mitglieder auswählen',
+        'es': 'Seleccionar roles asignados automáticamente para nuevos miembros',
+        'fr': 'Sélectionnez les rôles attribués automatiquement aux nouveaux membres',
+        'pl': 'Wybierz automatycznie przypisane role dla nowych członków',
+        'tr': 'Yeni üyeler için otomatik olarak atanan rolleri seçin'
+    }
     install = {
         'en': 'Install roles',
         'ru': 'Установить роли',
@@ -364,6 +386,17 @@ class auto_role:
         'fr': 'Installer les rôles',
         'pl': 'Ustaw role',
         'tr': 'Rolleri ayarla'
+    }
+    delete = {
+        'en': 'Delete roles',
+        'ru': 'Удалить роли',
+        'id': 'Hapus peran',
+        'da': 'Slet roller',
+        'de': 'Rollen löschen',
+        'es': 'Eliminar roles',
+        'fr': 'Supprimer des rôles',
+        'pl': 'Usuń role',
+        'tr': 'Rolleri sil'
     }
     embed_title = {
         'en': 'Automatic roles',
@@ -393,8 +426,8 @@ class auto_role:
             'Jika Anda tidak melihat aturan otomatis, itu berarti aturan tersebut tidak dipilih!'
         ),
         'da': (
-            'Den automatiske roller Kontrolpanel.\ n'
-            'Du kan indstille, redigere, slette og se sådanne handlinger fra panelet.\ n'
+            'Den automatiske roller Kontrolpanel.\n'
+            'Du kan indstille, redigere, slette og se sådanne handlinger fra panelet.\n'
             'Hvis du ikke kan se automatiske regler, betyder det, at de ikke er valgt!'
         ),
         'de': (

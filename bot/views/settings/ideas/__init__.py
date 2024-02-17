@@ -6,7 +6,7 @@ from .distribution import distrubuters
 from bot.databases.varstructs import IdeasPayload
 from bot.databases.db import GuildDateBases
 from bot.views import settings_menu
-from bot.views.ideas import IdeaBut
+from bot.views.ideas import IdeaView
 from bot.languages.settings import button as button_name
 
 
@@ -121,10 +121,9 @@ class IdeasView(DefaultSettingsView):
 
         if not (channel_suggest and channel_offers):
             await interaction.response.send_message(
-                content=(
-                    'You haven\'t set up everything to include ideas\n'
-                    'Requirement value: **suggest** and **offers** channel'
-                )
+                'You haven\'t set up everything to include ideas\n'
+                'Requirement value: **suggest** and **offers** channel',
+                ephemeral=True
             )
             return
 
@@ -138,7 +137,7 @@ class IdeasView(DefaultSettingsView):
             ),
             color=color
         )
-        view = IdeaBut(interaction.guild_id)
+        view = IdeaView(interaction.guild_id)
 
         message_suggest = await channel_suggest.send(embed=embed, view=view)
 

@@ -3,6 +3,7 @@ from nextcord.ext import commands
 
 from bot.languages import help as help_info
 from bot.databases.db import GuildDateBases
+from bot.misc.lordbot import LordBot
 from bot.views.help import HelpView
 
 import re
@@ -24,9 +25,7 @@ def get_command(name: str) -> help_info.CommandOption:
 
 
 class help(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: LordBot):
         self.bot = bot
 
     @commands.command()
@@ -158,5 +157,5 @@ class help(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(help(bot))

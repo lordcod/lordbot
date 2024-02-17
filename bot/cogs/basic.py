@@ -1,6 +1,7 @@
 import nextcord
 from nextcord.ext import commands, application_checks
 from nextcord.utils import oauth_url
+from bot.misc.lordbot import LordBot
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
@@ -25,9 +26,7 @@ EMOJI_REGEXP = re.compile(r"<(a?):([a-zA-Z_-]+):(\d{19})>")
 
 
 class basic(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: LordBot):
         self.bot = bot
 
     @commands.command()
@@ -173,5 +172,5 @@ class basic(commands.Cog):
                                            ephemeral=True)
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(basic(bot))

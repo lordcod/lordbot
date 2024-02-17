@@ -2,6 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
+from bot.misc.lordbot import LordBot
 from bot.views.translate import TranslateView
 from bot.languages import BotInfo
 
@@ -74,15 +75,11 @@ class Translates:
         await mes.channel.send(mes.content, embed=embed, view=view)
         await mes.delete()
 
-    select_types = {
-        'message': message
-    }
+    select_types = {'message': message}
 
 
 class message_event(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
@@ -127,7 +124,5 @@ class message_event(commands.Cog):
             await message.channel.send(embed=embed)
 
 
-def setup(bot: commands.Bot):
-    event = message_event(bot)
-
-    bot.add_cog(event)
+def setup(bot):
+    bot.add_cog(message_event(bot))

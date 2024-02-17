@@ -20,6 +20,7 @@ class RolesDropDown(nextcord.ui.StringSelect):
         select_roles: List[int]
     ) -> None:
         self.gdb = GuildDateBases(guild.id)
+        locale = self.gdb.get('language')
         auto_roles = self.gdb.get('auto_roles')
 
         options = []
@@ -29,7 +30,8 @@ class RolesDropDown(nextcord.ui.StringSelect):
                 role.is_default() or
                 role.is_premium_subscriber() or
                 role.is_integration() or
-                role.is_bot_managed()
+                role.is_bot_managed() or
+                role.position > guild.me.top_role.position
             ):
                 continue
 
@@ -48,15 +50,13 @@ class RolesDropDown(nextcord.ui.StringSelect):
         options = options[:25]
 
         if 0 >= len(options):
-            options.append(
-                nextcord.SelectOption(
-                    label="-"
-                )
-            )
+            options.append(nextcord.SelectOption(
+                label="-"
+            ))
             self.current_disabled = True
 
         super().__init__(
-            placeholder="Select the roles in which the command will work",
+            placeholder=role_lang.placeholder.get(locale),
             min_values=1,
             max_values=len(options),
             options=options,
@@ -88,6 +88,7 @@ class AutoRoleView(DefaultSettingsView):
 
         self.back.label = button_name.back.get(locale)
         self.install.label = role_lang.install.get(locale)
+        self.delete.label = role_lang.delete.get(locale)
 
         self.embed = nextcord.Embed(
             title=role_lang.embed_title.get(locale),

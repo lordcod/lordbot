@@ -181,16 +181,6 @@ def get_award(number):
     return award
 
 
-def to_color(color: int) -> str:
-    color = hex(color).replace('0x', '#').upper()
-    return color
-
-
-def from_color(color: str) -> int:
-    color = int(color[1:], 16)
-    return color
-
-
 async def generate_message(content: str) -> dict:
     content = str(content)
     message = {}
