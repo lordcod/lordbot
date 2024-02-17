@@ -11,10 +11,7 @@ timeout = {}
 
 class ConfirmModal(nextcord.ui.Modal):
     def __init__(self):
-        super().__init__(
-            "Suggest an idea",
-            timeout=5 * 60,
-        )
+        super().__init__("Suggest an idea")
 
         self.reason = nextcord.ui.TextInput(
             label="Argument:",

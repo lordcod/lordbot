@@ -215,8 +215,11 @@ class moderations(commands.Cog):
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
-    async def between(self, ctx: commands.Context, message_start: nextcord.Message, messsage_finish: nextcord.Message = None):
-        if messsage_finish and message_start.channel != messsage_finish.channel:
+    async def between(self, ctx: commands.Context,
+                      message_start: nextcord.Message,
+                      messsage_finish: Optional[nextcord.Message] = None):
+        if (messsage_finish and
+                message_start.channel != messsage_finish.channel):
             raise commands.CommandError("Channel error")
 
         messages = []

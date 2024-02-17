@@ -66,7 +66,7 @@ class RolesDB(Table, name="roles", _connection=_connection):
 
 
 class MongoDataBases(Table, name="mongo", _connection=_connection):
-    name = Colum(data_type="TEXT", primary_key=True)
+    key_name = Colum(name="name", data_type="TEXT", primary_key=True)
     values = Colum(data_type="JSON", default="{}")
 
 

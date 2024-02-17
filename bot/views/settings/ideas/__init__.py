@@ -121,10 +121,9 @@ class IdeasView(DefaultSettingsView):
 
         if not (channel_suggest and channel_offers):
             await interaction.response.send_message(
-                content=(
-                    'You haven\'t set up everything to include ideas\n'
-                    'Requirement value: **suggest** and **offers** channel'
-                )
+                'You haven\'t set up everything to include ideas\n'
+                'Requirement value: **suggest** and **offers** channel',
+                ephemeral=True
             )
             return
 

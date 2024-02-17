@@ -28,7 +28,9 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         locale: str = self.gdb.get('language')
 
         if channel.id in reacts:
-            await interaction.response.send_message(reaction_langs.addres.channel_error.get(locale), ephemeral=True)
+            await interaction.response.send_message(
+                reaction_langs.addres.channel_error.get(locale),
+                ephemeral=True)
             return
 
         view = InstallEmojiView(channel.guild.id, channel.id)
@@ -54,14 +56,21 @@ class InstallEmojiView(DefaultSettingsView):
 
         self.add_item(DDB)
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Back',
+                        style=nextcord.ButtonStyle.red)
+    async def back(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         view = reactions.AutoReactions(interaction.guild)
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install emoji', style=nextcord.ButtonStyle.blurple, disabled=True)
-    async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Install emoji',
+                        style=nextcord.ButtonStyle.blurple,
+                        disabled=True)
+    async def install(self,
+                      button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
         modal = ModalBuilder(interaction.guild_id, self.channel_id)
 
         await interaction.response.send_modal(modal)
