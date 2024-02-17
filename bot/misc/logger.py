@@ -47,14 +47,13 @@ async def post_mes(data, time_string):
             pass
 
 
-@lambda cls: cls(True)
+@lambda cls: cls(False)
 class Logger:
     loop = None
 
-    def __init__(self, prints=True) -> None:
+    def __init__(self, prints) -> None:
         self.prints = prints
         self.loop = asyncio.get_event_loop()
-        pass
 
     def callback(self, text):
         if self.prints:
