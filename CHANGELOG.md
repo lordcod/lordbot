@@ -1,8 +1,8 @@
 # 📑 Change Log
 
-## Scheduled update - Alpha/v0.2.1
+## Alpha/v0.2.1
 
-\~18.02.2024
+17.02.2024
 
 ### What's Changed
 1. Added the leaderboard command.
