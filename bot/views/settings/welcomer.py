@@ -120,8 +120,7 @@ class WelcomerView(DefaultSettingsView):
         member_payload = utils.MemberPayload(interaction.user).to_dict()
         data_payload = guild_payload | member_payload
 
-        templete = utils.GreetingTemplate(content)
-        message_format = templete.safe_substitute(data_payload)
+        message_format = utils.lord_format(content, data_payload)
 
         message_data = await utils.generate_message(message_format)
 

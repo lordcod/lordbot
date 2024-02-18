@@ -8,7 +8,7 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Self, Union
+from typing import Coroutine, Self, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -78,7 +78,7 @@ class MemberPayload(TempletePayload):
         return self.tag
 
 
-class GreetingTemplate(string.Template):
+class __LordFormatingTemplate(string.Template):
     pattern = r'''
         \{(\s*)(?:
         (?P<escaped>\{) |
@@ -133,6 +133,20 @@ def cancel_atimerhandler(th: TimerHandle):
     coro: Coroutine = th._args[0]
     coro.close()
     th.cancel()
+
+    def format(
+        self,
+        __mapping: Mapping[str, object],
+        **kwargs
+    ) -> str:
+        return self.safe_substitute(__mapping, **kwargs)
+
+
+def lord_format(
+    __value: object,
+    __mapping: Mapping[str, object]
+) -> str:
+    return __LordFormatingTemplate(__value).format(__mapping)
 
 
 def clamp(val: number_type,
