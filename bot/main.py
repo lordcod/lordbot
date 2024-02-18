@@ -3,6 +3,7 @@ from nextcord.ext import commands
 
 from bot.databases.db import GuildDateBases
 from bot.misc import env
+from bot.misc.lordbot import LordBot
 
 import os
 from typing import List
@@ -17,12 +18,7 @@ async def get_command_prefixs(
     prefix = gdb.get('prefix')
     return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
-bot = commands.Bot(
-    command_prefix=get_command_prefixs,
-    intents=nextcord.Intents.all(),
-    help_command=None
-)
-bot.timeouts = {}
+bot = LordBot(get_command_prefixs)
 
 
 def load_dir(dirpath: str) -> None:

@@ -1,5 +1,6 @@
 import nextcord
 from nextcord.ext import commands
+from bot.misc.lordbot import LordBot
 
 from bot.views.selector_music import MusicView
 from bot.misc.voice import (yandex_music_requests, queue,
@@ -28,9 +29,7 @@ YANDEX_MUSIC_SEARCH = re.compile(
 
 
 class Voice(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
     @commands.command()
@@ -165,5 +164,5 @@ class Voice(commands.Cog):
             await plr.skip()
 
 
-def setup(bot: commands.Bot):
+def setup(bot):
     bot.add_cog(Voice(bot))

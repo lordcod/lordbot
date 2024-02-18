@@ -7,6 +7,8 @@ import random
 import aiohttp
 import orjson
 
+from asyncio import TimerHandle
+from typing import Coroutine, Self, Union
 from typing import Mapping, Union
 from datetime import datetime
 from captcha.image import ImageCaptcha
@@ -87,6 +89,52 @@ class __LordFormatingTemplate(string.Template):
         )
     '''
 
+
+class DataRoleTimerHandlers:
+    __instance = None
+    data = None
+
+    def __new__(cls) -> Self:
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            cls.data = {}
+        return cls.__instance
+
+    def __init__(self) -> None:
+        pass
+
+    def register(self,
+                 guild_id: int,
+                 member_id: int):
+        if guild_id not in self.data:
+            self.data[guild_id] = {}
+        if member_id not in self.data[guild_id]:
+            self.data[guild_id][member_id] = {}
+
+    def add_th(self,
+               guild_id: int,
+               member_id: int,
+               role_id: int,
+               rth: TimerHandle):
+        self.register(guild_id, member_id)
+        self.data[guild_id][member_id][role_id] = rth
+
+    def cancel_th(self,
+                  guild_id: int,
+                  member_id: int,
+                  role_id: int):
+        self.register(guild_id, member_id)
+        th = self.data[guild_id][member_id].get(role_id)
+        if th is None:
+            return
+        cancel_atimerhandler(th)
+
+
+def cancel_atimerhandler(th: TimerHandle):
+    coro: Coroutine = th._args[0]
+    coro.close()
+    th.cancel()
+
     def format(
         self,
         __mapping: Mapping[str, object],
@@ -127,7 +175,7 @@ def calculate_time(string: str) -> (int | None):
     ftime = 0
     for number, word in timedate:
         if word not in coefficients:
-            return None
+            raise TypeError('Format time is not valid!')
 
         number = int(number)
         multiplier = coefficients[word]
@@ -146,16 +194,6 @@ def get_award(number):
     }
     award = awards.get(number, number)
     return award
-
-
-def to_color(color: int) -> str:
-    color = hex(color).replace('0x', '#').upper()
-    return color
-
-
-def from_color(color: str) -> int:
-    color = int(color[1:], 16)
-    return color
 
 
 async def generate_message(content: str) -> dict:
@@ -239,13 +277,6 @@ def cut_back(string: str, length: int):
     return new_string
 
 
-def get_szie_with_text(text: str, normal_size: int = 50) -> int:
-    lenght = len(text)
-    if 12 >= lenght:
-        return normal_size
-    return max(28, normal_size-2*(lenght-12))
-
-
 async def generate_welcome_message(member: nextcord.Member) -> bytes:
     background = Editor("assets/background.jpeg").resize((800, 450))
 
@@ -268,7 +299,11 @@ async def generate_welcome_message(member: nextcord.Member) -> bytes:
         align="center"
     )
     background.text(
-        (400, 320), member.display_name, color="white", font=nunito_small, align="center"
+        (400, 320),
+        member.display_name,
+        color="white",
+        font=nunito_small,
+        align="center"
     )
     background.text(
         (400, 360),

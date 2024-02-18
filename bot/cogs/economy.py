@@ -2,6 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases.db import EconomyMembedDB, colums, GuildDateBases
+from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
 from bot.misc.utils import get_award
@@ -52,10 +53,8 @@ class MemberDB:
         self.emdb.update(key, value)
 
 
-class Economy(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+class economy(commands.Cog):
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
         super().__init__()
@@ -181,20 +180,21 @@ class Economy(commands.Cog):
         leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
         user_index = leaderboard_indexs.index(ctx.author.id)+1
 
+        file_pedestal = nextcord.File(
+            "assets/pedestal.png", filename="pedestal.png")
         embed = nextcord.Embed(
             title="List of leaders by balance",
             description=f"**{ctx.author.display_name}**, Your position in the top: **{user_index}**",
             color=color
         )
-
         embed.set_thumbnail(
-            "https://cdn.discordapp.com/attachments/1179069504651796562/1183659540324036638/1426727.png")
+            "attachment://pedestal.png")
         embed.set_footer(
             text=ctx.guild.name,
             icon_url=ctx.guild.icon
         )
 
-        for (member_id, balance, bank, total) in leaderboard[:10]:
+        for (member_id, balance, bank, total) in leaderboard[0:10]:
             member = ctx.guild.get_member(member_id)
             if not member or 0 >= total:
                 leaderboard_indexs.remove(member_id)
@@ -211,8 +211,8 @@ class Economy(commands.Cog):
                 ),
                 inline=False
             )
-
-        await message.edit(content=None, embed=embed)
+        await message.delete()
+        await ctx.send(embed=embed, file=file_pedestal)
 
     @commands.command(name="pay")
     async def pay(self, ctx: commands.Context, member: nextcord.Member, sum: int):
@@ -311,13 +311,6 @@ class Economy(commands.Cog):
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
     async def gift(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
-        if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000}")
-            return
-        if 0 >= sum:
-            await ctx.send("The amount must be positive")
-            return
-
         if not member:
             member = ctx.author
 
@@ -326,20 +319,20 @@ class Economy(commands.Cog):
         currency_emoji = eco_sets.get('emoji')
         account = MemberDB(ctx.guild.id, member.id)
 
+        if sum > 1_000_000:
+            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
+            return
+        if 0 >= sum:
+            await ctx.send("The amount must be positive")
+            return
+
         account["balance"] += sum
 
-        await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji} ")
+        await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji}")
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
     async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
-        if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000}")
-            return
-        if 0 >= sum:
-            await ctx.send("The amount must be positive")
-            return
-
         if not member:
             member = ctx.author
 
@@ -347,6 +340,13 @@ class Economy(commands.Cog):
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
         account = MemberDB(ctx.guild.id, member.id)
+
+        if sum > 1_000_000:
+            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
+            return
+        if 0 >= sum:
+            await ctx.send("The amount must be positive")
+            return
 
         if 0 > (account.get('balance')-sum):
             await ctx.send('The operation cannot be performed because the balance will become negative during it')
@@ -357,5 +357,5 @@ class Economy(commands.Cog):
         await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(Economy(bot))
+def setup(bot):
+    bot.add_cog(economy(bot))

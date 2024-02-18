@@ -164,8 +164,7 @@ class Table:
                                 not_null=res[3],
                                 primary_key=res[4],
                                 _connection=cls.__connection
-                                )
-                          )
+                                ))
         return colums
 
     @classmethod

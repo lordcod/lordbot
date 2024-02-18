@@ -85,10 +85,7 @@ class PrefixView(DefaultSettingsView):
                     button: nextcord.ui.Button,
                     interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        prefix = DEFAULT_PREFIX
-
-        gdb.set('prefix', prefix)
+        gdb.set('prefix', DEFAULT_PREFIX)
 
         view = PrefixView(interaction.guild)
-
         await interaction.message.edit(embed=view.embed, view=view)

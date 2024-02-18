@@ -4,11 +4,11 @@ import time
 import asyncio
 from typing import Optional
 
+from bot.misc.lordbot import LordBot
+
 
 class members_event_timeouts(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
@@ -61,6 +61,4 @@ class members_event_timeouts(commands.Cog):
 
 
 def setup(bot):
-    cog = members_event_timeouts(bot)
-
-    bot.add_cog(cog)
+    bot.add_cog(members_event_timeouts(bot))

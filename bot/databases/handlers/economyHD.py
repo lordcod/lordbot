@@ -16,10 +16,10 @@ class EconomyMembedDB:
         with connection().cursor() as cursor:
             cursor.execute(
                 """SELECT 
-                member_id, balance, bank, balance+bank as total
+                 member_id, balance, bank, balance+bank as total
                 FROM economic
                 WHERE guild_id = %s
-                ORDER BY total DESC;""",
+                ORDER BY total DESC""",
                 (self.guild_id,)
             )
 

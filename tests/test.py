@@ -5,22 +5,14 @@ async def ttask(arg):
     print(arg)
 
 
-def sstest(*args):
-    print(*args)
-
-
-ft = filter(lambda item: item is not None, [None, 1, 0, None])
-
-sstest(*ft)
-
-
 async def main():
     print('start')
     loop = asyncio.get_event_loop()
-    th = loop.call_later(5, asyncio.create_task, ttask('finish task'))
+    th = loop.call_later(1, asyncio.create_task, ttask('finish task'))
 
     await asyncio.sleep(2)
-
+    print(loop.time())
+    print(th.when())
     th._args[0].close()
     th.cancel()
 

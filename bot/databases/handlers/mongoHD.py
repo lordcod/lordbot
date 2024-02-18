@@ -16,20 +16,15 @@ class MongoDB:
     def create(self):
         with connection().cursor() as cursor:
             cursor.execute(
-                """
-                    INSERT INTO mongo (name) 
-                    VALUES (%s)
-                """,
+                "INSERT INTO mongo (name) VALUES (%s)",
                 (self.table_name, )
             )
 
     def check_table(self):
         with connection().cursor() as cursor:
             cursor.execute(
-                """
-                    SELECT * 
-                    FROM mongo 
-                    WHERE name = %s
+                """SELECT * FROM mongo 
+                   WHERE name = %s
                 """,
                 (self.table_name, )
             )

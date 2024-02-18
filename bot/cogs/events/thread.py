@@ -6,13 +6,13 @@ from bot.misc import utils
 
 import googletrans
 
+from bot.misc.lordbot import LordBot
+
 translator = googletrans.Translator()
 
 
 class thread_event(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
@@ -20,7 +20,7 @@ class thread_event(commands.Cog):
     async def on_thread_create(self, thread: nextcord.Thread):
         guild_data = GuildDateBases(thread.guild.id)
         afm = guild_data.get('thread_messages')
-        thread_data = afm.get(thread.parent_id, None)
+        thread_data = afm.get(thread.parent_id)
 
         if not thread_data:
             return
@@ -29,7 +29,5 @@ class thread_event(commands.Cog):
         await thread.send(**content)
 
 
-def setup(bot: commands.Bot):
-    event = thread_event(bot)
-
-    bot.add_cog(event)
+def setup(bot):
+    bot.add_cog(thread_event(bot))

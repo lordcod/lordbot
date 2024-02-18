@@ -74,7 +74,7 @@ categories: Dict[str, List[CommandOption]] = {
             "arguments": ["[member]"],
             "descriptrion": {
                 "en": (
-                    "Displays the participant\"s balance as well as possible rewards that can be collected\n\n"
+                    "Displays the participant's balance as well as possible rewards that can be collected\n\n"
                     "If no participant is specified, the value is taken by the one who started the command"
                 ),
                 "ru": (
@@ -82,7 +82,7 @@ categories: Dict[str, List[CommandOption]] = {
                     "Если участник не указан, значение принимает тот, кто запустил команду"
                 ),
                 "id": (
-                    "Menampilkan saldo peserta serta kemungkinan hadiah yang dapat dikumpulkan \ n \ n"
+                    "Menampilkan saldo peserta serta kemungkinan hadiah yang dapat dikumpulkan \n\n"
                     "Jika tidak ada peserta yang ditentukan, nilainya diambil oleh orang yang memulai perintah"
                 ),
                 "da": (
@@ -90,7 +90,7 @@ categories: Dict[str, List[CommandOption]] = {
                     "Hvis der ikke er angivet nogen deltager, tages værdien af den, der startede kommandoen"
                 ),
                 "de": (
-                    "Zeigt das Guthaben des Teilnehmers sowie mögliche Belohnungen an, die gesammelt werden können\n \n"
+                    "Zeigt das Guthaben des Teilnehmers sowie mögliche Belohnungen an, die gesammelt werden können\n\n"
                     "Wenn kein Teilnehmer angegeben ist, wird der Wert von demjenigen übernommen, der den Befehl gestartet hat."
                 ),
                 "es": (
@@ -98,7 +98,7 @@ categories: Dict[str, List[CommandOption]] = {
                     "Si no se especifica ningún participante, el valor lo toma quien inició el comando"
                 ),
                 "fr": (
-                    "Affiche le solde du participant ainsi que les éventuelles récompenses pouvant être collectées\n \ n"
+                    "Affiche le solde du participant ainsi que les éventuelles récompenses pouvant être collectées\n\n"
                     "Si aucun participant n'est spécifié, la valeur est prise par celui qui a lancé la commande"
                 ),
                 "pl": (
@@ -823,7 +823,7 @@ categories: Dict[str, List[CommandOption]] = {
         {
             "name": "purge",
             "category": "moderation",
-            "aliases": ['<limit>'],
+            "aliases": ["<limit>"],
             "arguments": [],
             "descriptrion": {
                 "en": "Clears the chat the specified number of times",
@@ -883,7 +883,7 @@ categories: Dict[str, List[CommandOption]] = {
                     "Tilføjer roller til en bestemt deltager i et stykke tid eller for evigt\n"
                     "Hvis rollen ikke er angivet, vil rollen blive tildelt for evigt\n"
                     "Du kan opsummere rollerne\n"
-                    "Tiden er angivet i formatet '1d1h1m1s' værdierne kan kombineres og også duplikeres, for eksempel `1d2h1d`\n \ n"
+                    "Tiden er angivet i formatet '1d1h1m1s' værdierne kan kombineres og også duplikeres, for eksempel `1d2h1d`\n\n"
                     "Eksempel: "
                     "l.temp-role **@lordcode** **@role1** **@role2** _12h_"
                 ),

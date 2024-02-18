@@ -1,3 +1,4 @@
+import jmespath
 import nextcord
 from bot import languages
 from bot.views import settings_menu
@@ -23,7 +24,7 @@ class DropDown(nextcord.ui.Select):
                 emoji=data.get('flag', None),
                 default=locale == data.get('locale')
             )
-            for data in languages.current[:24]
+            for data in languages.current[:25]
         ]
 
         super().__init__(
@@ -37,10 +38,7 @@ class DropDown(nextcord.ui.Select):
         value = self.values[0]
         gdb = GuildDateBases(interaction.guild_id)
 
-        langData = find(lambda lan: lan.get('locale', None)
-                        == value, languages.current)
-
-        gdb.set('language', langData.get('locale'))
+        gdb.set('language', value)
 
         view = Languages(interaction.guild)
 

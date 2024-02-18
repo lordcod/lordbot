@@ -61,11 +61,12 @@ class EconomicDB(Table, name="economic", _connection=_connection):
 class RolesDB(Table, name="roles", _connection=_connection):
     guild_id = Colum(data_type="BIGINT", not_null=True)
     member_id = Colum(data_type="BIGINT", not_null=True)
-    roles = Colum(data_type="JSON", default="{}")
+    role_id = Colum(data_type="BIGINT", not_null=True)
+    time = Colum(data_type="BIGINT", not_null=True)
 
 
 class MongoDataBases(Table, name="mongo", _connection=_connection):
-    name = Colum(data_type="TEXT", primary_key=True)
+    key_name = Colum(name="name", data_type="TEXT", primary_key=True)
     values = Colum(data_type="JSON", default="{}")
 
 

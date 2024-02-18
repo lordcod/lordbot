@@ -1,4 +1,5 @@
 from nextcord.ext import commands
+from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
 from bot.misc.logger import Logger
@@ -101,9 +102,7 @@ class PermissionChecker:
 
 
 class command_event(commands.Cog):
-    bot: commands.Bot
-
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
@@ -135,7 +134,5 @@ class command_event(commands.Cog):
             ctx.cooldown.add()
 
 
-def setup(bot: commands.Bot):
-    event = command_event(bot)
-
-    bot.add_cog(event)
+def setup(bot):
+    bot.add_cog(command_event(bot))
