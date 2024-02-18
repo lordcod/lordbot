@@ -8,8 +8,7 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Self, Union
-from typing import Mapping, Union
+from typing import Coroutine, Self, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
