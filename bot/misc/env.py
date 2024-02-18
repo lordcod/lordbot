@@ -11,4 +11,4 @@ token_lord_classic = environ.get("lordclassic_token")
 
 
 class Tokens:
-    token = token_lord_kind
+    token = token_lord_cord
