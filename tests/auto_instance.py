@@ -19,3 +19,7 @@ class Timeout:
 
     def set(self, name: str, value: str) -> None:
         self.data[name] = value
+
+print(Timeout.get('name'))
+Timeout.set('name', 'value')
+print(Timeout.get('name'))
