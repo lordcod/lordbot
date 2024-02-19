@@ -57,6 +57,40 @@ class DataRoleTimerHandlers:
             return
         cancel_atimerhandler(th)
 
+class DataBanTimerHandlers:
+    __instance = None
+    data = None
+
+    def __new__(cls) -> Self:
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            cls.data = {}
+        return cls.__instance
+
+    def __init__(self) -> None:
+        pass
+
+    def register(self,
+                 guild_id: int):
+        if guild_id not in self.data:
+            self.data[guild_id] = {}
+
+    def add_th(self,
+               guild_id: int,
+               member_id: int,
+               rth: TimerHandle):
+        self.register(guild_id)
+        self.data[guild_id][member_id] = rth
+
+    def cancel_th(self,
+                  guild_id: int,
+                  member_id: int):
+        self.register(guild_id)
+        th = self.data[guild_id].get(member_id)
+        if th is None:
+            return
+        th.cancel()
+
 
 class TempletePayload:
     _prefix = None
@@ -144,12 +178,6 @@ def cancel_atimerhandler(th: TimerHandle):
     coro.close()
     th.cancel()
 
-    def format(
-        self,
-        __mapping: Mapping[str, object],
-        **kwargs
-    ) -> str:
-        return self.safe_substitute(__mapping, **kwargs)
 
 
 def clamp(val: number_type,
@@ -166,7 +194,7 @@ async def getRandomQuote(lang='en'):
             return json
 
 
-def calculate_time(string: str) -> (int | None):
+def calculate_time(string: str) -> int:
     coefficients = {
         's': 1,
         'm': 60,
@@ -175,6 +203,7 @@ def calculate_time(string: str) -> (int | None):
     }
     timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
     ftime = 0
+    
     for number, word in timedate:
         if word not in coefficients:
             raise TypeError('Format time is not valid!')

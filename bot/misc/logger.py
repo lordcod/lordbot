@@ -46,7 +46,7 @@ async def post_mes(data, time_string):
         async with session.post(url, data=data):
             pass
 
-@lambda _: _(False)
+@lambda _: _(True)
 class Logger:
     loop = None
 

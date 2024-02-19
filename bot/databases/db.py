@@ -10,7 +10,8 @@ from .handlers import (
     EconomyMembedDB,
     CommandDB,
     RoleDateBases,
-    MongoDB
+    MongoDB,
+    BanDateBases
 )
 
 from bot.resources import info
@@ -63,6 +64,13 @@ class RolesDB(Table, name="roles", _connection=_connection):
     member_id = Colum(data_type="BIGINT", not_null=True)
     role_id = Colum(data_type="BIGINT", not_null=True)
     time = Colum(data_type="BIGINT", not_null=True)
+
+
+class BansDB(Table, name="bans", _connection=_connection):
+    guild_id = Colum(data_type="BIGINT", not_null=True)
+    member_id = Colum(data_type="BIGINT", not_null=True)
+    time = Colum(data_type="BIGINT", not_null=True)
+    reason = Colum(data_type="TEXT")
 
 
 class MongoDataBases(Table, name="mongo", _connection=_connection):
