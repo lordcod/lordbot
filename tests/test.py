@@ -8,7 +8,7 @@ async def ttask(arg):
 async def main():
     print('start')
     loop = asyncio.get_event_loop()
-    th = loop.call_later(1, asyncio.create_task, ttask('finish task'))
+    th = loop.call_later(-13859, asyncio.create_task, ttask('finish task'))
 
     await asyncio.sleep(2)
     print(loop.time())

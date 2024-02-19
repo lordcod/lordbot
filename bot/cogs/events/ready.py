@@ -1,7 +1,8 @@
+import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
-from bot.databases.db import RoleDateBases
+from bot.databases.db import RoleDateBases, BanDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.ideas import (ConfirmView, IdeaView)
 
@@ -17,6 +18,7 @@ class ready_event(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         await self.process_temp_roles()
+        await self.process_temp_bans()
 
         self.bot.add_view(ConfirmView())
         self.bot.add_view(IdeaView())
@@ -26,6 +28,22 @@ class ready_event(commands.Cog):
     @commands.Cog.listener()
     async def on_disconnect(self):
         Logger.core("Bot is disconnect")
+
+    async def process_temp_bans(self):
+        bsdb = BanDateBases()
+        datas = bsdb.get_all()
+
+        for dat in datas:
+            guild_id = dat[0]
+            member_id = dat[1]
+            ban_time = dat[2]
+
+            mbrsd = BanDateBases(guild_id, member_id)
+            self.bot.loop.call_later(
+                ban_time-time.time(),
+                asyncio.create_task,
+                mbrsd.remove_ban(self.bot._connection)
+            )
 
     async def process_temp_roles(self):
         rsdb = RoleDateBases()

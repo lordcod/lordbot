@@ -52,52 +52,27 @@ class moderations(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         bsdb = BanDateBases(ctx.guild.id, member.id)
         color = gdb.get('color')
-        _ban_data = bsdb.get_as_member()
 
         ftime = utils.calculate_time(stime)
 
-        if _ban_data is not None:
-            self.bot.ban_timer_handlers.cancel_th(ctx.guild.id,
-                                                   member.id)
-            embed = nextcord.Embed(
-                title="The duration of the ban has been changed",
-                description=f"Moderator {ctx.author.mention} banned {member.mention}",
-                color=color)
-            embed.add_field()
+        embed = nextcord.Embed(
+            title="Temporary ban granted!",
+            color=color)
+        embed.add_field(
+            name="Time of action",
+            value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
+            inline=False
+        )
+        if reason is not None:
             embed.add_field(
-                name='New time of action',
-                value=f'<t:{_ban_data[0] :.0f}:f> → <t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})',
+                name='Reason',
+                value=reason,
                 inline=False
             )
-            if reason is not None:
-                embed.add_field(
-                    name='Reason',
-                    value=reason,
-                    inline=False
-                )
-        else:
-            embed = nextcord.Embed(
-                title="Temporary ban granted!",
-                color=color)
-            embed.add_field(
-                name="Time of action",
-                value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
-                inline=False
-            )
-            if reason is not None:
-                embed.add_field(
-                    name='Reason',
-                    value=reason,
-                    inline=False
-                )
+        
+        self.bot.loop.call_later(ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
 
-        bsdb.set_ban(ftime+time.time(), reason)
-
-        rth = self.bot.loop.call_later(
-            ftime, asyncio.create_task, bsdb.remove_ban(member, reason))
-
-        self.bot.ban_timer_handlers.add_th(
-            ctx.guild.id, member.id, rth)
+        bsdb.insert(ftime+time.time())
 
         await member.ban(reason=reason)
 
@@ -116,18 +91,12 @@ class moderations(commands.Cog):
         for quantity, role_data in enumerate(datas):
             member_id = role_data[0]
             ban_time = role_data[1]
-            ban_reason = role_data[2]
 
-            member = ctx.guild.get_member(member_id)
-
-            if not member:
-                continue
-
-            message += f"{quantity}. {member.mention} → {ban_reason} (<t:{ban_time}:R>)\n"
+            message += f"{quantity}. <@{member_id}>(<t:{ban_time}:R>)\n"
 
         message = message or "There are no registered temporary roles on this server"
         embed = nextcord.Embed(
-            title="Temp Roles",
+            title="Temp Bans",
             description=message,
             color=color
         )

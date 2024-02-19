@@ -3,13 +3,12 @@ from typing import Callable, List
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc.utils import DataRoleTimerHandlers, DataBanTimerHandlers
+from bot.misc.utils import DataRoleTimerHandlers
 
 
 class LordBot(commands.Bot):
     timeouts = {}
     role_timer_handlers = DataRoleTimerHandlers()
-    ban_timer_handlers = DataBanTimerHandlers()
     guild_timer_handlers = {}
 
     def __init__(

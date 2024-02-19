@@ -70,7 +70,6 @@ class BansDB(Table, name="bans", _connection=_connection):
     guild_id = Colum(data_type="BIGINT", not_null=True)
     member_id = Colum(data_type="BIGINT", not_null=True)
     time = Colum(data_type="BIGINT", not_null=True)
-    reason = Colum(data_type="TEXT")
 
 
 class MongoDataBases(Table, name="mongo", _connection=_connection):

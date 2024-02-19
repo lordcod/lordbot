@@ -57,40 +57,6 @@ class DataRoleTimerHandlers:
             return
         cancel_atimerhandler(th)
 
-class DataBanTimerHandlers:
-    __instance = None
-    data = None
-
-    def __new__(cls) -> Self:
-        if cls.__instance is None:
-            cls.__instance = object.__new__(cls)
-            cls.data = {}
-        return cls.__instance
-
-    def __init__(self) -> None:
-        pass
-
-    def register(self,
-                 guild_id: int):
-        if guild_id not in self.data:
-            self.data[guild_id] = {}
-
-    def add_th(self,
-               guild_id: int,
-               member_id: int,
-               rth: TimerHandle):
-        self.register(guild_id)
-        self.data[guild_id][member_id] = rth
-
-    def cancel_th(self,
-                  guild_id: int,
-                  member_id: int):
-        self.register(guild_id)
-        th = self.data[guild_id].get(member_id)
-        if th is None:
-            return
-        th.cancel()
-
 
 class TempletePayload:
     _prefix = None
