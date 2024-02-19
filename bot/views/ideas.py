@@ -20,12 +20,12 @@ class Timeout:
         self.data = {}
 
     def get(self, guild_id: int, member_id: int) -> Optional[float]:
-        if guild_id in self.data:
+        if guild_id not in self.data:
             self.data[guild_id] = {}
         return self.data[guild_id].get(member_id)
 
     def set(self, guild_id: int, member_id: int, delay: float) -> None:
-        if guild_id in self.data:
+        if guild_id not in self.data:
             self.data[guild_id] = {}
         self.data[guild_id][member_id] = delay
 
@@ -97,7 +97,7 @@ class ConfirmModal(nextcord.ui.Modal):
         )
         embed_accept.add_field(
             name=lang_ConfirmModal.idea_embed_field.get(locale),
-            value=reason,
+            value=idea_content,
             inline=False
         )
         if reason:

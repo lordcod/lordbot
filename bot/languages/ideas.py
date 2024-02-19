@@ -172,38 +172,29 @@ class ConfirmView:
 
 
 class IdeaModal:
-    title = {
-        'en': 'Suggest an idea',
-        'ru': '',
-        'id': '',
-        'da': '',
-        'de': '',
-        'es': '',
-        'fr': '',
-        'pl': '',
-        'tr': ''
-    }
+    title = ConfirmModal.title
+    
     label = {
         'en': 'Tell us about your idea',
-        'ru': '',
-        'id': '',
-        'da': '',
-        'de': '',
-        'es': '',
-        'fr': '',
-        'pl': '',
-        'tr': ''
+        'ru': 'Расскажите нам о своей идее',
+        'id': 'Ceritakan tentang ide Anda',
+        'da': 'Fortæl os om din ide',
+        'de': 'Erzählen Sie uns von Ihrer Idee',
+        'es': 'Cuéntanos sobre tu idea',
+        'fr': 'Parlez-nous de votre idée',
+        'pl': 'Opowiedz nam o swoim pomyśle',
+        'tr': 'Bize fikrinden bahset'
     }
     placeholder = {
         'en': 'Describe your idea in as much detail as possible with usage examples.',
-        'ru': '',
-        'id': '',
-        'da': '',
-        'de': '',
-        'es': '',
-        'fr': '',
-        'pl': '',
-        'tr': ''
+        'ru': 'Опишите свою идею как можно более подробно с примерами использования.',
+        'id': 'Jelaskan ide Anda sedetail mungkin dengan contoh penggunaan.',
+        'da': 'Beskriv din ide så detaljeret som muligt med brugseksempler.',
+        'de': 'Beschreiben Sie Ihre Idee so detailliert wie möglich mit Anwendungsbeispielen.',
+        'es': 'Describe tu idea con el mayor detalle posible con ejemplos de uso.',
+        'fr': 'Décrivez votre idée avec autant de détails que possible avec des exemples d\'utilisation.',
+        'pl': 'Opisz swój pomysł tak szczegółowo, jak to możliwe, korzystając z przykładów użycia.',
+        'tr': 'Kullanım örnekleri ile fikrinizi mümkün olduğunca ayrıntılı olarak açıklayın.'
     }
 
     embed_title = ConfirmModal.embed_title

@@ -1,3 +1,4 @@
+from typing import Callable
 import nextcord
 from nextcord.ext import commands, application_checks
 from nextcord.utils import oauth_url
@@ -62,9 +63,9 @@ class basic(commands.Cog):
         image_file = nextcord.File(
             data, filename="captcha.png", description="Captcha", spoiler=True)
         await ctx.send(content=lang_captcha.enter.get(lang), file=image_file)
+        check: Callable[
+            [nextcord.Message], bool] = lambda mes: mes.channel == ctx.channel and mes.author == ctx.author
         try:
-            def check(
-                m): return m.channel == ctx.channel and m.author == ctx.author
             message: nextcord.Message = await self.bot.wait_for("message",
                                                                 timeout=30,
                                                                 check=check)
@@ -157,7 +158,8 @@ class basic(commands.Cog):
         if not message.content:
             await inters.response.send_message("This message has no content, "
                                                "so we will not be able to "
-                                               "translate it.")
+                                               "translate it.",
+                                               ephemeral=True)
 
         data = jmespath.search(
             f"[?discord_language=='{inters.locale}']|[0]", lang_datas)

@@ -18,6 +18,45 @@ from easy_pil import Editor, Font, load_image_async
 
 number_type = Union[int, float]
 
+class DataRoleTimerHandlers:
+    __instance = None
+    data = None
+
+    def __new__(cls) -> Self:
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+            cls.data = {}
+        return cls.__instance
+
+    def __init__(self) -> None:
+        pass
+
+    def register(self,
+                 guild_id: int,
+                 member_id: int):
+        if guild_id not in self.data:
+            self.data[guild_id] = {}
+        if member_id not in self.data[guild_id]:
+            self.data[guild_id][member_id] = {}
+
+    def add_th(self,
+               guild_id: int,
+               member_id: int,
+               role_id: int,
+               rth: TimerHandle):
+        self.register(guild_id, member_id)
+        self.data[guild_id][member_id][role_id] = rth
+
+    def cancel_th(self,
+                  guild_id: int,
+                  member_id: int,
+                  role_id: int):
+        self.register(guild_id, member_id)
+        th = self.data[guild_id][member_id].get(role_id)
+        if th is None:
+            return
+        cancel_atimerhandler(th)
+
 
 class TempletePayload:
     _prefix = None
@@ -88,45 +127,16 @@ class __LordFormatingTemplate(string.Template):
         )
     '''
 
+    def format(self, __mapping: Mapping[str, object]):
+        return self.safe_substitute(__mapping)
 
-class DataRoleTimerHandlers:
-    __instance = None
-    data = None
+def lord_format(
+    __value: object,
+    __mapping: Mapping[str, object]
+) -> str:
+    return __LordFormatingTemplate(__value).format(__mapping)
 
-    def __new__(cls) -> Self:
-        if cls.__instance is None:
-            cls.__instance = object.__new__(cls)
-            cls.data = {}
-        return cls.__instance
 
-    def __init__(self) -> None:
-        pass
-
-    def register(self,
-                 guild_id: int,
-                 member_id: int):
-        if guild_id not in self.data:
-            self.data[guild_id] = {}
-        if member_id not in self.data[guild_id]:
-            self.data[guild_id][member_id] = {}
-
-    def add_th(self,
-               guild_id: int,
-               member_id: int,
-               role_id: int,
-               rth: TimerHandle):
-        self.register(guild_id, member_id)
-        self.data[guild_id][member_id][role_id] = rth
-
-    def cancel_th(self,
-                  guild_id: int,
-                  member_id: int,
-                  role_id: int):
-        self.register(guild_id, member_id)
-        th = self.data[guild_id][member_id].get(role_id)
-        if th is None:
-            return
-        cancel_atimerhandler(th)
 
 
 def cancel_atimerhandler(th: TimerHandle):
@@ -140,13 +150,6 @@ def cancel_atimerhandler(th: TimerHandle):
         **kwargs
     ) -> str:
         return self.safe_substitute(__mapping, **kwargs)
-
-
-def lord_format(
-    __value: object,
-    __mapping: Mapping[str, object]
-) -> str:
-    return __LordFormatingTemplate(__value).format(__mapping)
 
 
 def clamp(val: number_type,
