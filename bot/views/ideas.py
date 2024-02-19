@@ -97,7 +97,7 @@ class ConfirmModal(nextcord.ui.Modal):
         )
         embed_accept.add_field(
             name=lang_ConfirmModal.idea_embed_field.get(locale),
-            value=reason,
+            value=idea_content,
             inline=False
         )
         if reason:
