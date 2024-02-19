@@ -47,7 +47,7 @@ async def post_mes(data, time_string):
             pass
 
 
-@lambda cls: cls(False)
+@lambda cls: cls(True)
 class Logger:
     loop = None
 
