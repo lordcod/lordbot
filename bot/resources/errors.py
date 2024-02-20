@@ -52,13 +52,9 @@ class CallbackCommandError:
 
     async def process(self):
         Logger.info(f'[{self.error.__class__.__name__}] {self.error}')
-        for error in self.errors:
-            name = error.__name__
-            error_name = self.error.__class__.__name__
-
-            if name == error_name:
-                await error(self)
-                break
+        error_name = self.error.__class__.__name__
+        if error_coro := getattr(self, error_name, None):
+            await error_coro()
         else:
             await self.OfterError()
 
@@ -151,21 +147,3 @@ class CallbackCommandError:
 
     async def OfterError(self):
         pass
-
-    errors = [
-        MissingPermissions,
-        MissingRole,
-        MissingChannel,
-        BotMissingPermissions,
-        DisabledCommand,
-        CommandNotFound,
-        CommandOnCooldown,
-        NotOwner,
-        CheckFailure,
-        BadArgument,
-        MissingRequiredArgument,
-        OnlyTeamError,
-        NotActivateEconomy,
-        MemberNotFound,
-        BadUnionArgument
-    ]

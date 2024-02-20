@@ -1,4 +1,5 @@
 from typing import List, Dict, TypedDict
+import jmespath
 
 
 class CommandOption(TypedDict):
@@ -1106,6 +1107,12 @@ categories: Dict[str, List[CommandOption]] = {
 
 commands: List[CommandOption] = [com for cat in categories.values()
                                  for com in cat]
+
+
+def get_command(name: str) -> CommandOption:
+    expression = f"[?name == '{name}'||contains(aliases, '{name}')]|[0]"
+    result = jmespath.search(expression, commands)
+    return result
 
 
 class Embed:

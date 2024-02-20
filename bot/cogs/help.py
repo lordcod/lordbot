@@ -2,6 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.languages import help as help_info
+from bot.languages.help import get_command
 from bot.databases.db import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.help import HelpView
@@ -16,12 +17,6 @@ def is_valid_command(name: str) -> bool:
     if result:
         return True
     return False
-
-
-def get_command(name: str) -> help_info.CommandOption:
-    expression = f"[?name == '{name}'||contains(aliases, '{name}')]|[0]"
-    result = jmespath.search(expression, help_info.commands)
-    return result
 
 
 class help(commands.Cog):
