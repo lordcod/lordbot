@@ -5,11 +5,12 @@ from bot.misc import utils
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.views.settings_menu import SettingsView
+from bot.views.delcat import DelCatView
 from bot.databases.db import RoleDateBases, BanDateBases, GuildDateBases
 
 import io
-import asyncio
 import time
+import asyncio
 from typing import Optional
 
 
@@ -38,6 +39,12 @@ class moderations(commands.Cog):
 
         await ctx.send(embed=view.embed, view=view)
 
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def deletecategory(self, ctx: commands.Context, category: nextcord.CategoryChannel):
+        view = DelCatView(ctx.author, category)
+
+        await ctx.send(embed=view.embed, view=view)
 
     @commands.group(name='temp-ban', invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
@@ -69,8 +76,9 @@ class moderations(commands.Cog):
                 value=reason,
                 inline=False
             )
-        
-        self.bot.loop.call_later(ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
+
+        self.bot.loop.call_later(
+            ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
 
         bsdb.insert(ftime+time.time())
 
@@ -102,7 +110,6 @@ class moderations(commands.Cog):
         )
 
         await ctx.send(embed=embed)
-
 
     @commands.group(name='temp-role', invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
@@ -200,7 +207,6 @@ class moderations(commands.Cog):
 
         await ctx.send(embed=embed)
 
-
     @nextcord.slash_command(
         name='clone',
         default_member_permissions=268435456
@@ -242,7 +248,6 @@ class moderations(commands.Cog):
         )
 
         await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}', ephemeral=True)
-
 
     @commands.group(invoke_without_command=True)
     @commands.has_permissions(manage_messages=True)
