@@ -1,0 +1,59 @@
+{
+    "en": {
+        "bot-info": {
+            "title": "{name} this is a multifunctional bot",
+            "description": "The bot is designed to facilitate server management and is equipped with various automation tool",
+            "info-server": "Information about the server",
+            "prefix-server": "> Server prefix - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Will choose the appropriate language:"
+        },
+        "captcha": {
+            "congratulation": "Congratulations you have passed the captcha!",
+            "enter": "You have 30 seconds to solve the captcha!",
+            "failed": "Captcha failed"
+        },
+        "activiti": {
+            "failed": "This activity is unavailable or does not work",
+            "embed": {
+                "title": "The activity has been successfully created!",
+                "description": "However, some types of activities may not be available for your server if the boost level does not meet the activity requirements."
+            },
+            "fields": {
+                "label": "Activity name",
+                "max-user": "Maximum number of users"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "You don't have enough rights",
+            "MissingRole": "You don't have a suitable role to execute the command",
+            "MissingChannel": "You cannot execute this command in this channel",
+            "NotOwner": "This command is intended for the bot owner",
+            "CommandNotFound": "There is no such command",
+            "CheckFailure": "You don't fulfill all the conditions",
+            "BadArgument": "Invalid argument entered",
+            "DisabledCommand": "This command is disabled on the server",
+            "MissingRequiredArgument": "You didn't enter a required argument",
+            "NotActivateEconomy": "The economy system is disabled on the server",
+            "OnlyTeamError": "This command can only be used by the bot team",
+            "MemberNotFound": "The participant could not be found",
+            "CommandOnCooldown": {
+                "title": "The command is on hold",
+                "description": "Try again after {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "Choose the track you are interested in!",
+            "placeholder": "Select a track"
+        }
+    },
+    "ru": {},
+    "id": {},
+    "da": {},
+    "de": {},
+    "es": {},
+    "fr": {},
+    "pl": {},
+    "tr": {}
+}
