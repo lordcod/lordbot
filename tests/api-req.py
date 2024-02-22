@@ -15,9 +15,10 @@ async def main():
             "The bot is designed to facilitate server management and is equipped with various automation tool"
         ]
     }
+    payload = orjson.dumps(payload).decode()
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer {0}".format(yakey)
+        "Authorization": "Bearer {0}".format(translate_apikey)
     }
     async with aiohttp.ClientSession() as session:
         async with session.post(url, data=payload, headers=headers) as res:
