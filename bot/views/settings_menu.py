@@ -17,58 +17,58 @@ class SetDropdown(nextcord.ui.Select):
 
         options = [
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.economy'),
+                label=i18n.t(locale, 'settings.module-name.economy'),
                 emoji=Emoji.economy,
                 value='Economy'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.languages'),
+                label=i18n.t(locale, 'settings.module-name.languages'),
                 emoji=Emoji.languages,
                 value='Languages'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.prefix'),
+                label=i18n.t(locale, 'settings.module-name.prefix'),
                 emoji=Emoji.prefix,
                 value='Prefix'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.color'),
+                label=i18n.t(locale, 'settings.module-name.color'),
                 emoji=Emoji.color,
                 value='Color'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.music'),
+                label=i18n.t(locale, 'settings.module-name.music'),
                 emoji=Emoji.channel_voice,
                 value='Music'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.auto-roles'),
+                label=i18n.t(locale, 'settings.module-name.auto-roles'),
                 emoji=Emoji.auto_role,
                 value='AutoRoles'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.welcomer'),
+                label=i18n.t(locale, 'settings.module-name.welcomer'),
                 emoji=Emoji.frame_person,
                 value='Welcomer'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.reactions'),
+                label=i18n.t(locale, 'settings.module-name.reactions'),
                 emoji=Emoji.reactions,
                 value='Reactions'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.thread'),
+                label=i18n.t(locale, 'settings.module-name.thread'),
                 emoji=Emoji.thread_message,
                 value='ThreadMessage'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module_name.ideas'),
+                label=i18n.t(locale, 'settings.module-name.ideas'),
                 emoji=Emoji.lightbulb,
                 value='Ideas'
             ),
             nextcord.SelectOption(
                 label=i18n.t(
-                    locale, 'settings.module_name.command-permission'),
+                    locale, 'settings.module-name.command-permission'),
                 emoji=Emoji.command,
                 value='CommandPermission'
             ),

@@ -29,16 +29,7 @@ class LordBot(commands.Bot):
 
         You can find more info about the events on the :ref:`documentation below <discord-api-events>`.
 
-        The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
-
-        Example
-        -------
-
-        .. code-block:: python3
-
-            @client.event
-            async def on_ready():
-                print('Ready!')
+        The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised
 
         Raises
         ------
@@ -60,5 +51,3 @@ class LordBot(commands.Bot):
         super().__init__(command_prefix=self.get_command_prefixs,
                          intents=nextcord.Intents.all(),
                          help_command=None)
-        self.event
-        self.add_listener(self.ready_temp, 'on_ready')

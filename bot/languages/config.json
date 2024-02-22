@@ -116,7 +116,7 @@
             "prefix": {
                 "title": "Prefix",
                 "description": "Setting the prefix to which the bot will respond when calling the command.",
-                "current": "The current prefix is {prefix}"
+                "current": "The current prefix is `{prefix}`"
             },
             "languages": {
                 "title": "Languages",
