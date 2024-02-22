@@ -96,5 +96,6 @@ def db_forever():
         exit()
 
 
-thread = threading.Thread(target=db_forever, name='DataBase')
+thread = threading.Thread(
+    target=db_forever, name='DataBase')
 thread.start()

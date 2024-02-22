@@ -3,13 +3,8 @@ import nextcord
 from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
 
-from bot.misc import utils
 from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases, CommandDB
-from bot.languages import help as help_info
-from bot.languages.settings import (
-    button as button_name
-)
 
 from typing import List
 

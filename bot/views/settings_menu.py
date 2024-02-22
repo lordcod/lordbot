@@ -3,6 +3,7 @@ from bot.resources.ether import Emoji
 from bot.databases.db import GuildDateBases
 from bot.views.settings import moduls
 from bot.views.settings._view import DefaultSettingsView
+from bot.languages import i18n
 from bot.languages.settings import (
     start as start_langs,
     module_name
@@ -16,64 +17,65 @@ class SetDropdown(nextcord.ui.Select):
 
         options = [
             nextcord.SelectOption(
-                label=module_name.economy.get(locale),
+                label=i18n.t(locale, 'settings.module_name.economy'),
                 emoji=Emoji.economy,
                 value='Economy'
             ),
             nextcord.SelectOption(
-                label=module_name.languages.get(locale),
+                label=i18n.t(locale, 'settings.module_name.languages'),
                 emoji=Emoji.languages,
                 value='Languages'
             ),
             nextcord.SelectOption(
-                label=module_name.prefix.get(locale),
+                label=i18n.t(locale, 'settings.module_name.prefix'),
                 emoji=Emoji.prefix,
                 value='Prefix'
             ),
             nextcord.SelectOption(
-                label=module_name.color.get(locale),
+                label=i18n.t(locale, 'settings.module_name.color'),
                 emoji=Emoji.color,
                 value='Color'
             ),
             nextcord.SelectOption(
-                label=module_name.music.get(locale),
+                label=i18n.t(locale, 'settings.module_name.music'),
                 emoji=Emoji.channel_voice,
                 value='Music'
             ),
             nextcord.SelectOption(
-                label=module_name.auto_roles.get(locale),
+                label=i18n.t(locale, 'settings.module_name.auto-roles'),
                 emoji=Emoji.auto_role,
                 value='AutoRoles'
             ),
             nextcord.SelectOption(
-                label=module_name.welcomer.get(locale),
+                label=i18n.t(locale, 'settings.module_name.welcomer'),
                 emoji=Emoji.frame_person,
                 value='Welcomer'
             ),
             nextcord.SelectOption(
-                label=module_name.reactions.get(locale),
+                label=i18n.t(locale, 'settings.module_name.reactions'),
                 emoji=Emoji.reactions,
                 value='Reactions'
             ),
             nextcord.SelectOption(
-                label=module_name.thread.get(locale),
+                label=i18n.t(locale, 'settings.module_name.thread'),
                 emoji=Emoji.thread_message,
                 value='ThreadMessage'
             ),
             nextcord.SelectOption(
-                label=module_name.ideas.get(locale),
+                label=i18n.t(locale, 'settings.module_name.ideas'),
                 emoji=Emoji.lightbulb,
                 value='Ideas'
             ),
             nextcord.SelectOption(
-                label=module_name.command_permission.get(locale),
+                label=i18n.t(
+                    locale, 'settings.module_name.command-permission'),
                 emoji=Emoji.command,
                 value='CommandPermission'
             ),
         ]
 
         super().__init__(
-            placeholder=start_langs.choose.get(locale),
+            placeholder=i18n.t(locale, 'settings.start.choose'),
             min_values=1,
             max_values=1,
             options=options,
@@ -94,13 +96,14 @@ class SettingsView(DefaultSettingsView):
         locale = gdb.get('language')
 
         self.embed = nextcord.Embed(
-            description=start_langs.description.get(locale),
+            description=i18n.t(locale, 'settings.start.description'),
             color=color
         )
-        self.embed.set_author(name=start_langs.author.get(
-            locale), icon_url=member.guild.icon)
+        self.embed.set_author(name=i18n.t(
+            locale, 'settings.start.title'), icon_url=member.guild.icon)
         self.embed.set_footer(
-            text=f'{start_langs.request.get(locale)} {member.display_name}',
+            text=i18n.t(locale, 'settings.start.request',
+                        name=member.display_name),
             icon_url=member.avatar)
 
         super().__init__()

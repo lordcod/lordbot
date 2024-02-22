@@ -1,6 +1,7 @@
 from typing import Optional
 import nextcord
 from bot import languages
+from bot.languages import i18n
 from bot.databases.db import GuildDateBases
 import googletrans
 
@@ -13,7 +14,7 @@ class TranslateDropDown(nextcord.ui.Select):
         locale = gdb.get('language')
 
         super().__init__(
-            placeholder=languages.translate.placeholder.get(locale),
+            placeholder=i18n.t(locale, 'settings.translate.placeholder'),
             min_values=1,
             max_values=1,
             options=[

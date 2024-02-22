@@ -7,7 +7,7 @@ from bot.databases.varstructs import IdeasPayload
 from bot.databases.db import GuildDateBases
 from bot.views import settings_menu
 from bot.views.ideas import IdeaView
-from bot.languages.settings import button as button_name
+from bot.languages import i18n
 
 
 class DropDown(nextcord.ui.Select):
@@ -95,7 +95,7 @@ class IdeasView(DefaultSettingsView):
 
         self.add_item(DropDown(guild.id))
 
-        self.back.label = button_name.back.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

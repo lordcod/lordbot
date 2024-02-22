@@ -8,7 +8,6 @@ from bot.misc.lordbot import LordBot
 from bot.views.help import HelpView
 
 import re
-import jmespath
 
 
 def is_valid_command(name: str) -> bool:

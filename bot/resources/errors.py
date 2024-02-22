@@ -4,7 +4,7 @@ from nextcord.ext import commands
 from bot.misc.logger import Logger
 from bot.misc.time_transformer import display_time
 from bot.databases.db import GuildDateBases
-from bot.languages import errors
+from bot.languages import i18n
 
 from inspect import Parameter
 from typing import Union
@@ -59,27 +59,27 @@ class CallbackCommandError:
             await self.OfterError()
 
     async def MissingPermissions(self):
-        content = errors.MissingPermissions.get(self.locale)
+        content = i18n.t(self.locale, 'errors.MissingPermissions')
 
         await self.ctx.send(content)
 
     async def BotMissingPermissions(self):
-        content = errors.BotMissingPermissions.get(self.locale)
+        content = i18n.t(self.locale, 'errors.BotMissingPermissions')
 
         await self.ctx.send(content)
 
     async def MissingRole(self):
-        content = errors.MissingRole.get(self.locale)
+        content = i18n.t(self.locale, 'errors.MissingRole')
 
         await self.ctx.send(content)
 
     async def MissingChannel(self):
-        content = errors.MissingChannel.get(self.locale)
+        content = i18n.t(self.locale, 'errors.MissingChannel')
 
         await self.ctx.send(content)
 
     async def CommandNotFound(self):
-        content = errors.CommandNotFound.get(self.locale)
+        content = i18n.t(self.locale, 'errors.CommandNotFound')
 
         await self.ctx.send(
             content=content,
@@ -90,55 +90,47 @@ class CallbackCommandError:
         color = self.gdb.get('color')
 
         embed = nextcord.Embed(
-            title=errors.CommandOnCooldown.title.get(self.locale),
-            description=(
-                f'{errors.CommandOnCooldown.description.get(self.locale)} '
-                f"{display_time(self.error.retry_after, self.locale)}"
-            ),
+            title=i18n.t(self.locale, 'errors.CommandOnCooldown.title'),
+            description=i18n.t(self.locale, 'errors.CommandOnCooldown.description',
+                               delay=display_time(self.error.retry_after,
+                                                  self.locale)),
             color=color
         )
 
         await self.ctx.send(embed=embed, delete_after=5.0)
 
     async def NotOwner(self):
-        content = errors.NotOwner.get(self.locale)
+        content = i18n.t(self.locale, 'errors.NotOwner')
 
         await self.ctx.send(content=content)
 
-    async def CheckFailure(self):
-        content = errors.CheckFailure.get(self.locale)
-
-        await self.ctx.send(content)
-
     async def BadArgument(self):
-        content = errors.BadArgument.get(self.locale)
+        content = i18n.t(self.locale, 'errors.BadArgument')
 
         await self.ctx.send(content)
 
     async def DisabledCommand(self):
-        content = errors.DisabledCommand.get(self.locale)
+        content = i18n.t(self.locale, 'errors.DisabledCommand')
 
         await self.ctx.send(content)
 
     async def MissingRequiredArgument(self):
-        param: Parameter = self.error.param
-        content = (f'{errors.MissingRequiredArgument.get(self.locale)} - '
-                   f'{param.name}')
+        content = i18n.t(self.locale, 'errors.MissingRequiredArgument')
 
         await self.ctx.send(content)
 
     async def NotActivateEconomy(self):
-        content = errors.NotActivateEconomy.get(self.locale)
+        content = i18n.t(self.locale, 'errors.NotActivateEconomy')
 
         await self.ctx.send(content)
 
     async def OnlyTeamError(self):
-        content = errors.OnlyTeamError.get(self.locale)
+        content = i18n.t(self.locale, 'errors.OnlyTeamError')
 
         await self.ctx.send(content)
 
     async def MemberNotFound(self):
-        content = errors.MemberNotFound.get(self.locale)
+        content = i18n.t(self.locale, 'errors.MemberNotFound')
 
         await self.ctx.send(content)
 

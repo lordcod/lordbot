@@ -9,11 +9,8 @@ from bot.misc import utils
 from bot.databases.db import GuildDateBases
 from bot.resources import info
 from bot.views.translate import TranslateView
-from bot.languages import (
-    captcha as lang_captcha,
-    activiti as lang_activiti,
-    data as lang_datas
-)
+from bot.languages import i18n
+from bot.languages import data as lang_data
 
 import jmespath
 import googletrans
@@ -62,33 +59,24 @@ class basic(commands.Cog):
         data, code = await utils.generator_captcha(random.randint(3, 7))
         image_file = nextcord.File(
             data, filename="captcha.png", description="Captcha", spoiler=True)
-        await ctx.send(content=lang_captcha.enter.get(lang), file=image_file)
+        await ctx.send(content=i18n.t(lang, 'captcha.enter'), file=image_file)
         check: Callable[
-            [nextcord.Message], bool] = lambda mes: mes.channel == ctx.channel and mes.author == ctx.author
+            [nextcord.Message],
+            bool] = lambda mes: (mes.channel == ctx.channel
+                                 and mes.author == ctx.author)
         try:
             message: nextcord.Message = await self.bot.wait_for("message",
                                                                 timeout=30,
                                                                 check=check)
         except asyncio.TimeoutError:
-            await ctx.send(content=lang_captcha.failed.get(lang))
+            await ctx.send(content=i18n.t(lang, 'captcha.failed'))
             return
 
         if message.content.upper() == code:
             await ctx.send((f"{Emoji.congratulation}"
-                           f"{lang_captcha.congratulation.get(lang)}"))
+                            f"{i18n.t(lang, 'captcha.congratulation')}"))
         else:
-            await ctx.send(content=lang_captcha.failed.get(lang))
-
-    @commands.command(name="welcome-message")
-    async def welcome_message(self, ctx: commands.Context):
-        image_bytes = await utils.generate_welcome_message(ctx.author)
-
-        file = nextcord.File(image_bytes, "welcome-message.png")
-
-        embed = nextcord.Embed()
-        embed.set_image("attachment://welcome-message.png")
-
-        await ctx.send(embed=embed, file=file)
+            await ctx.send(content=i18n.t(lang, 'captcha.failed'))
 
     @nextcord.slash_command(
         name="activiti",
@@ -125,7 +113,7 @@ class basic(commands.Cog):
             )
         except (nextcord.HTTPException, nextcord.NotFound):
             await interaction.response.send_message(
-                content=lang_activiti.failed.get(lang))
+                content=i18n.t(lang, 'activiti.failed'))
             return
 
         view = nextcord.ui.View(timeout=None)
@@ -133,16 +121,16 @@ class basic(commands.Cog):
             label="Activiti", emoji=Emoji.roketa, url=inv.url))
 
         embed = nextcord.Embed(
-            title=f"**{lang_activiti.embed_title.get(lang)}**",
+            title=f"**{i18n.t(lang, 'activiti.embed.title')}**",
             color=color,
-            description=lang_activiti.embed_description.get(lang)
+            description=i18n.t(lang, 'activiti.embed.description')
         )
         embed.add_field(
-            name=lang_activiti.fields_label.get(lang),
+            name=i18n.t(lang, 'activiti.fields.label'),
             value=activiti.get('label')
         )
         embed.add_field(
-            name=lang_activiti.fields_max_user.get(lang),
+            name=i18n.t(lang, 'activiti.fields.max-user'),
             value=activiti.get('max_user')
         )
 
@@ -162,7 +150,7 @@ class basic(commands.Cog):
                                                ephemeral=True)
 
         data = jmespath.search(
-            f"[?discord_language=='{inters.locale}']|[0]", lang_datas)
+            f"[?discord_language=='{inters.locale}']|[0]", lang_data)
 
         result = translator.translate(
             text=message.content, dest=data.get('google_language'))

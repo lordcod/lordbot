@@ -78,7 +78,6 @@ class ModerationRolesView(DefaultSettingsView):
         self.gdb = GuildDateBases(guild.id)
         self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
         mod_role_ids = self.idea_datas.get('moderation-role-ids')
-        color = self.gdb.get('color')
 
         super().__init__()
 

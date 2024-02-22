@@ -1,5 +1,7 @@
 import nextcord
 
+from bot.languages import i18n
+
 from .additional import InstallThreadView
 from .precise import ThreadData
 from .._view import DefaultSettingsView
@@ -7,10 +9,6 @@ from .._view import DefaultSettingsView
 from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
 from bot.resources.ether import Channel_Type
-from bot.languages.settings import (
-    thread as thread_langs,
-    button as button_name
-)
 
 
 class DropDown(nextcord.ui.StringSelect):
@@ -36,7 +34,8 @@ class DropDown(nextcord.ui.StringSelect):
             self.current_disabled = True
 
         super().__init__(
-            placeholder=thread_langs.init.placeholder.get(locale),
+            placeholder=i18n.t(
+                locale, 'settings.thread.init.placeholder'),
             min_values=1,
             max_values=1,
             options=options,
@@ -50,11 +49,12 @@ class DropDown(nextcord.ui.StringSelect):
         channel_data = self.forum_message.get(value)
         locale = self.gdb.get('language')
         color = self.gdb.get('color')
-
+        channel
         embed = nextcord.Embed(
-            title=thread_langs.init.brief_title.get(locale),
-            description=(f"{thread_langs.init.channel.get(locale)}: "
-                         f"{channel.mention}"),
+            title=i18n.t(
+                locale, 'settings.thread.init.brief'),
+            description=i18n.t(
+                locale, 'settings.thread.init.channel', channel=channel.mention),
             color=color
         )
         await interaction.message.edit(embed=embed,
@@ -70,15 +70,19 @@ class AutoThreadMessage(DefaultSettingsView):
         color = gdb.get('color')
 
         self.embed = nextcord.Embed(
-            title=thread_langs.init.title.get(locale),
-            description=thread_langs.init.description.get(locale),
+            title=i18n.t(
+                locale, 'settings.thread.init.title'),
+            description=i18n.t(
+                locale, 'settings.thread.init.description'),
             color=color
         )
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.addtion.label = button_name.add.get(locale)
+        self.back.label = i18n.t(
+            locale, 'settings.button.back')
+        self.addtion.label = i18n.t(
+            locale, 'settings.button.add')
 
         self.add_item(DropDown(guild))
 

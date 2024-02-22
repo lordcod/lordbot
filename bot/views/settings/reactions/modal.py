@@ -3,9 +3,7 @@ import nextcord
 from .. import reactions
 
 from bot.databases.db import GuildDateBases
-from bot.languages.settings import (
-    reactions as reaction_langs
-)
+from bot.languages import i18n
 
 
 class ModalBuilder(nextcord.ui.Modal):
@@ -14,22 +12,26 @@ class ModalBuilder(nextcord.ui.Modal):
         locale = gdb.get('language')
 
         self.channel_id = channel_id
-        super().__init__(reaction_langs.modal.title.get(locale))
+        super().__init__(i18n.t(
+            locale, 'settings.reactions.modal.title'))
 
         self.emoji_1 = nextcord.ui.TextInput(
-            label=reaction_langs.modal.label.get(locale),
+            label=i18n.t(
+                locale, 'settings.reactions.modal.label'),
             placeholder='<a:name:id>',
             required=True
         )
 
         self.emoji_2 = nextcord.ui.TextInput(
-            label=reaction_langs.modal.label.get(locale),
+            label=i18n.t(
+                locale, 'settings.reactions.modal.label'),
             placeholder='<:name:id>',
             required=False
         )
 
         self.emoji_3 = nextcord.ui.TextInput(
-            label=reaction_langs.modal.label.get(locale),
+            label=i18n.t(
+                locale, 'settings.reactions.modal.label'),
             placeholder='😀',
             required=False
         )

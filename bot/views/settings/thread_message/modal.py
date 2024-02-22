@@ -1,11 +1,10 @@
 import nextcord
 
+from bot.languages import i18n
+
 from .. import thread_message
 
 from bot.databases.db import GuildDateBases
-from bot.languages.settings import (
-    thread as thread_langs
-)
 
 
 class ModalBuilder(nextcord.ui.Modal):
@@ -13,11 +12,14 @@ class ModalBuilder(nextcord.ui.Modal):
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
         self.channel_id = channel_id
-        super().__init__(thread_langs.modal.title.get(locale))
+        super().__init__(i18n.t(
+            locale, 'settings.thread.modal.title'))
 
         self.content = nextcord.ui.TextInput(
-            label=thread_langs.modal.label.get(locale),
-            placeholder=thread_langs.modal.placeholder.get(locale)
+            label=i18n.t(
+                locale, 'settings.thread.modal.label'),
+            placeholder=i18n.t(
+                locale, 'settings.thread.modal.placeholder')
         )
 
         self.add_item(self.content)

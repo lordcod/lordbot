@@ -173,7 +173,7 @@ class ConfirmView:
 
 class IdeaModal:
     title = ConfirmModal.title
-    
+
     label = {
         'en': 'Tell us about your idea',
         'ru': 'Расскажите нам о своей идее',

@@ -61,7 +61,6 @@ class init:
 
 class addptional:
     channel_error = {
-        'en': 'Auto-messages have already been installed on this channel',
         'ru': 'На этот канал уже установлено авто-сообщения',
         'en': 'Auto-messages have already been installed on this channel',
         'id': 'Pesan otomatis telah diinstal di saluran ini',
@@ -73,7 +72,6 @@ class addptional:
         'tr': 'Bu kanala otomatik mesajlar zaten yüklenmiştir'
     }
     placeholder = {
-        'en': 'Select a channel for auto-messages',
         'ru': 'Выберете канал для авто-сообщений',
         'en': 'Select a channel for auto-messages',
         'id': 'Pilih saluran untuk pesan otomatis',
@@ -85,7 +83,6 @@ class addptional:
         'tr': 'Otomatik mesajlar için bir kanal seçin'
     }
     install_mes = {
-        'en': 'Install message',
         'ru': 'Установить сообщение',
         'en': 'Install message',
         'id': 'Instal pesan',

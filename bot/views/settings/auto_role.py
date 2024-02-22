@@ -5,6 +5,7 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.resources.ether import Emoji
 from bot.views import settings_menu
 from bot.databases.db import GuildDateBases
+from bot.languages import i18n
 from bot.languages.settings import (button as button_name,
                                     auto_role as role_lang)
 
@@ -86,13 +87,14 @@ class AutoRoleView(DefaultSettingsView):
 
         self.add_item(DDB)
 
-        self.back.label = button_name.back.get(locale)
-        self.install.label = role_lang.install.get(locale)
-        self.delete.label = role_lang.delete.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.install.label = i18n.t(
+            locale, 'settings.auto-role.button.install')
+        self.delete.label = i18n.t(locale, 'settings.auto-role.button.delete')
 
         self.embed = nextcord.Embed(
-            title=role_lang.embed_title.get(locale),
-            description=role_lang.embed_description.get(locale),
+            title=i18n.t(locale, 'settings.auto-role.embed.title'),
+            description=i18n.t(locale, 'settings.auto-role.embed.description'),
             color=color
         )
 

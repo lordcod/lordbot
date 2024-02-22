@@ -1,14 +1,12 @@
 import nextcord
 
+from bot.languages import i18n
+
 from .modal import ModalBuilder
 from .. import reactions
 from .._view import DefaultSettingsView
 
 from bot.databases.db import GuildDateBases
-from bot.languages.settings import (
-    reactions as reaction_langs,
-    button as button_name
-)
 
 
 class ReactData(DefaultSettingsView):
@@ -21,9 +19,12 @@ class ReactData(DefaultSettingsView):
         self.channel = channel
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.edit_reactions.label = reaction_langs.datas.editreact.get(locale)
-        self.delete_reactions.label = reaction_langs.datas.delreact.get(locale)
+        self.back.label = i18n.t(
+            locale, 'settings.button.back')
+        self.edit_reactions.label = i18n.t(
+            locale, 'settings.reactions.button.edit')
+        self.delete_reactions.label = i18n.t(
+            locale, 'settings.reactions.button.delete')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

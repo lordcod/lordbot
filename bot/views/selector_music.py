@@ -3,7 +3,7 @@ from nextcord import utils
 
 from bot.databases.db import GuildDateBases
 from bot.misc.voice import Track
-from bot.languages import selector_music as lang_selector_music
+from bot.languages import i18n
 
 from typing import List
 
@@ -17,7 +17,7 @@ class MusicDropDown(nextcord.ui.Select):
         self.player = player
 
         super().__init__(
-            placeholder=lang_selector_music.placeholder.get(locale),
+            placeholder=i18n.t(locale, 'music-selector.placeholder'),
             min_values=1,
             max_values=1,
             options=[
@@ -48,7 +48,7 @@ class MusicView(nextcord.ui.View):
         color = gdb.get('color')
         locale = gdb.get('language')
         self.embed = nextcord.Embed(
-            title=lang_selector_music.title.get(locale),
+            title=i18n.t(locale, 'music-selector.title'),
             color=color
         )
 

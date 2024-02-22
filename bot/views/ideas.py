@@ -6,12 +6,7 @@ from typing import Optional
 from bot.resources.ether import Emoji
 from bot.databases.varstructs import IdeasPayload
 from bot.databases.db import MongoDB, GuildDateBases
-from bot.languages.ideas import (
-    ConfirmModal as lang_ConfirmModal,
-    ConfirmView as lang_ConfirmView,
-    IdeaModal as lang_IdeaModal,
-    IdeaView as lang_IdeaView
-)
+from bot.languages import i18n
 
 
 @lambda _: _()
@@ -35,10 +30,10 @@ class ConfirmModal(nextcord.ui.Modal):
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
 
-        super().__init__(lang_ConfirmModal.title.get(locale))
+        super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
         self.reason = nextcord.ui.TextInput(
-            label=lang_ConfirmModal.reason_label.get(locale),
+            label=i18n.t(locale, 'ideas.globals.reason-label'),
             required=False,
             style=nextcord.TextInputStyle.paragraph,
             min_length=0,
@@ -65,7 +60,7 @@ class ConfirmModal(nextcord.ui.Modal):
         reason = self.reason.value
 
         embed = nextcord.Embed(
-            title=lang_ConfirmModal.embed_title.get(locale),
+            title=i18n.t(locale, 'ideas.confrim-modal.embed.title'),
             color=nextcord.Color.green()
         )
         embed.set_author(
@@ -73,12 +68,13 @@ class ConfirmModal(nextcord.ui.Modal):
             icon_url=interaction.user.display_avatar
         )
         embed.add_field(
-            name=lang_ConfirmModal.embed_field.get(locale),
+            name=i18n.t(locale, 'ideas.confrim-modal.field'),
             value=idea_content
         )
 
         author = interaction.guild.get_member(idea_author_id)
-        content = f'{author.mention} {lang_ConfirmModal.idea_content.get(locale)}'
+        content = i18n.t(locale, 'ideas.confrim-modal.content',
+                         mention=author.mention)
 
         views = ConfirmView(interaction.guild_id)
         views.approve.disabled = True
@@ -92,17 +88,17 @@ class ConfirmModal(nextcord.ui.Modal):
         channel = interaction.guild.get_channel(channel_approved_id)
 
         embed_accept = nextcord.Embed(
-            title=lang_ConfirmModal.idea_embed_title.get(locale),
+            title=i18n.t(locale, 'ideas.confrim-modal.idea.embed.title'),
             color=nextcord.Color.green()
         )
         embed_accept.add_field(
-            name=lang_ConfirmModal.idea_embed_field.get(locale),
+            name=i18n.t(locale, 'ideas.confrim-modal.idea.embed.field'),
             value=idea_content,
             inline=False
         )
         if reason:
             embed_accept.add_field(
-                name=lang_ConfirmModal.idea_embed_reason.get(locale),
+                name=i18n.t(locale, 'ideas.confrim-modal.idea.embed.reason'),
                 value=reason,
                 inline=False
             )
@@ -123,8 +119,10 @@ class ConfirmView(nextcord.ui.View):
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
 
-        self.approve.label = lang_ConfirmView.approve_button.get(locale)
-        self.deny.label = lang_ConfirmView.deny_button.get(locale)
+        self.approve.label = i18n.t(
+            locale, 'ideas.confrim-view.button.approve')
+        self.deny.label = i18n.t(
+            locale, 'ideas.confrim-view.button.deny')
 
     @nextcord.ui.button(label="Approve",
                         style=nextcord.ButtonStyle.green,
@@ -139,8 +137,8 @@ class ConfirmView(nextcord.ui.View):
         enabled: bool = ideas_data.get('enabled', False)
 
         if enabled is False:
-            await interaction.response.send_message(
-                lang_ConfirmView.ideas_disabled.get(locale), ephemeral=True)
+            await interaction.response.send_message(i18n.t(
+                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
             return
 
         role_ids = set(interaction.user._roles)
@@ -164,8 +162,8 @@ class ConfirmView(nextcord.ui.View):
         moderation_role_ids = ideas_data.get('moderation-role-ids', [])
         enabled: bool = ideas_data.get('enabled', False)
         if enabled is False:
-            await interaction.response.send_message(
-                lang_ConfirmView.ideas_disabled.get(locale), ephemeral=True)
+            await interaction.response.send_message(i18n.t(
+                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
             return
 
         mdb = MongoDB('ideas')
@@ -191,14 +189,15 @@ class ConfirmView(nextcord.ui.View):
             name=interaction.user.display_name,
             icon_url=interaction.user.display_avatar
         )
-        embed.add_field(name=lang_ConfirmView.idea.get(
-            locale), value=idea_content)
+        embed.add_field(name=i18n.t(
+            locale, 'ideas.confrim-view.idea'), value=idea_content)
         embed.set_footer(
             text=f'{lang_ConfirmView.refused.get(locale)} | {name}',
             icon_url=interaction.user.display_avatar)
 
         author = interaction.guild.get_member(idea_author_id)
-        content = f'{author.mention} {lang_ConfirmView.idea_content.get(locale)}'
+        content = i18n.t(locale, 'ideas.confrim-view.idea-content',
+                         mention=author.mention)
 
         self.approve.disabled = True
         self.deny.disabled = True
@@ -211,12 +210,12 @@ class IdeaModal(nextcord.ui.Modal):
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
 
-        super().__init__(lang_IdeaModal.title.get(locale))
+        super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
         self.idea = nextcord.ui.TextInput(
-            label=lang_IdeaModal.label.get(locale),
+            label=i18n.t(locale, 'ideas.idea-modal.label'),
             style=nextcord.TextInputStyle.paragraph,
-            placeholder=lang_IdeaModal.placeholder.get(locale),
+            placeholder=i18n.t(locale, 'ideas.idea-modal.placeholder'),
             min_length=10,
             max_length=1500
         )
@@ -243,14 +242,15 @@ class IdeaModal(nextcord.ui.Modal):
             name=interaction.user.display_name,
             icon_url=interaction.user.display_avatar
         )
-        embed.add_field(name=lang_IdeaModal.idea.get(locale), value=idea)
+        embed.add_field(name=i18n.t(
+            locale, 'ideas.idea-modal.idea'), value=idea)
 
         mes = await channel.send(content=interaction.user.mention,
                                  embed=embed,
                                  view=ConfirmView(interaction.guild_id))
         await mes.add_reaction(Emoji.tickmark)
         await mes.add_reaction(Emoji.cross)
-        await mes.create_thread(name=f"{lang_IdeaModal.thread_name.get(locale)} {interaction.user.display_name}")
+        await mes.create_thread(name=i18n.t(locale, 'ideas.idea-modal.thread-name', name=interaction.user.display_name))
 
         idea_data = {
             'user_id': interaction.user.id,
@@ -270,7 +270,7 @@ class IdeaView(nextcord.ui.View):
             return
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
-        self.suggest.label = lang_IdeaView.suggest_button.get(locale)
+        self.suggest.label = i18n.t(locale, 'ideas.globals.placeholder')
 
     @nextcord.ui.button(
         label="Suggest an idea",
@@ -288,7 +288,8 @@ class IdeaView(nextcord.ui.View):
         user_timeout = Timeout.get(interaction.guild_id, interaction.user.id)
         if user_timeout and user_timeout > time.time():
             await interaction.response.send_message(
-                content=f"{lang_IdeaView.timeout_message.get(locale)} <t:{user_timeout :.0f}:R>",
+                content=i18n.t(
+                    locale, 'ideas.idea-view.timeout-message', time=int(user_timeout)),
                 ephemeral=True
             )
             return
@@ -297,8 +298,7 @@ class IdeaView(nextcord.ui.View):
         ideas_data: IdeasPayload = gdb.get('ideas')
         enabled: bool = ideas_data.get('enabled', False)
         if enabled is False:
-            await interaction.response.send_message(
-                lang_IdeaView.ideas_disabled.get(locale), ephemeral=True)
+            await interaction.response.send_message(i18n.t(locale, 'ideas.globals.ideas-disabled'), ephemeral=True)
             return
 
         modal = IdeaModal(interaction.guild_id)

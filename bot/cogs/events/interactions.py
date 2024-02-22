@@ -9,7 +9,7 @@ class interactions_event(commands.Cog):
         self.bot = bot
         super().__init__()
 
-        bot.event(self.on_interaction)
+        bot.add_event(self.on_interaction)
 
     async def on_interaction(self, interaction: nextcord.Interaction):
         await self.bot.process_application_commands(interaction)

@@ -1,3 +1,4 @@
+import nextcord
 from nextcord.ext import commands
 from bot.misc.lordbot import LordBot
 
@@ -107,13 +108,14 @@ class command_event(commands.Cog):
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
-        # bot.event(self.on_error)
-        bot.event(self.on_command_error)
-        bot.event(self.on_application_error)
+        bot.add_event(self.on_error)
+        bot.add_event(self.on_command_error)
+        bot.add_event(self.on_application_error)
 
         bot.add_check(self.permission_check)
 
-    async def on_application_error(self, interaction, error):
+    async def on_application_error(
+            self, interaction: nextcord.Interaction, error: Exception):
         pass
 
     async def on_command_error(self, ctx: commands.Context, error):
