@@ -18,8 +18,7 @@ class DataBase:
 
     @property
     def connection(self) -> psycopg2.extensions.connection:
-        print('Get connection')
-        if not self.__connection.closed == 0:
+        if self.__connection.closed != 0:
             Logger.core("[Closed connection] Starting a database reboot")
             self.__connection = psycopg2.connect(**self.conn_kwargs)
             self.__connection.autocommit = True
