@@ -6,11 +6,7 @@ from .modal import ModalBuilder
 from .. import thread_message
 from .._view import DefaultSettingsView
 
-from bot.databases.db import GuildDateBases
-from bot.languages.settings import (
-    thread as thread_langs,
-    button as button_name
-)
+from bot.databases import GuildDateBases
 
 
 class ChannelDropDown(nextcord.ui.ChannelSelect):
@@ -49,7 +45,8 @@ class InstallThreadView(DefaultSettingsView):
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
+        self.back.label = i18n.t(
+            locale, 'settings.button.back')
         self.install.label = i18n.t(
             locale, 'settings.thread.addptional.button.install-mes')
 

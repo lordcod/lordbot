@@ -1,5 +1,5 @@
 import nextcord
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc import utils
 from .. import music
 from .._view import DefaultSettingsView

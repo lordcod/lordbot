@@ -1,6 +1,6 @@
 from typing import List, Optional
 import nextcord
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.resources.ether import Emoji
 from .. import music
 from .._view import DefaultSettingsView

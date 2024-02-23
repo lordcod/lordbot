@@ -1,10 +1,10 @@
 from __future__ import annotations
-from typing import Union, Callable
-from psycopg2.extensions import connection as psycoon
+from typing import Union
+from ..db_engine import DataBase
 from ..misc.error_handler import on_error
 from ..misc.utils import Json, Formating
 
-connection: Callable[[], psycoon]
+engine: DataBase = None
 
 reserved: list = []
 
@@ -20,34 +20,27 @@ class GuildDateBases:
 
     @on_error()
     def _get(self, guild_id):
-        with connection().cursor() as cursor:
-            cursor.execute('SELECT * FROM guilds WHERE id = %s', (guild_id,))
+        guild = engine.fetchone(
+            'SELECT * FROM guilds WHERE id = %s', (guild_id,))
 
-            guild = cursor.fetchone()
-
-            return guild
+        return guild
 
     @on_error()
     def _get_service(self, guild_id, arg):
-        with connection().cursor() as cursor:
-            cursor.execute(
-                f'SELECT {arg} FROM guilds WHERE id = %s', (guild_id,))
+        value = engine.fetchone(
+            f'SELECT {arg} FROM guilds WHERE id = %s', (guild_id,))
 
-            value = cursor.fetchone()
-
-            return value
+        return value
 
     @on_error()
     def _insert(self, guild_id):
-        with connection().cursor() as cursor:
-            cursor.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
+        engine.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
 
     @on_error()
     def _update(self, guild_id, arg, value):
-        with connection().cursor() as cursor:
-            cursor.execute(
-                f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value,
-                                                                guild_id))
+        engine.execute(
+            f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value,
+                                                            guild_id))
 
     @on_error()
     def get(self, service: str, default: any = None) -> Union[dict, int, str]:
@@ -70,6 +63,5 @@ class GuildDateBases:
     def delete(self):
         reserved.remove(self.guild_id)
 
-        with connection().cursor() as cursor:
-            cursor.execute('DELETE FROM guilds WHERE id = %s',
-                           (self.guild_id,))
+        engine.execute('DELETE FROM guilds WHERE id = %s',
+                       (self.guild_id,))

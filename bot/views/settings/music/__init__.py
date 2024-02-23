@@ -8,7 +8,7 @@ from .max_size import MaxSizeView
 from bot.views import settings_menu
 from bot.resources.ether import Emoji
 from bot.views.settings._view import DefaultSettingsView
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 

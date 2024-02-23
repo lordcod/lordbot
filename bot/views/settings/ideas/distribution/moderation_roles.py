@@ -4,11 +4,8 @@ from ... import ideas
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
-from bot.languages.settings import (
-    button as button_name
-)
 
 from typing import List
 

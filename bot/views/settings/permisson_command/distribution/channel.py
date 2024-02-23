@@ -5,7 +5,7 @@ from bot.views.settings._view import DefaultSettingsView
 
 from bot.misc import utils
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases import GuildDateBases, CommandDB
 
 
 class DropDown(nextcord.ui.StringSelect):

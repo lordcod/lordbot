@@ -7,7 +7,7 @@ from .precise import ThreadData
 from .._view import DefaultSettingsView
 
 from bot.views import settings_menu
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.resources.ether import Channel_Type
 
 

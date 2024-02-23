@@ -2,7 +2,7 @@ from typing import Optional
 import nextcord
 from bot import languages
 from bot.languages import i18n
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 import googletrans
 
 translator = googletrans.Translator()

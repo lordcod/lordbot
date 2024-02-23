@@ -2,7 +2,7 @@ import nextcord
 
 from .. import reactions
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 

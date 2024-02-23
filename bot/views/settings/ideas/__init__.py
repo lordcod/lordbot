@@ -4,7 +4,7 @@ from bot.views.settings._view import DefaultSettingsView
 from .distribution import distrubuters
 
 from bot.databases.varstructs import IdeasPayload
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.views import settings_menu
 from bot.views.ideas import IdeaView
 from bot.languages import i18n

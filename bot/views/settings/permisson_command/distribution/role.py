@@ -4,7 +4,7 @@ from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases import GuildDateBases, CommandDB
 
 from typing import List
 

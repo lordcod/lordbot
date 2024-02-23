@@ -5,7 +5,7 @@ from bot.misc.lordbot import LordBot
 from bot.misc.ratelimit import Cooldown
 from bot.misc.logger import Logger
 from bot.resources import errors
-from bot.databases.db import CommandDB
+from bot.databases import CommandDB
 from bot.resources.errors import (CallbackCommandError,
                                   MissingRole,
                                   MissingChannel,
@@ -108,7 +108,7 @@ class command_event(commands.Cog):
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
-        bot.add_event(self.on_error)
+        # bot.add_event(self.on_error)
         bot.add_event(self.on_command_error)
         bot.add_event(self.on_application_error)
 

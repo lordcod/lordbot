@@ -3,7 +3,7 @@ import nextcord
 from .precise import CommandData
 from bot.views.settings._view import DefaultSettingsView
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.views import settings_menu
 from bot.languages import help, i18n
 

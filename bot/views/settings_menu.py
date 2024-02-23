@@ -1,13 +1,9 @@
 import nextcord
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.views.settings import moduls
 from bot.views.settings._view import DefaultSettingsView
 from bot.languages import i18n
-from bot.languages.settings import (
-    start as start_langs,
-    module_name
-)
 
 
 class SetDropdown(nextcord.ui.Select):

@@ -4,7 +4,7 @@ from bot.languages import i18n
 
 from .. import thread_message
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 
 
 class ModalBuilder(nextcord.ui.Modal):

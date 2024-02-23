@@ -17,6 +17,7 @@ class on_error:
                 return wrapped(*args, **kwargs)
         return wrapped
 
+
 class on_aioerror:
     def __init__(self) -> None:
         pass

@@ -4,10 +4,8 @@ from bot.views.settings._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
 from bot.views import settings_menu
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.languages import i18n
-from bot.languages.settings import (button as button_name,
-                                    auto_role as role_lang)
 
 from typing import List
 
@@ -57,7 +55,7 @@ class RolesDropDown(nextcord.ui.StringSelect):
             self.current_disabled = True
 
         super().__init__(
-            placeholder=role_lang.placeholder.get(locale),
+            placeholder=i18n.t(locale, 'settings.auto-role.placeholder'),
             min_values=1,
             max_values=len(options),
             options=options,
@@ -112,7 +110,7 @@ class AutoRoleView(DefaultSettingsView):
                            [guild.get_role(role_id) for role_id in roles_ids])
 
             self.embed.add_field(
-                name=role_lang.embed_field.get(locale),
+                name=i18n.t(locale, 'settings.auto-role.embed.field'),
                 value=', '.join([role.mention for role in roles])
             )
         if select_roles is None and not roles_ids:

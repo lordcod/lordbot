@@ -3,7 +3,7 @@ from nextcord.ext import commands
 
 from bot.misc.logger import Logger
 from bot.misc.time_transformer import display_time
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 from inspect import Parameter

@@ -2,7 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
-from bot.databases.db import RoleDateBases, BanDateBases
+from bot.databases import RoleDateBases, BanDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.ideas import (ConfirmView, IdeaView)
 

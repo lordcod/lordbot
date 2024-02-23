@@ -6,7 +6,7 @@ from nextcord.ext import commands
 from bot.misc.utils import DataRoleTimerHandlers
 from bot.languages import i18n
 from typing import Coroutine, List, Optional
-from bot.databases import db
+from bot.databases import GuildDateBases
 
 
 class LordBot(commands.Bot):
@@ -20,7 +20,7 @@ class LordBot(commands.Bot):
         msg: nextcord.Message
     ) -> List[str]:
         "Returns a list of prefixes that can be used when using bot commands"
-        gdb = db.GuildDateBases(msg.guild.id)
+        gdb = GuildDateBases(msg.guild.id)
         prefix = gdb.get('prefix')
         return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 

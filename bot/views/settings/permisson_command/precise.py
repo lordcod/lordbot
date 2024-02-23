@@ -7,7 +7,7 @@ from .distribution.cooldown import CooldownsView
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases import GuildDateBases, CommandDB
 from bot.languages import help as help_info, i18n
 from bot.languages.help import get_command
 

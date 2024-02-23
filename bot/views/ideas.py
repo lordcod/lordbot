@@ -5,7 +5,7 @@ from typing import Optional
 
 from bot.resources.ether import Emoji
 from bot.databases.varstructs import IdeasPayload
-from bot.databases.db import MongoDB, GuildDateBases
+from bot.databases import MongoDB, GuildDateBases
 from bot.languages import i18n
 
 

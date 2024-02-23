@@ -5,7 +5,7 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.misc import utils
 from bot.languages import i18n
 from bot.views import settings_menu
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 
 
 class Modal(nextcord.ui.Modal):

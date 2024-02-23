@@ -6,7 +6,7 @@ from bot.misc.lordbot import LordBot
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.resources import info
 from bot.views.translate import TranslateView
 from bot.languages import i18n

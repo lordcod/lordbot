@@ -6,7 +6,7 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.misc import utils
 from bot.misc.time_transformer import display_time
 from bot.misc.ratelimit import BucketType, reset_cooldown
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases import GuildDateBases, CommandDB
 
 cd_types = {
     0: 'Member',

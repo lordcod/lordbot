@@ -6,7 +6,7 @@ from .modal import ModalBuilder
 from .. import reactions
 from .._view import DefaultSettingsView
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 
 
 class ReactData(DefaultSettingsView):
