@@ -35,10 +35,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
             command_data = cdb.get(self.command_name, {})
             command_data.setdefault("distribution", {})
 
-            command_data["distribution"]["role"] = {
-                "permission": 1,
-                "values": self.values.ids
-            }
+            command_data["distribution"]["allow-role"] = self.values.ids
 
             cdb.update(self.command_name, command_data)
 
@@ -62,21 +59,21 @@ class RolesView(DefaultSettingsView):
         cdb = CommandDB(guild.id)
         command_data = cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
+        role_ids = command_data["distribution"].get(
+            "allow-role", [])
 
         self.embed = nextcord.Embed(
             title="Allowed roles",
             description="The selected command will only work in the roles that you select",
             color=color
         )
-        role_ids = command_data["distribution"].get(
-            "role", {}).get("values")
-
-        self.embed.add_field(
-            name="Selected roles:",
-            value=', '.join(filter(
-                lambda item: item is not None,
-                [guild.get_role(role_id) for role_id in role_ids]
-            )))
+        if role_ids:
+            self.embed.add_field(
+                name="Selected roles:",
+                value=', '.join([role.mention
+                                 for role_id in role_ids
+                                 if (role := guild.get_role(role_id))])
+            )
 
         super().__init__()
 

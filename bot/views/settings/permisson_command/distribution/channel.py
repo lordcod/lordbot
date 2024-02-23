@@ -1,3 +1,4 @@
+from typing import List
 import nextcord
 
 from ... import permisson_command
@@ -12,23 +13,41 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         guild: nextcord.Guild,
         command_name: str
     ) -> None:
-        self.command_name = command_name
 
+        self.command_name = command_name
         super().__init__(
             placeholder="Select the channels in which the command will work",
             min_values=1,
-            max_values=15
+            max_values=15,
+            channel_types=[
+                nextcord.ChannelType.text,
+                nextcord.ChannelType.voice,
+                nextcord.ChannelType.category,
+                nextcord.ChannelType.news,
+                nextcord.ChannelType.stage_voice,
+                nextcord.ChannelType.guild_directory,
+                nextcord.ChannelType.forum
+            ]
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        channels: List[int] = []
+        categories: List[int] = []
+
+        for channel in self.values.channels:
+            if channel.type == nextcord.ChannelType.category:
+                categories.append(channel.id)
+            else:
+                channels.append(channel.id)
+
         cdb = CommandDB(interaction.guild_id)
 
         command_data = cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
 
-        command_data["distribution"]["channel"] = {
-            "permission": 1,
-            "values": self.values.ids
+        command_data["distribution"]["allow-channel"] = {
+            'channels': channels,
+            'categories': categories
         }
 
         cdb.update(self.command_name, command_data)
@@ -54,22 +73,31 @@ class ChannelsView(DefaultSettingsView):
         command_data = cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
 
-        channel_ids = command_data["distribution"].get(
-            "channel", {}).get("values")
+        allow_datas = command_data["distribution"].get(
+            "allow-channel", {})
+
+        channel_ids = allow_datas.get('channels')
+        category_ids = allow_datas.get('categories')
 
         self.embed = nextcord.Embed(
             title="Allowed channels",
             description="The selected command will only work in the channels that you select",
             color=color
         )
+        if category_ids:
+            self.embed.add_field(
+                name="Selected categories:",
+                value=', '.join([channel.mention
+                                 for category_id in category_ids
+                                 if (channel := guild.get_channel(category_id))])
+            )
         if channel_ids:
             self.embed.add_field(
                 name="Selected channels:",
-                value=', '.join(filter(
-                    lambda item: item is not None,
-                    [guild.get_channel(channel_id)
-                     for channel_id in channel_ids]
-                )))
+                value=', '.join([channel.mention
+                                 for channel_id in channel_ids
+                                 if (channel := guild.get_channel(channel_id))])
+            )
 
         super().__init__()
 
