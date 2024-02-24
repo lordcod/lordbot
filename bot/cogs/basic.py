@@ -31,7 +31,7 @@ class basic(commands.Cog):
     async def ping(self, ctx: commands.Context):
         content = (
             "Pong!🏓🎉\n"
-            f"Latency: {(self.bot.latency)*100:.1f}ms"
+            f"Latency: {self.bot.latency*100 :.1f}ms"
         )
 
         await ctx.send(content)
@@ -45,12 +45,7 @@ class basic(commands.Cog):
             scopes=("bot", "applications.commands"),
         )
 
-        content = (
-            "Special bot invitation to the server:\n"
-            f"{invite_link}"
-        )
-
-        await ctx.send(content)
+        await ctx.send(f"Special bot invitation to the server:\n{invite_link}")
 
     @commands.command()
     async def captcha(self, ctx: commands.Context):

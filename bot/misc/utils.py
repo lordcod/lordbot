@@ -16,8 +16,6 @@ from functools import lru_cache
 from easy_pil import Editor, Font, load_image_async
 
 
-number_type = Union[int, float]
-
 class DataRoleTimerHandlers:
     __instance = None
     data = None
@@ -78,6 +76,15 @@ class TempletePayload:
         return base
 
 
+WelcomeMessageItems = {
+    "view-from-mountain": "The summer atmosphere, the stunning views of the mountains, and the setting sun - it all adds to the charm.",
+    "autumn-street": "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn.",
+    "winter-day": "A dazzling winter day, a majestic mountain ahead, small buildings, a sparkling highway and snow-white covers.",
+    "magic-city": "The beautiful atmosphere and scenic views from the boat.",
+    "city-dawn": "The starry night sky, the warm summer breeze, the rustle of leaves, the chirping of crickets, the flickering of fireflies and the soft light from the campfire create a unique atmosphere of comfort and tranquility."
+}
+
+
 class GuildPayload(TempletePayload):
     _prefix = 'guild'
 
@@ -118,17 +125,18 @@ class MemberPayload(TempletePayload):
 
 
 class __LordFormatingTemplate(string.Template):
-    pattern = r'''
+    pattern = r"""
         \{(\s*)(?:
         (?P<escaped>\{) |
         (?P<named>[\._a-z][\._a-z0-9]*)(\s*)\} |
         (?P<braced>[\._a-z][\._a-z0-9]*)(\s*)\} |
         (?P<invalid>)
         )
-    '''
+    """
 
     def format(self, __mapping: Mapping[str, object]):
         return self.safe_substitute(__mapping)
+
 
 def lord_format(
     __value: object,
@@ -137,22 +145,19 @@ def lord_format(
     return __LordFormatingTemplate(__value).format(__mapping)
 
 
-
-
 def cancel_atimerhandler(th: TimerHandle):
     coro: Coroutine = th._args[0]
     coro.close()
     th.cancel()
 
 
-
-def clamp(val: number_type,
-          minv: number_type,
-          maxv: number_type) -> number_type:
+def clamp(val: Union[int, float],
+          minv: Union[int, float],
+          maxv: Union[int, float]) -> Union[int, float]:
     return min(maxv, max(minv, val))
 
 
-async def getRandomQuote(lang='en'):
+async def getRandomQuote(lang: str = 'en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
     async with aiohttp.ClientSession() as session:
         async with session.post(url) as responce:
@@ -169,7 +174,7 @@ def calculate_time(string: str) -> int:
     }
     timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
     ftime = 0
-    
+
     for number, word in timedate:
         if word not in coefficients:
             raise TypeError('Format time is not valid!')
@@ -200,6 +205,7 @@ async def generate_message(content: str) -> dict:
         content: dict = orjson.loads(content)
 
         message_content = content.get('plainText')
+        message['content'] = message_content
 
         title = content.get('title')
         description = content.get('description')
@@ -207,13 +213,11 @@ async def generate_message(content: str) -> dict:
         url = content.get('url')
         fields = content.get('fields', [])
 
-        message['content'] = message_content
-
         embed = nextcord.Embed(
             title=title,
             description=description,
             color=color,
-            url=url,
+            url=url
         )
 
         if thumbnail := content.get('thumbnail'):
@@ -246,7 +250,7 @@ async def generate_message(content: str) -> dict:
                 or author or footer or fields):
             message['embed'] = embed
         elif not message_content:
-            raise ValueError()
+            raise ValueError
     except (TypeError, ValueError, orjson.JSONDecodeError):
         message['content'] = content
     return message
@@ -257,6 +261,7 @@ async def generator_captcha(num):
     captcha_image = ImageCaptcha(
         width=400,
         height=220,
+        fonts=["assets/Nunito-Black.ttf"],
         font_sizes=(40, 70, 100)
     )
     data: BytesIO = captcha_image.generate(text)
