@@ -7,7 +7,8 @@
             "prefix-server": "> Server prefix - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Will choose the appropriate language:"
+            "placeholder": "Will choose the appropriate language:",
+            "failed": "This message has no content, so we will not be able to translate it."
         },
         "captcha": {
             "congratulation": "Congratulations you have passed the captcha!",
@@ -17,7 +18,7 @@
         "activiti": {
             "failed": "This activity is unavailable or does not work",
             "embed": {
-                "title": "The activity has been successfully created!",
+                "title": "**The activity has been successfully created!**",
                 "description": "However, some types of activities may not be available for your server if the boost level does not meet the activity requirements."
             },
             "fields": {
@@ -221,7 +222,8 @@
             "prefix-server": "> Префикс сервера - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Выберете подходящий язык:"
+            "placeholder": "Выберете подходящий язык:",
+            "failed": "Это сообщение не содержит содержания, поэтому мы не сможем его перевести."
         },
         "captcha": {
             "congratulation": "Поздравляю, вы ввели капчу!",
@@ -377,7 +379,7 @@
                     "brief": "Авто-сообщения",
                     "description": "Добавляйте или изменяйте свои автоматические сообщения в форумах/ветках",
                     "placeholder": "Настройки авто-сообщений в ветках/форумах:",
-                    "channel": "Канал"
+                    "channel": "Канал: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Установить сообщение",
@@ -431,7 +433,8 @@
             "prefix-server": "> Awalan server - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Akan memilih bahasa yang sesuai:"
+            "placeholder": "Akan memilih bahasa yang sesuai:",
+            "failed": "Pesan ini tidak memiliki konten, jadi kami tidak dapat menerjemahkannya."
         },
         "captcha": {
             "congratulation": "Selamat Anda telah lolos captcha!",
@@ -592,7 +595,7 @@
                     "brief": "Pesan otomatis",
                     "description": "Tambahkan atau ubah postingan otomatis Anda di forum/utas",
                     "placeholder": "Pengaturan pesan otomatis di cabang/forum:",
-                    "channel": "Saluran"
+                    "channel": "Saluran: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Instal pesan",
@@ -646,7 +649,8 @@
             "prefix-server": "> Serverpræfiks - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Vil vælge det passende sprog:"
+            "placeholder": "Vil vælge det passende sprog:",
+            "failed": "Denne meddelelse har intet indhold, så vi kan ikke oversætte den."
         },
         "captcha": {
             "congratulation": "Tillykke, du har bestået captchaen!",
@@ -807,7 +811,7 @@
                     "brief": "Auto-beskeder",
                     "description": "Tilføj eller rediger dine automatiske indlæg i fora/tråde",
                     "placeholder": "Indstillinger for automatisk besked i filialer/fora:",
-                    "channel": "Kanal"
+                    "channel": "Kanal: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Installationsmeddelelse",
@@ -861,7 +865,8 @@
             "prefix-server": "> Serverpräfix – `{prefix}`."
         },
         "translate": {
-            "placeholder": "Wählt die passende Sprache:"
+            "placeholder": "Wählt die passende Sprache:",
+            "failed": "Diese Nachricht hat keinen Inhalt, daher können wir sie nicht übersetzen."
         },
         "captcha": {
             "congratulation": "Herzlichen Glückwunsch, Sie haben das Captcha bestanden!",
@@ -1022,7 +1027,7 @@
                     "brief": "Automatische Nachrichten",
                     "description": "Fügen Sie Ihre automatischen Beiträge in Foren/Threads hinzu oder ändern Sie sie",
                     "placeholder": "Einstellungen für automatische Nachrichten in Zweigen/Foren:",
-                    "channel": "Kanal"
+                    "channel": "Kanal: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Nachricht installieren",
@@ -1076,7 +1081,8 @@
             "prefix-server": "> Prefijo del servidor - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Elegirá el idioma apropiado:"
+            "placeholder": "Elegirá el idioma apropiado:",
+            "failed": "Este mensaje no tiene contenido, por lo que no podremos traducirlo."
         },
         "captcha": {
             "congratulation": "¡Felicitaciones, has pasado el captcha!",
@@ -1237,7 +1243,7 @@
                     "brief": "Mensajes automáticos",
                     "description": "Agregue o cambie sus publicaciones automáticas en foros/hilos",
                     "placeholder": "Configuración de mensajes automáticos en sucursales/foros:",
-                    "channel": "Canal"
+                    "channel": "Canal: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Instalar mensaje",
@@ -1291,7 +1297,8 @@
             "prefix-server": "> Préfixe du serveur - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Choisira la langue appropriée :"
+            "placeholder": "Choisira la langue appropriée:",
+            "failed": "Ce message n'a pas de contenu, nous ne pourrons donc pas le traduire."
         },
         "captcha": {
             "congratulation": "Félicitations, vous avez réussi le captcha !",
@@ -1451,8 +1458,8 @@
                     "title": "Messages automatiques dans les forums/threads",
                     "brief": "Messages automatiques",
                     "description": "Ajoutez ou modifiez vos publications automatiques dans les forums/threads",
-                    "placeholder": "Paramètres de message automatique dans les branches/forums :",
-                    "channel": "Canal"
+                    "placeholder": "Paramètres de message automatique dans les branches/forums:",
+                    "channel": "Canal: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Message d'installation",
@@ -1506,7 +1513,8 @@
             "prefix-server": "> Prefiks serwera - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Wybierze odpowiedni język:"
+            "placeholder": "Wybierze odpowiedni język:",
+            "failed": "Ta wiadomość nie ma treści, więc nie będziemy mogli jej przetłumaczyć."
         },
         "captcha": {
             "congratulation": "Gratulacje, udało Ci się przejść captcha!",
@@ -1667,7 +1675,7 @@
                     "brief": "Automatyczne wiadomości",
                     "description": "Dodaj lub zmień swoje automatyczne posty na forach/wątkach",
                     "placeholder": "Ustawienia automatycznych wiadomości w oddziałach/forach:",
-                    "channel": "Kanał"
+                    "channel": "Kanał: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Zainstaluj wiadomość",
@@ -1721,7 +1729,8 @@
             "prefix-server": "> Sunucu öneki - `{prefix}`"
         },
         "translate": {
-            "placeholder": "Uygun dili seçecektir:"
+            "placeholder": "Uygun dili seçecektir:",
+            "failed": "Bu mesajın içeriği yok, bu yüzden çeviremeyeceğiz."
         },
         "captcha": {
             "congratulation": "Tebrikler captcha'yı geçtiniz!",
@@ -1882,7 +1891,7 @@
                     "brief": "Otomatik mesajlar",
                     "description": "Forumlara/konulara otomatik gönderilerinizi ekleyin veya değiştirin",
                     "placeholder": "Şubelerde/forumlarda otomatik mesaj ayarları:",
-                    "channel": "Kanal"
+                    "channel": "Kanal: {channel}"
                 },
                 "addptional": {
                     "button.install_mes": "Mesajı yükle",

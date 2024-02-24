@@ -121,7 +121,7 @@ class basic(commands.Cog):
             label="Activiti", emoji=Emoji.roketa, url=inv.url))
 
         embed = nextcord.Embed(
-            title=f"**{i18n.t(lang, 'activiti.embed.title')}**",
+            title=i18n.t(lang, 'activiti.embed.title'),
             color=color,
             description=i18n.t(lang, 'activiti.embed.description')
         )
@@ -143,11 +143,13 @@ class basic(commands.Cog):
         inters: nextcord.Interaction,
         message: nextcord.Message
     ):
+        gdb = GuildDateBases(inters.guild_id)
+        locale = gdb.get('language')
+
         if not message.content:
-            await inters.response.send_message("This message has no content, "
-                                               "so we will not be able to "
-                                               "translate it.",
+            await inters.response.send_message(i18n.t(locale, 'translate.failed'),
                                                ephemeral=True)
+            return
 
         data = jmespath.search(
             f"[?discord_language=='{inters.locale}']|[0]", lang_data)

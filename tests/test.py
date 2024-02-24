@@ -20,9 +20,12 @@ async def main():
 
     print('finish')
 
+
+def gen_test(iter):
+    yield from iter
+
+
 if __name__ == "__main__":
-    table = {}
-    table["key"] = "Main"
-    table.setdefault("key")
-    print(table)
+    for i in gen_test(range(1, 100)):
+        print(i)
     # asyncio.run(main())
