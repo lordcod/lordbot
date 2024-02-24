@@ -1,16 +1,14 @@
 import nextcord
 
+from bot.languages import i18n
+
 from .additional import InstallEmojiView
 from .precise import ReactData
 from .._view import DefaultSettingsView
 
 from bot.views import settings_menu
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.resources.ether import Channel_Type
-from bot.languages.settings import (
-    reactions as reaction_langs,
-    button as button_name
-)
 
 
 class DropDown(nextcord.ui.Select):
@@ -38,7 +36,7 @@ class DropDown(nextcord.ui.Select):
         ]
 
         super().__init__(
-            placeholder=reaction_langs.init.ph.get(locale),
+            placeholder=i18n.t(locale, 'settings.reactions.init.placeholder'),
             min_values=1,
             max_values=1,
             options=options,
@@ -56,12 +54,11 @@ class DropDown(nextcord.ui.Select):
         channel_data = self.reactions.get(value)
 
         embed = nextcord.Embed(
-            title=reaction_langs.init.brief_title.get(locale),
-            description=(
-                f"{reaction_langs.init.channel.get(locale)}: "
-                f"{channel.mention}\n"
-                f"{reaction_langs.init.emoji.get(locale)}: "
-                f"{', '.join([emo for emo in channel_data])}"
+            title=i18n.t(locale, 'settings.reactions.init.brief'),
+            description=i18n.t(
+                locale, 'settings.reactions.init.dddesc',
+                channel=channel.mention,
+                emojis=', '.join([emo for emo in channel_data])
             ),
             color=color
         )
@@ -79,15 +76,15 @@ class AutoReactions(DefaultSettingsView):
         locale = gdb.get('language')
 
         self.embed = nextcord.Embed(
-            title=reaction_langs.init.title.get(locale),
-            description=reaction_langs.init.description.get(locale),
+            title=i18n.t(locale, 'settings.reactions.init.title'),
+            description=i18n.t(locale, 'settings.reactions.init.description'),
             color=color
         )
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.addtion.label = button_name.add.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.addtion.label = i18n.t(locale, 'settings.button.add')
 
         auto = DropDown(guild)
 

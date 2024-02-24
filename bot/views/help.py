@@ -1,7 +1,7 @@
 import nextcord
 
 from bot.languages import help as help_info
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 
 
 class DropDown(nextcord.ui.Select):

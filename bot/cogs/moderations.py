@@ -6,7 +6,7 @@ from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.views.settings_menu import SettingsView
 from bot.views.delcat import DelCatView
-from bot.databases.db import RoleDateBases, BanDateBases, GuildDateBases
+from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
 import io
 import time

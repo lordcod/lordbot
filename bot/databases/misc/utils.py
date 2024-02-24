@@ -1,6 +1,6 @@
 from typing import Any, Dict, Union
 import ujson as json
-from psycopg2.extensions import connection
+from ..db_engine import DataBase
 
 
 class Json:
@@ -57,14 +57,7 @@ class Formating:
         return new_data
 
 
-def register_table(table_name: str, variable: str, connection: connection):
-    with connection.cursor() as cursor:
-        cursor.execute(
-            f"CREATE TABLE IF NOT EXISTS {table_name} ({variable})"
-        )
-
-
-def get_info_colums(table_name: str, connection: connection) -> Union[list, None]:
+def get_info_colums(table_name: str, database: DataBase) -> Union[list, None]:
     query = """
         SELECT
             column_name,
@@ -76,12 +69,10 @@ def get_info_colums(table_name: str, connection: connection) -> Union[list, None
         WHERE
             table_name = %s;
     """
-    with connection.cursor() as cursor:
-        cursor.execute(query, (table_name,))
 
-        info = cursor.fetchall()
+    info = database.fetchall(query, (table_name,))
 
-        if not info:
-            return None
+    if not info:
+        return None
 
-        return list(info)
+    return list(info)

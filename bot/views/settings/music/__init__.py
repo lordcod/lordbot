@@ -1,5 +1,6 @@
 import nextcord
 
+
 from .dj_roles import DjRolesView
 from .volume import VolumeView
 from .max_size import MaxSizeView
@@ -7,8 +8,8 @@ from .max_size import MaxSizeView
 from bot.views import settings_menu
 from bot.resources.ether import Emoji
 from bot.views.settings._view import DefaultSettingsView
-from bot.databases.db import GuildDateBases
-from bot.languages.settings import button as button_name
+from bot.databases import GuildDateBases
+from bot.languages import i18n
 
 
 distribution = {
@@ -79,7 +80,7 @@ class MusicView(DefaultSettingsView):
 
         self.add_item(MusicDropDown())
 
-        self.back.label = button_name.back.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

@@ -1,0 +1,1931 @@
+{
+    "en": {
+        "bot-info": {
+            "title": "{name} this is a multifunctional bot",
+            "description": "The bot is designed to facilitate server management and is equipped with various automation tool",
+            "info-server": "Information about the server",
+            "prefix-server": "> Server prefix - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Will choose the appropriate language:"
+        },
+        "captcha": {
+            "congratulation": "Congratulations you have passed the captcha!",
+            "enter": "You have 30 seconds to solve the captcha!",
+            "failed": "Captcha failed"
+        },
+        "activiti": {
+            "failed": "This activity is unavailable or does not work",
+            "embed": {
+                "title": "The activity has been successfully created!",
+                "description": "However, some types of activities may not be available for your server if the boost level does not meet the activity requirements."
+            },
+            "fields": {
+                "label": "Activity name",
+                "max-user": "Maximum number of users"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "You don't have enough rights",
+            "MissingRole": "You don't have a suitable role to execute the command",
+            "MissingChannel": "You cannot execute this command in this channel",
+            "NotOwner": "This command is intended for the bot owner",
+            "CommandNotFound": "There is no such command",
+            "CheckFailure": "You don't fulfill all the conditions",
+            "BadArgument": "Invalid argument entered",
+            "DisabledCommand": "This command is disabled on the server",
+            "MissingRequiredArgument": "You didn't enter a required argument",
+            "NotActivateEconomy": "The economy system is disabled on the server",
+            "OnlyTeamError": "This command can only be used by the bot team",
+            "MemberNotFound": "The participant could not be found",
+            "CommandOnCooldown": {
+                "title": "The command is on hold",
+                "description": "Try again after {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "Choose the track you are interested in!",
+            "placeholder": "Select a track"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Suggest an idea",
+                "ideas-disabled": "The **idea** module is disabled on this server",
+                "embed-title": "New idea!"
+            },
+            "confirm-modal": {
+                "reason-label": "Argument:",
+                "embed": {
+                    "title": "New idea!",
+                    "field": "Old idea!"
+                },
+                "idea": {
+                    "content": "{mention} Your idea is approved!",
+                    "embed": {
+                        "title": "The idea is approved!",
+                        "field": "The essence of the idea:",
+                        "reason": "Confirmation argument:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Approve",
+                    "deny": "Deny"
+                },
+                "old-idea": "An outdated idea!",
+                "idea": "Idea:",
+                "refused": "Refused",
+                "idea-content": "{mention} Your idea has been rejected!"
+            },
+            "idea-modal": {
+                "label": "Tell us about your idea",
+                "placeholder": "Describe your idea in as much detail as possible with usage examples.",
+                "embed-description": "Whether the idea is approved or not depends on you!",
+                "idea": "Idea:",
+                "thread-name": "Discussion of the idea from {name}"
+            },
+            "idea-view.timeout-message": "You can only propose an idea once every 30 minutes\nThe next opportunity to submit an idea will be through: <t:{time}:R>"
+        },
+        "settings": {
+            "start": {
+                "title": "Configuring the bot modules.",
+                "choose": "Choose settings...",
+                "description": "Interact with the selection drop-down menu to configure the server.",
+                "request": "Request from {name}"
+            },
+            "module-name": {
+                "economy": "Economy",
+                "languages": "Languages",
+                "prefix": "Prefix",
+                "music": "Music",
+                "color": "Color of system messages",
+                "reactions": "Auto Reactions",
+                "thread": "Auto message in a thread/post",
+                "command-permission": "Command Settings",
+                "ideas": "Ideas",
+                "welcomer": "Welcome new members",
+                "auto-roles": "Automatic roles"
+            },
+            "button": {
+                "back": "Back",
+                "edit": "Edit",
+                "reset": "Reset",
+                "add": "Add"
+            },
+            "prefix": {
+                "title": "Prefix",
+                "description": "Setting the prefix to which the bot will respond when calling the command.",
+                "current": "The current prefix is `{prefix}`"
+            },
+            "languages": {
+                "title": "Languages",
+                "description": "This setting changes the language for working with the bot.",
+                "choose": "Select the language for the server:"
+            },
+            "color": {
+                "not-valid": "The hex code format is incorrect",
+                "title": "Color of system messages",
+                "description": "When you use commands, the bot displays inserts that have an invisible color by default.\n\nYou can set your color according to the theme of your community.",
+                "current": "Current color: `{hex_color}`"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Install roles",
+                    "delete": "Delete roles"
+                },
+                "placeholder": "Select automatically assigned roles for new members",
+                "embed": {
+                    "title": "Automatic roles",
+                    "description": "The control panel for automatic roles.\nYou can install, edit, delete, and view such actions from the panel.\nIf you do not see the auto roles, then they are not selected!",
+                    "field": "Selected roles:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Delete message",
+                    "view": "View message",
+                    "install": "Install message"
+                },
+                "embed": {
+                    "title": "Message greeting",
+                    "description": "Automatic sending of messages when a participant logs on to the server\n\nIf you want to change the channel, just select it again and set the message\n\nTo change a message, select the current channel and set a new message for it",
+                    "field": {
+                        "successful": "Installed channel",
+                        "failure": "The channel is not installed"
+                    }
+                },
+                "dropdown-placeholder": "Select the welcome channel",
+                "modal": {
+                    "title": "Message greeting",
+                    "label": "Message",
+                    "placeholder": "You can also use embed builder"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Automatic messages in forums/threads",
+                    "brief": "Auto-messages",
+                    "description": "Add or change your automatic posts in forums/threads",
+                    "placeholder": "Auto-message settings in branches/forums:",
+                    "channel": "Channel: {channel}"
+                },
+                "addptional": {
+                    "button.install-mes": "Install message",
+                    "channel-error": "Auto-messages have already been installed on this channel",
+                    "placeholder": "Select a channel for auto-messages"
+                },
+                "thread": {
+                    "mes-not-found": "No message found",
+                    "button": {
+                        "view": "View the message",
+                        "edit": "Edit a message",
+                        "delete": "Delete a message"
+                    }
+                },
+                "modal": {
+                    "label": "Message:",
+                    "title": "Auto-messages",
+                    "placeholder": "You can also use embed-builder"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Automatic reactions",
+                    "brief": "Auto-reactions",
+                    "description": "Control of automatic addition of reactions in channels",
+                    "dddesc": "Channel: {channel}\nEmoji: {emojis}",
+                    "placeholder": "Auto-reaction settings:"
+                },
+                "addres": {
+                    "channel-error": "Auto-reactions have already been installed on this channel",
+                    "install-emoji": "Install emoji",
+                    "placeholder": "Select a channel for auto-reactions"
+                },
+                "button": {
+                    "delete": "Delete reaction",
+                    "edit": "Edit reaction"
+                },
+                "modal": {
+                    "title": "Auto-reaction",
+                    "label": "Emoji:"
+                }
+            }
+        }
+    },
+    "ru": {
+        "bot-info": {
+            "title": "{name} - это многофункциональный бот.",
+            "description": "Бот предназначен для облегчения управления сервером и оснащен различными средствами автоматизации",
+            "info-server": "Информация о сервере",
+            "prefix-server": "> Префикс сервера - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Выберете подходящий язык:"
+        },
+        "captcha": {
+            "congratulation": "Поздравляю, вы ввели капчу!",
+            "enter": "У вас есть 30 секунд чтобы решить капчу!",
+            "failed": "Капча не пройдена"
+        },
+        "activiti": {
+            "failed": "Это активность недоступна или не работает",
+            "embed": {
+                "title": "Активность успешно создана!",
+                "description": "Однако некоторые виды активностей могут быть недоступны для вашего сервера, если уровень бустов не соответствует требованиям активности."
+            },
+            "fields": {
+                "label": "Название активности",
+                "max-user": "Максимальное кол-во пользователей"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "У вас недостаточно прав",
+            "MissingRole": "У вас нет нужной роли для выполнения команды",
+            "MissingChannel": "Вы не можете выполнить эту команду в этом канале",
+            "NotOwner": "Эта команда предназначена для владельца бота",
+            "CommandNotFound": "Такой команды нет",
+            "BadArgument": "Введен недопустимый аргумент",
+            "DisabledCommand": "Эта команда отключена на сервере",
+            "MissingRequiredArgument": "Вы не ввели обязательный аргумент",
+            "DisabledEconomy": "Система экономики отключена на сервере",
+            "OnlyTeamError": "Эта команда может быть использована только командой бота",
+            "MemberNotFound": "Участника не удалось найти",
+            "CommandOnCooldown": {
+                "title": "Команда находится в режиме ожидания",
+                "description": "Повторите попытку через {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "Выберите интересующий вас трек!",
+            "placeholder": "Выберите трек"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Предложите идею",
+                "ideas-disabled": "Модуль **идей** отключен на этом сервере",
+                "embed-title": "Новая идея!",
+                "idea": "Idea:"
+            },
+            "confirm-modal": {
+                "reason-label": "Аргумент:",
+                "embed-field": "Старая идея!",
+                "idea": {
+                    "content": "Ваша идея одобрена!",
+                    "embed": {
+                        "title": "Идея одобрена!",
+                        "field": "Суть идеи:",
+                        "reason": "Аргумент подтверждения:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Одобрить",
+                    "deny": "Отказать"
+                },
+                "old-idea": "Устаревшая идея!",
+                "refused": "Отказано",
+                "idea-content": "Отказано, Ваша идея была отклонена!"
+            },
+            "idea-modal": {
+                "label": "Расскажите нам о своей идее",
+                "placeholder": "Опишите свою идею как можно более подробно с примерами использования.",
+                "embed-description": "Будет ли идея одобрена или нет, зависит только от вас!",
+                "thread-name": "Обсуждение идеи от {name}"
+            },
+            "idea-view.timeout-message": "Вы можете предлагать идею только раз в 30 минут\nСледующая возможность представить идею будет через: "
+        },
+        "settings": {
+            "start": {
+                "title": "Настройка модулей бота.",
+                "choose": "Выберите настройки...",
+                "description": "Взаимодействуйте с выпадающим меню выбора, чтобы настроить сервер.",
+                "request": "Запрос от {name}"
+            },
+            "module-name": {
+                "economy": "Экономика",
+                "languages": "Языки",
+                "prefix": "Префикс",
+                "music": "Музыка",
+                "color": "Цвет системных сообщений",
+                "reactions": "Автоматические реакции",
+                "thread": "Автоматическое сообщение в ветке/посте",
+                "command-permission": "Настройки команды",
+                "ideas": "Идеи",
+                "welcomer": "Приветствие новых участников",
+                "auto-roles": "Автоматические роли"
+            },
+            "button": {
+                "back": "Назад",
+                "edit": "Изменить",
+                "reset": "Сбросить",
+                "add": "Добавить"
+            },
+            "prefix": {
+                "title": "Префикс",
+                "description": "Установка префикса, на который бот будет реагировать при вызове команды.",
+                "current": "Текущий префикс - {prefix}"
+            },
+            "languages": {
+                "title": "Язык",
+                "description": "Эта настройка изменяет язык для работы с ботом.",
+                "choose": "Выберите язык для сервера:"
+            },
+            "color": {
+                "not-valid": "Неверный формат hex кода",
+                "title": "Цвет системных сообщений",
+                "description": "Когда вы используете команды, бот отображает вставки, которые по умолчанию имеют невидимый цвет.\n\nВы можете установить свой цвет в соответствии с тематикой вашего сообщества.",
+                "current": "Текущий цвет"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Установить роли",
+                    "delete": "Удалить роли"
+                },
+                "placeholder": "Выберите автоматически назначаемые роли для новых участников",
+                "embed": {
+                    "title": "Автоматические роли",
+                    "description": "Панель управления автоматическими ролями.\nВы можете устанавливать, редактировать, удалять и просматривать такие действия с панели.\nЕсли вы не видите автоматические роли, значит, они не выбраны!",
+                    "field": "Выбранные роли:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Удалить сообщение",
+                    "view": "Просмотреть сообщение",
+                    "install": "Установить сообщение"
+                },
+                "embed": {
+                    "title": "Сообщение приветствие",
+                    "description": "Автоматическая отправка сообщений при входе участника на сервер\n\nЕсли вы хотите сменить канал, просто выберите его еще раз и установите сообщение\n\nЧтобы изменить сообщение, выберите текущий канал и установите для него новое сообщение",
+                    "field": {
+                        "successful": "Установленный канал",
+                        "failure": "Канал не установлен"
+                    }
+                },
+                "dropdown-placeholder": "Выберите канал приветствия",
+                "modal": {
+                    "title": "Сообщение приветствие",
+                    "label": "Сообщение",
+                    "placeholder": "Вы также можете использовать embed builder"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Автоматические сообщения в форумах/ветках",
+                    "brief": "Авто-сообщения",
+                    "description": "Добавляйте или изменяйте свои автоматические сообщения в форумах/ветках",
+                    "placeholder": "Настройки авто-сообщений в ветках/форумах:",
+                    "channel": "Канал"
+                },
+                "addptional": {
+                    "button.install_mes": "Установить сообщение",
+                    "channel-error": "На этот канал уже установлено авто-сообщения",
+                    "placeholder": "Выберете канал для авто-сообщений"
+                },
+                "thread": {
+                    "mes-not-found": "Сообщения не найдено",
+                    "button": {
+                        "view": "Посмотреть сообщение",
+                        "edit": "Изменить сообщение",
+                        "delete": "Удалить сообщение"
+                    }
+                },
+                "modal": {
+                    "label": "Сообщение:",
+                    "title": "Авто-сообщения",
+                    "placeholder": "Вы также можете пользоваться embed-builder"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Автоматические реакции",
+                    "brief": "Авто-реакции",
+                    "description": "Управление автоматическим добавлением реакций в каналах",
+                    "emoji": "Эмодзи",
+                    "channel": "Канал",
+                    "placeholder": "Настройки авто-реакций:"
+                },
+                "addres": {
+                    "channel-error": "На этот канал уже установлены авто-реакции",
+                    "install_emoji": "Установить эмодзи",
+                    "placeholder": "Выберете канал для авто-реакций"
+                },
+                "button": {
+                    "delete": "Удалить реакцию",
+                    "edit": "Редактировать реакцию"
+                },
+                "modal": {
+                    "title": "Auto-reaction",
+                    "label": "Emoji:"
+                }
+            }
+        }
+    },
+    "id": {
+        "bot-info": {
+            "title": "{name} ini adalah bot multifungsi",
+            "description": "Bot dirancang untuk memudahkan pengelolaan server dan dilengkapi dengan berbagai alat otomatisasi",
+            "info-server": "Informasi tentang server",
+            "prefix-server": "> Awalan server - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Akan memilih bahasa yang sesuai:"
+        },
+        "captcha": {
+            "congratulation": "Selamat Anda telah lolos captcha!",
+            "enter": "Anda punya waktu 30 detik untuk menyelesaikan captcha!",
+            "failed": "CAPTCHA gagal"
+        },
+        "activiti": {
+            "failed": "Aktivitas ini tidak tersedia atau tidak berfungsi",
+            "embed": {
+                "title": "Aktivitas telah berhasil dibuat!",
+                "description": "Namun, beberapa jenis aktivitas mungkin tidak tersedia untuk server Anda jika tingkat peningkatan tidak memenuhi persyaratan aktivitas."
+            },
+            "fields": {
+                "label": "Nama aktivitas",
+                "max-user": "Jumlah maksimum pengguna"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "Anda tidak memiliki cukup hak",
+            "MissingRole": "Anda tidak memiliki peran yang cocok untuk menjalankan perintah",
+            "MissingChannel": "Anda tidak dapat menjalankan perintah ini di saluran ini",
+            "NotOwner": "Perintah ini ditujukan untuk pemilik bot",
+            "CommandNotFound": "Tidak ada perintah seperti itu",
+            "CheckFailure": "Anda tidak memenuhi semua persyaratan",
+            "BadArgument": "Argumen yang dimasukkan tidak valid",
+            "DisabledCommand": "Perintah ini dinonaktifkan di server",
+            "MissingRequiredArgument": "Anda tidak memasukkan argumen yang diperlukan",
+            "NotActivateEconomy": "Sistem ekonomi dinonaktifkan di server",
+            "OnlyTeamError": "Perintah ini hanya dapat digunakan oleh tim bot",
+            "MemberNotFound": "Peserta tidak dapat ditemukan",
+            "CommandOnCooldown": {
+                "title": "Perintahnya ditunda",
+                "description": "Coba lagi setelah {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "Pilih trek yang Anda minati!",
+            "placeholder": "Pilih trek"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Sarankan sebuah ide",
+                "ideas-disabled": "Modul **ide** dinonaktifkan di server ini",
+                "embed-title": "Ide baru!"
+            },
+            "confirm-modal": {
+                "reason-label": "Argumen:",
+                "embed": {
+                    "title": "Ide baru!",
+                    "field": "Ide lama!"
+                },
+                "idea": {
+                    "content": "Ide Anda disetujui!",
+                    "embed": {
+                        "title": "Idenya disetujui!",
+                        "field": "Inti dari idenya:",
+                        "reason": "Argumen konfirmasi:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Menyetujui",
+                    "deny": "Membantah"
+                },
+                "old-idea": "Ide yang ketinggalan jaman!",
+                "idea": "Ide:",
+                "refused": "Ditolak",
+                "idea-content": "Ide Anda telah ditolak!"
+            },
+            "idea-modal": {
+                "label": "Beritahu kami tentang ide Anda",
+                "placeholder": "Jelaskan ide Anda sedetail mungkin dengan contoh penggunaan.",
+                "embed-description": "Disetujui atau tidaknya ide itu tergantung pada Anda!",
+                "idea": "Ide:",
+                "thread-name": "Diskusi ide dari {name}"
+            },
+            "idea-view.timeout-message": "Anda hanya dapat mengajukan ide setiap 30 menit sekali\nKesempatan selanjutnya untuk menyampaikan ide adalah melalui:"
+        },
+        "settings": {
+            "start": {
+                "title": "Mengonfigurasi modul bot.",
+                "choose": "Pilih pengaturan...",
+                "description": "Berinteraksi dengan menu tarik-turun pilihan untuk mengonfigurasi server.",
+                "request": "Permintaan dari {name}"
+            },
+            "module-name": {
+                "economy": "Ekonomi",
+                "languages": "Bahasa",
+                "prefix": "Awalan",
+                "music": "Musik",
+                "color": "Warna pesan sistem",
+                "reactions": "Reaksi Otomatis",
+                "thread": "Pesan otomatis di thread/postingan",
+                "command-permission": "Pengaturan Perintah",
+                "ideas": "Ide ide",
+                "welcomer": "Selamat datang anggota baru",
+                "auto-roles": "Peran otomatis"
+            },
+            "button": {
+                "back": "Kembali",
+                "edit": "Sunting",
+                "reset": "Mengatur ulang",
+                "add": "Menambahkan"
+            },
+            "prefix": {
+                "title": "Awalan",
+                "description": "Menetapkan awalan yang akan ditanggapi bot saat memanggil perintah.",
+                "current": "Awalan saat ini adalah {prefix}"
+            },
+            "languages": {
+                "title": "Bahasa",
+                "description": "Pengaturan ini mengubah bahasa untuk bekerja dengan bot.",
+                "choose": "Pilih bahasa untuk server:"
+            },
+            "color": {
+                "not-valid": "Format kode hex salah",
+                "title": "Warna pesan sistem",
+                "description": "Saat Anda menggunakan perintah, bot menampilkan sisipan yang memiliki warna tidak terlihat secara default.\n\nAnda dapat mengatur warna sesuai dengan tema komunitas Anda.",
+                "current": "Warna saat ini"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Instal peran",
+                    "delete": "Hapus peran"
+                },
+                "placeholder": "Pilih peran yang ditetapkan secara otomatis untuk anggota baru",
+                "embed": {
+                    "title": "Peran otomatis",
+                    "description": "Panel kontrol untuk peran otomatis.\nAnda dapat menginstal, mengedit, menghapus, dan melihat tindakan tersebut dari panel.\nJika Anda tidak melihat peran otomatis, maka peran tersebut tidak dipilih!",
+                    "field": "Peran yang dipilih:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Hapus pesan",
+                    "view": "Lihat pesan",
+                    "install": "Instal pesan"
+                },
+                "embed": {
+                    "title": "Salam pesan",
+                    "description": "Pengiriman pesan otomatis ketika peserta masuk ke server\n\nJika ingin mengganti saluran, cukup pilih lagi dan atur pesannya\n\nUntuk mengubah pesan, pilih saluran saat ini dan atur pesan baru untuk saluran tersebut",
+                    "field": {
+                        "successful": "Saluran terpasang",
+                        "failure": "Saluran belum terpasang"
+                    }
+                },
+                "dropdown-placeholder": "Pilih saluran selamat datang",
+                "modal": {
+                    "title": "Salam pesan",
+                    "label": "Pesan",
+                    "placeholder": "Anda juga dapat menggunakan pembuat penyematan"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Pesan otomatis di forum/thread",
+                    "brief": "Pesan otomatis",
+                    "description": "Tambahkan atau ubah postingan otomatis Anda di forum/utas",
+                    "placeholder": "Pengaturan pesan otomatis di cabang/forum:",
+                    "channel": "Saluran"
+                },
+                "addptional": {
+                    "button.install_mes": "Instal pesan",
+                    "channel-error": "Pesan otomatis telah dipasang di saluran ini",
+                    "placeholder": "Pilih saluran untuk pesan otomatis"
+                },
+                "thread": {
+                    "mes-not-found": "Tidak ada pesan yang ditemukan",
+                    "button": {
+                        "view": "Lihat pesannya",
+                        "edit": "Mengedit pesan",
+                        "delete": "Hapus pesan"
+                    }
+                },
+                "modal": {
+                    "label": "Pesan:",
+                    "title": "Pesan otomatis",
+                    "placeholder": "Anda juga dapat menggunakan pembuat penyematan"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Reaksi otomatis",
+                    "brief": "Reaksi otomatis",
+                    "description": "Kontrol penambahan reaksi otomatis dalam saluran",
+                    "emoji": "emoji",
+                    "channel": "Saluran",
+                    "placeholder": "Pengaturan reaksi otomatis:"
+                },
+                "addres": {
+                    "channel-error": "Reaksi otomatis telah dipasang di saluran ini",
+                    "install_emoji": "Instal emoji",
+                    "placeholder": "Pilih saluran untuk reaksi otomatis"
+                },
+                "buttons": {
+                    "delete": "Hapus reaksi",
+                    "edit": "Sunting reaksi"
+                },
+                "modal": {
+                    "title": "Reaksi otomatis",
+                    "label": "Emoji:"
+                }
+            }
+        }
+    },
+    "da": {
+        "bot-info": {
+            "title": "{name} dette er en multifunktionel bot",
+            "description": "Botten er designet til at lette serverstyring og er udstyret med forskellige automatiseringsværktøjer",
+            "info-server": "Oplysninger om serveren",
+            "prefix-server": "> Serverpræfiks - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Vil vælge det passende sprog:"
+        },
+        "captcha": {
+            "congratulation": "Tillykke, du har bestået captchaen!",
+            "enter": "Du har 30 sekunder til at løse captchaen!",
+            "failed": "Captcha mislykkedes"
+        },
+        "activiti": {
+            "failed": "Denne aktivitet er ikke tilgængelig eller virker ikke",
+            "embed": {
+                "title": "Aktiviteten er blevet oprettet!",
+                "description": "Nogle typer aktiviteter er dog muligvis ikke tilgængelige for din server, hvis boostniveauet ikke opfylder aktivitetskravene."
+            },
+            "fields": {
+                "label": "Aktivitetsnavn",
+                "max-user": "Maksimalt antal brugere"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "Du har ikke nok rettigheder",
+            "MissingRole": "Du har ikke en passende rolle til at udføre kommandoen",
+            "MissingChannel": "Du kan ikke udføre denne kommando i denne kanal",
+            "NotOwner": "Denne kommando er beregnet til bot-ejeren",
+            "CommandNotFound": "Der er ingen sådan kommando",
+            "CheckFailure": "Du opfylder ikke alle betingelserne",
+            "BadArgument": "Ugyldigt argument indtastet",
+            "DisabledCommand": "Denne kommando er deaktiveret på serveren",
+            "MissingRequiredArgument": "Du har ikke indtastet et påkrævet argument",
+            "NotActivateEconomy": "Økonomisystemet er deaktiveret på serveren",
+            "OnlyTeamError": "Denne kommando kan kun bruges af bot-teamet",
+            "MemberNotFound": "Deltageren kunne ikke findes",
+            "CommandOnCooldown": {
+                "title": "Kommandoen er i venteposition",
+                "description": "Prøv igen efter {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "Vælg det spor, du er interesseret i!",
+            "placeholder": "Vælg et spor"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Foreslå en idé",
+                "ideas-disabled": "Modulet **idé** er deaktiveret på denne server",
+                "embed-title": "Ny idé!"
+            },
+            "confirm-modal": {
+                "reason-label": "Argument:",
+                "embed": {
+                    "title": "Ny idé!",
+                    "field": "Gammel idé!"
+                },
+                "idea": {
+                    "content": "Din idé er godkendt!",
+                    "embed": {
+                        "title": "Idéen er godkendt!",
+                        "field": "Essensen af ​​ideen:",
+                        "reason": "Bekræftelsesargument:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Godkende",
+                    "deny": "Nægte"
+                },
+                "old-idea": "En forældet idé!",
+                "idea": "Ide:",
+                "refused": "Afviste",
+                "idea-content": "Din idé er blevet afvist!"
+            },
+            "idea-modal": {
+                "label": "Fortæl os om din idé",
+                "placeholder": "Beskriv din idé så detaljeret som muligt med brugseksempler.",
+                "embed-description": "Om ideen bliver godkendt eller ej afhænger af dig!",
+                "idea": "Ide:",
+                "thread-name": "Diskussion af ideen fra {name}"
+            },
+            "idea-view.timeout-message": "Du kan kun foreslå en idé én gang hvert 30. minut\nNæste mulighed for at indsende en idé vil være gennem:"
+        },
+        "settings": {
+            "start": {
+                "title": "Konfiguration af bot-modulerne.",
+                "choose": "Vælg indstillinger...",
+                "description": "Interager med rullemenuen for at konfigurere serveren.",
+                "request": "Anmodning fra {name}"
+            },
+            "module-name": {
+                "economy": "Økonomi",
+                "languages": "Sprog",
+                "prefix": "Præfiks",
+                "music": "musik",
+                "color": "Farve på systemmeddelelser",
+                "reactions": "Auto reaktioner",
+                "thread": "Automatisk besked i en tråd/indlæg",
+                "command-permission": "Kommandoindstillinger",
+                "ideas": "Ideer",
+                "welcomer": "Velkommen til nye medlemmer",
+                "auto-roles": "Automatiske roller"
+            },
+            "button": {
+                "back": "Tilbage",
+                "edit": "Redigere",
+                "reset": "Nulstil",
+                "add": "Tilføje"
+            },
+            "prefix": {
+                "title": "Præfiks",
+                "description": "Indstilling af det præfiks, som botten vil reagere på, når kommandoen kaldes.",
+                "current": "Det nuværende præfiks er {prefix}"
+            },
+            "languages": {
+                "title": "Sprog",
+                "description": "Denne indstilling ændrer sproget for at arbejde med botten.",
+                "choose": "Vælg sprog for serveren:"
+            },
+            "color": {
+                "not-valid": "Hexkodeformatet er forkert",
+                "title": "Farve på systemmeddelelser",
+                "description": "Når du bruger kommandoer, viser botten indsæt, der har en usynlig farve som standard.\n\nDu kan indstille din farve i henhold til temaet for dit fællesskab.",
+                "current": "Nuværende farve"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Installer roller",
+                    "delete": "Slet roller"
+                },
+                "placeholder": "Vælg automatisk tildelte roller til nye medlemmer",
+                "embed": {
+                    "title": "Automatiske roller",
+                    "description": "Kontrolpanelet for automatiske roller.\nDu kan installere, redigere, slette og se sådanne handlinger fra panelet.\nHvis du ikke kan se autorollerne, så er de ikke valgt!",
+                    "field": "Udvalgte roller:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Slet besked",
+                    "view": "Se besked",
+                    "install": "Installationsmeddelelse"
+                },
+                "embed": {
+                    "title": "Besked hilsen",
+                    "description": "Automatisk afsendelse af beskeder, når en deltager logger på serveren\n\nHvis du vil ændre kanalen, skal du blot vælge den igen og indstille beskeden\n\nFor at ændre en besked skal du vælge den aktuelle kanal og indstille en ny besked til den",
+                    "field": {
+                        "successful": "Installeret kanal",
+                        "failure": "Kanalen er ikke installeret"
+                    }
+                },
+                "dropdown-placeholder": "Vælg velkomstkanalen",
+                "modal": {
+                    "title": "Besked hilsen",
+                    "label": "Besked",
+                    "placeholder": "Du kan også bruge embed builder"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Automatiske beskeder i fora/tråde",
+                    "brief": "Auto-beskeder",
+                    "description": "Tilføj eller rediger dine automatiske indlæg i fora/tråde",
+                    "placeholder": "Indstillinger for automatisk besked i filialer/fora:",
+                    "channel": "Kanal"
+                },
+                "addptional": {
+                    "button.install_mes": "Installationsmeddelelse",
+                    "channel-error": "Automatiske beskeder er allerede blevet installeret på denne kanal",
+                    "placeholder": "Vælg en kanal til automatiske beskeder"
+                },
+                "thread": {
+                    "mes-not-found": "Ingen besked fundet",
+                    "button": {
+                        "view": "Se beskeden",
+                        "edit": "Rediger en besked",
+                        "delete": "Slet en besked"
+                    }
+                },
+                "modal": {
+                    "label": "Besked:",
+                    "title": "Auto-beskeder",
+                    "placeholder": "Du kan også bruge embed-builder"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Automatiske reaktioner",
+                    "brief": "Autoreaktioner",
+                    "description": "Styring af automatisk tilføjelse af reaktioner i kanaler",
+                    "emoji": "Emoji",
+                    "channel": "Kanal",
+                    "placeholder": "Indstillinger for autoreaktion:"
+                },
+                "addres": {
+                    "channel-error": "Autoreaktioner er allerede blevet installeret på denne kanal",
+                    "install_emoji": "Installer emoji",
+                    "placeholder": "Vælg en kanal til autoreaktioner"
+                },
+                "buttons": {
+                    "delete": "Slet reaktion",
+                    "edit": "Rediger reaktion"
+                },
+                "modal": {
+                    "title": "Autoreaktion",
+                    "label": "Emoji:"
+                }
+            }
+        }
+    },
+    "de": {
+        "bot-info": {
+            "title": "{name} das ist ein multifunktionaler Bot",
+            "description": "Der Bot soll die Serververwaltung erleichtern und ist mit verschiedenen Automatisierungstools ausgestattet",
+            "info-server": "Informationen zum Server",
+            "prefix-server": "> Serverpräfix – `{prefix}`."
+        },
+        "translate": {
+            "placeholder": "Wählt die passende Sprache:"
+        },
+        "captcha": {
+            "congratulation": "Herzlichen Glückwunsch, Sie haben das Captcha bestanden!",
+            "enter": "Sie haben 30 Sekunden Zeit, um das Captcha zu lösen!",
+            "failed": "CAPTCHA gescheitert"
+        },
+        "activiti": {
+            "failed": "Diese Aktivität ist nicht verfügbar oder funktioniert nicht",
+            "embed": {
+                "title": "Die Aktivität wurde erfolgreich erstellt!",
+                "description": "Allerdings sind einige Arten von Aktivitäten möglicherweise nicht für Ihren Server verfügbar, wenn die Boost-Stufe nicht den Aktivitätsanforderungen entspricht."
+            },
+            "fields": {
+                "label": "Aktivitätsname",
+                "max-user": "Maximale Anzahl Benutzer"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "Sie haben nicht genügend Rechte",
+            "MissingRole": "Sie haben keine geeignete Rolle, um den Befehl auszuführen",
+            "MissingChannel": "Sie können diesen Befehl in diesem Kanal nicht ausführen",
+            "NotOwner": "Dieser Befehl ist für den Bot-Besitzer gedacht",
+            "CommandNotFound": "Einen solchen Befehl gibt es nicht",
+            "CheckFailure": "Sie erfüllen nicht alle Bedingungen",
+            "BadArgument": "Ungültiges Argument eingegeben",
+            "DisabledCommand": "Dieser Befehl ist auf dem Server deaktiviert",
+            "MissingRequiredArgument": "Sie haben kein erforderliches Argument eingegeben",
+            "NotActivateEconomy": "Das Sparsystem ist auf dem Server deaktiviert",
+            "OnlyTeamError": "Dieser Befehl kann nur vom Bot-Team verwendet werden",
+            "MemberNotFound": "Der Teilnehmer konnte nicht gefunden werden",
+            "CommandOnCooldown": {
+                "title": "Der Befehl liegt in der Warteschleife",
+                "description": "Versuchen Sie es nach {delay} erneut."
+            }
+        },
+        "music-selector": {
+            "title": "Wählen Sie den Titel, der Sie interessiert!",
+            "placeholder": "Wählen Sie einen Titel aus"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Schlagen Sie eine Idee vor",
+                "ideas-disabled": "Das **idea**-Modul ist auf diesem Server deaktiviert",
+                "embed-title": "Neue Idee!"
+            },
+            "confirm-modal": {
+                "reason-label": "Streit:",
+                "embed": {
+                    "title": "Neue Idee!",
+                    "field": "Alte Idee!"
+                },
+                "idea": {
+                    "content": "Ihre Idee ist genehmigt!",
+                    "embed": {
+                        "title": "Die Idee wird angenommen!",
+                        "field": "Der Kern der Idee:",
+                        "reason": "Bestätigungsargument:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Genehmigen",
+                    "deny": "Leugnen"
+                },
+                "old-idea": "Eine veraltete Idee!",
+                "idea": "Idee:",
+                "refused": "Abgelehnt",
+                "idea-content": "Ihre Idee wurde abgelehnt!"
+            },
+            "idea-modal": {
+                "label": "Erzählen Sie uns von Ihrer Idee",
+                "placeholder": "Beschreiben Sie Ihre Idee möglichst detailliert anhand von Anwendungsbeispielen.",
+                "embed-description": "Ob die Idee angenommen wird oder nicht, hängt von Ihnen ab!",
+                "idea": "Idee:",
+                "thread-name": "Diskussion der Idee von {name}"
+            },
+            "idea-view.timeout-message": "Sie können nur alle 30 Minuten eine Idee vorschlagen\nDie nächste Möglichkeit, eine Idee einzureichen, besteht über:"
+        },
+        "settings": {
+            "start": {
+                "title": "Konfigurieren der Bot-Module.",
+                "choose": "Wählen Sie Einstellungen...",
+                "description": "Interagieren Sie mit dem Auswahl-Dropdown-Menü, um den Server zu konfigurieren.",
+                "request": "Anfrage von {name}"
+            },
+            "module-name": {
+                "economy": "Wirtschaft",
+                "languages": "Sprachen",
+                "prefix": "Präfix",
+                "music": "Musik",
+                "color": "Farbe der Systemmeldungen",
+                "reactions": "Automatische Reaktionen",
+                "thread": "Automatische Nachricht in einem Thread/Beitrag",
+                "command-permission": "Befehlseinstellungen",
+                "ideas": "Ideen",
+                "welcomer": "Willkommen neue Mitglieder",
+                "auto-roles": "Automatische Rollen"
+            },
+            "button": {
+                "back": "Zurück",
+                "edit": "Bearbeiten",
+                "reset": "Zurücksetzen",
+                "add": "Hinzufügen"
+            },
+            "prefix": {
+                "title": "Präfix",
+                "description": "Festlegen des Präfixes, auf das der Bot beim Aufrufen des Befehls antwortet.",
+                "current": "Das aktuelle Präfix ist {prefix}"
+            },
+            "languages": {
+                "title": "Sprachen",
+                "description": "Diese Einstellung ändert die Sprache für die Arbeit mit dem Bot.",
+                "choose": "Wählen Sie die Sprache für den Server aus:"
+            },
+            "color": {
+                "not-valid": "Das Hex-Code-Format ist falsch",
+                "title": "Farbe der Systemmeldungen",
+                "description": "Wenn Sie Befehle verwenden, zeigt der Bot standardmäßig Einfügungen mit einer unsichtbaren Farbe an.\n\nSie können Ihre Farbe entsprechend dem Thema Ihrer Community festlegen.",
+                "current": "Aktuelle Farbe"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Rollen installieren",
+                    "delete": "Rollen löschen"
+                },
+                "placeholder": "Wählen Sie automatisch zugewiesene Rollen für neue Mitglieder aus",
+                "embed": {
+                    "title": "Automatische Rollen",
+                    "description": "Das Bedienfeld für automatische Rollen.\nSie können solche Aktionen über das Bedienfeld installieren, bearbeiten, löschen und anzeigen.\nWenn Sie die automatischen Rollen nicht sehen, sind sie nicht ausgewählt!",
+                    "field": "Ausgewählte Rollen:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Nachricht löschen",
+                    "view": "Nachricht ansehen",
+                    "install": "Nachricht installieren"
+                },
+                "embed": {
+                    "title": "Begrüßung per Nachricht",
+                    "description": "Automatischer Versand von Nachrichten, wenn sich ein Teilnehmer am Server anmeldet\n\nWenn Sie den Kanal wechseln möchten, wählen Sie ihn einfach erneut aus und stellen Sie die Nachricht ein\n\nUm eine Nachricht zu ändern, wählen Sie den aktuellen Kanal aus und legen Sie eine neue Nachricht dafür fest",
+                    "field": {
+                        "successful": "Installierter Kanal",
+                        "failure": "Der Kanal ist nicht installiert"
+                    }
+                },
+                "dropdown-placeholder": "Wählen Sie den Willkommenskanal aus",
+                "modal": {
+                    "title": "Begrüßung per Nachricht",
+                    "label": "Nachricht",
+                    "placeholder": "Sie können auch den Embed Builder verwenden"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Automatische Nachrichten in Foren/Threads",
+                    "brief": "Automatische Nachrichten",
+                    "description": "Fügen Sie Ihre automatischen Beiträge in Foren/Threads hinzu oder ändern Sie sie",
+                    "placeholder": "Einstellungen für automatische Nachrichten in Zweigen/Foren:",
+                    "channel": "Kanal"
+                },
+                "addptional": {
+                    "button.install_mes": "Nachricht installieren",
+                    "channel-error": "Auf diesem Kanal wurden bereits automatische Nachrichten installiert",
+                    "placeholder": "Wählen Sie einen Kanal für automatische Nachrichten aus"
+                },
+                "thread": {
+                    "mes-not-found": "Keine Nachricht gefunden",
+                    "button": {
+                        "view": "Sehen Sie sich die Nachricht an",
+                        "edit": "Bearbeiten Sie eine Nachricht",
+                        "delete": "Eine Nachricht löschen"
+                    }
+                },
+                "modal": {
+                    "label": "Nachricht:",
+                    "title": "Automatische Nachrichten",
+                    "placeholder": "Sie können auch den Embed-Builder verwenden"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Automatische Reaktionen",
+                    "brief": "Autoreaktionen",
+                    "description": "Steuerung der automatischen Zugabe von Reaktionen in Kanälen",
+                    "emoji": "Emoji",
+                    "channel": "Kanal",
+                    "placeholder": "Autoreaktionseinstellungen:"
+                },
+                "addres": {
+                    "channel-error": "Auf diesem Kanal sind bereits Autoreaktionen installiert",
+                    "install_emoji": "Emoji installieren",
+                    "placeholder": "Wählen Sie einen Kanal für Autoreaktionen aus"
+                },
+                "buttons": {
+                    "delete": "Reaktion löschen",
+                    "edit": "Reaktion bearbeiten"
+                },
+                "modal": {
+                    "title": "Autoreaktion",
+                    "label": "Emoji:"
+                }
+            }
+        }
+    },
+    "es": {
+        "bot-info": {
+            "title": "{name} este es un bot multifuncional",
+            "description": "El bot está diseñado para facilitar la gestión del servidor y está equipado con varias herramientas de automatización.",
+            "info-server": "Información sobre el servidor",
+            "prefix-server": "> Prefijo del servidor - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Elegirá el idioma apropiado:"
+        },
+        "captcha": {
+            "congratulation": "¡Felicitaciones, has pasado el captcha!",
+            "enter": "¡Tienes 30 segundos para resolver el captcha!",
+            "failed": "Código de imagen erroneo"
+        },
+        "activiti": {
+            "failed": "Esta actividad no está disponible o no funciona",
+            "embed": {
+                "title": "¡La actividad ha sido creada exitosamente!",
+                "description": "Sin embargo, es posible que algunos tipos de actividades no estén disponibles para su servidor si el nivel de impulso no cumple con los requisitos de actividad."
+            },
+            "fields": {
+                "label": "Nombre de la actividad",
+                "max-user": "Número máximo de usuarios"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "No tienes suficientes derechos",
+            "MissingRole": "No tienes un rol adecuado para ejecutar el comando.",
+            "MissingChannel": "No puedes ejecutar este comando en este canal.",
+            "NotOwner": "Este comando está destinado al propietario del bot.",
+            "CommandNotFound": "No existe tal comando",
+            "CheckFailure": "No cumples todas las condiciones",
+            "BadArgument": "Argumento no válido ingresado",
+            "DisabledCommand": "Este comando está deshabilitado en el servidor.",
+            "MissingRequiredArgument": "No ingresaste un argumento requerido",
+            "NotActivateEconomy": "El sistema económico está deshabilitado en el servidor.",
+            "OnlyTeamError": "Este comando solo puede ser utilizado por el equipo bot.",
+            "MemberNotFound": "No se pudo encontrar al participante.",
+            "CommandOnCooldown": {
+                "title": "El comando está en espera",
+                "description": "Inténtalo de nuevo después de {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "¡Elige la pista que te interesa!",
+            "placeholder": "Selecciona una pista"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Sugerir una idea",
+                "ideas-disabled": "El módulo **idea** está deshabilitado en este servidor",
+                "embed-title": "¡Idea Nueva!"
+            },
+            "confirm-modal": {
+                "reason-label": "Argumento:",
+                "embed": {
+                    "title": "¡Idea Nueva!",
+                    "field": "¡Vieja idea!"
+                },
+                "idea": {
+                    "content": "¡Tu idea está aprobada!",
+                    "embed": {
+                        "title": "¡La idea está aprobada!",
+                        "field": "La esencia de la idea:",
+                        "reason": "Argumento de confirmación:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Aprobar",
+                    "deny": "Denegar"
+                },
+                "old-idea": "¡Una idea obsoleta!",
+                "idea": "Idea:",
+                "refused": "Rechazado",
+                "idea-content": "¡Tu idea ha sido rechazada!"
+            },
+            "idea-modal": {
+                "label": "Cuéntanos tu idea",
+                "placeholder": "Describe tu idea con el mayor detalle posible con ejemplos de uso.",
+                "embed-description": "¡Que la idea sea aprobada o no depende de ti!",
+                "idea": "Idea:",
+                "thread-name": "Discusión de la idea de {name}"
+            },
+            "idea-view.timeout-message": "Sólo puedes proponer una idea una vez cada 30 minutos.\nLa próxima oportunidad para enviar una idea será a través de:"
+        },
+        "settings": {
+            "start": {
+                "title": "Configurando los módulos del bot.",
+                "choose": "Elige la configuración...",
+                "description": "Interactúe con el menú desplegable de selección para configurar el servidor.",
+                "request": "Solicitud de {name}"
+            },
+            "module-name": {
+                "economy": "Economía",
+                "languages": "Idiomas",
+                "prefix": "Prefijo",
+                "music": "Música",
+                "color": "Color de los mensajes del sistema.",
+                "reactions": "Reacciones automáticas",
+                "thread": "Mensaje automático en un hilo/publicación",
+                "command-permission": "Configuración de comando",
+                "ideas": "Ideas",
+                "welcomer": "Bienvenidos nuevos miembros",
+                "auto-roles": "Roles automáticos"
+            },
+            "button": {
+                "back": "Atrás",
+                "edit": "Editar",
+                "reset": "Reiniciar",
+                "add": "Agregar"
+            },
+            "prefix": {
+                "title": "Prefijo",
+                "description": "Establecer el prefijo al que responderá el bot al llamar al comando.",
+                "current": "El prefijo actual es {prefix}"
+            },
+            "languages": {
+                "title": "Idiomas",
+                "description": "Esta configuración cambia el idioma para trabajar con el bot.",
+                "choose": "Seleccione el idioma del servidor:"
+            },
+            "color": {
+                "not-valid": "El formato del código hexadecimal es incorrecto.",
+                "title": "Color de los mensajes del sistema.",
+                "description": "Cuando usas comandos, el bot muestra inserciones que tienen un color invisible de forma predeterminada.\n\nPuedes configurar tu color según el tema de tu comunidad.",
+                "current": "Color actual"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Instalar roles",
+                    "delete": "Eliminar roles"
+                },
+                "placeholder": "Seleccionar roles asignados automáticamente para nuevos miembros",
+                "embed": {
+                    "title": "Roles automáticos",
+                    "description": "El panel de control para roles automáticos.\nPuede instalar, editar, eliminar y ver dichas acciones desde el panel.\nSi no ve los roles automáticos, ¡no están seleccionados!",
+                    "field": "Roles seleccionados:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Borrar mensaje",
+                    "view": "Ver mensaje",
+                    "install": "Instalar mensaje"
+                },
+                "embed": {
+                    "title": "mensaje de saludo",
+                    "description": "Envío automático de mensajes cuando un participante inicia sesión en el servidor\n\nSi desea cambiar el canal, simplemente selecciónelo nuevamente y configure el mensaje\n\nPara cambiar un mensaje, seleccione el canal actual y establezca un nuevo mensaje para él",
+                    "field": {
+                        "successful": "Canal instalado",
+                        "failure": "El canal no está instalado."
+                    }
+                },
+                "dropdown-placeholder": "Selecciona el canal de bienvenida",
+                "modal": {
+                    "title": "mensaje de saludo",
+                    "label": "Mensaje",
+                    "placeholder": "También puedes usar el generador de incrustaciones."
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Mensajes automáticos en foros/hilos",
+                    "brief": "Mensajes automáticos",
+                    "description": "Agregue o cambie sus publicaciones automáticas en foros/hilos",
+                    "placeholder": "Configuración de mensajes automáticos en sucursales/foros:",
+                    "channel": "Canal"
+                },
+                "addptional": {
+                    "button.install_mes": "Instalar mensaje",
+                    "channel-error": "Los mensajes automáticos ya se han instalado en este canal.",
+                    "placeholder": "Seleccione un canal para mensajes automáticos"
+                },
+                "thread": {
+                    "mes-not-found": "No se encontró ningún mensaje",
+                    "button": {
+                        "view": "Ver el mensaje",
+                        "edit": "Editar un mensaje",
+                        "delete": "Eliminar un mensaje"
+                    }
+                },
+                "modal": {
+                    "label": "Mensaje:",
+                    "title": "Mensajes automáticos",
+                    "placeholder": "También puedes usar el constructor de incrustaciones."
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Reacciones automáticas",
+                    "brief": "Reacciones automáticas",
+                    "description": "Control de adición automática de reacciones en canales.",
+                    "emoji": "emojis",
+                    "channel": "Canal",
+                    "placeholder": "Configuración de reacción automática:"
+                },
+                "addres": {
+                    "channel-error": "Las reacciones automáticas ya se han instalado en este canal.",
+                    "install_emoji": "Instalar emojis",
+                    "placeholder": "Seleccione un canal para reacciones automáticas"
+                },
+                "buttons": {
+                    "delete": "Eliminar reacción",
+                    "edit": "Editar reacción"
+                },
+                "modal": {
+                    "title": "Reacción automática",
+                    "label": "emojis:"
+                }
+            }
+        }
+    },
+    "fr": {
+        "bot-info": {
+            "title": "{name} c'est un bot multifonctionnel",
+            "description": "Le bot est conçu pour faciliter la gestion du serveur et est équipé de divers outils d'automatisation",
+            "info-server": "Informations sur le serveur",
+            "prefix-server": "> Préfixe du serveur - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Choisira la langue appropriée :"
+        },
+        "captcha": {
+            "congratulation": "Félicitations, vous avez réussi le captcha !",
+            "enter": "Vous avez 30 secondes pour résoudre le captcha !",
+            "failed": "Echec du CAPTCHA"
+        },
+        "activiti": {
+            "failed": "Cette activité n'est pas disponible ou ne fonctionne pas",
+            "embed": {
+                "title": "L'activité a été créée avec succès !",
+                "description": "Cependant, certains types d'activités peuvent ne pas être disponibles pour votre serveur si le niveau de boost ne répond pas aux exigences d'activité."
+            },
+            "fields": {
+                "label": "Nom de l'activité",
+                "max-user": "Nombre maximum d'utilisateurs"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "Vous n'avez pas assez de droits",
+            "MissingRole": "Vous n'avez pas de rôle approprié pour exécuter la commande",
+            "MissingChannel": "Vous ne pouvez pas exécuter cette commande dans ce canal",
+            "NotOwner": "Cette commande est destinée au propriétaire du bot",
+            "CommandNotFound": "Il n'existe pas une telle commande",
+            "CheckFailure": "Vous ne remplissez pas toutes les conditions",
+            "BadArgument": "Argument entré non valide",
+            "DisabledCommand": "Cette commande est désactivée sur le serveur",
+            "MissingRequiredArgument": "Vous n'avez pas saisi un argument obligatoire",
+            "NotActivateEconomy": "Le système d'économie est désactivé sur le serveur",
+            "OnlyTeamError": "Cette commande ne peut être utilisée que par l'équipe du bot",
+            "MemberNotFound": "Le participant n'a pas pu être trouvé",
+            "CommandOnCooldown": {
+                "title": "La commande est en attente",
+                "description": "Réessayez après {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "Choisissez la piste qui vous intéresse !",
+            "placeholder": "Sélectionnez une piste"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Proposer une idée",
+                "ideas-disabled": "Le module **idea** est désactivé sur ce serveur",
+                "embed-title": "Nouvelle idée!"
+            },
+            "confirm-modal": {
+                "reason-label": "Argument:",
+                "embed": {
+                    "title": "Nouvelle idée!",
+                    "field": "Vieille idée !"
+                },
+                "idea": {
+                    "content": "Votre idée est approuvée !",
+                    "embed": {
+                        "title": "L'idée est approuvée !",
+                        "field": "L'essence de l'idée :",
+                        "reason": "Argument de confirmation :"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Approuver",
+                    "deny": "Refuser"
+                },
+                "old-idea": "Une idée dépassée !",
+                "idea": "Idée:",
+                "refused": "Refusé",
+                "idea-content": "Votre idée a été rejetée !"
+            },
+            "idea-modal": {
+                "label": "Parlez-nous de votre idée",
+                "placeholder": "Décrivez votre idée de manière aussi détaillée que possible avec des exemples d'utilisation.",
+                "embed-description": "Que l’idée soit approuvée ou non dépend de vous !",
+                "idea": "Idée:",
+                "thread-name": "Discussion de l'idée de {name}"
+            },
+            "idea-view.timeout-message": "Vous ne pouvez proposer une idée qu'une fois toutes les 30 minutes\nLa prochaine opportunité de soumettre une idée sera :"
+        },
+        "settings": {
+            "start": {
+                "title": "Configuration des modules du bot.",
+                "choose": "Choisissez les paramètres...",
+                "description": "Interagissez avec le menu déroulant de sélection pour configurer le serveur.",
+                "request": "Demande de {name}"
+            },
+            "module-name": {
+                "economy": "Économie",
+                "languages": "Langues",
+                "prefix": "Préfixe",
+                "music": "Musique",
+                "color": "Couleur des messages système",
+                "reactions": "Réactions automatiques",
+                "thread": "Message automatique dans un fil de discussion/une publication",
+                "command-permission": "Paramètres de commande",
+                "ideas": "Idées",
+                "welcomer": "Bienvenue aux nouveaux membres",
+                "auto-roles": "Rôles automatiques"
+            },
+            "button": {
+                "back": "Dos",
+                "edit": "Modifier",
+                "reset": "Réinitialiser",
+                "add": "Ajouter"
+            },
+            "prefix": {
+                "title": "Préfixe",
+                "description": "Définition du préfixe auquel le bot répondra lors de l'appel de la commande.",
+                "current": "Le préfixe actuel est {prefix}"
+            },
+            "languages": {
+                "title": "Langues",
+                "description": "Ce paramètre modifie la langue de travail avec le bot.",
+                "choose": "Sélectionnez la langue du serveur :"
+            },
+            "color": {
+                "not-valid": "Le format du code hexadécimal est incorrect",
+                "title": "Couleur des messages système",
+                "description": "Lorsque vous utilisez des commandes, le bot affiche les inserts qui ont une couleur invisible par défaut.\n\nVous pouvez définir votre couleur en fonction du thème de votre communauté.",
+                "current": "Couleur actuelle"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Installer des rôles",
+                    "delete": "Supprimer des rôles"
+                },
+                "placeholder": "Sélectionnez les rôles attribués automatiquement aux nouveaux membres",
+                "embed": {
+                    "title": "Rôles automatiques",
+                    "description": "Le panneau de contrôle pour les rôles automatiques.\nVous pouvez installer, modifier, supprimer et afficher ces actions à partir du panneau.\nSi vous ne voyez pas les rôles automatiques, c'est qu'ils ne sont pas sélectionnés !",
+                    "field": "Rôles sélectionnés :"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Supprimer le message",
+                    "view": "Voir message",
+                    "install": "Message d'installation"
+                },
+                "embed": {
+                    "title": "Message de bienvenue",
+                    "description": "Envoi automatique de messages lorsqu'un participant se connecte au serveur\n\nSi vous souhaitez changer de chaîne, sélectionnez-la à nouveau et définissez le message\n\nPour modifier un message, sélectionnez la chaîne actuelle et définissez un nouveau message pour celle-ci.",
+                    "field": {
+                        "successful": "Chaîne installée",
+                        "failure": "La chaîne n'est pas installée"
+                    }
+                },
+                "dropdown-placeholder": "Sélectionnez la chaîne de bienvenue",
+                "modal": {
+                    "title": "Message de bienvenue",
+                    "label": "Message",
+                    "placeholder": "Vous pouvez également utiliser le générateur d'intégration"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Messages automatiques dans les forums/threads",
+                    "brief": "Messages automatiques",
+                    "description": "Ajoutez ou modifiez vos publications automatiques dans les forums/threads",
+                    "placeholder": "Paramètres de message automatique dans les branches/forums :",
+                    "channel": "Canal"
+                },
+                "addptional": {
+                    "button.install_mes": "Message d'installation",
+                    "channel-error": "Des messages automatiques ont déjà été installés sur cette chaîne",
+                    "placeholder": "Sélectionnez un canal pour les messages automatiques"
+                },
+                "thread": {
+                    "mes-not-found": "Aucun message trouvé",
+                    "button": {
+                        "view": "Afficher le message",
+                        "edit": "Modifier un message",
+                        "delete": "Supprimer un message"
+                    }
+                },
+                "modal": {
+                    "label": "Message:",
+                    "title": "Messages automatiques",
+                    "placeholder": "Vous pouvez également utiliser le constructeur intégré"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Réactions automatiques",
+                    "brief": "Réactions automatiques",
+                    "description": "Contrôle de l'ajout automatique de réactions dans les canaux",
+                    "emoji": "Émoji",
+                    "channel": "Canal",
+                    "placeholder": "Paramètres de réaction automatique :"
+                },
+                "addres": {
+                    "channel-error": "Des réactions automatiques ont déjà été installées sur cette chaîne",
+                    "install_emoji": "Installer des emoji",
+                    "placeholder": "Sélectionnez un canal pour les réactions automatiques"
+                },
+                "buttons": {
+                    "delete": "Supprimer la réaction",
+                    "edit": "Modifier la réaction"
+                },
+                "modal": {
+                    "title": "Réaction automatique",
+                    "label": "Émoji :"
+                }
+            }
+        }
+    },
+    "pl": {
+        "bot-info": {
+            "title": "{name} to wielofunkcyjny bot",
+            "description": "Bot ma na celu ułatwienie zarządzania serwerem i jest wyposażony w różne narzędzia automatyzujące",
+            "info-server": "Informacje o serwerze",
+            "prefix-server": "> Prefiks serwera - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Wybierze odpowiedni język:"
+        },
+        "captcha": {
+            "congratulation": "Gratulacje, udało Ci się przejść captcha!",
+            "enter": "Masz 30 sekund na rozwiązanie captcha!",
+            "failed": "Błąd CAPTCHA"
+        },
+        "activiti": {
+            "failed": "To działanie jest niedostępne lub nie działa",
+            "embed": {
+                "title": "Działanie zostało pomyślnie utworzone!",
+                "description": "Jednakże niektóre typy działań mogą nie być dostępne dla Twojego serwera, jeśli poziom wzmocnienia nie spełnia wymagań dotyczących aktywności."
+            },
+            "fields": {
+                "label": "Nazwa działania",
+                "max-user": "Maksymalna liczba użytkowników"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "Nie masz wystarczających praw",
+            "MissingRole": "Nie masz odpowiedniej roli, aby wykonać polecenie",
+            "MissingChannel": "Nie możesz wykonać tego polecenia w tym kanale",
+            "NotOwner": "To polecenie jest przeznaczone dla właściciela bota",
+            "CommandNotFound": "Nie ma takiego polecenia",
+            "CheckFailure": "Nie spełniasz wszystkich warunków",
+            "BadArgument": "Wprowadzono nieprawidłowy argument",
+            "DisabledCommand": "To polecenie jest wyłączone na serwerze",
+            "MissingRequiredArgument": "Nie podałeś wymaganego argumentu",
+            "NotActivateEconomy": "System ekonomiczny jest wyłączony na serwerze",
+            "OnlyTeamError": "To polecenie może być użyte tylko przez zespół botów",
+            "MemberNotFound": "Nie udało się znaleźć uczestnika",
+            "CommandOnCooldown": {
+                "title": "Polecenie jest wstrzymane",
+                "description": "Spróbuj ponownie po {delay}."
+            }
+        },
+        "music-selector": {
+            "title": "Wybierz utwór, który Cię interesuje!",
+            "placeholder": "Wybierz utwór"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Zaproponuj pomysł",
+                "ideas-disabled": "Moduł **idea** jest wyłączony na tym serwerze",
+                "embed-title": "Nowy pomysł!"
+            },
+            "confirm-modal": {
+                "reason-label": "Argument:",
+                "embed": {
+                    "title": "Nowy pomysł!",
+                    "field": "Stary pomysł!"
+                },
+                "idea": {
+                    "content": "Twój pomysł został zatwierdzony!",
+                    "embed": {
+                        "title": "Pomysł został zatwierdzony!",
+                        "field": "Istota pomysłu:",
+                        "reason": "Argument potwierdzający:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Zatwierdzić",
+                    "deny": "Zaprzeczyć"
+                },
+                "old-idea": "Przestarzały pomysł!",
+                "idea": "Pomysł:",
+                "refused": "Odrzucony",
+                "idea-content": "Twój pomysł został odrzucony!"
+            },
+            "idea-modal": {
+                "label": "Opowiedz nam o swoim pomyśle",
+                "placeholder": "Opisz swój pomysł tak szczegółowo, jak to możliwe, za pomocą przykładów użycia.",
+                "embed-description": "To, czy pomysł zostanie zaakceptowany, czy nie, zależy od Ciebie!",
+                "idea": "Pomysł:",
+                "thread-name": "Dyskusja na temat pomysłu od {name}"
+            },
+            "idea-view.timeout-message": "Pomysł można zaproponować tylko raz na 30 minut\nNastępną okazją do zgłoszenia pomysłu będzie:"
+        },
+        "settings": {
+            "start": {
+                "title": "Konfiguracja modułów bota.",
+                "choose": "Wybierz ustawienia...",
+                "description": "Skorzystaj z rozwijanego menu wyboru, aby skonfigurować serwer.",
+                "request": "Prośba od: {name}"
+            },
+            "module-name": {
+                "economy": "Gospodarka",
+                "languages": "Języki",
+                "prefix": "Prefiks",
+                "music": "Muzyka",
+                "color": "Kolor komunikatów systemowych",
+                "reactions": "Reakcje automatyczne",
+                "thread": "Automatyczna wiadomość w wątku/poście",
+                "command-permission": "Ustawienia poleceń",
+                "ideas": "Pomysły",
+                "welcomer": "Witamy nowych członków",
+                "auto-roles": "Role automatyczne"
+            },
+            "button": {
+                "back": "Z powrotem",
+                "edit": "Edytować",
+                "reset": "Resetowanie",
+                "add": "Dodać"
+            },
+            "prefix": {
+                "title": "Prefiks",
+                "description": "Ustawienie prefiksu, na który bot będzie reagował przy wywołaniu polecenia.",
+                "current": "Obecny prefiks to {prefix}"
+            },
+            "languages": {
+                "title": "Języki",
+                "description": "To ustawienie zmienia język pracy z botem.",
+                "choose": "Wybierz język serwera:"
+            },
+            "color": {
+                "not-valid": "Format kodu szesnastkowego jest nieprawidłowy",
+                "title": "Kolor komunikatów systemowych",
+                "description": "Podczas korzystania z poleceń bot domyślnie wyświetla wstawki, które mają niewidoczny kolor.\n\nMożesz ustawić kolor zgodnie z tematyką swojej społeczności.",
+                "current": "Aktualny kolor"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Zainstaluj role",
+                    "delete": "Usuń role"
+                },
+                "placeholder": "Wybierz automatycznie przypisane role nowym członkom",
+                "embed": {
+                    "title": "Role automatyczne",
+                    "description": "Panel sterowania dla ról automatycznych.\nZ poziomu panelu możesz instalować, edytować, usuwać i przeglądać takie akcje.\nJeśli nie widzisz ról automatycznych, oznacza to, że nie zostały one wybrane!",
+                    "field": "Wybrane role:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Usuń wiadomość",
+                    "view": "Wyświetl wiadomośc",
+                    "install": "Zainstaluj wiadomość"
+                },
+                "embed": {
+                    "title": "Wiadomość powitalna",
+                    "description": "Automatyczne wysyłanie wiadomości w momencie zalogowania się uczestnika na serwerze\n\nJeśli chcesz zmienić kanał, po prostu wybierz go ponownie i ustaw komunikat\n\nAby zmienić wiadomość, wybierz bieżący kanał i ustaw dla niego nową wiadomość",
+                    "field": {
+                        "successful": "Zainstalowany kanał",
+                        "failure": "Kanał nie jest zainstalowany"
+                    }
+                },
+                "dropdown-placeholder": "Wybierz kanał powitalny",
+                "modal": {
+                    "title": "Wiadomość powitalna",
+                    "label": "Wiadomość",
+                    "placeholder": "Możesz także użyć kreatora osadzania"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Automatyczne wiadomości na forach/wątkach",
+                    "brief": "Automatyczne wiadomości",
+                    "description": "Dodaj lub zmień swoje automatyczne posty na forach/wątkach",
+                    "placeholder": "Ustawienia automatycznych wiadomości w oddziałach/forach:",
+                    "channel": "Kanał"
+                },
+                "addptional": {
+                    "button.install_mes": "Zainstaluj wiadomość",
+                    "channel-error": "Automatyczne wiadomości zostały już zainstalowane na tym kanale",
+                    "placeholder": "Wybierz kanał dla automatycznych wiadomości"
+                },
+                "thread": {
+                    "mes-not-found": "Nie znaleziono wiadomości",
+                    "button": {
+                        "view": "Wyświetl wiadomość",
+                        "edit": "Edytuj wiadomość",
+                        "delete": "Usuń wiadomość"
+                    }
+                },
+                "modal": {
+                    "label": "Wiadomość:",
+                    "title": "Automatyczne wiadomości",
+                    "placeholder": "Możesz także użyć narzędzia embed-builder"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Reakcje automatyczne",
+                    "brief": "Autoreakcje",
+                    "description": "Sterowanie automatycznym dodawaniem reakcji w kanałach",
+                    "emoji": "Emoji",
+                    "channel": "Kanał",
+                    "placeholder": "Ustawienia automatycznej reakcji:"
+                },
+                "addres": {
+                    "channel-error": "Na tym kanale zainstalowano już automatyczne reakcje",
+                    "install_emoji": "Zainstaluj emoji",
+                    "placeholder": "Wybierz kanał automatycznych reakcji"
+                },
+                "buttons": {
+                    "delete": "Usuń reakcję",
+                    "edit": "Edytuj reakcję"
+                },
+                "modal": {
+                    "title": "Autoreakcja",
+                    "label": "Emotikony:"
+                }
+            }
+        }
+    },
+    "tr": {
+        "bot-info": {
+            "title": "{name} bu çok işlevli bir bottur",
+            "description": "Bot, sunucu yönetimini kolaylaştırmak için tasarlanmıştır ve çeşitli otomasyon araçlarıyla donatılmıştır.",
+            "info-server": "Sunucu hakkında bilgi",
+            "prefix-server": "> Sunucu öneki - `{prefix}`"
+        },
+        "translate": {
+            "placeholder": "Uygun dili seçecektir:"
+        },
+        "captcha": {
+            "congratulation": "Tebrikler captcha'yı geçtiniz!",
+            "enter": "Captcha'yı çözmek için 30 saniyeniz var!",
+            "failed": "Captcha başarısız oldu"
+        },
+        "activiti": {
+            "failed": "Bu etkinlik kullanılamıyor veya çalışmıyor",
+            "embed": {
+                "title": "Etkinlik başarıyla oluşturuldu!",
+                "description": "Ancak, yükseltme düzeyi etkinlik gereksinimlerini karşılamıyorsa bazı etkinlik türleri sunucunuz için kullanılamayabilir."
+            },
+            "fields": {
+                "label": "Etkinlik adı",
+                "max-user": "Maksimum kullanıcı sayısı"
+            }
+        },
+        "errors": {
+            "MissingPermissions": "Yeterli haklarınız yok",
+            "MissingRole": "Komutu yürütmek için uygun bir rolünüz yok",
+            "MissingChannel": "Bu komutu bu kanalda çalıştıramazsınız",
+            "NotOwner": "Bu komut bot sahibine yöneliktir",
+            "CommandNotFound": "öyle bir komut yok",
+            "CheckFailure": "Tüm koşulları yerine getirmiyorsunuz",
+            "BadArgument": "Geçersiz bağımsız değişken girildi",
+            "DisabledCommand": "Bu komut sunucuda devre dışı bırakıldı",
+            "MissingRequiredArgument": "Gerekli bir argüman girmediniz",
+            "NotActivateEconomy": "Sunucuda ekonomi sistemi devre dışı bırakıldı",
+            "OnlyTeamError": "Bu komut yalnızca bot ekibi tarafından kullanılabilir",
+            "MemberNotFound": "Katılımcı bulunamadı",
+            "CommandOnCooldown": {
+                "title": "Komut beklemede",
+                "description": "{delay} sonra tekrar deneyin."
+            }
+        },
+        "music-selector": {
+            "title": "İlgilendiğiniz parçayı seçin!",
+            "placeholder": "Bir parça seçin"
+        },
+        "ideas": {
+            "globals": {
+                "title": "Bir fikir öner",
+                "ideas-disabled": "**idea** modülü bu sunucuda devre dışı bırakıldı",
+                "embed-title": "Yeni fikir!"
+            },
+            "confirm-modal": {
+                "reason-label": "Argüman:",
+                "embed": {
+                    "title": "Yeni fikir!",
+                    "field": "Eski fikir!"
+                },
+                "idea": {
+                    "content": "Fikriniz onaylandı!",
+                    "embed": {
+                        "title": "Fikir onaylandı!",
+                        "field": "Fikrin özü:",
+                        "reason": "Onay argümanı:"
+                    }
+                }
+            },
+            "confirm-view": {
+                "button": {
+                    "approve": "Onaylamak",
+                    "deny": "Reddetmek"
+                },
+                "old-idea": "Modası geçmiş bir fikir!",
+                "idea": "Fikir:",
+                "refused": "Reddedildi",
+                "idea-content": "Fikriniz reddedildi!"
+            },
+            "idea-modal": {
+                "label": "Bize fikrinizden bahsedin",
+                "placeholder": "Fikrinizi kullanım örnekleriyle mümkün olduğunca ayrıntılı olarak açıklayın.",
+                "embed-description": "Fikrin onaylanıp onaylanmaması size bağlıdır!",
+                "idea": "Fikir:",
+                "thread-name": "{name}'ın fikrinin tartışılması"
+            },
+            "idea-view.timeout-message": "Bir fikri yalnızca 30 dakikada bir önerebilirsiniz\nBir fikir göndermek için bir sonraki fırsat şu şekilde olacaktır:"
+        },
+        "settings": {
+            "start": {
+                "title": "Bot modüllerini yapılandırma.",
+                "choose": "Ayarları seçin...",
+                "description": "Sunucuyu yapılandırmak için seçim açılır menüsüyle etkileşim kurun.",
+                "request": "{name} tarafından talep edildi"
+            },
+            "module-name": {
+                "economy": "Ekonomi",
+                "languages": "Diller",
+                "prefix": "Önek",
+                "music": "Müzik",
+                "color": "Sistem mesajlarının rengi",
+                "reactions": "Otomatik Reaksiyonlar",
+                "thread": "Bir başlıkta/gönderide otomatik mesaj",
+                "command-permission": "Komut Ayarları",
+                "ideas": "Fikirler",
+                "welcomer": "Yeni üyelere hoş geldiniz",
+                "auto-roles": "Otomatik roller"
+            },
+            "button": {
+                "back": "Geri",
+                "edit": "Düzenlemek",
+                "reset": "Sıfırla",
+                "add": "Eklemek"
+            },
+            "prefix": {
+                "title": "Önek",
+                "description": "Komutu çağırırken botun yanıt vereceği öneki ayarlama.",
+                "current": "Geçerli önek: {prefix}"
+            },
+            "languages": {
+                "title": "Diller",
+                "description": "Bu ayar, botla çalışma dilini değiştirir.",
+                "choose": "Sunucunun dilini seçin:"
+            },
+            "color": {
+                "not-valid": "Onaltılı kod formatı yanlış",
+                "title": "Sistem mesajlarının rengi",
+                "description": "Komutları kullandığınızda bot, varsayılan olarak görünmez bir renge sahip ekleri görüntüler.\n\nRenginizi topluluğunuzun temasına göre ayarlayabilirsiniz.",
+                "current": "Mevcut renk"
+            },
+            "auto-role": {
+                "button": {
+                    "install": "Rolleri yükle",
+                    "delete": "Rolleri sil"
+                },
+                "placeholder": "Yeni üyeler için otomatik olarak atanan rolleri seçin",
+                "embed": {
+                    "title": "Otomatik roller",
+                    "description": "Otomatik roller için kontrol paneli.\nBu tür eylemleri panelden kurabilir, düzenleyebilir, silebilir ve görüntüleyebilirsiniz.\nOtomatik rolleri görmüyorsanız seçilmemişlerdir!",
+                    "field": "Seçilen roller:"
+                }
+            },
+            "welcomer": {
+                "button": {
+                    "delete": "Mesajı sil",
+                    "view": "Mesajı görüntüle",
+                    "install": "Mesajı yükle"
+                },
+                "embed": {
+                    "title": "Mesaj tebrik",
+                    "description": "Bir katılımcı sunucuda oturum açtığında mesajların otomatik olarak gönderilmesi\n\nKanalı değiştirmek istiyorsanız tekrar seçip mesajı ayarlamanız yeterlidir.\n\nBir mesajı değiştirmek için mevcut kanalı seçin ve bunun için yeni bir mesaj ayarlayın.",
+                    "field": {
+                        "successful": "Yüklü kanal",
+                        "failure": "Kanal yüklü değil"
+                    }
+                },
+                "dropdown-placeholder": "Karşılama kanalını seçin",
+                "modal": {
+                    "title": "Mesaj tebrik",
+                    "label": "İleti",
+                    "placeholder": "Ayrıca yerleştirme oluşturucuyu da kullanabilirsiniz"
+                }
+            },
+            "thread": {
+                "init": {
+                    "title": "Forumlarda/konularda otomatik mesajlar",
+                    "brief": "Otomatik mesajlar",
+                    "description": "Forumlara/konulara otomatik gönderilerinizi ekleyin veya değiştirin",
+                    "placeholder": "Şubelerde/forumlarda otomatik mesaj ayarları:",
+                    "channel": "Kanal"
+                },
+                "addptional": {
+                    "button.install_mes": "Mesajı yükle",
+                    "channel-error": "Bu kanala otomatik mesajlar zaten yüklendi",
+                    "placeholder": "Otomatik mesajlar için bir kanal seçin"
+                },
+                "thread": {
+                    "mes-not-found": "Mesaj bulunamadı",
+                    "button": {
+                        "view": "Mesajı görüntüle",
+                        "edit": "Mesajı düzenleme",
+                        "delete": "Mesajı silme"
+                    }
+                },
+                "modal": {
+                    "label": "İleti:",
+                    "title": "Otomatik mesajlar",
+                    "placeholder": "Embed-builder'ı da kullanabilirsiniz"
+                }
+            },
+            "reactions": {
+                "init": {
+                    "title": "Otomatik reaksiyonlar",
+                    "brief": "Otomatik reaksiyonlar",
+                    "description": "Kanallara reaksiyonların otomatik eklenmesinin kontrolü",
+                    "emoji": "Emoji",
+                    "channel": "Kanal",
+                    "placeholder": "Otomatik reaksiyon ayarları:"
+                },
+                "addres": {
+                    "channel-error": "Bu kanalda otomatik reaksiyonlar zaten yüklü",
+                    "install_emoji": "Emojiyi yükle",
+                    "placeholder": "Otomatik reaksiyonlar için bir kanal seçin"
+                },
+                "buttons": {
+                    "delete": "Tepkiyi sil",
+                    "edit": "Tepkiyi düzenle"
+                },
+                "modal": {
+                    "title": "Otomatik reaksiyon",
+                    "label": "Emoji:"
+                }
+            }
+        }
+    }
+}

@@ -3,10 +3,9 @@ import nextcord
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.misc import utils
+from bot.languages import i18n
 from bot.views import settings_menu
-from bot.databases.db import GuildDateBases
-from bot.languages.settings import (welcome as welcome_lang,
-                                    button as button_name)
+from bot.databases import GuildDateBases
 
 
 class Modal(nextcord.ui.Modal):
@@ -16,11 +15,11 @@ class Modal(nextcord.ui.Modal):
         self.gdb = GuildDateBases(guild.id)
         locale = self.gdb.get('language')
 
-        super().__init__(welcome_lang.modal_title.get(locale))
+        super().__init__(i18n.t(locale, 'settings.welcomer.modal.title'))
 
         self.message = nextcord.ui.TextInput(
-            label=welcome_lang.modal_label.get(locale),
-            placeholder=welcome_lang.modal_placeholder.get(locale)
+            label=i18n.t(locale, 'settings.welcomer.modal.label'),
+            placeholder=i18n.t(locale, 'settings.welcomer.modal.placeholder')
         )
         self.add_item(self.message)
 
@@ -43,7 +42,8 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         locale = gdb.get('language')
 
         super().__init__(
-            placeholder=welcome_lang.dropdown_placeholder.get(locale),
+            placeholder=i18n.t(
+                locale, 'settings.welcomer.dropdown-placeholder'),
             channel_types=[nextcord.ChannelType.news,
                            nextcord.ChannelType.text]
         )
@@ -68,17 +68,17 @@ class WelcomerView(DefaultSettingsView):
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.install.label = welcome_lang.button_install.get(locale)
-        self.preview.label = welcome_lang.button_view.get(locale)
-        self.delete.label = welcome_lang.button_delete.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.install.label = i18n.t(locale, 'settings.welcomer.button.install')
+        self.preview.label = i18n.t(locale, 'settings.welcomer.button.view')
+        self.delete.label = i18n.t(locale, 'settings.welcomer.button.delete')
 
         DDB = ChannelsDropDown(guild.id)
         self.add_item(DDB)
 
         self.embed = nextcord.Embed(
-            title=welcome_lang.embed_title.get(locale),
-            description=welcome_lang.embed_description.get(locale),
+            title=i18n.t(locale, 'settings.welcomer.embed.title'),
+            description=i18n.t(locale, 'settings.welcomer.embed.description'),
             color=color
         )
 
@@ -94,7 +94,7 @@ class WelcomerView(DefaultSettingsView):
             self.delete.disabled = True
 
             self.embed.add_field(
-                name=welcome_lang.field_failure.get(locale),
+                name=i18n.t(locale, 'settings.welcomer.embed.field.failure'),
                 value=''
             )
 

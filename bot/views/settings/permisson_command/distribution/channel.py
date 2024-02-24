@@ -1,70 +1,53 @@
+from typing import List
 import nextcord
 
 from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
 
-from bot.misc import utils
-from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases, CommandDB
-from bot.languages import help as help_info
-from bot.languages.settings import (
-    button as button_name
-)
-
-from typing import List
+from bot.databases import GuildDateBases, CommandDB
 
 
-class DropDown(nextcord.ui.StringSelect):
-    current_disabled = False
-
+class ChannelsDropDown(nextcord.ui.ChannelSelect):
     def __init__(
         self,
         guild: nextcord.Guild,
-        command_name: str,
-        channels: list[nextcord.TextChannel]
+        command_name: str
     ) -> None:
+
         self.command_name = command_name
-        options = []
-
-        for tchnl in guild.text_channels[:25]:
-            opt = nextcord.SelectOption(
-                label=tchnl.name,
-                value=tchnl.id,
-                description=tchnl.topic,
-                emoji=Emoji.channel_text,
-            )
-            if tchnl in channels:
-                opt.default = True
-            options.append(opt)
-
-        if 0 >= len(options):
-            options.append(
-                nextcord.SelectOption(
-                    label="To make it work"
-                )
-            )
-            self.current_disabled = True
         super().__init__(
             placeholder="Select the channels in which the command will work",
-            min_values=0,
-            max_values=len(options),
-            options=options,
-            disabled=self.current_disabled
+            min_values=1,
+            max_values=15,
+            channel_types=[
+                nextcord.ChannelType.text,
+                nextcord.ChannelType.voice,
+                nextcord.ChannelType.category,
+                nextcord.ChannelType.news,
+                nextcord.ChannelType.stage_voice,
+                nextcord.ChannelType.guild_directory,
+                nextcord.ChannelType.forum
+            ]
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        values = self.values
-        channel_ids = [int(val) for val in values]
+        channels: List[int] = []
+        categories: List[int] = []
+
+        for channel in self.values.channels:
+            if channel.type == nextcord.ChannelType.category:
+                categories.append(channel.id)
+            else:
+                channels.append(channel.id)
 
         cdb = CommandDB(interaction.guild_id)
 
         command_data = cdb.get(self.command_name, {})
-        if "distribution" not in command_data:
-            command_data["distribution"] = {}
+        command_data.setdefault("distribution", {})
 
-        command_data["distribution"]["channel"] = {
-            "permission": 1,
-            "values": channel_ids
+        command_data["distribution"]["allow-channel"] = {
+            'channels': channels,
+            'categories': categories
         }
 
         cdb.update(self.command_name, command_data)
@@ -87,29 +70,40 @@ class ChannelsView(DefaultSettingsView):
         color = gdb.get('color')
 
         cdb = CommandDB(guild.id)
-        command_data = cdb.get(command_name, {})
-        distribution = command_data.get("distribution", {})
-        channel_perms = distribution.get("channel", None)
+        command_data = cdb.get(self.command_name, {})
+        command_data.setdefault("distribution", {})
 
-        channel_ids = []
-        channels = []
+        allow_datas = command_data["distribution"].get(
+            "allow-channel", {})
+
+        channel_ids = allow_datas.get('channels')
+        category_ids = allow_datas.get('categories')
 
         self.embed = nextcord.Embed(
             title="Allowed channels",
             description="The selected command will only work in the channels that you select",
             color=color
         )
-
-        if channel_perms:
-            channel_ids = channel_perms.get('values')
-            channels = [guild.get_channel(id) for id in channel_ids]
+        if category_ids:
+            self.embed.add_field(
+                name="Selected categories:",
+                value=', '.join([channel.mention
+                                 for category_id in category_ids
+                                 if (channel := guild.get_channel(category_id))])
+            )
+        if channel_ids:
+            self.embed.add_field(
+                name="Selected channels:",
+                value=', '.join([channel.mention
+                                 for channel_id in channel_ids
+                                 if (channel := guild.get_channel(channel_id))])
+            )
 
         super().__init__()
 
-        cdd = DropDown(
+        cdd = ChannelsDropDown(
             guild,
-            command_name,
-            channels
+            command_name
         )
         self.add_item(cdd)
 

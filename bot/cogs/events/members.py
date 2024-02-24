@@ -4,7 +4,7 @@ from nextcord.ext import commands
 
 from bot.misc import utils
 from bot.misc.logger import Logger
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 
 import functools
 

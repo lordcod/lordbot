@@ -7,12 +7,9 @@ from .distribution.cooldown import CooldownsView
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases, CommandDB
-from bot.languages import help as help_info
+from bot.databases import GuildDateBases, CommandDB
+from bot.languages import help as help_info, i18n
 from bot.languages.help import get_command
-from bot.languages.settings import (
-    button as button_name
-)
 
 
 class DropDown(nextcord.ui.StringSelect):
@@ -95,7 +92,7 @@ class CommandData(DefaultSettingsView):
             self.switcher.label = "Enable"
             self.switcher.style = nextcord.ButtonStyle.green
 
-        self.back.label = button_name.back.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

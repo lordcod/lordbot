@@ -9,9 +9,9 @@ from .mongoHD import MongoDB
 
 
 def establish_connection(conn):
-    guildHD.connection = conn
-    economyHD.connection = conn
-    commandHD.connection = conn
-    rolesHD.connection = conn
-    bansHD.connection = conn
-    mongoHD.connection = conn
+    guildHD.engine = conn
+    economyHD.engine = conn
+    commandHD.engine = conn
+    rolesHD.engine = conn
+    bansHD.engine = conn
+    mongoHD.engine = conn

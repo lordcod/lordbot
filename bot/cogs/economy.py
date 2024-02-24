@@ -1,7 +1,7 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases.db import EconomyMembedDB, colums, GuildDateBases
+from bot.databases import EconomyMembedDB, colums, GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji

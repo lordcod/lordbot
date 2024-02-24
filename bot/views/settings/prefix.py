@@ -2,13 +2,10 @@ import nextcord
 
 from ._view import DefaultSettingsView
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.views import settings_menu
 from bot.resources.info import DEFAULT_PREFIX
-from bot.languages.settings import (
-    prefix as prefix_langs,
-    button as button_name
-)
+from bot.languages import i18n
 
 
 class Modal(nextcord.ui.Modal):
@@ -17,10 +14,10 @@ class Modal(nextcord.ui.Modal):
         locale = gdb.get('language')
         prefix = gdb.get('prefix')
 
-        super().__init__(title=prefix_langs.title.get(locale, 'en'))
+        super().__init__(title=i18n.t(locale, 'settings.prefix.title'))
 
         self.prefix = nextcord.ui.TextInput(
-            label=f'{prefix_langs.title.get(locale)}:',
+            label=f"{i18n.t(locale, 'settings.prefix.title')}:",
             placeholder=prefix,
             max_length=3
         )
@@ -47,22 +44,22 @@ class PrefixView(DefaultSettingsView):
         locale = gdb.get('language')
 
         self.embed = nextcord.Embed(
-            title=prefix_langs.title.get(locale),
-            description=prefix_langs.description.get(locale),
+            title=i18n.t(locale, 'settings.prefix.title'),
+            description=i18n.t(locale, 'settings.prefix.description'),
             color=color
         )
         self.embed._fields = [
             {
-                'name': f"{prefix_langs.current.get(locale)}: `{prefix}`",
+                'name': i18n.t(locale, 'settings.prefix.current', prefix=prefix),
                 'value': ''
             }
         ]
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.edit.label = button_name.edit.get(locale)
-        self.reset.label = button_name.reset.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.reset.label = i18n.t(locale, 'settings.button.reset')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

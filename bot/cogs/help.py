@@ -3,12 +3,11 @@ from nextcord.ext import commands
 
 from bot.languages import help as help_info
 from bot.languages.help import get_command
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.help import HelpView
 
 import re
-import jmespath
 
 
 def is_valid_command(name: str) -> bool:

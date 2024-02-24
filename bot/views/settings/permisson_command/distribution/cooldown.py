@@ -6,7 +6,7 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.misc import utils
 from bot.misc.time_transformer import display_time
 from bot.misc.ratelimit import BucketType, reset_cooldown
-from bot.databases.db import GuildDateBases, CommandDB
+from bot.databases import GuildDateBases, CommandDB
 
 cd_types = {
     0: 'Member',
@@ -55,8 +55,7 @@ class CoolModal(nextcord.ui.Modal):
 
         cdb = CommandDB(interaction.guild.id)
         command_data = cdb.get(self.command_name, {})
-        if "distribution" not in command_data:
-            command_data["distribution"] = {}
+        command_data.setdefault("distribution", {})
 
         command_data["distribution"]["cooldown"] = {
             "type": self.type,
@@ -74,7 +73,7 @@ class CoolModal(nextcord.ui.Modal):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-class DropDown(nextcord.ui.StringSelect):
+class CooltypeDropDown(nextcord.ui.StringSelect):
     current_disabled = False
 
     def __init__(
@@ -139,7 +138,7 @@ class CooldownsView(DefaultSettingsView):
             color=color
         )
 
-        cdd = DropDown(
+        cdd = CooltypeDropDown(
             guild.id,
             command_name
         )

@@ -21,4 +21,8 @@ async def main():
     print('finish')
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    table = {}
+    table["key"] = "Main"
+    table.setdefault("key")
+    print(table)
+    # asyncio.run(main())

@@ -2,7 +2,7 @@ import time
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 

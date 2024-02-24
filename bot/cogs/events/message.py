@@ -1,10 +1,10 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.translate import TranslateView
-from bot.languages import BotInfo
+from bot.languages import i18n
 
 import googletrans
 
@@ -112,13 +112,14 @@ class message_event(commands.Cog):
 
         if message.content.strip() == self.bot.user.mention:
             embed = nextcord.Embed(
-                title=f'{self.bot.user.display_name} — {BotInfo.title.get(locale)}',
-                description=BotInfo.description.get(locale),
+                title=i18n.t(locale, 'bot-info.title',
+                             name=self.bot.user.display_name),
+                description=i18n.t(locale, 'bot-info.description'),
                 color=color
             )
             embed.add_field(
-                name=BotInfo.info_server.get(locale),
-                value=f'> {BotInfo.prefix_server.get(locale)} - `{prefix}`'
+                name=i18n.t(locale, 'bot-info.info-server'),
+                value=i18n.t(locale, 'bot-info.prefix-server', prefix=prefix)
             )
 
             await message.channel.send(embed=embed)
