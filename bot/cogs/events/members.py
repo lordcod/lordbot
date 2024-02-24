@@ -66,6 +66,11 @@ class members_event(commands.Cog):
         message_format = utils.lord_format(content, data_payload)
         message_data = await utils.generate_message(message_format)
 
+        if image_link := greeting_message.get('image'):
+            image_bytes = await utils.generate_welcome_image(member, image_link)
+            file = nextcord.File(image_bytes, "welcome-image.png")
+            message_data["file"] = file
+
         await channel.send(**message_data)
 
 

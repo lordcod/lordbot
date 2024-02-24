@@ -152,8 +152,8 @@
                     "title": "Message greeting",
                     "description": "Automatic sending of messages when a participant logs on to the server\n\nIf you want to change the channel, just select it again and set the message\n\nTo change a message, select the current channel and set a new message for it",
                     "field": {
-                        "successful": "Installed channel",
-                        "failure": "The channel is not installed"
+                        "selected": "Selected greeting channel: {channel}",
+                        "failure": "Not all the data has been collected yet."
                     }
                 },
                 "dropdown-placeholder": "Select the welcome channel",
@@ -362,8 +362,8 @@
                     "title": "Сообщение приветствие",
                     "description": "Автоматическая отправка сообщений при входе участника на сервер\n\nЕсли вы хотите сменить канал, просто выберите его еще раз и установите сообщение\n\nЧтобы изменить сообщение, выберите текущий канал и установите для него новое сообщение",
                     "field": {
-                        "successful": "Установленный канал",
-                        "failure": "Канал не установлен"
+                        "selected": "Выбранный канал приветствия:{channel}",
+                        "failure": "Еще не все данные были собраны."
                     }
                 },
                 "dropdown-placeholder": "Выберите канал приветствия",
@@ -578,8 +578,8 @@
                     "title": "Salam pesan",
                     "description": "Pengiriman pesan otomatis ketika peserta masuk ke server\n\nJika ingin mengganti saluran, cukup pilih lagi dan atur pesannya\n\nUntuk mengubah pesan, pilih saluran saat ini dan atur pesan baru untuk saluran tersebut",
                     "field": {
-                        "successful": "Saluran terpasang",
-                        "failure": "Saluran belum terpasang"
+                        "selected": "Saluran ucapan terpilih: {channel}",
+                        "failure": "Belum semua data terkumpul."
                     }
                 },
                 "dropdown-placeholder": "Pilih saluran selamat datang",
@@ -794,8 +794,8 @@
                     "title": "Besked hilsen",
                     "description": "Automatisk afsendelse af beskeder, når en deltager logger på serveren\n\nHvis du vil ændre kanalen, skal du blot vælge den igen og indstille beskeden\n\nFor at ændre en besked skal du vælge den aktuelle kanal og indstille en ny besked til den",
                     "field": {
-                        "successful": "Installeret kanal",
-                        "failure": "Kanalen er ikke installeret"
+                        "selected": "Valgt hilsen kanal: {channel}",
+                        "failure": "Ikke alle data er indsamlet endnu."
                     }
                 },
                 "dropdown-placeholder": "Vælg velkomstkanalen",
@@ -1010,8 +1010,8 @@
                     "title": "Begrüßung per Nachricht",
                     "description": "Automatischer Versand von Nachrichten, wenn sich ein Teilnehmer am Server anmeldet\n\nWenn Sie den Kanal wechseln möchten, wählen Sie ihn einfach erneut aus und stellen Sie die Nachricht ein\n\nUm eine Nachricht zu ändern, wählen Sie den aktuellen Kanal aus und legen Sie eine neue Nachricht dafür fest",
                     "field": {
-                        "successful": "Installierter Kanal",
-                        "failure": "Der Kanal ist nicht installiert"
+                        "selected": "Ausgewählter Begrüßungskanal: {channel}",
+                        "failure": "Es wurden noch nicht alle Daten gesammelt."
                     }
                 },
                 "dropdown-placeholder": "Wählen Sie den Willkommenskanal aus",
@@ -1226,8 +1226,8 @@
                     "title": "mensaje de saludo",
                     "description": "Envío automático de mensajes cuando un participante inicia sesión en el servidor\n\nSi desea cambiar el canal, simplemente selecciónelo nuevamente y configure el mensaje\n\nPara cambiar un mensaje, seleccione el canal actual y establezca un nuevo mensaje para él",
                     "field": {
-                        "successful": "Canal instalado",
-                        "failure": "El canal no está instalado."
+                        "selected": "Canal de saludo seleccionado: {channel}",
+                        "failure": "Aún no se han recopilado todos los datos."
                     }
                 },
                 "dropdown-placeholder": "Selecciona el canal de bienvenida",
@@ -1442,8 +1442,8 @@
                     "title": "Message de bienvenue",
                     "description": "Envoi automatique de messages lorsqu'un participant se connecte au serveur\n\nSi vous souhaitez changer de chaîne, sélectionnez-la à nouveau et définissez le message\n\nPour modifier un message, sélectionnez la chaîne actuelle et définissez un nouveau message pour celle-ci.",
                     "field": {
-                        "successful": "Chaîne installée",
-                        "failure": "La chaîne n'est pas installée"
+                        "selected": "Canal d'accueil sélectionné: {channel}",
+                        "failure": "Toutes les données n'ont pas encore été collectées."
                     }
                 },
                 "dropdown-placeholder": "Sélectionnez la chaîne de bienvenue",
@@ -1658,8 +1658,8 @@
                     "title": "Wiadomość powitalna",
                     "description": "Automatyczne wysyłanie wiadomości w momencie zalogowania się uczestnika na serwerze\n\nJeśli chcesz zmienić kanał, po prostu wybierz go ponownie i ustaw komunikat\n\nAby zmienić wiadomość, wybierz bieżący kanał i ustaw dla niego nową wiadomość",
                     "field": {
-                        "successful": "Zainstalowany kanał",
-                        "failure": "Kanał nie jest zainstalowany"
+                        "selected": "Wybrany kanał powitalny: {channel}",
+                        "failure": "Nie wszystkie dane zostały jeszcze zebrane."
                     }
                 },
                 "dropdown-placeholder": "Wybierz kanał powitalny",
@@ -1874,8 +1874,8 @@
                     "title": "Mesaj tebrik",
                     "description": "Bir katılımcı sunucuda oturum açtığında mesajların otomatik olarak gönderilmesi\n\nKanalı değiştirmek istiyorsanız tekrar seçip mesajı ayarlamanız yeterlidir.\n\nBir mesajı değiştirmek için mevcut kanalı seçin ve bunun için yeni bir mesaj ayarlayın.",
                     "field": {
-                        "successful": "Yüklü kanal",
-                        "failure": "Kanal yüklü değil"
+                        "selected": "Seçilen tebrik kanalı: {channel}",
+                        "failure": "Tüm veriler henüz toplanmadı."
                     }
                 },
                 "dropdown-placeholder": "Karşılama kanalını seçin",

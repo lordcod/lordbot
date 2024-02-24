@@ -1,3 +1,4 @@
+from collections import namedtuple
 import nextcord
 
 import inspect
@@ -8,12 +9,26 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Self, Union, Mapping
+from typing import Coroutine, Self, Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 from functools import lru_cache
+from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
+
+
+wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
+
+welcome_message_items = {
+    "None": wel_mes("None", None, None),
+    "my-image": wel_mes("My image", "Nope", "You will be able to enter a link to an image."),
+    "view-from-mountain": wel_mes("View from mountain", "https://i.postimg.cc/Hnpz0ycb/view-from-mountain.jpg", "Summer vibes, mountain views, sunset - all adds charm."),
+    "autumn-street": wel_mes("Autumn street", "https://i.postimg.cc/sXnQ8QHY/autumn-street.jpg", "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn."),
+    "winter-day": wel_mes("Winter day", "https://i.postimg.cc/qBhyYQ0g/winter-day.jpg", "Dazzling winter day, majestic mountain, small buildings, sparkling highway, snow-white covers."),
+    "magic-city": wel_mes("Magic city", "https://i.postimg.cc/hjJzk4kN/magic-city.jpg", "The beautiful atmosphere and scenic views from the boat."),
+    "city-dawn": wel_mes("City dawn", "https://i.postimg.cc/13J84NPL/city-dawn.jpg", "Starry sky, breeze, rustling leaves, crickets, fireflies, bonfire - perfect night.")
+}
 
 
 class DataRoleTimerHandlers:
@@ -76,15 +91,6 @@ class TempletePayload:
         return base
 
 
-WelcomeMessageItems = {
-    "view-from-mountain": "The summer atmosphere, the stunning views of the mountains, and the setting sun - it all adds to the charm.",
-    "autumn-street": "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn.",
-    "winter-day": "A dazzling winter day, a majestic mountain ahead, small buildings, a sparkling highway and snow-white covers.",
-    "magic-city": "The beautiful atmosphere and scenic views from the boat.",
-    "city-dawn": "The starry night sky, the warm summer breeze, the rustle of leaves, the chirping of crickets, the flickering of fireflies and the soft light from the campfire create a unique atmosphere of comfort and tranquility."
-}
-
-
 class GuildPayload(TempletePayload):
     _prefix = 'guild'
 
@@ -143,6 +149,26 @@ def lord_format(
     __mapping: Mapping[str, object]
 ) -> str:
     return __LordFormatingTemplate(__value).format(__mapping)
+
+
+async def copy_message(message: nextcord.Message) -> dict:
+    content = message.content
+    embeds = message.embeds
+    files = []
+    for attach in message.attachments:
+        filebytes = await attach.read()
+        files.append(nextcord.File(
+            fp=filebytes,
+            filename=attach.filename,
+            description=attach.description,
+            spoiler=attach.is_spoiler()
+        ))
+
+    return {
+        "content": content,
+        "embeds": embeds,
+        "files": files
+    }
 
 
 def cancel_atimerhandler(th: TimerHandle):
@@ -279,31 +305,71 @@ def cut_back(string: str, length: int):
     return new_string
 
 
-async def generate_welcome_message(member: nextcord.Member) -> bytes:
-    background = Editor("assets/background.jpeg").resize((800, 450))
+def draw_gradient(
+    img: Image.Image,
+    start: Tuple[int, int, int],
+    end: Tuple[int, int, int]
+):
+    px = img.load()
+    for y in range(0, img.height):
+        color = tuple(int(start[i] + (end[i] - start[i])
+                      * y / img.height) for i in range(3))
+        for x in range(0, img.width):
+            px[x, y] = color
 
-    nunito = Font("assets/Nunito-ExtraBold.ttf", 50)
-    nunito_small = Font("assets/Nunito-Black.ttf", 25)
-    nunito_light = Font("assets/Nunito-Black.ttf", 20)
+
+def add_gradient(
+    backgroud: Image.Image,
+    font: ImageFont.FreeTypeFont,
+    text: str,
+    height: int,
+    color_start: Tuple[int, int, int],
+    color_stop: Tuple[int, int, int]
+) -> None:
+    w, h = font.getbbox(text)[2:]
+
+    gradient = Image.new("RGB", (w, h))
+    draw_gradient(gradient, color_start, color_stop)
+
+    im_text = Image.new("RGBA", (w, h))
+    d = ImageDraw.Draw(im_text)
+    d.text((0, 0), text, font=font)
+
+    backgroud.draft("RGBA", backgroud.size)
+    backgroud.paste(
+        gradient,
+        (int(backgroud.size[0]/2-im_text.size[0]/2), height),
+        im_text
+    )
+
+
+async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
+    background_image = await load_image_async(background_link)
+    background = Editor(background_image).resize((800, 450))
 
     profile_image = await load_image_async(
         member.display_avatar.with_size(128).url)
-    profile = Editor(profile_image).resize((150, 150)).circle_image()
+    profile = Editor(profile_image).resize((150, 150)).circle_image()\
+
+    nunito = Font("assets/Nunito-ExtraBold.ttf", 40)
+    nunito_small = Font("assets/Nunito-Black.ttf", 25)
+    nunito_light = Font("assets/Nunito-Black.ttf", 20)
 
     background.paste(profile, (325, 90))
     background.ellipse((325, 90), 150, 150, outline=(
         125, 249, 255), stroke_width=4)
-    background.text(
-        (400, 260),
-        f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}",
-        color="white",
-        font=nunito,
-        align="center"
+    add_gradient(
+        background.image,
+        nunito.font,
+        f"WELCOME TO {member.guild.name.upper()}",
+        260,
+        (253, 187, 45),
+        (34, 193, 195)
     )
     background.text(
         (400, 320),
         member.display_name,
-        color="white",
+        color=0xff0000,
         font=nunito_small,
         align="center"
     )
