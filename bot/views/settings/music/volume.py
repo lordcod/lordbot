@@ -4,16 +4,23 @@ from bot.misc import utils
 from .. import music
 from .._view import DefaultSettingsView
 
+from bot.languages import i18n
+
 
 class VolumeModal(nextcord.ui.Modal):
-    def __init__(self, value: int) -> None:
-        super().__init__("Default volume music")
+    def __init__(self, guild_id: int, value: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = gdb.get('language')
+
+        super().__init__(i18n.t(
+            locale, 'settings.music.default-volume.description'))
         self.volume = nextcord.ui.TextInput(
-            label="Volume:",
+            label=i18n.t(
+                locale, 'settings.music.default-volume.name'),
             placeholder=value,
             max_length=3
         )
-        self.add_item(self.size)
+        self.add_item(self.volume)
 
     async def callback(self, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
@@ -38,8 +45,12 @@ class VolumeView(DefaultSettingsView):
     def __init__(self, guild: nextcord.Guild) -> None:
         self.embed = music.MusicView(guild).embed
         self.gdb = GuildDateBases(guild.id)
+        locale = self.gdb.get('language')
 
         super().__init__()
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -49,10 +60,10 @@ class VolumeView(DefaultSettingsView):
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.blurple)
-    async def install(self,
-                      button: nextcord.ui.Button,
-                      interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
+    async def edit(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
         music_settings = self.gdb.get("music_settings")
         volume = music_settings.get("volume", 70)
 

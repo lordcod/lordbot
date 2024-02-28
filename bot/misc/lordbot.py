@@ -47,7 +47,8 @@ class LordBot(commands.Bot):
     def __init__(
         self
     ) -> None:
-        i18n.from_file("./bot/languages/config.json")
+        i18n.from_folder("./bot/languages/localization")
+        i18n.config['locale'] = 'en'
         super().__init__(command_prefix=self.get_command_prefixs,
                          intents=nextcord.Intents.all(),
                          help_command=None)

@@ -1,5 +1,6 @@
 import nextcord
 from bot.databases import GuildDateBases
+from bot.languages import i18n
 from .. import music
 from .._view import DefaultSettingsView
 
@@ -12,14 +13,17 @@ class RolesDropDown(nextcord.ui.RoleSelect):
         self.gdb = GuildDateBases(guild.id)
         super().__init__(
             min_values=1,
-            max_values=15
+            max_values=25
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         for role in self.values.roles:
             if role.is_integration() or role.is_bot_managed():
+                locale = self.gdb.get('language')
                 await interaction.response.send_message(
-                    content=f"The {role.mention} role cannot be assigned and is used for integration or by a bot.",
+                    content=i18n.t(locale,
+                                   'settings.music.dj-roles.failed',
+                                   role=role.mention),
                     ephemeral=True
                 )
                 break

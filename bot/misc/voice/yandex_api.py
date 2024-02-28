@@ -1,18 +1,25 @@
 import aiohttp
 import asyncio
 
+import os
 import orjson
-from .config import api, headers, SIGN_SALT
-from bs4 import BeautifulSoup
 from hashlib import md5
 from typing import Union, List, Optional
+import xmltodict
 
 
-def decode_download_info(bs_data: BeautifulSoup) -> None:
-    host = bs_data.find('host').contents[0]
-    ts = bs_data.find('ts').contents[0]
-    path = bs_data.find('path').contents[0]
-    s = bs_data.find('s').contents[0]
+api = 'https://api.music.yandex.net'
+token = os.environ.get('yandex_api_token')
+headers = {'Authorization': f'OAuth {token}'}
+SIGN_SALT = 'XGRlBW9FXlekgbPrRHuSiA'
+
+
+def decode_download_info(xmldata) -> None:
+    data = xmltodict.parse(xmldata)['download-info']
+    host = data.get('host')
+    ts = data.get('ts')
+    path = data.get('path')
+    s = data.get('s')
     sign = md5((SIGN_SALT + path[1::] + s).encode('utf-8')).hexdigest()
 
     return f'https://{host}/get-mp3/{sign}/{ts}{path}'
@@ -126,8 +133,7 @@ class yandex_music_requests:
         async with aiohttp.ClientSession() as session:
             async with session.get(downloadInfoUrl) as res:
                 data = await res.read()
-                bs_data = BeautifulSoup(data, "xml")
-                link = decode_download_info(bs_data)
+                link = decode_download_info(data)
                 return link
 
     @staticmethod
@@ -194,7 +200,12 @@ class yandex_music_requests:
 
 
 async def main():
-    track = (await yandex_music_requests.get_list(117276354))[0]
+    global token
+    from dotenv import load_dotenv
+    load_dotenv("C:/Users/2008d/git/lordbot/.env")
+    token = os.environ.get('yandex_api_token')
+
+    track = (await yandex_music_requests.get_list(53447834))[0]
     print(await track.download_link())
 
 if __name__ == "__main__":

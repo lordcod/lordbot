@@ -1,14 +1,17 @@
 import nextcord
 from bot.databases import GuildDateBases
+from bot.languages import i18n
 from .. import music
 from .._view import DefaultSettingsView
 
 
 class MaxSizeModal(nextcord.ui.Modal):
-    def __init__(self, value: int) -> None:
-        super().__init__("Maximum queue size")
+    def __init__(self, guild_id, value: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = gdb.get('language')
+        super().__init__(i18n.t(locale, 'settings.music.max-queue-size.description'))
         self.size = nextcord.ui.TextInput(
-            label="Max size:",
+            label=i18n.t(locale, 'settings.music.max-queue-size.name'),
             placeholder=value,
             max_length=3
         )
@@ -37,8 +40,12 @@ class MaxSizeView(DefaultSettingsView):
     def __init__(self, guild: nextcord.Guild) -> None:
         self.embed = music.MusicView(guild).embed
         self.gdb = GuildDateBases(guild.id)
+        locale = self.gdb.get('language')
 
         super().__init__()
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -48,13 +55,13 @@ class MaxSizeView(DefaultSettingsView):
 
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.blurple)
-    async def install(self,
-                      button: nextcord.ui.Button,
-                      interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
+    async def edit(self,
+                   button: nextcord.ui.Button,
+                   interaction: nextcord.Interaction):
 
         music_settings = self.gdb.get("music_settings")
         max_size = music_settings.get("queue-max-size", 150)
 
-        modal = MaxSizeModal(max_size)
+        modal = MaxSizeModal(interaction.guild_id, max_size)
         await interaction.response.send_modal(modal)
