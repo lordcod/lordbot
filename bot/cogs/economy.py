@@ -22,16 +22,10 @@ class MemberDB:
         self.emdb = EconomyMembedDB(guild_id, member_id)
         data = self.emdb.get()
 
-        # Get name colums from economic except guild_id and member_id
-        colums_name = [cl[0] for cl in colums['economic']][2:]
-
         if not data:
             self.emdb.insert()
             data = self.emdb.get()
-        # Get data from economy member except guild_id and member_id
-        data = list(data)[2:]
-        # Create dict in which colums_name = data_member
-        data = dict(zip(colums_name, data))
+
         self.data = data
 
     def get_leaderboards(self):

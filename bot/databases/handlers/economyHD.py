@@ -1,4 +1,5 @@
 from __future__ import annotations
+from psycopg2.extras import DictCursor
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
 
@@ -24,16 +25,18 @@ class EconomyMembedDB:
 
     @on_error()
     def get(self):
-        guild = engine.fetchone(
-            'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
-            (self.guild_id, self.member_id))
+        with engine.connection.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(
+                'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
+                (self.guild_id, self.member_id))
+            data = cursor.fetchone()
 
-        return guild
+        return data
 
     @on_error()
     def insert(self):
         engine.execute(
-            'INSERT INTO economic (guild_id,member_id) VALUES (%s,%s)', (self.guild_id, self.member_id))
+            'INSERT INTO economic (guild_id, member_id) VALUES (%s,%s)', (self.guild_id, self.member_id))
 
     @on_error()
     def update(self, arg, value):

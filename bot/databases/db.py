@@ -2,7 +2,7 @@ import threading
 import asyncio
 
 from .handlers import establish_connection
-from .settings import Table, Colum, set_connection
+from .settings import Table, Colum, PostType, set_connection
 from .db_engine import DataBase
 from .misc.utils import get_info_colums
 from .config import (host, port, user, password, db_name)
@@ -18,58 +18,58 @@ set_connection(engine)
 class GuildsDB(Table):
     __tablename__ = "guilds"
 
-    id = Colum(data_type="BIGINT", primary_key=True)
-    language = Colum(data_type="TEXT",
+    id = Colum(data_type=PostType.BIGINT, primary_key=True)
+    language = Colum(data_type=PostType.TEXT,
                      default=info.DEFAULT_LANGUAGE)
-    prefix = Colum(data_type="TEXT",
+    prefix = Colum(data_type=PostType.TEXT,
                    default=info.DEFAULT_PREFIX)
-    color = Colum(data_type="BIGINT", default=info.DEFAULT_COLOR)
-    economic_settings = Colum(data_type="JSON",
+    color = Colum(data_type=PostType.BIGINT, default=info.DEFAULT_COLOR)
+    economic_settings = Colum(data_type=PostType.JSON,
                               default=info.DEFAULT_ECONOMY_SETTINGS)
-    music_settings = Colum(data_type="JSON", default="{}")
-    auto_roles = Colum(data_type="JSON", default="{}")
-    thread_messages = Colum(data_type="JSON", default="{}")
-    reactions = Colum(data_type="JSON", default="{}")
-    auto_translate = Colum(data_type="JSON", default="{}")
-    greeting_message = Colum(data_type="JSON", default="{}")
-    command_permissions = Colum(data_type="JSON", default="{}")
-    ideas = Colum(data_type="JSON", default="{}")
+    music_settings = Colum(data_type=PostType.JSON, default="{}")
+    auto_roles = Colum(data_type=PostType.JSON, default="{}")
+    thread_messages = Colum(data_type=PostType.JSON, default="{}")
+    reactions = Colum(data_type=PostType.JSON, default="{}")
+    auto_translate = Colum(data_type=PostType.JSON, default="{}")
+    greeting_message = Colum(data_type=PostType.JSON, default="{}")
+    command_permissions = Colum(data_type=PostType.JSON, default="{}")
+    ideas = Colum(data_type=PostType.JSON, default="{}")
 
 
 class EconomicDB(Table):
     __tablename__ = "economic"
 
-    guild_id = Colum(data_type="BIGINT", nullable=True)
-    member_id = Colum(data_type="BIGINT", nullable=True)
-    balance = Colum(data_type="BIGINT", default="0")
-    bank = Colum(data_type="BIGINT", default="0")
-    daily = Colum(data_type="BIGINT", default="0")
-    weekly = Colum(data_type="BIGINT", default="0")
-    monthly = Colum(data_type="BIGINT", default="0")
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    balance = Colum(data_type=PostType.BIGINT, default="0")
+    bank = Colum(data_type=PostType.BIGINT, default="0")
+    daily = Colum(data_type=PostType.BIGINT, default="0")
+    weekly = Colum(data_type=PostType.BIGINT, default="0")
+    monthly = Colum(data_type=PostType.BIGINT, default="0")
 
 
 class RolesDB(Table):
     __tablename__ = "roles"
 
-    guild_id = Colum(data_type="BIGINT", nullable=True)
-    member_id = Colum(data_type="BIGINT", nullable=True)
-    role_id = Colum(data_type="BIGINT", nullable=True)
-    time = Colum(data_type="BIGINT", nullable=True)
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    role_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
 
 
 class BansDB(Table):
     __tablename__ = "bans"
 
-    guild_id = Colum(data_type="BIGINT", nullable=True)
-    member_id = Colum(data_type="BIGINT", nullable=True)
-    time = Colum(data_type="BIGINT", nullable=True)
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
 
 
 class MongoDataBases(Table):
     __tablename__ = "mongo"
 
-    name = Colum(data_type="TEXT", primary_key=True)
-    values = Colum(data_type="JSON", default="{}")
+    name = Colum(data_type=PostType.TEXT, primary_key=True)
+    values = Colum(data_type=PostType.JSON, default="{}")
 
 
 colums = {

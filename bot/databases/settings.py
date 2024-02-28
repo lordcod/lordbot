@@ -1,6 +1,8 @@
+from __future__ import annotations
 from typing import List, Optional
 from nextcord import utils
 import re
+import enum
 from .db_engine import DataBase
 
 engine: DataBase = None
@@ -20,6 +22,55 @@ def set_connection(db: DataBase) -> None:
     engine = db
 
 
+class PostType(enum.StrEnum):
+    BIGINT = "BIGINT"
+    BIGSERIAL = "BIGSERIAL"
+    BIT = "BIT"
+    BIT_VATYING = "BIT VATYING"
+    BOOLEAN = "BOOLEAN"
+    BOX = "BOX"
+    BYTEA = "BYTEA"
+    BYNARY = "BYNARY"
+    CHARACTER = "CHARACTER"
+    CHARACTER_VARYING = "CHARACTER VARYING"
+    CIDR = "CIDR"
+    CIRCLE = "CIRCLE"
+    DATE = "DATE"
+    DOUBLE_PRECISION = "DOUBLE PRECISION"
+    INET = "INET"
+    INTEGER = "INTEGER"
+    INTERVAL = "INTERVAL"
+    JSON = "JSON"
+    JSONB = "JSONB"
+    LINE = "LINE"
+    LSEG = "LSEG"
+    MACADDR = "MACADDR"
+    MACADDR8 = "MACADDR8"
+    MONEY = "MONEY"
+    NUMERIC = "NUMERIC"
+    PATH = "PATH"
+    PG_LSN = "PG_LSN"
+    PG_SNAPSHOT = "PG_SNAPSHOT"
+    POINT = "POINT"
+    POLYGON = "POLYGON"
+    REAL = "REAL"
+    SMALLINT = "SMALLINT"
+    SMALLSERIAL = "SMALLSERIAL"
+    SERIAL = "SERIAL"
+    TEXT = "TEXT"
+    TIME = "TIME"
+    TIMESTAMP = "TIMESTAMP"
+    TSQUERY = "TSQUERY"
+    TSVECTOR = "TSVECTOR"
+    TXID_SNAPSHOT = "TXID_SNAPSHOT"
+    UUID = "UUID"
+    XML = "XML"
+
+    @classmethod
+    def get(cls, value: str) -> PostType:
+        return cls(value.upper())
+
+
 class Colum:
     def __init__(
         self,
@@ -34,16 +85,17 @@ class Colum:
         data_type = data_type.upper()
 
         self.name = name
-        self.data_type = data_type
-        self.default = default
+        self.data_type = data_type if isinstance(
+            data_type, PostType) else PostType.get(data_type)
         self.primary_key = primary_key
         self.nullable = nullable
+        self.default = default
 
     def add_colum(self, table_name: str) -> None:
         engine.execute(
             f"""
                     ALTER TABLE {table_name}
-                    ADD {self.name} {self.data_type}
+                    ADD {self.name} {self.data_type.value}
                     {" PRIMARY KEY" if self.primary_key is True else ""}
                     {" NOT NULL" if self.nullable is True else ""}
                     {f" DEFAULT '{self.default}'" if self.default is not None else ""}
@@ -76,11 +128,11 @@ class Colum:
                 """
         )
 
-    def change_type(self, table_name: str, new_type: str) -> None:
+    def change_type(self, table_name: str, new_type: PostType) -> None:
         engine.execute(
             f"""
                     ALTER TABLE {table_name}
-                    ALTER COLUMN {self.name} TYPE {new_type};
+                    ALTER COLUMN {self.name} TYPE {new_type.value};
                 """
         )
 

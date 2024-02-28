@@ -1,7 +1,6 @@
 import nextcord
 
 from .yandex_api import Track
-from .config import path
 
 import random
 import asyncio
@@ -133,7 +132,7 @@ class MusicPlayer:
 
         music_url = await self.data.download_link()
         source = nextcord.FFmpegPCMAudio(
-            music_url, pipe=False, executable=path)
+            music_url, pipe=False)
         source = nextcord.PCMVolumeTransformer(source, volume=0.5)
 
         self.voice.play(source, after=self.callback)

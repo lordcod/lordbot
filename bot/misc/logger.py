@@ -67,7 +67,7 @@ class Logger:
             print(text)
 
     def on_logs(func):
-        def redirect(self, txt):
+        def redirect(self, txt: str):
             named_tuple = time.localtime()
             time_string = time.strftime("%m-%d-%Y %H:%M:%S", named_tuple)
 
