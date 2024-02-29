@@ -2,7 +2,7 @@ import nextcord
 from nextcord import utils
 
 from bot.databases import GuildDateBases
-from bot.misc.voice import Track
+from yandex_music_api.datas import Track
 from bot.languages import i18n
 
 from typing import List

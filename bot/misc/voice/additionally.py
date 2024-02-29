@@ -1,6 +1,6 @@
 import nextcord
 
-from .yandex_api import Track
+from yandex_music_api.datas import Track
 
 import random
 import asyncio
