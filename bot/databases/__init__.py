@@ -1,7 +1,7 @@
 from .db import colums
 from .handlers import (
     GuildDateBases,
-    EconomyMembedDB,
+    EconomyMemberDB,
     CommandDB,
     RoleDateBases,
     MongoDB,

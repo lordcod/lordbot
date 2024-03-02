@@ -1,7 +1,7 @@
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import EconomyMembedDB, colums, GuildDateBases
+from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
@@ -12,39 +12,6 @@ from time import time as tick
 from typing import Optional, Union, Literal
 
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
-
-
-class MemberDB:
-    def __init__(self, guild_id: int, member_id: int) -> None:
-        self.guild_id = guild_id
-        self.member_id = member_id
-
-        self.emdb = EconomyMembedDB(guild_id, member_id)
-        data = self.emdb.get()
-
-        if not data:
-            self.emdb.insert()
-            data = self.emdb.get()
-
-        self.data = data
-
-    def get_leaderboards(self):
-        leaderboard_ids = self.emdb.get_leaderboards()
-        return leaderboard_ids
-
-    def get(self, __name, __default=None):
-        try:
-            return self.__getitem__(__name)
-        except KeyError:
-            return __default
-
-    def __getitem__(self, item):
-        return self.data[item]
-
-    def __setitem__(self, key, value):
-        self.data[key] = value
-
-        self.emdb.update(key, value)
 
 
 class economy(commands.Cog):
@@ -63,18 +30,16 @@ class economy(commands.Cog):
 
     async def handler_rewards(self, ctx: commands.Context):
         time = tick()
-        account = MemberDB(ctx.guild.id, ctx.author.id)
+        account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
         award = eco_sets.get(ctx.command.name, 0)
-
         if award <= 0:
             await ctx.send("Unfortunately this reward is not available if you are the server administrator change the reward")
             return
-
-        if (time-account.get(ctx.command.name, 0)) >= 0:
+        if time > account.get(ctx.command.name, 0):
             wait_long = time+timeout_rewards.get(ctx.command.name)
 
             embed = nextcord.Embed(
@@ -82,7 +47,6 @@ class economy(commands.Cog):
                 description=f"In size {award}{currency_emoji} come through <t:{wait_long :.0f}:R>",
                 color=color
             )
-
             account[ctx.command.name] = wait_long
             account['balance'] += award
         else:
@@ -118,7 +82,7 @@ class economy(commands.Cog):
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
 
-        account = MemberDB(ctx.guild.id, member.id)
+        account = EconomyMemberDB(ctx.guild.id, member.id)
         balance = account.get('balance', 0)
         bank = account.get('bank', 0)
         time = tick()
@@ -168,7 +132,7 @@ class economy(commands.Cog):
         economy_settings: dict = gdb.get('economic_settings')
         currency_emoji = economy_settings.get("emoji")
 
-        emdb = MemberDB(ctx.guild.id, ctx.author.id)
+        emdb = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         leaderboard = emdb.get_leaderboards()
 
         leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
@@ -215,8 +179,8 @@ class economy(commands.Cog):
         prefix = gdb.get('prefix')
         economic_settings: dict = gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
-        from_account = MemberDB(ctx.guild.id, ctx.author.id)
-        to_account = MemberDB(ctx.guild.id, member.id)
+        from_account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
+        to_account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if sum <= 0:
             await ctx.send(content="Specify the amount more **0**")
@@ -245,7 +209,7 @@ class economy(commands.Cog):
         prefix = gdb.get('prefix')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
-        account = MemberDB(ctx.guild.id, ctx.author.id)
+        account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         balance = account.get('balance', 0)
 
         if sum == "all":
@@ -277,7 +241,7 @@ class economy(commands.Cog):
         prefix = gdb.get('prefix')
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
-        account = MemberDB(ctx.guild.id, ctx.author.id)
+        account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         bank = account.get('bank', 0)
 
         if sum == "all":
@@ -311,7 +275,7 @@ class economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
-        account = MemberDB(ctx.guild.id, member.id)
+        account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if sum > 1_000_000:
             await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
@@ -333,7 +297,7 @@ class economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         eco_sets: dict = gdb.get('economic_settings')
         currency_emoji = eco_sets.get('emoji')
-        account = MemberDB(ctx.guild.id, member.id)
+        account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if sum > 1_000_000:
             await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")

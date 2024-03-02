@@ -45,7 +45,7 @@ class basic(commands.Cog):
             scopes=("bot", "applications.commands"),
         )
 
-        await ctx.send(f"Special bot invitation to the server:\n{invite_link}")
+        await ctx.send(f"[**Click to add to your server**]({invite_link})")
 
     @commands.command()
     async def captcha(self, ctx: commands.Context):

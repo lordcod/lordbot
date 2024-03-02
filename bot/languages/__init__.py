@@ -51,7 +51,6 @@ data = [
         "english_name": "Thai", "native_name": "ไทย", "flag": "🇹🇭"},
     {"discord_language": "ja", "google_language": "ja",
         "english_name": "Japanese", "native_name": "日本語", "flag": "🇯🇵"},
-
     {"discord_language": "no", "google_language": "no",
         "english_name": "Norwegian", "native_name": "Norsk", "flag": "🇳🇴"},
     {"discord_language": "lt", "google_language": "lt",
@@ -82,5 +81,5 @@ current = [
     {"locale": "pl", "english_name": "Polish",
      "native_name": "Polski", "flag": "🇵🇱"},
     {"locale": "tr", "english_name": "Turkish",
-     "native_name": "Türkçe", "flag": "🇹🇷"},
+     "native_name": "Türkçe", "flag": "🇹🇷"}
 ]

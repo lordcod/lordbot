@@ -1,7 +1,7 @@
 from . import guildHD, economyHD, commandHD, rolesHD, mongoHD, bansHD
 
 from .guildHD import GuildDateBases
-from .economyHD import EconomyMembedDB
+from .economyHD import EconomyMemberDB
 from .commandHD import CommandDB
 from .rolesHD import RoleDateBases
 from .bansHD import BanDateBases

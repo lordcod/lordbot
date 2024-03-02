@@ -151,7 +151,7 @@ def lord_format(
     return __LordFormatingTemplate(__value).format(__mapping)
 
 
-async def copy_message(message: nextcord.Message) -> dict:
+async def clone_message(message: nextcord.Message) -> dict:
     content = message.content
     embeds = message.embeds
     files = []

@@ -24,6 +24,8 @@ def add_translation(key: str, value: str, locale: Optional[str] = None) -> None:
 
 
 def from_folder(foldername: str) -> None:
+    Logger.info(
+        f"Added localization translation {TextColors.BLUE}{TextColors.BOLD}{foldername}/*.json")
     for filename in os.listdir(foldername):
         if not filename.endswith(".json"):
             continue
@@ -33,8 +35,6 @@ def from_folder(foldername: str) -> None:
 
 
 def parser(json_resource: dict, locale: Optional[str] = None, prefix: Optional[str] = None) -> None:
-    Logger.info(
-        f"Added localization translation {TextColors.BLUE}{TextColors.BOLD}{locale}.{prefix}")
     for key, value in json_resource.items():
         if isinstance(value, dict):
             parser(
