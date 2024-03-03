@@ -212,5 +212,30 @@
                 "label": "Emoji:"
             }
         }
+    },
+    "help": {
+        "title": "Yardım Kitabı",
+        "arguments": "[İsteğe bağlı] | <Gerekli>",
+        "command-embed": {
+            "title": "`{name}` komutuyla ilgili yardım.",
+            "info": "Bilgi",
+            "category": "Kategori: `{category_emoji}{category_name}`\n",
+            "aliases": "Takma adlar: {aliases}\n",
+            "disable_command": "Kapatabilir miyim? **{value}**\n",
+            "connection_disabled": {
+                "0": "Hayır",
+                "1": "Evet"
+            },
+            "using_command": "Kullanılıyor: `{using}`\n",
+            "example": "Örnek №{number}"
+        },
+        "command-notfound": {
+            "title": "Komut bulunamadı",
+            "description": "Komut ararken bulamadık, genel komut listesine tekrar bakın"
+        },
+        "command-invalid": {
+            "title": "Komut geçersiz",
+            "description": "Büyük olasılıkla takımın adını yanlış girdiniz, belki de bazı garip karakterler içeriyor"
+        }
     }
 }

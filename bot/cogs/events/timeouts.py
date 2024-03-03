@@ -15,7 +15,8 @@ class members_event_timeouts(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_audit_log_entry_create(self,
                                               entry: nextcord.AuditLogEntry):
-        if entry.action != nextcord.AuditLogAction.member_update:
+        if not (entry.action == nextcord.AuditLogAction.member_update
+                and hasattr(entry.before, "communication_disabled_until")):
             return
 
         if (entry.before.communication_disabled_until is None and
@@ -53,7 +54,7 @@ class members_event_timeouts(commands.Cog):
 
     async def on_untimeout(self,
                            member: nextcord.Member,
-                           moderator: Optional[nextcord.Member]):
+                           moderator: Optional[nextcord.Member] = None):
         if moderator is None:
             print(f"У {member.display_name} закончился мут!")
             return

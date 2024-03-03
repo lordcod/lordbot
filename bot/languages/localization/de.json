@@ -212,5 +212,30 @@
                 "label": "Emoji:"
             }
         }
+    },
+    "help": {
+        "title": "Hilfebuch",
+        "arguments": "[Optional] | <Erforderlich>",
+        "command-embed": {
+            "title": "Hilfe zum Befehl `{name}`.",
+            "info": "Information",
+            "category": "Kategorie: `{category_emoji}{category_name}`.\n",
+            "aliases": "Aliase: {aliases}\n",
+            "disable_command": "Kann ich es ausschalten? **{value}**\n",
+            "connection_disabled": {
+                "0": "Nein",
+                "1": "Ja"
+            },
+            "using_command": "Verwendung: `{using}`.\n",
+            "example": "Beispiel №{number}"
+        },
+        "command-notfound": {
+            "title": "Befehl nicht gefunden",
+            "description": "Bei der Suche nach dem Befehl haben wir ihn nicht gefunden. Schauen Sie ihn sich noch einmal in der allgemeinen Befehlsliste an"
+        },
+        "command-invalid": {
+            "title": "Der Befehl ist ungültig",
+            "description": "Höchstwahrscheinlich haben Sie den Namen des Teams falsch eingegeben, möglicherweise enthält er einige seltsame Zeichen"
+        }
     }
 }

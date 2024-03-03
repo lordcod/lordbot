@@ -25,6 +25,31 @@
             "max-user": "Maksimalt antal brugere"
         }
     },
+    "help": {
+        "title": "Hjælpebog",
+        "argumenter": "[Valgfrit] / < påkrævet>",
+        "command-embed": {
+            "title": "hjælp på kommandoen `{name}`.",
+            "info": "Oplysninger",
+            "category": "Category: `{category_emoji}{category_name}`\n",
+            "aliases": "Aliases: {aliases}\n",
+            "disable_command": "kan jeg slå den fra? **{value}**\n",
+            "connection_disabled": {
+                "0": "Nej",
+                "1": "Ja"
+            },
+            "using_command": "Using: `{using}`\n",
+            "eksempel": "eksempel, der viser{nummer}"
+        },
+        "command-notfound": {
+            "title": "kommando ikke fundet",
+            "beskrivelse": "når vi søgte efter kommando, fandt vi det ikke, se på det igen i den generelle liste over kommandoer"
+        },
+        "command-invalid": {
+            "title": "kommandoen er ugyldig",
+            "beskrivelse": "sandsynligvis indtastede du navnet på holdet forkert, måske indeholder det nogle mærkelige tegn"
+        }
+    },
     "errors": {
         "MissingPermissions": "Du har ikke nok rettigheder",
         "MissingRole": "Du har ikke en passende rolle til at udføre kommandoen",

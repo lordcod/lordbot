@@ -212,5 +212,30 @@
                 "label": "Émoji :"
             }
         }
+    },
+    "help": {
+        "title": "Livre d'aide",
+        "arguments": "[Facultatif] | <Obligatoire>",
+        "command-embed": {
+            "title": "Aide sur la commande `{name}`.",
+            "info": "Informations",
+            "category": "Catégorie : `{category_emoji}{category_name}`\n",
+            "aliases": "Alias : {alias}\n",
+            "disable_command": "Puis-je l'éteindre ? **{value}**\n",
+            "connection_disabled": {
+                "0": "Non",
+                "1": "Ouais"
+            },
+            "using_command": "Utilisation : `{using}`\n",
+            "example": "Exemple №{number}"
+        },
+        "command-notfound": {
+            "title": "Commande non trouvée",
+            "description": "Lors de la recherche d'une commande, nous ne l'avons pas trouvée, regardez-la à nouveau dans la liste générale des commandes"
+        },
+        "command-invalid": {
+            "title": "La commande n'est pas valide",
+            "description": "Il est fort probable que vous ayez mal saisi le nom de l'équipe, il contient peut-être des caractères étranges."
+        }
     }
 }

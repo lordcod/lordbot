@@ -212,5 +212,30 @@
                 "label": "Emotikony:"
             }
         }
+    },
+    "help": {
+        "title": "Książka pomocy",
+        "arguments": "[Opcjonalnie] | <Wymagane>",
+        "command-embed": {
+            "title": "Pomoc dotycząca polecenia `{name}`.",
+            "info": "Informacje",
+            "category": "Kategoria: `category_emoji}{category_name}`\n",
+            "aliases": "Aliasy: {aliases}\n",
+            "disable_command": "Czy mogę to wyłączyć? **{value}**\n",
+            "connection_disabled": {
+                "0": "Nie",
+                "1": "Tak"
+            },
+            "using_command": "Używanie: `{using}`\n",
+            "example": "Przykład №{number}"
+        },
+        "command-notfound": {
+            "title": "Nie znaleziono polecenia",
+            "description": "Szukając polecenia, nie znaleźliśmy go, spójrz na to ponownie na ogólnej liście poleceń"
+        },
+        "command-invalid": {
+            "title": "Polecenie jest nieprawidłowe",
+            "description": "Najprawdopodobniej błędnie wpisałeś nazwę zespołu, być może zawiera ona jakieś dziwne znaki"
+        }
     }
 }

@@ -207,5 +207,30 @@
                 "label": "Emoji:"
             }
         }
+    },
+    "help": {
+        "title": "Справочная книга",
+        "arguments": "[Необязательно] | <Обязательно>",
+        "command-embed": {
+            "title": "Помощь по команде `{name}`.",
+            "info": "Информация",
+            "category": "Категория: `{category_emoji}{category_name}`\n",
+            "aliases": "Псевдонимы: {aliases}\n",
+            "disable_command": "Могу ли я выключить его? **{value}**\n",
+            "connection_disabled": {
+                "0": "Неа",
+                "1": "Ага"
+            },
+            "using_command": "Использование: `{using}`\n",
+            "example": "Пример №{number}"
+        },
+        "command-notfound": {
+            "title": "Команда не найдена",
+            "description": "При поиске команды мы ее не нашли, посмотрите ее еще раз в общем списке команд"
+        },
+        "command-invalid": {
+            "title": "Команда недействительна",
+            "description": "Скорее всего вы неправильно ввели название команды, возможно оно содержит какие-то странные символы"
+        }
     }
 }

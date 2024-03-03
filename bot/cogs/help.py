@@ -1,21 +1,36 @@
+import re
 import nextcord
 from nextcord.ext import commands
 
-from bot.languages import help as help_info
+from bot.languages import help as help_info, i18n
 from bot.languages.help import get_command
 from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.help import HelpView
 
-import re
+
+REGEXP_COMMAND_NAME = re.compile(r'([ _\-\.a-zA-Z0-9]+)')
 
 
-def is_valid_command(name: str) -> bool:
-    pattern = r'([ _\-\.a-zA-Z]+)'
-    result = re.fullmatch(pattern, name)
-    if result:
-        return True
-    return False
+def bool_to_str_by_command(value: bool) -> str:
+    if value:
+        return "1"
+    return "0"
+
+
+def get_disable_command_value(
+    locale: str,
+    command: help_info.CommandOption
+) -> str:
+    return i18n.t(locale,
+                  f"help.command-embed.connection_disabled.{str(int(command.get('allowed_disabled')))}")
+
+
+def get_using(
+    locale: str,
+    command: help_info.CommandOption
+) -> str:
+    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(command.get('arguments')) if command.get('arguments') else ''}")
 
 
 class help(commands.Cog):
@@ -30,7 +45,7 @@ class help(commands.Cog):
             await self.generate_message(ctx)
             return
 
-        if not is_valid_command(command_name):
+        if not REGEXP_COMMAND_NAME.fullmatch(command_name):
             await self.generate_not_valid(ctx)
             return
 
@@ -46,18 +61,14 @@ class help(commands.Cog):
         color = self.gdb.get('color')
 
         embed = nextcord.Embed(
-            title=help_info.Embed.title.get(locale),
-            description=help_info.Embed.description.get(locale),
+            title=i18n.t(locale, "help.title"),
             color=color
         )
 
         for category, coms in help_info.categories.items():
             text = ''
             for cmd in coms:
-                text = (
-                    f"{text}"
-                    f"`{cmd.get('name')}` "
-                )
+                text += f"`{cmd.get('name')}` "
             embed.add_field(
                 name=f'{help_info.categories_emoji.get(category)}{help_info.categories_name.get(category).get(locale)}',
                 value=text,
@@ -72,57 +83,35 @@ class help(commands.Cog):
         locale = self.gdb.get('language')
         color = self.gdb.get('color')
         aliases = command_data.get('aliases')
-        arguments = command_data.get('arguments')
 
         embed = nextcord.Embed(
-            title=help_info.Embed.title.get(locale),
-            description=help_info.Embed.description.get(locale),
+            title=i18n.t(locale, "help.command-embed.title",
+                         name=command_data.get('name')),
+            description=command_data.get('descriptrion').get(locale),
             color=color
         )
-
-        embed.add_field(
-            name=help_info.CommandEmbed.name.get(locale),
-            value=command_data.get('name')
+        embed.set_footer(
+            text=i18n.t(locale, "help.arguments")
         )
-
         embed.add_field(
-            name=help_info.CommandEmbed.category.get(locale),
-            value=f"{help_info.categories_emoji.get(command_data.get('category'))}{help_info.categories_name.get(command_data.get('category')).get(locale)}"
-        )
-
-        embed.add_field(
-            name='',
-            value='',
+            name=i18n.t(
+                locale, 'help.command-embed.info'),
+            value=(
+                f"{i18n.t(locale, 'help.command-embed.category', category_emoji=help_info.categories_emoji.get(command_data.get('category')), category_name=help_info.categories_name.get(command_data.get('category')).get(locale))}"
+                f"{i18n.t(locale, 'help.command-embed.aliases', aliases=', '.join([f'`{al}`' for al in aliases])) if aliases else ''}"
+                f"{get_using(locale, command_data)}"
+                f"{i18n.t(locale, 'help.command-embed.disable_command', value=get_disable_command_value(locale, command_data))}"
+            ),
             inline=False
         )
-
-        if aliases:
-            embed.add_field(
-                name=help_info.CommandEmbed.aliases.get(locale),
-                value=', '.join(aliases)
-            )
-
-        if arguments:
-            embed.add_field(
-                name=help_info.CommandEmbed.arguments.get(locale),
-                value=' '.join(arguments)
-            )
-            embed.set_footer(
-                text=help_info.Embed.footer.get(locale)
-            )
-
-        embed.add_field(
-            name=help_info.CommandEmbed.disable_command.get(locale),
-            value=help_info.CommandEmbed.connection_disabled.get(
-                command_data.get('allowed_disabled')).get(locale),
-            inline=False
-        )
-
-        embed.add_field(
-            name=help_info.CommandEmbed.description.get(locale),
-            value=command_data.get('descriptrion').get(locale),
-            inline=False
-        )
+        if examples := command_data.get('examples'):
+            for num, emp in enumerate(examples, start=1):
+                embed.add_field(
+                    name=i18n.t(
+                        locale, 'help.command-embed.example', number=num),
+                    value=f"{emp[0]}\n{emp[1]}",
+                    inline=False
+                )
 
         await ctx.send(embed=embed)
 
@@ -131,8 +120,8 @@ class help(commands.Cog):
         color = self.gdb.get('color')
 
         embed = nextcord.Embed(
-            title=help_info.CommandNotFound.title.get(locale),
-            description=help_info.CommandNotFound.description.get(locale),
+            title=i18n.t(locale, "help.command-notfound.title"),
+            description=i18n.t(locale, "help.command-notfound.description"),
             color=color
         )
 
@@ -143,8 +132,8 @@ class help(commands.Cog):
         color = self.gdb.get('color')
 
         embed = nextcord.Embed(
-            title=help_info.CommandNotValid.title.get(locale),
-            description=help_info.CommandNotValid.description.get(locale),
+            title=i18n.t(locale, "help.command-invalid.title"),
+            description=i18n.t(locale, "help.command-invalid.description"),
             color=color
         )
 

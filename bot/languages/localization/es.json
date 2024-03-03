@@ -212,5 +212,30 @@
                 "label": "emojis:"
             }
         }
+    },
+    "help": {
+        "title": "Libro de ayuda",
+        "arguments": "[Opcional] | <Obligatorio>",
+        "command-embed": {
+            "title": "Ayuda sobre el comando `{name}`.",
+            "info": "Información",
+            "category": "Categoría: `{category_emoji}{category_name}`\n",
+            "aliases": "Alias: {aliases}\n",
+            "disable_command": "¿Puedo apagarlo? **{value}**\n",
+            "connection_disabled": {
+                "0": "No",
+                "1": "Sí"
+            },
+            "using_command": "Usando: `{using}`\n",
+            "example": "Ejemplo №{number}"
+        },
+        "command-notfound": {
+            "title": "Comando no encontrado",
+            "description": "Al buscar comando no lo encontramos, búsquelo nuevamente en la lista general de comandos"
+        },
+        "command-invalid": {
+            "title": "El comando no es válido",
+            "description": "Lo más probable es que hayas ingresado mal el nombre del equipo, quizás contenga algunos caracteres extraños."
+        }
     }
 }
