@@ -28,6 +28,7 @@ class GuildsDB(Table):
                               default=info.DEFAULT_ECONOMY_SETTINGS)
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
+    tickettool = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
     auto_translate = Colum(data_type=PostType.JSON, default="{}")
@@ -70,12 +71,6 @@ class MongoDataBases(Table):
 
     name = Colum(data_type=PostType.TEXT, primary_key=True)
     values = Colum(data_type=PostType.JSON, default="{}")
-
-
-colums = {
-    'guilds': get_info_colums('guilds', engine),
-    'economic': get_info_colums('economic', engine)
-}
 
 
 def db_forever():

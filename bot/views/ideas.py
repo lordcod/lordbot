@@ -1,5 +1,5 @@
 import nextcord
-import timeit
+import time
 
 from typing import Optional
 
@@ -260,7 +260,7 @@ class IdeaModal(nextcord.ui.Modal):
         mdb.set(mes.id, idea_data)
 
         Timeout.set(interaction.guild_id,
-                    interaction.user.id, timeit.default_timer()+(60*30))
+                    interaction.user.id, time.time()+(60*30))
 
 
 class IdeaView(nextcord.ui.View):
@@ -286,7 +286,7 @@ class IdeaView(nextcord.ui.View):
         locale = gdb.get('language')
 
         user_timeout = Timeout.get(interaction.guild_id, interaction.user.id)
-        if user_timeout and user_timeout > timeit.default_timer():
+        if user_timeout and user_timeout > time.time():
             await interaction.response.send_message(
                 content=i18n.t(
                     locale, 'ideas.idea-view.timeout-message', time=int(user_timeout)),

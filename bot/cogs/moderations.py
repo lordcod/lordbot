@@ -9,7 +9,7 @@ from bot.views.delcat import DelCatView
 from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
 import io
-import timeit
+import time
 import asyncio
 from typing import Optional
 
@@ -67,7 +67,7 @@ class moderations(commands.Cog):
             color=color)
         embed.add_field(
             name="Time of action",
-            value=f"<t:{ftime+timeit.default_timer() :.0f}:f> ({display_time(ftime)})",
+            value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
             inline=False
         )
         if reason is not None:
@@ -80,7 +80,7 @@ class moderations(commands.Cog):
         self.bot.loop.call_later(
             ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
 
-        bsdb.insert(ftime+timeit.default_timer())
+        bsdb.insert(ftime+time.time())
 
         await member.ban(reason=reason)
 
@@ -96,10 +96,7 @@ class moderations(commands.Cog):
 
         message = ""
 
-        for quantity, role_data in enumerate(datas):
-            member_id = role_data[0]
-            ban_time = role_data[1]
-
+        for quantity, (member_id, ban_time) in enumerate(datas):
             message += f"{quantity}. <@{member_id}>(<t:{ban_time}:R>)\n"
 
         message = message or "There are no registered temporary roles on this server"
@@ -122,6 +119,7 @@ class moderations(commands.Cog):
     ):
         gdb = GuildDateBases(ctx.guild.id)
         rsdb = RoleDateBases(ctx.guild.id, member.id)
+        locale = gdb.get('language')
         color = gdb.get('color')
         _role_time = rsdb.get_as_role(role.id)
 
@@ -141,7 +139,7 @@ class moderations(commands.Cog):
             )
             embed.add_field(
                 name='New time of action',
-                value=f'<t:{_role_time[0]}:f> → <t:{ftime+timeit.default_timer() :.0f}:f> ({display_time(ftime)})',
+                value=f'<t:{_role_time[0]}:f> → <t:{ftime+time.time() :.0f}:f> ({display_time(ftime, locale)})',
                 inline=False
             )
         else:
@@ -155,11 +153,11 @@ class moderations(commands.Cog):
             )
             embed.add_field(
                 name="Time of action",
-                value=f"<t:{ftime+timeit.default_timer() :.0f}:f> ({display_time(ftime)})",
+                value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
                 inline=False
             )
 
-        rsdb.set_role(role.id, ftime+timeit.default_timer())
+        rsdb.set_role(role.id, ftime+time.time())
 
         rth = self.bot.loop.call_later(
             ftime, asyncio.create_task, rsdb.remove_role(member, role))
@@ -185,11 +183,7 @@ class moderations(commands.Cog):
 
         message = ""
 
-        for quantity, role_data in enumerate(datas):
-            member_id = role_data[0]
-            role_id = role_data[1]
-            role_time = role_data[2]
-
+        for quantity, (member_id, role_id, role_time) in enumerate(datas):
             member = ctx.guild.get_member(member_id)
             role = ctx.guild.get_role(role_id)
 
@@ -268,7 +262,7 @@ class moderations(commands.Cog):
 
         messages = []
 
-        minimum_time = int((timeit.default_timer() - 14 * 24 * 60 * 60)
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60)
                            * 1000.0 - 1420070400000) << 22
 
         async for message in ctx.channel.history(limit=250):
@@ -295,7 +289,7 @@ class moderations(commands.Cog):
 
         messages = []
         finder = False
-        minimum_time = int((timeit.default_timer() - 14 * 24 * 60 * 60)
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60)
                            * 1000.0 - 1420070400000) << 22
 
         async for message in message_start.channel.history(limit=100):

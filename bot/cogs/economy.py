@@ -8,7 +8,7 @@ from bot.resources.ether import Emoji
 from bot.misc.utils import get_award
 from nextcord.utils import escape_markdown
 
-import timeit
+import time
 from typing import Optional, Union, Literal
 
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
@@ -29,7 +29,7 @@ class economy(commands.Cog):
         return True
 
     async def handler_rewards(self, ctx: commands.Context):
-        time = timeit.default_timer()
+        loctime = time.time()
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
@@ -39,8 +39,8 @@ class economy(commands.Cog):
         if award <= 0:
             await ctx.send("Unfortunately this reward is not available if you are the server administrator change the reward")
             return
-        if time > account.get(ctx.command.name, 0):
-            wait_long = time+timeout_rewards.get(ctx.command.name)
+        if loctime > account.get(ctx.command.name, 0):
+            wait_long = loctime+timeout_rewards.get(ctx.command.name)
 
             embed = nextcord.Embed(
                 title="You have received a gift",
@@ -85,14 +85,14 @@ class economy(commands.Cog):
         account = EconomyMemberDB(ctx.guild.id, member.id)
         balance = account.get('balance', 0)
         bank = account.get('bank', 0)
-        time = timeit.default_timer()
+        loctime = time.time()
 
         description = ""
-        if account.get('daily', 0) < time:
+        if account.get('daily', 0) < loctime:
             description += f"— Daily Bonus ({prefix}daily)\n"
-        if account.get('weekly', 0) < time:
+        if account.get('weekly', 0) < loctime:
             description += f"— Weekly Bonus ({prefix}weekly)\n"
-        if account.get('monthly', 0) < time:
+        if account.get('monthly', 0) < loctime:
             description += f"— Monthly Bonus ({prefix}monthly)\n"
         if description:
             description = f"{Emoji.award} Available Rewards:\n{description}"

@@ -69,6 +69,7 @@ def time_convert(timestamp: (int | float)) -> dict[str, int]:
 
 
 def display_time(number: int, lang: str = "en") -> str:
+    distributing.get(lang, distributing['en'])
     current_time = time_convert(number)
     time_strings = [distributing[lang](num, key)
                     for key, num in current_time.items() if num != 0]

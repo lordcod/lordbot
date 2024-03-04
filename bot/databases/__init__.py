@@ -1,4 +1,4 @@
-from .db import colums
+from . import db
 from .handlers import (
     GuildDateBases,
     EconomyMemberDB,

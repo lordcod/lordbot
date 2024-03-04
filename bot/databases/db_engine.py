@@ -68,9 +68,6 @@ class DataBase:
         query: str | bytes,
         vars: Vars = None
     ) -> None:
-        global i
-        i += 1
-        print(f'DBIE: {i}')
         with self.connection.cursor() as cursor:
             cursor.execute(query, vars)
 
@@ -79,9 +76,6 @@ class DataBase:
         query: str | bytes,
         vars: Vars = None
     ) -> list[tuple[Any, ...]]:
-        global i
-        i += 1
-        print(f'DBIFA: {i}')
         with self.connection.cursor() as cursor:
             cursor.execute(query, vars)
             return cursor.fetchall()
@@ -92,9 +86,6 @@ class DataBase:
         vars: Vars = None,
         size: int | None = None
     ) -> list[tuple[Any, ...]]:
-        global i
-        i += 1
-        print(f'DBIFM: {i}')
         with self.connection.cursor() as cursor:
             cursor.execute(query, vars)
             return cursor.fetchmany(size)
@@ -104,9 +95,6 @@ class DataBase:
         query: str | bytes,
         vars: Vars = None
     ) -> tuple[Any, ...] | None:
-        global i
-        i += 1
-        print(f'DBIFO: {i}')
         with self.connection.cursor() as cursor:
             cursor.execute(query, vars)
             return cursor.fetchone()
