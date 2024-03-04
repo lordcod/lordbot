@@ -1,6 +1,6 @@
 import nextcord
 from nextcord.ext import commands
-import time
+import timeit
 import asyncio
 from typing import Optional
 
@@ -24,7 +24,7 @@ class members_event_timeouts(commands.Cog):
             self.bot.dispatch("timeout", entry.target, entry.user)
 
             timing = entry.target.communication_disabled_until.timestamp()
-            temp = timing-time.time()
+            temp = timing-timeit.default_timer()
 
             th = self.bot.loop.call_later(
                 temp, asyncio.create_task, self.process_untimeout(entry.target))

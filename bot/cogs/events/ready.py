@@ -1,4 +1,3 @@
-import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
@@ -6,7 +5,7 @@ from bot.databases import RoleDateBases, BanDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.ideas import (ConfirmView, IdeaView)
 
-import time
+import timeit
 import asyncio
 
 
@@ -40,7 +39,7 @@ class ready_event(commands.Cog):
 
             mbrsd = BanDateBases(guild_id, member_id)
             self.bot.loop.call_later(
-                ban_time-time.time(),
+                ban_time-timeit.default_timer(),
                 asyncio.create_task,
                 mbrsd.remove_ban(self.bot._connection)
             )
@@ -65,7 +64,7 @@ class ready_event(commands.Cog):
             mrsdb = RoleDateBases(guild_id, member_id)
 
             rth = self.bot.loop.call_later(
-                role_time-time.time(),
+                role_time-timeit.default_timer(),
                 asyncio.create_task,
                 mrsdb.remove_role(member, role)
             )

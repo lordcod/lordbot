@@ -8,7 +8,7 @@ from bot.resources.ether import Emoji
 from bot.misc.utils import get_award
 from nextcord.utils import escape_markdown
 
-from time import time as tick
+import timeit
 from typing import Optional, Union, Literal
 
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
@@ -29,7 +29,7 @@ class economy(commands.Cog):
         return True
 
     async def handler_rewards(self, ctx: commands.Context):
-        time = tick()
+        time = timeit.default_timer()
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
@@ -85,7 +85,7 @@ class economy(commands.Cog):
         account = EconomyMemberDB(ctx.guild.id, member.id)
         balance = account.get('balance', 0)
         bank = account.get('bank', 0)
-        time = tick()
+        time = timeit.default_timer()
 
         description = ""
         if account.get('daily', 0) < time:

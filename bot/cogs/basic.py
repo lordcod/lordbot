@@ -1,3 +1,4 @@
+import timeit
 from typing import Callable
 import nextcord
 from nextcord.ext import commands, application_checks
@@ -29,12 +30,28 @@ class basic(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
-        content = (
-            "Pong!🏓🎉\n"
-            f"Latency: {self.bot.latency*100 :.1f}ms"
+        gdb = GuildDateBases(ctx.guild.id)
+
+        stime = timeit.default_timer()
+        color = gdb.get('color')
+        ftime = timeit.default_timer()
+
+        discord_latency_ms = round(self.bot.latency*100, 2)
+        databases_latency_ms = round((ftime-stime)*100, 2)
+        command_latency_ms = round(
+            (discord_latency_ms*2)+(databases_latency_ms*10), 2)
+
+        embed = nextcord.Embed(
+            title="Pong!🏓🎉",
+            description=(
+                f"Discord latency: {discord_latency_ms}ms\n"
+                f"Databases latency: {databases_latency_ms}ms\n"
+                f"Command processing latency: {command_latency_ms}ms\n"
+            ),
+            color=color
         )
 
-        await ctx.send(content)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def invite(self, ctx: commands.Context):

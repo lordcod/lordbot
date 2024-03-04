@@ -1,6 +1,6 @@
 import datetime
 import requests
-import time
+import timeit
 from datetime import datetime
 
 
