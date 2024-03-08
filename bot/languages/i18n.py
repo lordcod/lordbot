@@ -20,7 +20,6 @@ def _parse_json(content: str) -> dict:
 
 
 def add_res_translation(key: str, value: str, locale: str):
-    print(key, value, locale)
     data = resource_dict[locale]
     data_keys = key.split(".")
     for num, tk in enumerate(data_keys, start=1):
@@ -33,11 +32,11 @@ def add_res_translation(key: str, value: str, locale: str):
 
 
 def add_translation(key: str, value: str, locale: Optional[str] = None, loadable: bool = False) -> None:
+    print(f"Parse add translaion {key} = {value}")
     locale = locale or config.get('locale')
     memoization_dict.setdefault(locale, {})
     memoization_dict[locale][key] = value
     if not loadable:
-        print("Parse "+key)
         add_res_translation(key, value, locale)
 
 
@@ -116,8 +115,6 @@ def to_folder(foldername: str) -> str:
 
 def parser(json_resource: dict, locale: Optional[str] = None, prefix: Optional[str] = None, loadable: bool = True) -> None:
     for key, value in json_resource.items():
-        print(
-            "Parse "+f"{locale}.{prefix+'.' if prefix else ''}{key}", loadable)
         if isinstance(value, dict):
             parser(
                 value,

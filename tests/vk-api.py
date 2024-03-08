@@ -1,7 +1,6 @@
 from pprint import pprint
 import re
 import requests
-from vkaudiotoken import get_kate_token, get_vk_official_token
 
 kt_access_token = "vk1.a.11pGsKeKMJEsNQL2szPcyY7MXX0Uqd5wqTL5wxbv47fbCJziLR7ORWGrxQ2l84JC-0v0kGzdOMzbIn5VHM15Se3E9U6pbXkCZxA_rBNuVTAIZpQivsjtsUvIgWAAHWcT91bDHXHEBVs4zJlIOj-nE0FTwqw4vMno0mIlyQylGQwHaik5N9PjmclxdffE8Er5vdcf7C1XtebqvdA6f8ALEQ"
 kt_user_agent = "KateMobileAndroid/56 lite-460 (Android 4.4.2; SDK 19; x86; unknown Android SDK built for x86; en)"
@@ -59,3 +58,14 @@ responce = requests.post(
     headers=headers
 )
 pprint(responce.json())
+
+
+# TODO Get by page
+
+
+responce = requests.get(
+    "https://vk.com/audio-2001585086_108585086",
+    headers=headers
+)
+with open("vkhtnl.html", "wb") as file:
+    file.write(responce.content)
