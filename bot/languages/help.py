@@ -82,7 +82,7 @@ def get_command(name: str) -> CommandOption:
     return result
 
 
-with open("commands_lang.json", "rb") as file:
+with open("bot/languages/commands_data.json", "rb") as file:
     content = file.read()
     commands = orjson.loads(content)
     for cmd in commands:

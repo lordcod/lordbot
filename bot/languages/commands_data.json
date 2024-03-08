@@ -8,6 +8,50 @@
         "arguments": [
             "[member]"
         ],
+        "examples": [
+            [
+                "balance",
+                {
+                    "en": "Displays your balance",
+                    "ru": "Отображает ваш баланс",
+                    "id": "Menampilkan saldo Anda",
+                    "da": "Viser din balance",
+                    "de": "Zeigt Ihren Kontostand an",
+                    "es": "Muestra tu saldo",
+                    "fr": "Affiche votre solde",
+                    "pl": "Wyświetla saldo",
+                    "tr": "Bakiyenizi görüntüler"
+                }
+            ],
+            [
+                "balance @lordcode",
+                {
+                    "en": "Displays the balance of the lordcode participant",
+                    "ru": "Отображает баланс участника лордкода",
+                    "id": "Menampilkan saldo peserta lordcode",
+                    "da": "Viser saldoen for lordcode-deltageren",
+                    "de": "Zeigt den Kontostand des Lordcode-Teilnehmers an",
+                    "es": "Muestra el saldo del participante de Lordcode.",
+                    "fr": "Affiche le solde du participant Lordcode",
+                    "pl": "Wyświetla saldo uczestnika Lordcode",
+                    "tr": "Lordcode katılımcısının bakiyesini görüntüler"
+                }
+            ],
+            [
+                "balance 636824998123798531",
+                {
+                    "en": "Displays the balance of the participant with id 636824998123798531",
+                    "ru": "Отображает баланс участника с id 636824998123798531",
+                    "id": "Menampilkan saldo peserta dengan id 636824998123798531",
+                    "da": "Viser saldoen for deltageren med id 636824998123798531",
+                    "de": "Zeigt den Kontostand des Teilnehmers mit der ID 636824998123798531 an",
+                    "es": "Muestra el saldo del participante con id 636824998123798531",
+                    "fr": "Affiche le solde du participant avec l'identifiant 636824998123798531",
+                    "pl": "Wyświetla saldo uczestnika o identyfikatorze 636824998123798531",
+                    "tr": "636824998123798531 kimliğine sahip katılımcının bakiyesini görüntüler"
+                }
+            ]
+        ],
         "descriptrion": {
             "en": "Displays the participant's balance as well as possible rewards that can be collected\n\nIf no participant is specified, the value is taken by the one who started the command",
             "ru": "Отображает баланс участника, а также возможные вознаграждения, которые можно получить\n\nЕсли участник не указан, значение принимает тот, кто запустил команду",
@@ -35,7 +79,11 @@
     {
         "name": "leaderboard",
         "category": "economy",
-        "aliases": [],
+        "aliases": [
+            "lb",
+            "leaders",
+            "top"
+        ],
         "arguments": [],
         "descriptrion": {
             "en": "Shows statistics of the top 10 server participants by balance",
@@ -68,6 +116,36 @@
         "arguments": [
             "<member>",
             "<amount>"
+        ],
+        "examples": [
+            [
+                "pay @lordcode 100",
+                {
+                    "en": "Transfers 100 coins to the account of the lordcode participant",
+                    "ru": "Переводит 100 монет на счет участника лордкода",
+                    "id": "Mentransfer 100 koin ke akun peserta lordcode",
+                    "da": "Overfører 100 mønter til lordcode-deltagerens konto",
+                    "de": "Überweist 100 Münzen auf das Konto des Lordcode-Teilnehmers",
+                    "es": "Transfiere 100 monedas a la cuenta del participante de Lordcode",
+                    "fr": "Transfère 100 pièces sur le compte du participant au Lordcode",
+                    "pl": "Przelewa 100 monet na konto uczestnika lordcode",
+                    "tr": "Lordcode katılımcısının hesabına 100 jeton aktarır"
+                }
+            ],
+            [
+                "pay 636824998123798531 100",
+                {
+                    "en": "Transfers 100 coins to the participant's account from ID 636824998123798531",
+                    "ru": "Переводит 100 монет на счет участника с ID 636824998123798531",
+                    "id": "Transfer 100 koin ke rekening peserta dari ID 636824998123798531",
+                    "da": "Overfører 100 mønter til deltagerens konto fra ID 636824998123798531",
+                    "de": "Überträgt 100 Münzen auf das Konto des Teilnehmers von der ID 636824998123798531",
+                    "es": "Transfiere 100 monedas a la cuenta del participante desde ID 636824998123798531",
+                    "fr": "Transfère 100 pièces sur le compte du participant à partir de l'ID 636824998123798531",
+                    "pl": "Przelewa 100 monet na konto uczestnika z ID 636824998123798531",
+                    "tr": "636824998123798531 numaralı kimlikten katılımcının hesabına 100 jeton aktarılır"
+                }
+            ]
         ],
         "descriptrion": {
             "en": "Transfers the specified amount to the selected participant",
@@ -189,6 +267,36 @@
         "arguments": [
             "<amount>"
         ],
+        "examples": [
+            [
+                "deposit 100",
+                {
+                    "en": "Transfers 100 coins to the bank",
+                    "ru": "Переводит 100 монет в банк",
+                    "id": "Transfer 100 koin ke bank",
+                    "da": "Overfører 100 mønter til banken",
+                    "de": "Überweist 100 Münzen an die Bank",
+                    "es": "Transfiere 100 monedas al banco.",
+                    "fr": "Transfère 100 pièces à la banque",
+                    "pl": "Przekazuje 100 monet do banku",
+                    "tr": "Bankaya 100 jeton aktarır"
+                }
+            ],
+            [
+                "deposit all",
+                {
+                    "en": "Transfers all coins to the bank",
+                    "ru": "Переносит все монеты в банк",
+                    "id": "Transfer semua koin ke bank",
+                    "da": "Overfører alle mønter til banken",
+                    "de": "Überträgt alle Münzen an die Bank",
+                    "es": "Transfiere todas las monedas al banco.",
+                    "fr": "Transfère toutes les pièces à la banque",
+                    "pl": "Przekazuje wszystkie monety do banku",
+                    "tr": "Tüm paraları bankaya aktarır"
+                }
+            ]
+        ],
         "descriptrion": {
             "en": "Transfers the entered amount of money to the bank protecting your funds from robbery",
             "ru": "Переводит введенную сумму денег в банк, защищая ваши средства от ограбления",
@@ -221,6 +329,36 @@
         ],
         "arguments": [
             "<amount>"
+        ],
+        "examples": [
+            [
+                "withdraw 100",
+                {
+                    "en": "Transfers 100 coins from the bank back to your account",
+                    "ru": "Переводит 100 монет из банка обратно на ваш счет",
+                    "id": "Transfer 100 koin dari bank kembali ke rekening Anda",
+                    "da": "Overfører 100 mønter fra banken tilbage til din konto",
+                    "de": "Überweist 100 Münzen von der Bank zurück auf Ihr Konto",
+                    "es": "Transfiere 100 monedas del banco a su cuenta",
+                    "fr": "Transfère 100 pièces de la banque vers votre compte",
+                    "pl": "Przelewa 100 monet z banku z powrotem na Twoje konto",
+                    "tr": "100 jetonu bankadan hesabınıza geri aktarır"
+                }
+            ],
+            [
+                "withdraw all",
+                {
+                    "en": "Transfers all coins from the bank back to your account",
+                    "ru": "Переводит все монеты из банка обратно на ваш счет",
+                    "id": "Transfer semua koin dari bank kembali ke rekening Anda",
+                    "da": "Overfører alle mønter fra banken tilbage til din konto",
+                    "de": "Überträgt alle Coins von der Bank zurück auf Ihr Konto",
+                    "es": "Transfiere todas las monedas del banco a su cuenta",
+                    "fr": "Transfère toutes les pièces de la banque vers votre compte",
+                    "pl": "Przesyła wszystkie monety z banku z powrotem na Twoje konto",
+                    "tr": "Bankadaki tüm paraları hesabınıza geri aktarır"
+                }
+            ]
         ],
         "descriptrion": {
             "en": "Redirects your funds from the bank back to your account\n\nPlease note that if you lose your funds, it is not possible to return them",
@@ -255,8 +393,34 @@
             "<amount>"
         ],
         "examples": [
-            ["gift 100", "Gives you 100 coins."],
-            ["gift @member 100", "Gives member 100 coins."]
+            [
+                "gift 100",
+                {
+                    "en": "Gives you 100 coins.",
+                    "ru": "Дает вам 100 монет.",
+                    "id": "Memberi Anda 100 koin.",
+                    "da": "Giver dig 100 mønter.",
+                    "de": "Gibt Ihnen 100 Münzen.",
+                    "es": "Te da 100 monedas.",
+                    "fr": "Vous donne 100 pièces.",
+                    "pl": "Daje ci 100 monet.",
+                    "tr": "Size 100 jeton verir."
+                }
+            ],
+            [
+                "gift @lordcode 100",
+                {
+                    "en": "Gives member lordcode 100 coins.",
+                    "ru": "Дает участнику лорд-код 100 монет.",
+                    "id": "Memberikan lordcode anggota 100 koin.",
+                    "da": "Giver medlem herrekode 100 mønter.",
+                    "de": "Gibt dem Mitglied Lordcode 100 Münzen.",
+                    "es": "Le da al miembro Lordcode 100 monedas.",
+                    "fr": "Donne au membre Lordcode 100 pièces.",
+                    "pl": "Daje członkowi Lordcode 100 monet.",
+                    "tr": "Üyeye 100 jeton lord kodu verir."
+                }
+            ]
         ],
         "descriptrion": {
             "en": "Adds a certain amount to the selected participant\nIf the participant is not selected, the team performer acts instead",
@@ -291,8 +455,34 @@
             "<amount>"
         ],
         "examples": [
-            ["take 100", "Takes you 100 coins."],
-            ["take @member 100", "Takes member lordcode 100 coins."]
+            [
+                "take 100",
+                {
+                    "en": "Takes you 100 coins.",
+                    "ru": "Берет с вас 100 монет.",
+                    "id": "Membawa Anda 100 koin.",
+                    "da": "Giver dig 100 mønter.",
+                    "de": "Bringt Ihnen 100 Münzen.",
+                    "es": "Te lleva 100 monedas.",
+                    "fr": "Cela vous prend 100 pièces.",
+                    "pl": "Zabierze ci 100 monet.",
+                    "tr": "100 jeton alır."
+                }
+            ],
+            [
+                "take @lordcode 100",
+                {
+                    "en": "Takes member lordcode 100 coins.",
+                    "ru": "Берет члена лорд-кода 100 монет.",
+                    "id": "Mengambil lordcode anggota 100 koin.",
+                    "da": "Tager medlem herrekode 100 mønter.",
+                    "de": "Benötigt Mitglieds-Lordcode 100 Münzen.",
+                    "es": "Toma miembro Lordcode 100 monedas.",
+                    "fr": "Prend le code seigneur du membre 100 pièces.",
+                    "pl": "Zajmuje członkostwo Lordcode 100 monet.",
+                    "tr": "Üye lord kodunu 100 jeton alır."
+                }
+            ]
         ],
         "descriptrion": {
             "en": "Takes a certain amount to the selected participant\nIf the participant is not selected, the team performer acts instead",
@@ -324,6 +514,22 @@
         "aliases": [],
         "arguments": [
             "[command]"
+        ],
+        "examples": [
+            [
+                "help ping",
+                {
+                    "en": "Shows help about the `ping` command",
+                    "ru": "Показывает справку о команде ping.",
+                    "id": "Menampilkan bantuan tentang perintah `ping`",
+                    "da": "Viser hjælp om kommandoen `ping`",
+                    "de": "Zeigt Hilfe zum Befehl „ping“.",
+                    "es": "Muestra ayuda sobre el comando `ping`",
+                    "fr": "Affiche de l'aide sur la commande `ping`",
+                    "pl": "Wyświetla pomoc dotyczącą polecenia `ping`",
+                    "tr": "'ping' komutuyla ilgili yardımı gösterir"
+                }
+            ]
         ],
         "descriptrion": {
             "en": "A command describing the bot's functions",
@@ -501,6 +707,36 @@
         "arguments": [
             "<title/url>"
         ],
+        "examples": [
+            [
+                "play A Sky Full of Stars",
+                {
+                    "en": "Run a search for the song `A Sky Full of Stars` and it will prompt you to choose the desired author.",
+                    "ru": "Запустите поиск по песне `A Sky Full of Stars` и он предложит вам выбрать нужного автора.",
+                    "id": "Jalankan pencarian untuk lagu `Langit Penuh Bintang` dan Anda akan diminta untuk memilih penulis yang diinginkan.",
+                    "da": "Kør en søgning efter sangen \"A Sky Full of Stars\", og den vil bede dig om at vælge den ønskede forfatter.",
+                    "de": "Führen Sie eine Suche nach dem Lied „A Sky Full of Stars“ durch und Sie werden aufgefordert, den gewünschten Autor auszuwählen.",
+                    "es": "Ejecute una búsqueda de la canción \"A Sky Full of Stars\" y se le pedirá que elija el autor deseado.",
+                    "fr": "Lancez une recherche sur la chanson « A Sky Full of Stars » et il vous sera demandé de choisir l'auteur souhaité.",
+                    "pl": "Uruchom wyszukiwanie utworu „A Sky Full of Stars”, a wyświetli się monit o wybranie żądanego autora.",
+                    "tr": "'A Sky Full of Stars' şarkısını arayın ve istediğiniz yazarı seçmenizi isteyecektir."
+                }
+            ],
+            [
+                "play https://music.yandex.ru/album/2207193/track/17646450",
+                {
+                    "en": "Launch the song from the specified link.",
+                    "da": "Start sangen fra det angivne link.",
+                    "de": "Starten Sie den Song über den angegebenen Link.",
+                    "es": "Inicie la canción desde el enlace especificado.",
+                    "fr": "Lancez la chanson à partir du lien spécifié.",
+                    "id": "Luncurkan lagu dari tautan yang ditentukan.",
+                    "pl": "Uruchom utwór z podanego linku.",
+                    "ru": "Запустите песню по указанной ссылке.",
+                    "tr": "Şarkıyı belirtilen bağlantıdan başlatın."
+                }
+            ]
+        ],
         "descriptrion": {
             "en": "Starts playing the music set by the user\nAs a cloud with music is [**Yandex Music**](<https://music.yandex.ru>)",
             "ru": "Начинает воспроизводиться музыка, установленная пользователем\nВ качестве облака с музыкой используется [**Яндекс Музыка**](<https://music.yandex.ru>)",
@@ -619,7 +855,22 @@
         "arguments": [
             "<volume>"
         ],
-        "examples": [["volume 100", "Sets the maximum volume for music."]],
+        "examples": [
+            [
+                "volume 100",
+                {
+                    "en": "Sets the maximum volume for music.",
+                    "ru": "Устанавливает максимальную громкость музыки.",
+                    "id": "Mengatur volume maksimum untuk musik.",
+                    "da": "Indstiller den maksimale lydstyrke for musik.",
+                    "de": "Legt die maximale Lautstärke für Musik fest.",
+                    "es": "Establece el volumen máximo para la música.",
+                    "fr": "Définit le volume maximum de la musique.",
+                    "pl": "Ustawia maksymalną głośność muzyki.",
+                    "tr": "Müziğin maksimum ses düzeyini ayarlar."
+                }
+            ]
+        ],
         "descriptrion": {
             "en": "Set the volume to the current music stream from 1 to 100",
             "ru": "Установите громкость текущего музыкального потока в диапазоне от 1 до 100",
@@ -648,9 +899,28 @@
         "name": "purge",
         "category": "moderation",
         "aliases": [
+            "clear",
+            "clean"
+        ],
+        "arguments": [
             "<limit>"
         ],
-        "arguments": [],
+        "examples": [
+            [
+                "purge 10",
+                {
+                    "en": "Clear the last 10 messages in the channel",
+                    "ru": "Очистить последние 10 сообщений в канале",
+                    "id": "Hapus 10 pesan terakhir di saluran",
+                    "da": "Ryd de sidste 10 beskeder i kanalen",
+                    "de": "Löschen Sie die letzten 10 Nachrichten im Kanal",
+                    "es": "Borrar los últimos 10 mensajes del canal.",
+                    "fr": "Effacer les 10 derniers messages de la chaîne",
+                    "pl": "Wyczyść ostatnie 10 wiadomości na kanale",
+                    "tr": "Kanaldaki son 10 mesajı temizle"
+                }
+            ]
+        ],
         "descriptrion": {
             "en": "Clears the chat the specified number of times",
             "ru": "Очищает чат указанное количество раз",
@@ -663,15 +933,131 @@
             "tr": "Sohbeti belirtilen sayıda temizler"
         },
         "brief_descriptrion": {
-            "en": "Commands to clear the chat",
-            "ru": "Команды для очистки чата",
-            "id": "Perintah untuk menghapus obrolan",
-            "da": "Kommandoer til at rydde chatten",
-            "de": "Befehle zum Löschen des Chats",
-            "es": "Comandos para borrar el chat",
-            "fr": "Commandes pour effacer le chat",
-            "pl": "Polecenia, aby wyczyścić czat",
-            "tr": "Sohbeti temizleme komutları"
+            "en": "Clears the chat the specified number of times",
+            "ru": "Очищает чат указанное количество раз",
+            "id": "Menghapus obrolan beberapa kali yang ditentukan",
+            "da": "Rydder chatten det angivne antal gange",
+            "de": "Löscht den Chat die angegebene Anzahl von Malen",
+            "es": "Borra el chat el número especificado de veces",
+            "fr": "Efface le chat le nombre de fois spécifié",
+            "pl": "Czyści czat określoną liczbę razy",
+            "tr": "Sohbeti belirtilen sayıda temizler"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "purge user",
+        "category": "moderation",
+        "aliases": [
+            "clear user",
+            "clean user"
+        ],
+        "arguments": [
+            "<member>",
+            "<limit>"
+        ],
+        "examples": [
+            [
+                "purge user @lordcode 10",
+                {
+                    "en": "Clear the last 10 messages sent by the lordcode member in the channel",
+                    "ru": "Очистить последние 10 сообщений, отправленных участником лордкода на канале.",
+                    "id": "Hapus 10 pesan terakhir yang dikirim oleh anggota lordcode di saluran",
+                    "da": "Ryd de sidste 10 beskeder sendt af lordcode-medlemmet i kanalen",
+                    "de": "Löschen Sie die letzten 10 Nachrichten, die vom Lordcode-Mitglied im Kanal gesendet wurden",
+                    "es": "Borra los últimos 10 mensajes enviados por el miembro de Lordcode en el canal.",
+                    "fr": "Effacez les 10 derniers messages envoyés par le membre Lordcode dans la chaîne",
+                    "pl": "Wyczyść ostatnie 10 wiadomości wysłanych przez członka lordcode na kanale",
+                    "tr": "Lordcode üyesinin kanala gönderdiği son 10 mesajı temizleyin"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Clears the chat a specified number of times after the specified user sends a message.",
+            "ru": "Очищает чат указанное количество раз после того, как указанный пользователь отправит сообщение.",
+            "id": "Menghapus obrolan beberapa kali setelah pengguna tertentu mengirim pesan.",
+            "da": "Rydder chatten et angivet antal gange, efter at den angivne bruger har sendt en besked.",
+            "de": "Löscht den Chat eine bestimmte Anzahl von Malen, nachdem der angegebene Benutzer eine Nachricht gesendet hat.",
+            "es": "Borra el chat una cantidad específica de veces después de que el usuario especificado envía un mensaje.",
+            "fr": "Efface le chat un nombre de fois spécifié après que l'utilisateur spécifié a envoyé un message.",
+            "pl": "Czyści czat określoną liczbę razy po wysłaniu wiadomości przez określonego użytkownika.",
+            "tr": "Belirtilen kullanıcı mesaj gönderdikten sonra sohbeti belirtilen sayıda temizler."
+        },
+        "brief_descriptrion": {
+            "en": "Clears the chat a specified number of times after the specified user sends a message.",
+            "ru": "Очищает чат указанное количество раз после того, как указанный пользователь отправит сообщение.",
+            "id": "Menghapus obrolan beberapa kali setelah pengguna tertentu mengirim pesan.",
+            "da": "Rydder chatten et angivet antal gange, efter at den angivne bruger har sendt en besked.",
+            "de": "Löscht den Chat eine bestimmte Anzahl von Malen, nachdem der angegebene Benutzer eine Nachricht gesendet hat.",
+            "es": "Borra el chat una cantidad específica de veces después de que el usuario especificado envía un mensaje.",
+            "fr": "Efface le chat un nombre de fois spécifié après que l'utilisateur spécifié a envoyé un message.",
+            "pl": "Czyści czat określoną liczbę razy po wysłaniu wiadomości przez określonego użytkownika.",
+            "tr": "Belirtilen kullanıcı mesaj gönderdikten sonra sohbeti belirtilen sayıda temizler."
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "purge between",
+        "category": "moderation",
+        "aliases": [
+            "clear between",
+            "clean between"
+        ],
+        "arguments": [
+            "<message_start>",
+            "[message_stop]"
+        ],
+        "examples": [
+            [
+                "purge between 1214583337776320524 1214584228889497610",
+                {
+                    "en": "Clears the chat between message 1214583337776320524 and 1214584228889497610",
+                    "ru": "Очищает чат между сообщениями 1214583337776320524 и 1214584228889497610.",
+                    "id": "Menghapus obrolan antara pesan 1214583337776320524 dan 1214584228889497610",
+                    "da": "Rydder chatten mellem besked 12145833337776320524 og 1214584228889497610",
+                    "de": "Löscht den Chat zwischen der Nachricht 1214583337776320524 und 1214584228889497610",
+                    "es": "Borra el chat entre el mensaje 1214583337776320524 y 1214584228889497610",
+                    "fr": "Efface le chat entre le message 12145833337776320524 et 1214584228889497610",
+                    "pl": "Czyści czat między wiadomościami 1214583337776320524 i 1214584228889497610",
+                    "tr": "1214583337776320524 ve 1214584228889497610 mesajları arasındaki sohbeti temizler"
+                }
+            ],
+            [
+                "purge between 1214583337776320524",
+                {
+                    "en": "Clears the chat from message 1214583337776320524 to the current one",
+                    "ru": "Очищает чат от сообщения 1214583337776320524 до текущего.",
+                    "id": "Menghapus obrolan dari pesan 1214583337776320524 ke pesan saat ini",
+                    "da": "Rydder chatten fra besked 12145833337776320524 til den nuværende",
+                    "de": "Löscht den Chat von der Nachricht 1214583337776320524 zur aktuellen",
+                    "es": "Borra el chat del mensaje 1214583337776320524 al actual",
+                    "fr": "Efface le chat du message 1214583337776320524 au message actuel",
+                    "pl": "Czyści czat z wiadomości 1214583337776320524 do bieżącej",
+                    "tr": "1214583337776320524 numaralı mesajdan mevcut mesaja kadar olan sohbeti temizler"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Clears the chat between messages",
+            "ru": "Очищает чат между сообщениями",
+            "id": "Menghapus obrolan antar pesan",
+            "da": "Rydder chatten mellem beskeder",
+            "de": "Löscht den Chat zwischen Nachrichten",
+            "es": "Borra el chat entre mensajes.",
+            "fr": "Efface le chat entre les messages",
+            "pl": "Czyści czat pomiędzy wiadomościami",
+            "tr": "Mesajlar arasındaki sohbeti temizler"
+        },
+        "brief_descriptrion": {
+            "en": "Clears the chat between messages",
+            "ru": "Очищает чат между сообщениями",
+            "id": "Menghapus obrolan antar pesan",
+            "da": "Rydder chatten mellem beskeder",
+            "de": "Löscht den Chat zwischen Nachrichten",
+            "es": "Borra el chat entre mensajes.",
+            "fr": "Efface le chat entre les messages",
+            "pl": "Czyści czat pomiędzy wiadomościami",
+            "tr": "Mesajlar arasındaki sohbeti temizler"
         },
         "allowed_disabled": true
     },
@@ -681,22 +1067,35 @@
         "aliases": [],
         "arguments": [
             "<member>",
-            "<roles>",
+            "<role>",
             "<time>"
         ],
         "examples": [
-            ["temp-role @member @role1 @role2 12h", "Issues the role of role1 and role2 for 12 hours to the participant."]
+            [
+                "temp-role @lordcode @role 12h",
+                {
+                    "en": "Issues the role of role for 12 hours to the participant lordcode.",
+                    "ru": "Выдает участнику лордкод роль на 12 часов.",
+                    "id": "Mengeluarkan peran peran selama 12 jam ke lordcode peserta.",
+                    "da": "Uddeler rollen som rolle i 12 timer til deltagerens herrekode.",
+                    "de": "Vergibt die Rolle der Rolle für 12 Stunden an den Teilnehmer-Lordcode.",
+                    "es": "Emite el rol de rol durante 12 horas al participante lordcode.",
+                    "fr": "Attribue le rôle de rôle pendant 12 heures au Lordcode du participant.",
+                    "pl": "Przydziela rolę roli na 12 godzin użytkownikowi lordcode.",
+                    "tr": "Katılımcı lord koduna 12 saatlik rol rolünü verir."
+                }
+            ]
         ],
         "descriptrion": {
-            "en": "Adds roles to a certain participant for a while or forever\nIf the role is not specified, the role will be assigned forever\nYou can summarize the roles\nThe time is indicated in the format `1d1h1m1s` the values can be combined and also duplicated, for example `1d2h1d`",
-            "ru": "Добавляет роли определенному участнику на некоторое время или навсегда\nЕсли роль не указана, она будет назначена навсегда\nВы можете суммировать роли\nВремя указано в формате `1d1h1m1s` значения могут комбинироваться, а также дублироваться, например `1d2h1d`",
-            "id": "Menambahkan peran ke peserta tertentu untuk sementara atau selamanya\nJika peran tidak ditentukan, peran tersebut akan ditetapkan selamanya\nAnda dapat meringkas peran\nWaktu ditunjukkan dalam format '1d1h1m1s' nilainya dapat digabungkan dan juga digandakan, misalnya `1d2h1d`",
-            "da": "Tilføjer roller til en bestemt deltager i et stykke tid eller for evigt\nHvis rollen ikke er angivet, vil rollen blive tildelt for evigt\nDu kan opsummere rollerne\nTiden er angivet i formatet '1d1h1m1s' værdierne kan kombineres og også duplikeres, for eksempel `1d2h1d`",
-            "de": "Fügt einem bestimmten Teilnehmer für eine Weile oder für immer Rollen hinzu\nWenn die Rolle nicht angegeben ist, wird die Rolle für immer zugewiesen\nSie können die Rollen zusammenfassen\nDie Uhrzeit wird im Format `1t1h1m1s' angegeben Die Werte können kombiniert und auch dupliziert werden, zum Beispiel `1t2h1d`",
-            "es": "Agrega roles a un determinado participante por un tiempo o para siempre\nSi no se especifica el rol, el rol se asignará para siempre\nPuedes resumir los roles\nLa hora se indica en el formato` 1d1h1m1s' los valores se pueden combinar y también duplicar, por ejemplo `1d2h1d`\n\nEjemplo:",
-            "fr": "Ajoute des rôles à un certain participant pendant un certain temps ou pour toujours\nSi le rôle n'est pas spécifié, le rôle sera attribué pour toujours\nVous pouvez résumer les rôles\nL'heure est indiquée au format '1d1h1m1s' les valeurs peuvent être combinées et également dupliquées, par exemple `1d2h1d`",
-            "pl": "Dodaje role do określonego uczestnika na chwilę lub na zawsze\nJeśli rola nie jest określona, rola zostanie przypisana na zawsze\nMożesz podsumować role\nCzas jest wskazany w formacie '1d1h1m1s' wartości można łączyć, a także powielać, na przykład '1d2h1d`",
-            "tr": "Belirli bir katılımcıya bir süre veya sonsuza kadar roller ekler\nRol belirtilmezse, rol sonsuza dek atanacaktır\nRolleri özetleyebilirsiniz\nZaman '1d1h1m1s' biçiminde gösterilir değerler birleştirilebilir ve ayrıca çoğaltılabilir, örneğin '1d2h1d`"
+            "en": "Adds roles to a certain participant for a while or forever\nYou can summarize the roles\nThe time is indicated in the format `1d1h1m1s` the values can be combined and also duplicated, for example `1d2h1d`",
+            "ru": "Добавляет роли определенному участнику на некоторое время или навсегда\nВы можете суммировать роли\nВремя указано в формате `1d1h1m1s` значения могут комбинироваться, а также дублироваться, например `1d2h1d`",
+            "id": "Menambahkan peran ke peserta tertentu untuk sementara atau selamanya\nAnda dapat meringkas peran\nWaktu ditunjukkan dalam format '1d1h1m1s' nilainya dapat digabungkan dan juga digandakan, misalnya `1d2h1d`",
+            "da": "Tilføjer roller til en bestemt deltager i et stykke tid eller for evigt\nDu kan opsummere rollerne\nTiden er angivet i formatet '1d1h1m1s' værdierne kan kombineres og også duplikeres, for eksempel `1d2h1d`",
+            "de": "Fügt einem bestimmten Teilnehmer für eine Weile oder für immer Rollen hinzu\nSie können die Rollen zusammenfassen\nDie Uhrzeit wird im Format `1t1h1m1s' angegeben Die Werte können kombiniert und auch dupliziert werden, zum Beispiel `1t2h1d`",
+            "es": "Agrega roles a un determinado participante por un tiempo o para siempre\nPuedes resumir los roles\nLa hora se indica en el formato` 1d1h1m1s' los valores se pueden combinar y también duplicar, por ejemplo `1d2h1d`\n\nEjemplo:",
+            "fr": "Ajoute des rôles à un certain participant pendant un certain temps ou pour toujours\nL'heure est indiquée au format '1d1h1m1s' les valeurs peuvent être combinées et également dupliquées, par exemple `1d2h1d`",
+            "pl": "Dodaje role do określonego uczestnika na chwilę lub na zawsze\nMożesz podsumować role\nCzas jest wskazany w formacie '1d1h1m1s' wartości można łączyć, a także powielać, na przykład '1d2h1d`",
+            "tr": "Belirli bir katılımcıya bir süre veya sonsuza kadar roller ekler\nZaman '1d1h1m1s' biçiminde gösterilir değerler birleştirilebilir ve ayrıca çoğaltılabilir, örneğin '1d2h1d`"
         },
         "brief_descriptrion": {
             "en": "Adds roles to a certain participant for a while or forever",
@@ -717,6 +1116,36 @@
         "aliases": [],
         "arguments": [
             "[member]"
+        ],
+        "examples": [
+            [
+                "temp-role list",
+                {
+                    "en": "Shows all temporary roles",
+                    "ru": "Показывает все временные роли",
+                    "id": "Menampilkan semua peran sementara",
+                    "da": "Viser alle midlertidige roller",
+                    "de": "Zeigt alle temporären Rollen an",
+                    "es": "Muestra todos los roles temporales",
+                    "fr": "Affiche tous les rôles temporaires",
+                    "pl": "Pokazuje wszystkie role tymczasowe",
+                    "tr": "Tüm geçici rolleri gösterir"
+                }
+            ],
+            [
+                "temp-role list @lordcode",
+                {
+                    "en": "Shows all temporary roles assigned to the lordcode member",
+                    "ru": "Показывает все временные роли, назначенные участнику лордкода.",
+                    "id": "Menampilkan semua peran sementara yang ditetapkan ke anggota lordcode",
+                    "da": "Viser alle midlertidige roller, der er tildelt lordcode-medlemmet",
+                    "de": "Zeigt alle temporären Rollen an, die dem Lordcode-Mitglied zugewiesen sind",
+                    "es": "Muestra todos los roles temporales asignados al miembro de Lordcode",
+                    "fr": "Affiche tous les rôles temporaires attribués au membre Lordcode",
+                    "pl": "Pokazuje wszystkie tymczasowe role przypisane do członka lordcode",
+                    "tr": "Lordcode üyesine atanan tüm geçici rolleri gösterir"
+                }
+            ]
         ],
         "descriptrion": {
             "en": "Provides a list of temporary roles for the server or member.\nIf `member` is not specified, it shows a list of all temporary roles on the server.\nIf specified, it shows only those roles that belong to the participant.\nThe roles assigned to are always not shown in the list.",
@@ -749,6 +1178,36 @@
         "arguments": [
             "<text/json>"
         ],
+        "examples": [
+            [
+                "say Hello",
+                {
+                    "en": "Send `Hello` to the current chat.",
+                    "ru": "Отправьте «Привет» в текущий чат.",
+                    "id": "Kirim `Halo` ke obrolan saat ini.",
+                    "da": "Send \"Hej\" til den aktuelle chat.",
+                    "de": "Senden Sie „Hallo“ an den aktuellen Chat.",
+                    "es": "Envía \"Hola\" al chat actual.",
+                    "fr": "Envoyez « Bonjour » au chat en cours.",
+                    "pl": "Wyślij „Witam” do bieżącego czatu.",
+                    "tr": "Mevcut sohbete 'Merhaba' gönderin."
+                }
+            ],
+            [
+                "say {\"title\": \"Hello\"}",
+                {
+                    "en": "Send embed with title `Hello` to the current chat.",
+                    "ru": "Отправьте вставку с заголовком «Привет» в текущий чат.",
+                    "id": "Kirim penyematan dengan judul `Halo` ke obrolan saat ini.",
+                    "da": "Send indlejring med titlen \"Hej\" til den aktuelle chat.",
+                    "de": "Einbettung mit dem Titel „Hallo“ an den aktuellen Chat senden.",
+                    "es": "Enviar inserción con el título \"Hola\" al chat actual.",
+                    "fr": "Envoyez l'intégration avec le titre « Bonjour » au chat actuel.",
+                    "pl": "Wyślij osadzenie z tytułem „Witam” do bieżącego czatu.",
+                    "tr": "Mevcut sohbete 'Merhaba' başlığını içeren yerleştirmeyi gönderin."
+                }
+            ]
+        ],
         "descriptrion": {
             "en": "Sends a message on behalf of the bot using a unique [**embed builder**](<https://lordcord.fun/embed-builder>) or plain text",
             "ru": "Отправляет сообщение от имени бота, используя уникальный [**embed конструктор**](<https://lordcord.fun/embed-builder>) или обычный текст",
@@ -763,13 +1222,13 @@
         "brief_descriptrion": {
             "en": "Sends a message",
             "ru": "Отправляет сообщение",
-            "id": "",
-            "da": "",
-            "de": "",
-            "es": "",
-            "fr": "",
-            "pl": "",
-            "tr": ""
+            "id": "Mengirim pesan",
+            "da": "Sender en besked",
+            "de": "Sendet eine Nachricht",
+            "es": "Envía un mensaje",
+            "fr": "Envoie un message",
+            "pl": "Wysyła wiadomość",
+            "tr": "Bir mesaj gönderir"
         },
         "allowed_disabled": true
     },

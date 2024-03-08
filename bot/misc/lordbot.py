@@ -35,6 +35,17 @@ class LordBot(commands.Bot):
         ------
         TypeError
             The coroutine passed is not actually a coroutine.
+
+        Example
+        -------
+
+        .. code-block:: python3
+
+            async def on_ready(): pass
+            async def my_message(message): pass
+
+            bot.add_event(on_ready)
+            bot.add_event(my_message, 'on_message')
         """
 
         if not asyncio.iscoroutinefunction(coro):

@@ -123,7 +123,7 @@ class economy(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="leaderboard")
+    @commands.command(name="leaderboard", aliases=["lb", "leaders", "top"])
     async def leaderboard(self, ctx: commands.Context):
         message = await ctx.send("Uploading data...")
 

@@ -246,7 +246,7 @@ class moderations(commands.Cog):
 
         await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}', ephemeral=True)
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, aliases=["clear", "clean"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx: commands.Context, limit: int):
         if limit > 200:

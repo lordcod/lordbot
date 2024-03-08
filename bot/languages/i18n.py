@@ -32,7 +32,6 @@ def add_res_translation(key: str, value: str, locale: str):
 
 
 def add_translation(key: str, value: str, locale: Optional[str] = None, loadable: bool = False) -> None:
-    print(f"Parse add translaion {key} = {value}")
     locale = locale or config.get('locale')
     memoization_dict.setdefault(locale, {})
     memoization_dict[locale][key] = value
@@ -154,12 +153,16 @@ if __name__ == "__main__":
     #     print(trd)
     #     parser(trd, lang, "settings.music", loadable=False)
 
+    # data = translation_with_languages(
+    #     "en", "Launch the song from the specified link.", default_languages)
+    # print(orjson.dumps(data).decode())
+
     # add_dict_translations(
     #     "help.record", translation_with_languages("en", "Record", default_languages))
 
-    data = to_any_locales()
-    with open("test_loc.json", "wb") as file:
-        jsondata = orjson.dumps(data)
-        file.write(jsondata)
+    # data = to_any_locales()
+    # with open("test_loc.json", "wb") as file:
+    #     jsondata = orjson.dumps(data)
+    #     file.write(jsondata)
 
-    to_folder("./bot/languages/localization")
+    # to_folder("./bot/languages/localization")
