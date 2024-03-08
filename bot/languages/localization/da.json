@@ -1,1 +1,260 @@
-{"bot-info":{"title":"{name} dette er en multifunktionel bot","description":"Botten er designet til at lette serverstyring og er udstyret med forskellige automatiseringsværktøjer","info-server":"Oplysninger om serveren","prefix-server":"> Serverpræfiks - `{prefix}`"},"translate":{"placeholder":"Vil vælge det passende sprog:","failed":"Denne meddelelse har intet indhold, så vi kan ikke oversætte den."},"captcha":{"congratulation":"Tillykke, du har bestået captchaen!","enter":"Du har 30 sekunder til at løse captchaen!","failed":"Captcha mislykkedes"},"activiti":{"failed":"Denne aktivitet er ikke tilgængelig eller virker ikke","embed":{"title":"Aktiviteten er blevet oprettet!","description":"Nogle typer aktiviteter er dog muligvis ikke tilgængelige for din server, hvis boostniveauet ikke opfylder aktivitetskravene."},"fields":{"label":"Aktivitetsnavn","max-user":"Maksimalt antal brugere"}},"help":{"title":"Hjælpebog","arguments":"[Valgfrit] / < påkrævet>","command-embed":{"title":"hjælp på kommandoen `{name}`.","info":"Oplysninger","category":"Category: `{category_emoji}{category_name}`\n","aliases":"Aliases: {aliases}\n","disable_command":"kan jeg slå den fra? **{value}**\n","connection_disabled":{"0":"Nej","1":"Ja"},"using_command":"Using: `{using}`\n","example":"eksempel, der viser{nummer}"},"command-notfound":{"title":"kommando ikke fundet","description":"når vi søgte efter kommando, fandt vi det ikke, se på det igen i den generelle liste over kommandoer"},"command-invalid":{"title":"kommandoen er ugyldig","description":"sandsynligvis indtastede du navnet på holdet forkert, måske indeholder det nogle mærkelige tegn"}},"errors":{"MissingPermissions":"Du har ikke nok rettigheder","MissingRole":"Du har ikke en passende rolle til at udføre kommandoen","MissingChannel":"Du kan ikke udføre denne kommando i denne kanal","NotOwner":"Denne kommando er beregnet til bot-ejeren","CommandNotFound":"Der er ingen sådan kommando","CheckFailure":"Du opfylder ikke alle betingelserne","BadArgument":"Ugyldigt argument indtastet","DisabledCommand":"Denne kommando er deaktiveret på serveren","MissingRequiredArgument":"Du har ikke indtastet et påkrævet argument","NotActivateEconomy":"Økonomisystemet er deaktiveret på serveren","OnlyTeamError":"Denne kommando kan kun bruges af bot-teamet","MemberNotFound":"Deltageren kunne ikke findes","CommandOnCooldown":{"title":"Kommandoen er i venteposition","description":"Prøv igen efter {delay}."}},"music-selector":{"title":"Vælg det spor, du er interesseret i!","placeholder":"Vælg et spor"},"ideas":{"globals":{"title":"Foreslå en idé","ideas-disabled":"Modulet **idé** er deaktiveret på denne server","embed-title":"Ny idé!"},"confirm-modal":{"reason-label":"Argument:","embed":{"title":"Ny idé!","field":"Gammel idé!"},"idea":{"content":"Din idé er godkendt!","embed":{"title":"Idéen er godkendt!","field":"Essensen af ​​ideen:","reason":"Bekræftelsesargument:"}}},"confirm-view":{"button":{"approve":"Godkende","deny":"Nægte"},"old-idea":"En forældet idé!","idea":"Ide:","refused":"Afviste","idea-content":"Din idé er blevet afvist!"},"idea-modal":{"label":"Fortæl os om din idé","placeholder":"Beskriv din idé så detaljeret som muligt med brugseksempler.","embed-description":"Om ideen bliver godkendt eller ej afhænger af dig!","idea":"Ide:","thread-name":"Diskussion af ideen fra {name}"},"idea-view.timeout-message":"Du kan kun foreslå en idé én gang hvert 30. minut\nNæste mulighed for at indsende en idé vil være gennem:"},"settings":{"start":{"title":"Konfiguration af bot-modulerne.","choose":"Vælg indstillinger...","description":"Interager med rullemenuen for at konfigurere serveren.","request":"Anmodning fra {name}"},"module-name":{"economy":"Økonomi","languages":"Sprog","prefix":"Præfiks","music":"musik","color":"Farve på systemmeddelelser","reactions":"Auto reaktioner","thread":"Automatisk besked i en tråd/indlæg","command-permission":"Kommandoindstillinger","ideas":"Ideer","welcomer":"Velkommen til nye medlemmer","auto-roles":"Automatiske roller"},"button":{"back":"Tilbage","edit":"Redigere","reset":"Nulstil","add":"Tilføje"},"prefix":{"title":"Præfiks","description":"Indstilling af det præfiks, som botten vil reagere på, når kommandoen kaldes.","current":"Det nuværende præfiks er {prefix}"},"languages":{"title":"Sprog","description":"Denne indstilling ændrer sproget for at arbejde med botten.","choose":"Vælg sprog for serveren:"},"color":{"not-valid":"Hexkodeformatet er forkert","title":"Farve på systemmeddelelser","description":"Når du bruger kommandoer, viser botten indsæt, der har en usynlig farve som standard.\n\nDu kan indstille din farve i henhold til temaet for dit fællesskab.","current":"Nuværende farve"},"auto-role":{"button":{"install":"Installer roller","delete":"Slet roller"},"placeholder":"Vælg automatisk tildelte roller til nye medlemmer","embed":{"title":"Automatiske roller","description":"Kontrolpanelet for automatiske roller.\nDu kan installere, redigere, slette og se sådanne handlinger fra panelet.\nHvis du ikke kan se autorollerne, så er de ikke valgt!","field":"Udvalgte roller:"}},"welcomer":{"button":{"delete":"Slet besked","view":"Se besked","install":"Installationsmeddelelse"},"embed":{"title":"Besked hilsen","description":"Automatisk afsendelse af beskeder, når en deltager logger på serveren\n\nHvis du vil ændre kanalen, skal du blot vælge den igen og indstille beskeden\n\nFor at ændre en besked skal du vælge den aktuelle kanal og indstille en ny besked til den","field":{"selected":"Valgt hilsen kanal: {channel}","failure":"Ikke alle data er indsamlet endnu."}},"dropdown-placeholder":"Vælg velkomstkanalen","modal":{"title":"Besked hilsen","label":"Besked","placeholder":"Du kan også bruge embed builder"}},"thread":{"init":{"title":"Automatiske beskeder i fora/tråde","brief":"Auto-beskeder","description":"Tilføj eller rediger dine automatiske indlæg i fora/tråde","placeholder":"Indstillinger for automatisk besked i filialer/fora:","channel":"Kanal: {channel}"},"addptional":{"button.install_mes":"Installationsmeddelelse","channel-error":"Automatiske beskeder er allerede blevet installeret på denne kanal","placeholder":"Vælg en kanal til automatiske beskeder"},"thread":{"mes-not-found":"Ingen besked fundet","button":{"view":"Se beskeden","edit":"Rediger en besked","delete":"Slet en besked"}},"modal":{"label":"Besked:","title":"Auto-beskeder","placeholder":"Du kan også bruge embed-builder"}},"reactions":{"init":{"title":"Automatiske reaktioner","brief":"Autoreaktioner","description":"Styring af automatisk tilføjelse af reaktioner i kanaler","emoji":"Emoji","channel":"Kanal","placeholder":"Indstillinger for autoreaktion:"},"addres":{"channel-error":"Autoreaktioner er allerede blevet installeret på denne kanal","install_emoji":"Installer emoji","placeholder":"Vælg en kanal til autoreaktioner"},"buttons":{"delete":"Slet reaktion","edit":"Rediger reaktion"},"modal":{"title":"Autoreaktion","label":"Emoji:"}}}}
+{
+    "bot-info": {
+        "title": "{name} dette er en multifunktionel bot",
+        "description": "Botten er designet til at lette serverstyring og er udstyret med forskellige automatiseringsværktøjer",
+        "info-server": "Oplysninger om serveren",
+        "prefix-server": "> Serverpræfiks - `{prefix}`"
+    },
+    "translate": {
+        "placeholder": "Vil vælge det passende sprog:",
+        "failed": "Denne meddelelse har intet indhold, så vi kan ikke oversætte den."
+    },
+    "captcha": {
+        "congratulation": "Tillykke, du har bestået captchaen!",
+        "enter": "Du har 30 sekunder til at løse captchaen!",
+        "failed": "Captcha mislykkedes"
+    },
+    "activiti": {
+        "failed": "Denne aktivitet er ikke tilgængelig eller virker ikke",
+        "embed": {
+            "title": "Aktiviteten er blevet oprettet!",
+            "description": "Nogle typer aktiviteter er dog muligvis ikke tilgængelige for din server, hvis boostniveauet ikke opfylder aktivitetskravene."
+        },
+        "fields": {
+            "label": "Aktivitetsnavn",
+            "max-user": "Maksimalt antal brugere"
+        }
+    },
+    "help": {
+        "title": "Hjælpebog",
+        "arguments": "[Valgfrit] / < påkrævet>",
+        "command-embed": {
+            "title": "hjælp på kommandoen `{name}`.",
+            "info": "Oplysninger",
+            "category": "Category: `{category_emoji}{category_name}`\n",
+            "aliases": "Aliases: {aliases}\n",
+            "disable_command": "kan jeg slå den fra? **{value}**\n",
+            "connection_disabled": {
+                "0": "Nej",
+                "1": "Ja"
+            },
+            "using_command": "Using: `{using}`\n",
+            "example": "eksempel, der viser{nummer}"
+        },
+        "command-notfound": {
+            "title": "kommando ikke fundet",
+            "description": "når vi søgte efter kommando, fandt vi det ikke, se på det igen i den generelle liste over kommandoer"
+        },
+        "command-invalid": {
+            "title": "kommandoen er ugyldig",
+            "description": "sandsynligvis indtastede du navnet på holdet forkert, måske indeholder det nogle mærkelige tegn"
+        }
+    },
+    "errors": {
+        "MissingPermissions": "Du har ikke nok rettigheder",
+        "MissingRole": "Du har ikke en passende rolle til at udføre kommandoen",
+        "MissingChannel": "Du kan ikke udføre denne kommando i denne kanal",
+        "NotOwner": "Denne kommando er beregnet til bot-ejeren",
+        "CommandNotFound": "Der er ingen sådan kommando",
+        "CheckFailure": "Du opfylder ikke alle betingelserne",
+        "BadArgument": "Ugyldigt argument indtastet",
+        "DisabledCommand": "Denne kommando er deaktiveret på serveren",
+        "MissingRequiredArgument": "Du har ikke indtastet et påkrævet argument",
+        "NotActivateEconomy": "Økonomisystemet er deaktiveret på serveren",
+        "OnlyTeamError": "Denne kommando kan kun bruges af bot-teamet",
+        "MemberNotFound": "Deltageren kunne ikke findes",
+        "CommandOnCooldown": {
+            "title": "Kommandoen er i venteposition",
+            "description": "Prøv igen efter {delay}."
+        }
+    },
+    "music-selector": {
+        "title": "Vælg det spor, du er interesseret i!",
+        "placeholder": "Vælg et spor"
+    },
+    "ideas": {
+        "globals": {
+            "title": "Foreslå en idé",
+            "ideas-disabled": "Modulet **idé** er deaktiveret på denne server",
+            "embed-title": "Ny idé!"
+        },
+        "confirm-modal": {
+            "reason-label": "Argument:",
+            "embed": {
+                "title": "Ny idé!",
+                "field": "Gammel idé!"
+            },
+            "idea": {
+                "content": "Din idé er godkendt!",
+                "embed": {
+                    "title": "Idéen er godkendt!",
+                    "field": "Essensen af ​​ideen:",
+                    "reason": "Bekræftelsesargument:"
+                }
+            }
+        },
+        "confirm-view": {
+            "button": {
+                "approve": "Godkende",
+                "deny": "Nægte"
+            },
+            "old-idea": "En forældet idé!",
+            "idea": "Ide:",
+            "refused": "Afviste",
+            "idea-content": "Din idé er blevet afvist!"
+        },
+        "idea-modal": {
+            "label": "Fortæl os om din idé",
+            "placeholder": "Beskriv din idé så detaljeret som muligt med brugseksempler.",
+            "embed-description": "Om ideen bliver godkendt eller ej afhænger af dig!",
+            "idea": "Ide:",
+            "thread-name": "Diskussion af ideen fra {name}"
+        },
+        "idea-view.timeout-message": "Du kan kun foreslå en idé én gang hvert 30. minut\nNæste mulighed for at indsende en idé vil være gennem:"
+    },
+    "settings": {
+        "start": {
+            "title": "Konfiguration af bot-modulerne.",
+            "choose": "Vælg indstillinger...",
+            "description": "Interager med rullemenuen for at konfigurere serveren.",
+            "request": "Anmodning fra {name}"
+        },
+        "module-name": {
+            "economy": "Økonomi",
+            "languages": "Sprog",
+            "prefix": "Præfiks",
+            "music": "musik",
+            "color": "Farve på systemmeddelelser",
+            "reactions": "Auto reaktioner",
+            "thread": "Automatisk besked i en tråd/indlæg",
+            "command-permission": "Kommandoindstillinger",
+            "ideas": "Ideer",
+            "welcomer": "Velkommen til nye medlemmer",
+            "auto-roles": "Automatiske roller"
+        },
+        "button": {
+            "back": "Tilbage",
+            "edit": "Redigere",
+            "reset": "Nulstil",
+            "add": "Tilføje"
+        },
+        "prefix": {
+            "title": "Præfiks",
+            "description": "Indstilling af det præfiks, som botten vil reagere på, når kommandoen kaldes.",
+            "current": "Det nuværende præfiks er {prefix}"
+        },
+        "languages": {
+            "title": "Sprog",
+            "description": "Denne indstilling ændrer sproget for at arbejde med botten.",
+            "choose": "Vælg sprog for serveren:"
+        },
+        "color": {
+            "not-valid": "Hexkodeformatet er forkert",
+            "title": "Farve på systemmeddelelser",
+            "description": "Når du bruger kommandoer, viser botten indsæt, der har en usynlig farve som standard.\n\nDu kan indstille din farve i henhold til temaet for dit fællesskab.",
+            "current": "Nuværende farve"
+        },
+        "auto-role": {
+            "button": {
+                "install": "Installer roller",
+                "delete": "Slet roller"
+            },
+            "placeholder": "Vælg automatisk tildelte roller til nye medlemmer",
+            "embed": {
+                "title": "Automatiske roller",
+                "description": "Kontrolpanelet for automatiske roller.\nDu kan installere, redigere, slette og se sådanne handlinger fra panelet.\nHvis du ikke kan se autorollerne, så er de ikke valgt!",
+                "field": "Udvalgte roller:"
+            }
+        },
+        "welcomer": {
+            "button": {
+                "delete": "Slet besked",
+                "view": "Se besked",
+                "install": "Installationsmeddelelse"
+            },
+            "embed": {
+                "title": "Besked hilsen",
+                "description": "Automatisk afsendelse af beskeder, når en deltager logger på serveren\n\nHvis du vil ændre kanalen, skal du blot vælge den igen og indstille beskeden\n\nFor at ændre en besked skal du vælge den aktuelle kanal og indstille en ny besked til den",
+                "field": {
+                    "selected": "Valgt hilsen kanal: {channel}",
+                    "failure": "Ikke alle data er indsamlet endnu."
+                }
+            },
+            "dropdown-placeholder": "Vælg velkomstkanalen",
+            "modal": {
+                "title": "Besked hilsen",
+                "label": "Besked",
+                "placeholder": "Du kan også bruge embed builder"
+            }
+        },
+        "thread": {
+            "init": {
+                "title": "Automatiske beskeder i fora/tråde",
+                "brief": "Auto-beskeder",
+                "description": "Tilføj eller rediger dine automatiske indlæg i fora/tråde",
+                "placeholder": "Indstillinger for automatisk besked i filialer/fora:",
+                "channel": "Kanal: {channel}"
+            },
+            "addptional": {
+                "button.install_mes": "Installationsmeddelelse",
+                "channel-error": "Automatiske beskeder er allerede blevet installeret på denne kanal",
+                "placeholder": "Vælg en kanal til automatiske beskeder"
+            },
+            "thread": {
+                "mes-not-found": "Ingen besked fundet",
+                "button": {
+                    "view": "Se beskeden",
+                    "edit": "Rediger en besked",
+                    "delete": "Slet en besked"
+                }
+            },
+            "modal": {
+                "label": "Besked:",
+                "title": "Auto-beskeder",
+                "placeholder": "Du kan også bruge embed-builder"
+            }
+        },
+        "reactions": {
+            "init": {
+                "title": "Automatiske reaktioner",
+                "brief": "Autoreaktioner",
+                "description": "Styring af automatisk tilføjelse af reaktioner i kanaler",
+                "emoji": "Emoji",
+                "channel": "Kanal",
+                "placeholder": "Indstillinger for autoreaktion:"
+            },
+            "addres": {
+                "channel-error": "Autoreaktioner er allerede blevet installeret på denne kanal",
+                "install_emoji": "Installer emoji",
+                "placeholder": "Vælg en kanal til autoreaktioner"
+            },
+            "buttons": {
+                "delete": "Slet reaktion",
+                "edit": "Rediger reaktion"
+            },
+            "modal": {
+                "title": "Autoreaktion",
+                "label": "Emoji:"
+            }
+        },
+        "music": {
+            "title": "musik",
+            "max-queue-size": {
+                "name": "Maksimal størrelse",
+                "description": "Maksimal sporkøstelængde.",
+                "value": "Maksimal køstørrelse: {size}"
+            },
+            "default-volume": {
+                "name": "Standardvolumen",
+                "description": "Standardmusikvolumen.",
+                "value": "Standardvolumenmusik: {volume}"
+            },
+            "dj-roles": {
+                "failed": "Rollen {role} kan ikke tildeles og bruges til integration eller af en bot.",
+                "name": "DJ-roller",
+                "description": "Roller, der kan kontrollere musik.",
+                "value": "DJ-roller: {roles}"
+            }
+        }
+    }
+}

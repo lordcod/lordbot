@@ -338,17 +338,6 @@
                 "ru": "Скорее всего вы неправильно ввели название команды, возможно оно содержит какие-то странные символы",
                 "tr": "Büyük olasılıkla takımın adını yanlış girdiniz, belki de bazı garip karakterler içeriyor"
             }
-        },
-        "record": {
-            "da": "Optage",
-            "de": "Aufzeichnen",
-            "en": "Record",
-            "es": "Registro",
-            "fr": "Enregistrer",
-            "id": "Catatan",
-            "pl": "Nagrywać",
-            "ru": "Записывать",
-            "tr": "Kayıt"
         }
     },
     "errors": {
@@ -1674,42 +1663,130 @@
         },
         "music": {
             "title": {
-                "en": "Music"
+                "da": "musik",
+                "de": "Musik",
+                "en": "Music",
+                "es": "Música",
+                "fr": "Musique",
+                "id": "Musik",
+                "pl": "Muzyka",
+                "ru": "Музыка",
+                "tr": "Müzik"
             },
             "max-queue-size": {
                 "name": {
-                    "en": "Max size"
+                    "da": "Maksimal størrelse",
+                    "de": "maximale Größe",
+                    "en": "Max size",
+                    "es": "tamaño máximo",
+                    "fr": "taille max",
+                    "id": "Ukuran maksimal",
+                    "pl": "największy rozmiar",
+                    "ru": "Максимальный размер",
+                    "tr": "Maksimum Boyut"
                 },
                 "description": {
-                    "en": "Maximum track queue lenght."
+                    "da": "Maksimal sporkøstelængde.",
+                    "de": "Maximale Länge der Spurwarteschlange.",
+                    "en": "Maximum track queue lenght.",
+                    "es": "Longitud máxima de la cola de pista.",
+                    "fr": "Longueur de file d'attente de piste maximale.",
+                    "id": "Panjang antrian trek maksimum.",
+                    "pl": "Maksymalna długość kolejki toru.",
+                    "ru": "Максимальная длина очереди треков.",
+                    "tr": "Maksimum parça kuyruk uzunluğu."
                 },
                 "value": {
-                    "en": "Maximum queue size: {size}\n"
+                    "da": "Maksimal køstørrelse: {størrelse}",
+                    "de": "Maximale Warteschlangengröße: {Größe}",
+                    "en": "Maximum queue size: {size}\n",
+                    "es": "Tamaño máximo de la cola: {tamaño}",
+                    "fr": "Taille maximale de la file d'attente: {taille}",
+                    "id": "Ukuran antrian maksimum: {size}",
+                    "pl": "Maksymalny rozmiar kolejki: {rozmiar}",
+                    "ru": "Максимальный размер очереди: {размер}",
+                    "tr": "Maksimum kuyruk boyutu: {boyut}"
                 }
             },
             "default-volume": {
                 "name": {
-                    "en": "Default volume"
+                    "da": "Standardvolumen",
+                    "de": "Standardlautstärke",
+                    "en": "Default volume",
+                    "es": "Volumen predeterminado",
+                    "fr": "Volume par défaut",
+                    "id": "Volume default",
+                    "pl": "Domyślna objętość",
+                    "ru": "Громкость по умолчанию",
+                    "tr": "Varsayılan ses"
                 },
                 "description": {
-                    "en": "The default music volume."
+                    "da": "Standardmusikvolumen.",
+                    "de": "Die Standard -Musikvolumen.",
+                    "en": "The default music volume.",
+                    "es": "El volumen de música predeterminado.",
+                    "fr": "Le volume de musique par défaut.",
+                    "id": "Volume musik default.",
+                    "pl": "Domyślny tom muzyczny.",
+                    "ru": "Том по умолчанию Music.",
+                    "tr": "Varsayılan müzik hacmi."
                 },
                 "value": {
-                    "en": "Default volume music: {volume}\n"
+                    "da": "Standardvolumenmusik: {bind}",
+                    "de": "Standardvolumenmusik: {Volume}",
+                    "en": "Default volume music: {volume}\n",
+                    "es": "Música de volumen predeterminada: {volumen}",
+                    "fr": "Musique de volume par défaut: {volume}",
+                    "id": "Musik volume default: {volume}",
+                    "pl": "Domyślna muzyka woluminów: {Volume}",
+                    "ru": "По умолчанию Music: {Volume}",
+                    "tr": "Varsayılan cilt müzik: {cilt}"
                 }
             },
             "dj-roles": {
                 "failed": {
-                    "en": "The {role} role cannot be assigned and is used for integration or by a bot."
+                    "da": "Rollen {roll} kan ikke tildeles og bruges til integration eller af en bot.",
+                    "de": "Die Rolle {Rolle} kann nicht zugewiesen werden und wird zur Integration oder von einem Bot verwendet.",
+                    "en": "The {role} role cannot be assigned and is used for integration or by a bot.",
+                    "es": "El rol {rol} no se puede asignar y se usa para la integración o por un bot.",
+                    "fr": "Le rôle {rôle} ne peut pas être attribué et est utilisé pour l'intégration ou par un bot.",
+                    "id": "Peran {peran} tidak dapat ditetapkan dan digunakan untuk integrasi atau dengan bot.",
+                    "pl": "Rola {roli} nie można przypisać i służy do integracji lub przez bot.",
+                    "ru": "Роль {роли} не может быть назначена и используется для интеграции или бота.",
+                    "tr": "{Rol} rolü atanamaz ve entegrasyon veya bir bot tarafından kullanılır."
                 },
                 "name": {
-                    "en": "Dj-roles"
+                    "da": "DJ-roller",
+                    "de": "DJ-Rollen",
+                    "en": "Dj-roles",
+                    "es": "Roles de DJ",
+                    "fr": "Dj",
+                    "id": "DJ-ROLE",
+                    "pl": "Role DJ-a",
+                    "ru": "DJ-Roles",
+                    "tr": "DJ Rolleri"
                 },
                 "description": {
-                    "en": "Roles that can control music."
+                    "da": "Roller, der kan kontrollere musik.",
+                    "de": "Rollen, die Musik steuern können.",
+                    "en": "Roles that can control music.",
+                    "es": "Roles que pueden controlar la música.",
+                    "fr": "Rôles qui peuvent contrôler la musique.",
+                    "id": "Peran yang dapat mengontrol musik.",
+                    "pl": "Role, które mogą kontrolować muzykę.",
+                    "ru": "Роли, которые могут контролировать музыку.",
+                    "tr": "Müziği kontrol edebilen roller."
                 },
                 "value": {
-                    "en": "Dj-roles: {roles}"
+                    "da": "DJ-roller: {roller}",
+                    "de": "DJ-Rollen: {Rollen}",
+                    "en": "Dj-roles: {roles}",
+                    "es": "DJ-Roles: {roles}",
+                    "fr": "DJ rôles: {rôles}",
+                    "id": "Dj-roles: {peran}",
+                    "pl": "Role DJ: {Roles}",
+                    "ru": "DJ-Rololes: {Roles}",
+                    "tr": "DJ-Roles: {Roller}"
                 }
             }
         }

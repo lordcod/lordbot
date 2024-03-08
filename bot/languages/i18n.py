@@ -1,7 +1,6 @@
 import os
 import orjson
 import googletrans
-import jmespath
 from typing import Optional, Dict, List
 
 
@@ -21,6 +20,7 @@ def _parse_json(content: str) -> dict:
 
 
 def add_res_translation(key: str, value: str, locale: str):
+    print(key, value, locale)
     data = resource_dict[locale]
     data_keys = key.split(".")
     for num, tk in enumerate(data_keys, start=1):
@@ -37,7 +37,45 @@ def add_translation(key: str, value: str, locale: Optional[str] = None, loadable
     memoization_dict.setdefault(locale, {})
     memoization_dict[locale][key] = value
     if not loadable:
+        print("Parse "+key)
         add_res_translation(key, value, locale)
+
+
+def add_dict_translations(path: str, data: Dict[str, str]):
+    for loc, text in data.items():
+        add_translation(path, text, loc)
+
+
+def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
+    translator = googletrans.Translator()
+    dest_dict = {}
+    for key, value in src_dict.items():
+        if isinstance(value, dict):
+            dest_dict[key] = translate_dict(src, dest, value)
+        elif isinstance(value, list):
+            for num, text in enumerate(value):
+                dest_dict.setdefault(key, [])
+                dest_dict[key][num] = translator.translate(
+                    text, dest, src).text
+        else:
+            dest_dict[key] = translator.translate(value,  dest, src).text
+    return dest_dict
+
+
+def translation_with_languages(locale: str, text: str, languages: List[str]) -> dict:
+    data = {}
+    data[locale] = text
+
+    if locale in languages:
+        languages.remove(locale)
+
+    translator = googletrans.Translator()
+
+    for dest in languages:
+        tran_text = translator.translate(text, dest, locale).text
+        data[dest] = tran_text
+
+    return data
 
 
 def _parser_foo_any_locales(locale: str, data: dict, new_data: dict):
@@ -59,27 +97,6 @@ def to_any_locales() -> dict:
     return new_data
 
 
-def add_dict_translations(path: str, data: Dict[str, str]):
-    for loc, text in data.items():
-        add_translation(path, text, loc)
-
-
-def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
-    translator = googletrans.Translator()
-    dest_dict = {}
-    for key, value in src_dict.items():
-        if isinstance(value, dict):
-            dest_dict[key] = translate_dict(value)
-        elif isinstance(value, list):
-            for num, text in enumerate(value):
-                dest_dict.setdefault(key, [])
-                dest_dict[key][num] = translator.translate(
-                    text, dest, src).text
-        else:
-            dest_dict[key] = translator.translate(value,  dest, src).text
-    return dest_dict
-
-
 def from_folder(foldername: str) -> None:
     for filename in os.listdir(foldername):
         if not filename.endswith(".json"):
@@ -97,33 +114,20 @@ def to_folder(foldername: str) -> str:
             file.write(jsondata)
 
 
-def parser(json_resource: dict, locale: Optional[str] = None, prefix: Optional[str] = None) -> None:
+def parser(json_resource: dict, locale: Optional[str] = None, prefix: Optional[str] = None, loadable: bool = True) -> None:
     for key, value in json_resource.items():
+        print(
+            "Parse "+f"{locale}.{prefix+'.' if prefix else ''}{key}", loadable)
         if isinstance(value, dict):
             parser(
                 value,
                 locale,
-                f"{prefix+'.' if prefix else ''}{key}"
+                f"{prefix+'.' if prefix else ''}{key}",
+                loadable=loadable
             )
         else:
             add_translation(
-                f"{prefix+'.' if prefix else ''}{key}", value, locale, loadable=True)
-
-
-def translation_with_languages(locale: str, text: str, languages: List[str]) -> dict:
-    data = {}
-    data[locale] = text
-
-    if locale in languages:
-        languages.remove(locale)
-
-    translator = googletrans.Translator()
-
-    for dest in languages:
-        tran_text = translator.translate(text, dest, locale).text
-        data[dest] = tran_text
-
-    return data
+                f"{prefix+'.' if prefix else ''}{key}", value, locale, loadable=loadable)
 
 
 def t(
@@ -144,15 +148,21 @@ def t(
 if __name__ == "__main__":
     from_folder("./bot/languages/localization")
 
-    for lang in default_languages:
-        translate_dict("en", lang, resource_dict['en']['music'])
+    # for lang in default_languages:
+    #     if lang == "en":
+    #         continue
+    #     print(lang)
+    #     trd = translate_dict(
+    #         "en", lang, resource_dict['en']["settings"]['music'])
+    #     print(trd)
+    #     parser(trd, lang, "settings.music", loadable=False)
 
     # add_dict_translations(
     #     "help.record", translation_with_languages("en", "Record", default_languages))
 
-    # data = to_any_locales()
-    # with open("test_loc.json", "wb") as file:
-    #     jsondata = orjson.dumps(data)
-    #     file.write(jsondata)
+    data = to_any_locales()
+    with open("test_loc.json", "wb") as file:
+        jsondata = orjson.dumps(data)
+        file.write(jsondata)
 
-    # to_folder("./bot/languages/localization")
+    to_folder("./bot/languages/localization")
