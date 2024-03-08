@@ -1,5 +1,6 @@
 
 from typing import List, Dict, Optional, TypedDict
+import googletrans
 import jmespath
 import orjson
 
@@ -88,3 +89,39 @@ with open("commands_lang.json", "rb") as file:
         if cmd.get('category') not in categories:
             categories[cmd.get('category')] = []
         categories[cmd.get('category')].append(cmd)
+
+translator = googletrans.Translator()
+
+
+def translate(text: str, lang: str) -> str:
+    return translator.translate(text, lang, 'en').text
+
+
+locales = [
+    'ru',
+    'id',
+    'da',
+    'de',
+    'es',
+    'fr',
+    'pl',
+    'tr'
+]
+
+if __name__ == "__main__":
+    for num, cmd_data in enumerate(commands, start=1):
+        if not cmd_data.get('examples'):
+            continue
+        print(
+            f"The process of translating the {cmd_data.get('name')} command({num}/{len(commands)})")
+        examples = cmd_data.get('examples')
+        for exp in examples:
+            new_examples = {}
+            text = exp[1]
+            new_examples['en'] = text
+            for loc in locales:
+                new_examples[loc] = translate(text, loc)
+            exp[1] = new_examples
+
+    with open("new_commands_lang.json", "wb+") as file:
+        file.write(orjson.dumps(commands))

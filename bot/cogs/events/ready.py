@@ -32,11 +32,7 @@ class ready_event(commands.Cog):
         bsdb = BanDateBases()
         datas = bsdb.get_all()
 
-        for dat in datas:
-            guild_id = dat[0]
-            member_id = dat[1]
-            ban_time = dat[2]
-
+        for (guild_id, member_id, ban_time) in datas:
             mbrsd = BanDateBases(guild_id, member_id)
             self.bot.loop.call_later(
                 ban_time-time.time(),
@@ -48,12 +44,7 @@ class ready_event(commands.Cog):
         rsdb = RoleDateBases()
         datas = rsdb.get_all()
 
-        for dat in datas:
-            guild_id = dat[0]
-            member_id = dat[1]
-            role_id = dat[2]
-            role_time = dat[3]
-
+        for (guild_id, member_id, role_id, role_time) in datas:
             if not (
                 (guild := self.bot.get_guild(guild_id)) and
                 (member := guild.get_member(member_id)) and

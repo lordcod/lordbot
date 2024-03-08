@@ -99,6 +99,26 @@ class CooltypeDropDown(nextcord.ui.StringSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         cooltype = int(self.values[0])
 
+        cdb = CommandDB(interaction.guild.id)
+        command_data = cdb.get(self.command_name, {})
+        command_data.setdefault("distribution", {})
+        command_data["distribution"].setdefault("cooldown", {})
+        cooldata = command_data["distribution"]["cooldown"]
+
+        if cooldata.get('rate') and cooldata.get('per'):
+            cooldata.update({
+                'type': cooltype
+            })
+            cdb.update(self.command_name, command_data)
+
+            view = CooldownsView(
+                interaction.guild,
+                self.command_name
+            )
+            await interaction.message.edit(embed=view.embed, view=view)
+
+            return
+
         modal = CoolModal(cooltype, self.command_name)
 
         await interaction.response.send_modal(modal)
@@ -125,7 +145,7 @@ class CooldownsView(DefaultSettingsView):
             description = (
                 "The current delay for the command\n"
                 f"Type: **{cd_types.get(cooldate.get('type'))}**\n"
-                f"Frequency of use: **{cooldate.get('rate')}** → **{display_time(cooldate.get('per', lang))}**\n"
+                f"Frequency of use: **{cooldate.get('rate')}** → **{display_time(cooldate.get('per'), lang)}**\n"
             )
         else:
             self.remove_item(self.edit)

@@ -105,11 +105,11 @@ class help(commands.Cog):
             inline=False
         )
         if examples := command_data.get('examples'):
-            for num, emp in enumerate(examples, start=1):
+            for num, (excmd, descript) in enumerate(examples, start=1):
                 embed.add_field(
                     name=i18n.t(
                         locale, 'help.command-embed.example', number=num),
-                    value=f"{emp[0]}\n{emp[1]}",
+                    value=f"`{excmd}`\n{descript.get(locale)}",
                     inline=False
                 )
 

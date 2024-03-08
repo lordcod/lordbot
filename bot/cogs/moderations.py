@@ -39,37 +39,42 @@ class moderations(commands.Cog):
 
         await ctx.send(embed=view.embed, view=view)
 
-    @commands.command()
+    @nextcord.slash_command(name="delete-category")
     @commands.has_permissions(manage_channels=True)
-    async def deletecategory(self, ctx: commands.Context, category: nextcord.CategoryChannel):
-        view = DelCatView(ctx.author, category)
+    async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
+        view = DelCatView(interaction.user, category)
 
-        await ctx.send(embed=view.embed, view=view)
+        await interaction.response.send_message(embed=view.embed, view=view)
 
-    @commands.group(name='temp-ban', invoke_without_command=True)
+    @commands.group(name='ban', invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
     async def temp_ban(
         self,
         ctx: commands.Context,
         member: nextcord.Member,
-        stime: str,
+        ftime: Optional[utils.calculate_time] = None,
         *,
         reason: Optional[str] = None
     ):
         gdb = GuildDateBases(ctx.guild.id)
         bsdb = BanDateBases(ctx.guild.id, member.id)
+        locale = gdb.get('language')
         color = gdb.get('color')
-
-        ftime = utils.calculate_time(stime)
 
         embed = nextcord.Embed(
             title="Temporary ban granted!",
-            color=color)
-        embed.add_field(
-            name="Time of action",
-            value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
-            inline=False
+            description=(
+                f"Banned: {member.name}({member.id})\n"
+                f"Moderator: {ctx.author.name}({ctx.author.id})"
+            ),
+            color=color
         )
+        if ftime is not None:
+            embed.add_field(
+                name="Time of action",
+                value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime, locale)})",
+                inline=False
+            )
         if reason is not None:
             embed.add_field(
                 name='Reason',
@@ -115,15 +120,13 @@ class moderations(commands.Cog):
         ctx: commands.Context,
         member: nextcord.Member,
         role: nextcord.Role,
-        stime: str
+        ftime: utils.calculate_time
     ):
         gdb = GuildDateBases(ctx.guild.id)
         rsdb = RoleDateBases(ctx.guild.id, member.id)
         locale = gdb.get('language')
         color = gdb.get('color')
         _role_time = rsdb.get_as_role(role.id)
-
-        ftime = utils.calculate_time(stime)
 
         if _role_time is not None:
             self.bot.role_timer_handlers.cancel_th(ctx.guild.id,

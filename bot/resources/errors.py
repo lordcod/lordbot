@@ -126,6 +126,45 @@ class CallbackCommandError:
                 self.locale, "help.command-embed.using_command", using=using),
             color=color
         )
+        embed.set_footer(text=i18n.t(
+            self.locale, "help.arguments"))
+
+        if examples := cmd_data.get('examples'):
+            for num, (excmd, descript) in enumerate(examples, start=1):
+                embed.add_field(
+                    name=i18n.t(
+                        self.locale, 'help.command-embed.example', number=num),
+                    value=f"`{excmd}`\n{descript.get(self.locale)}",
+                    inline=False
+                )
+
+        await self.ctx.send(embed=embed)
+
+    @attach_exception(commands.MissingRequiredArgument)
+    async def MissingRequiredArgument(self):
+        title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
+        color = self.gdb.get('color')
+
+        cmd_data = get_command(self.ctx.command.name)
+        using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
+
+        embed = nextcord.Embed(
+            title=title,
+            description=i18n.t(
+                self.locale, "help.command-embed.using_command", using=using),
+            color=color
+        )
+        embed.set_footer(text=i18n.t(
+            self.locale, "help.arguments"))
+
+        if examples := cmd_data.get('examples'):
+            for num, (excmd, descript) in enumerate(examples, start=1):
+                embed.add_field(
+                    name=i18n.t(
+                        self.locale, 'help.command-embed.example', number=num),
+                    value=f"`{excmd}`\n{descript.get(self.locale)}",
+                    inline=False
+                )
 
         await self.ctx.send(embed=embed)
 
@@ -143,11 +182,13 @@ class CallbackCommandError:
 
         await self.ctx.send(embed=embed, delete_after=5.0)
 
+    @attach_exception(NotActivateEconomy)
     async def NotActivateEconomy(self):
         content = i18n.t(self.locale, 'errors.NotActivateEconomy')
 
         await self.ctx.send(content)
 
+    @attach_exception(DisabledCommand, commands.DisabledCommand)
     async def DisabledCommand(self):
         content = i18n.t(self.locale, 'errors.DisabledCommand')
 
