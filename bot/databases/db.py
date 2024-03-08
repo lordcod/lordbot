@@ -4,7 +4,6 @@ import asyncio
 from .handlers import establish_connection
 from .settings import Table, Colum, PostType, set_connection
 from .db_engine import DataBase
-from .misc.utils import get_info_colums
 from .config import (host, port, user, password, db_name)
 
 from bot.resources import info
