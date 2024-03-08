@@ -142,7 +142,7 @@ def t(
 
 
 if __name__ == "__main__":
-    from_folder("./bot/languages/localization")
+    # from_folder("./bot/languages/localization")
 
     # for lang in default_languages:
     #     if lang == "en":
@@ -153,9 +153,9 @@ if __name__ == "__main__":
     #     print(trd)
     #     parser(trd, lang, "settings.music", loadable=False)
 
-    # data = translation_with_languages(
-    #     "en", "Launch the song from the specified link.", default_languages)
-    # print(orjson.dumps(data).decode())
+    data = translation_with_languages(
+        "en", "Issues a sheet with all temporary bans that were issued by the bot", default_languages)
+    print(orjson.dumps(data).decode())
 
     # add_dict_translations(
     #     "help.record", translation_with_languages("en", "Record", default_languages))

@@ -1,3 +1,4 @@
+
 import nextcord
 from nextcord.ext import commands
 
@@ -46,7 +47,7 @@ class moderations(commands.Cog):
 
         await interaction.response.send_message(embed=view.embed, view=view)
 
-    @commands.group(name='ban', invoke_without_command=True)
+    @commands.group(name='ban', aliases=["tempban"], invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
     async def temp_ban(
         self,
@@ -82,10 +83,11 @@ class moderations(commands.Cog):
                 inline=False
             )
 
-        self.bot.loop.call_later(
-            ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
+        if ftime is not None:
+            self.bot.loop.call_later(
+                ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
 
-        bsdb.insert(ftime+time.time())
+            bsdb.insert(ftime+time.time())
 
         await member.ban(reason=reason)
 

@@ -1062,6 +1062,103 @@
         "allowed_disabled": true
     },
     {
+        "name": "ban",
+        "category": "moderation",
+        "aliases": [
+            "tempban"
+        ],
+        "arguments": [
+            "<member>",
+            "<time>",
+            "[reason]"
+        ],
+        "examples": [
+            [
+                "ban @lordocde 10m advertising",
+                {
+                    "en": "Will ban lordcode for 10 minutes due to advertising",
+                    "da": "Vil forbyde lordcode i 10 minutter på grund af reklame",
+                    "de": "Wird Lordcode wegen Werbung für 10 Minuten sperren",
+                    "es": "Prohibirá a Lordcode durante 10 minutos debido a la publicidad.",
+                    "fr": "Lordcode sera interdit pendant 10 minutes à cause de la publicité.",
+                    "id": "Akan melarang lordcode selama 10 menit karena iklan",
+                    "pl": "Zablokuje lordcode na 10 minut z powodu reklam",
+                    "ru": "Забанят лордкодера на 10 минут из-за рекламы",
+                    "tr": "Lordcode reklam nedeniyle 10 dakika süreyle yasaklanacak"
+                }
+            ],
+            [
+                "ban 636824998123798531 1h",
+                {
+                    "en": "Ban a participant with ID 636824998123798531 for 1 hour for no reason",
+                    "da": "Forbyd en deltager med ID 636824998123798531 i 1 time uden grund",
+                    "de": "Einen Teilnehmer mit der ID 636824998123798531 ohne Angabe von Gründen für 1 Stunde sperren",
+                    "es": "Banear a un participante con DNI 636824998123798531 durante 1 hora sin motivo",
+                    "fr": "Bannir un participant avec l'ID 636824998123798531 pendant 1 heure sans raison",
+                    "id": "Ban peserta dengan ID 636824998123798531 selama 1 jam tanpa alasan",
+                    "pl": "Zablokuj uczestnika o identyfikatorze 636824998123798531 na 1 godzinę bez powodu",
+                    "ru": "Забанить участника с ID 636824998123798531 на 1 час без причины",
+                    "tr": "636824998123798531 ID'li bir katılımcıyı 1 saat süreyle sebepsiz yere yasaklayın"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Restricts the user's access to the server completely",
+            "da": "Begrænser brugerens adgang til serveren fuldstændigt",
+            "de": "Schränkt den Zugriff des Benutzers auf den Server vollständig ein",
+            "es": "Restringe completamente el acceso del usuario al servidor.",
+            "fr": "Restreint complètement l'accès de l'utilisateur au serveur",
+            "id": "Membatasi akses pengguna ke server sepenuhnya",
+            "pl": "Całkowicie ogranicza dostęp użytkownika do serwera",
+            "ru": "Полностью ограничивает доступ пользователя к серверу",
+            "tr": "Kullanıcının sunucuya erişimini tamamen kısıtlar"
+        },
+        "brief_descriptrion": {
+            "en": "Restricts the user's access to the server completely",
+            "da": "Begrænser brugerens adgang til serveren fuldstændigt",
+            "de": "Schränkt den Zugriff des Benutzers auf den Server vollständig ein",
+            "es": "Restringe completamente el acceso del usuario al servidor.",
+            "fr": "Restreint complètement l'accès de l'utilisateur au serveur",
+            "id": "Membatasi akses pengguna ke server sepenuhnya",
+            "pl": "Całkowicie ogranicza dostęp użytkownika do serwera",
+            "ru": "Полностью ограничивает доступ пользователя к серверу",
+            "tr": "Kullanıcının sunucuya erişimini tamamen kısıtlar"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "ban list",
+        "category": "moderation",
+        "aliases": [
+            "tempban list"
+        ],
+        "arguments": [],
+        "examples": [],
+        "descriptrion": {
+            "en": "Issues a sheet with all temporary bans that were issued by the bot",
+            "da": "Udsender et ark med alle midlertidige forbud, der blev udstedt af botten",
+            "de": "Gibt ein Blatt mit allen vorübergehenden Sperren aus, die vom Bot ausgesprochen wurden",
+            "es": "Emite una hoja con todas las prohibiciones temporales emitidas por el bot.",
+            "fr": "Émet une feuille avec toutes les interdictions temporaires émises par le bot",
+            "id": "Mengeluarkan sheet dengan semua larangan sementara yang dikeluarkan oleh bot",
+            "pl": "Wydaje arkusz ze wszystkimi tymczasowymi banami, które zostały wydane przez bota",
+            "ru": "Выдает лист со всеми временными банами, которые были выданы ботом",
+            "tr": "Bot tarafından verilen tüm geçici yasakları içeren bir sayfa düzenler"
+        },
+        "brief_descriptrion": {
+            "en": "Issues a sheet with all temporary bans that were issued by the bot",
+            "da": "Udsender et ark med alle midlertidige forbud, der blev udstedt af botten",
+            "de": "Gibt ein Blatt mit allen vorübergehenden Sperren aus, die vom Bot ausgesprochen wurden",
+            "es": "Emite una hoja con todas las prohibiciones temporales emitidas por el bot.",
+            "fr": "Émet une feuille avec toutes les interdictions temporaires émises par le bot",
+            "id": "Mengeluarkan sheet dengan semua larangan sementara yang dikeluarkan oleh bot",
+            "pl": "Wydaje arkusz ze wszystkimi tymczasowymi banami, które zostały wydane przez bota",
+            "ru": "Выдает лист со всеми временными банами, которые были выданы ботом",
+            "tr": "Bot tarafından verilen tüm geçici yasakları içeren bir sayfa düzenler"
+        },
+        "allowed_disabled": true
+    },
+    {
         "name": "temp-role",
         "category": "moderation",
         "aliases": [],
