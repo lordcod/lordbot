@@ -1,1 +1,259 @@
-{"bot-info":{"title":"{name} this is a multifunctional bot","description":"The bot is designed to facilitate server management and is equipped with various automation tool","info-server":"Information about the server","prefix-server":"> Server prefix - `{prefix}`"},"translate":{"placeholder":"Will choose the appropriate language:","failed":"This message has no content, so we will not be able to translate it."},"captcha":{"congratulation":"Congratulations you have passed the captcha!","enter":"You have 30 seconds to solve the captcha!","failed":"Captcha failed"},"activiti":{"failed":"This activity is unavailable or does not work","embed":{"title":"**The activity has been successfully created!**","description":"However, some types of activities may not be available for your server if the boost level does not meet the activity requirements."},"fields":{"label":"Activity name","max-user":"Maximum number of users"}},"help":{"title":"Help Book","arguments":"[Optional] | <Required>","command-embed":{"title":"Help on the `{name}` command.","info":"Information","category":"Category: `{category_emoji}{category_name}`\n","aliases":"Aliases: {aliases}\n","disable_command":"Can I turn it off? **{value}**\n","connection_disabled":{"0":"Nope","1":"Yeah"},"using_command":"Using: `{using}`\n","example":"Example №{number}"},"command-notfound":{"title":"Command Not Found","description":"When searching for command, we did not find it, look at it again in the general list of commands"},"command-invalid":{"title":"The command is invalid","description":"Most likely you entered the name of the team incorrectly, perhaps it contains some strange characters"}},"errors":{"MissingPermissions":"You don't have enough rights","MissingRole":"You don't have a suitable role to execute the command","MissingChannel":"You cannot execute this command in this channel","NotOwner":"This command is intended for the bot owner","CommandNotFound":"There is no such command","CheckFailure":"You don't fulfill all the conditions","BadArgument":"Invalid argument entered","DisabledCommand":"This command is disabled on the server","MissingRequiredArgument":"You didn't enter a required argument","NotActivateEconomy":"The economy system is disabled on the server","OnlyTeamError":"This command can only be used by the bot team","MemberNotFound":"The participant could not be found","CommandOnCooldown":{"title":"The command is on hold","description":"Try again after {delay}."}},"music-selector":{"title":"Choose the track you are interested in!","placeholder":"Select a track"},"ideas":{"globals":{"title":"Suggest an idea","ideas-disabled":"The **idea** module is disabled on this server","embed-title":"New idea!"},"confirm-modal":{"reason-label":"Argument:","embed":{"title":"New idea!","field":"Old idea!"},"idea":{"content":"{mention} Your idea is approved!","embed":{"title":"The idea is approved!","field":"The essence of the idea:","reason":"Confirmation argument:"}}},"confirm-view":{"button":{"approve":"Approve","deny":"Deny"},"old-idea":"An outdated idea!","idea":"Idea:","refused":"Refused","idea-content":"{mention} Your idea has been rejected!"},"idea-modal":{"label":"Tell us about your idea","placeholder":"Describe your idea in as much detail as possible with usage examples.","embed-description":"Whether the idea is approved or not depends on you!","idea":"Idea:","thread-name":"Discussion of the idea from {name}"},"idea-view.timeout-message":"You can only propose an idea once every 30 minutes\nThe next opportunity to submit an idea will be through: <t:{time}:R>"},"settings":{"start":{"title":"Configuring the bot modules.","choose":"Choose settings...","description":"Interact with the selection drop-down menu to configure the server.","request":"Request from {name}"},"module-name":{"economy":"Economy","languages":"Languages","prefix":"Prefix","music":"Music","color":"Color of system messages","reactions":"Auto Reactions","thread":"Auto message in a thread/post","command-permission":"Command Settings","ideas":"Ideas","welcomer":"Welcome new members","auto-roles":"Automatic roles"},"button":{"back":"Back","edit":"Edit","reset":"Reset","add":"Add"},"prefix":{"title":"Prefix","description":"Setting the prefix to which the bot will respond when calling the command.","current":"The current prefix is `{prefix}`"},"languages":{"title":"Languages","description":"This setting changes the language for working with the bot.","choose":"Select the language for the server:"},"color":{"not-valid":"The hex code format is incorrect","title":"Color of system messages","description":"When you use commands, the bot displays inserts that have an invisible color by default.\n\nYou can set your color according to the theme of your community.","current":"Current color: `{hex_color}`"},"auto-role":{"button":{"install":"Install roles","delete":"Delete roles"},"placeholder":"Select automatically assigned roles for new members","embed":{"title":"Automatic roles","description":"The control panel for automatic roles.\nYou can install, edit, delete, and view such actions from the panel.\nIf you do not see the auto roles, then they are not selected!","field":"Selected roles:"}},"welcomer":{"button":{"delete":"Delete message","view":"View message","install":"Install message"},"embed":{"title":"Message greeting","description":"Automatic sending of messages when a participant logs on to the server\n\nIf you want to change the channel, just select it again and set the message\n\nTo change a message, select the current channel and set a new message for it","field":{"selected":"Selected greeting channel: {channel}","failure":"Not all the data has been collected yet."}},"dropdown-placeholder":"Select the welcome channel","modal":{"title":"Message greeting","label":"Message","placeholder":"You can also use embed builder"}},"thread":{"init":{"title":"Automatic messages in forums/threads","brief":"Auto-messages","description":"Add or change your automatic posts in forums/threads","placeholder":"Auto-message settings in branches/forums:","channel":"Channel: {channel}"},"addptional":{"button.install-mes":"Install message","channel-error":"Auto-messages have already been installed on this channel","placeholder":"Select a channel for auto-messages"},"thread":{"mes-not-found":"No message found","button":{"view":"View the message","edit":"Edit a message","delete":"Delete a message"}},"modal":{"label":"Message:","title":"Auto-messages","placeholder":"You can also use embed-builder"}},"reactions":{"init":{"title":"Automatic reactions","brief":"Auto-reactions","description":"Control of automatic addition of reactions in channels","dddesc":"Channel: {channel}\nEmoji: {emojis}","placeholder":"Auto-reaction settings:"},"addres":{"channel-error":"Auto-reactions have already been installed on this channel","install-emoji":"Install emoji","placeholder":"Select a channel for auto-reactions"},"button":{"delete":"Delete reaction","edit":"Edit reaction"},"modal":{"title":"Auto-reaction","label":"Emoji:"}},"music":{"title":"Music","max-queue-size":{"name":"Max size","description":"Maximum track queue lenght.","value":"Maximum queue size: {size}\n"},"default-volume":{"name":"Default volume","description":"The default music volume.","value":"Default volume music: {volume}\n"},"dj-roles":{"failed":"The {role} role cannot be assigned and is used for integration or by a bot.","name":"Dj-roles","description":"Roles that can control music.","value":"Dj-roles: {roles}"}}}}
+{
+    "bot-info": {
+        "title": "{name} this is a multifunctional bot",
+        "description": "The bot is designed to facilitate server management and is equipped with various automation tool",
+        "info-server": "Information about the server",
+        "prefix-server": "> Server prefix - `{prefix}`"
+    },
+    "translate": {
+        "placeholder": "Will choose the appropriate language:",
+        "failed": "This message has no content, so we will not be able to translate it."
+    },
+    "captcha": {
+        "congratulation": "Congratulations you have passed the captcha!",
+        "enter": "You have 30 seconds to solve the captcha!",
+        "failed": "Captcha failed"
+    },
+    "activiti": {
+        "failed": "This activity is unavailable or does not work",
+        "embed": {
+            "title": "**The activity has been successfully created!**",
+            "description": "However, some types of activities may not be available for your server if the boost level does not meet the activity requirements."
+        },
+        "fields": {
+            "label": "Activity name",
+            "max-user": "Maximum number of users"
+        }
+    },
+    "help": {
+        "title": "Help Book",
+        "arguments": "[Optional] | <Required>",
+        "command-embed": {
+            "title": "Help on the `{name}` command.",
+            "info": "Information",
+            "category": "Category: `{category_emoji}{category_name}`\n",
+            "aliases": "Aliases: {aliases}\n",
+            "disable_command": "Can I turn it off? **{value}**\n",
+            "connection_disabled": {
+                "0": "Nope",
+                "1": "Yeah"
+            },
+            "using_command": "Using: `{using}`\n",
+            "example": "Example №{number}"
+        },
+        "command-notfound": {
+            "title": "Command Not Found",
+            "description": "When searching for command, we did not find it, look at it again in the general list of commands"
+        },
+        "command-invalid": {
+            "title": "The command is invalid",
+            "description": "Most likely you entered the name of the team incorrectly, perhaps it contains some strange characters"
+        }
+    },
+    "errors": {
+        "MissingPermissions": "You don't have enough rights",
+        "MissingRole": "You don't have a suitable role to execute the command",
+        "MissingChannel": "You cannot execute this command in this channel",
+        "NotOwner": "This command is intended for the bot owner",
+        "CommandNotFound": "There is no such command",
+        "CheckFailure": "You don't fulfill all the conditions",
+        "BadArgument": "Invalid argument entered",
+        "DisabledCommand": "This command is disabled on the server",
+        "MissingRequiredArgument": "You didn't enter a required argument",
+        "NotActivateEconomy": "The economy system is disabled on the server",
+        "OnlyTeamError": "This command can only be used by the bot team",
+        "MemberNotFound": "The participant could not be found",
+        "CommandOnCooldown": {
+            "title": "The command is on hold",
+            "description": "Try again after {delay}."
+        }
+    },
+    "music-selector": {
+        "title": "Choose the track you are interested in!",
+        "placeholder": "Select a track"
+    },
+    "ideas": {
+        "globals": {
+            "title": "Suggest an idea",
+            "ideas-disabled": "The **idea** module is disabled on this server",
+            "embed-title": "New idea!"
+        },
+        "confirm-modal": {
+            "reason-label": "Argument:",
+            "embed": {
+                "title": "New idea!",
+                "field": "Old idea!"
+            },
+            "idea": {
+                "content": "{mention} Your idea is approved!",
+                "embed": {
+                    "title": "The idea is approved!",
+                    "field": "The essence of the idea:",
+                    "reason": "Confirmation argument:"
+                }
+            }
+        },
+        "confirm-view": {
+            "button": {
+                "approve": "Approve",
+                "deny": "Deny"
+            },
+            "old-idea": "An outdated idea!",
+            "idea": "Idea:",
+            "refused": "Refused | {name}",
+            "idea-content": "{mention} Your idea has been rejected!"
+        },
+        "idea-modal": {
+            "label": "Tell us about your idea",
+            "placeholder": "Describe your idea in as much detail as possible with usage examples.",
+            "embed-description": "Whether the idea is approved or not depends on you!",
+            "idea": "Idea:",
+            "thread-name": "Discussion of the idea from {name}"
+        },
+        "idea-view.timeout-message": "You can only propose an idea once every 30 minutes\nThe next opportunity to submit an idea will be through: <t:{time}:R>"
+    },
+    "settings": {
+        "start": {
+            "title": "Configuring the bot modules.",
+            "choose": "Choose settings...",
+            "description": "Interact with the selection drop-down menu to configure the server.",
+            "request": "Request from {name}"
+        },
+        "module-name": {
+            "economy": "Economy",
+            "languages": "Languages",
+            "prefix": "Prefix",
+            "music": "Music",
+            "color": "Color of system messages",
+            "reactions": "Auto Reactions",
+            "thread": "Auto message in a thread/post",
+            "command-permission": "Command Settings",
+            "ideas": "Ideas",
+            "welcomer": "Welcome new members",
+            "auto-roles": "Automatic roles"
+        },
+        "button": {
+            "back": "Back",
+            "edit": "Edit",
+            "reset": "Reset",
+            "add": "Add"
+        },
+        "prefix": {
+            "title": "Prefix",
+            "description": "Setting the prefix to which the bot will respond when calling the command.",
+            "current": "The current prefix is `{prefix}`"
+        },
+        "languages": {
+            "title": "Languages",
+            "description": "This setting changes the language for working with the bot.",
+            "choose": "Select the language for the server:"
+        },
+        "color": {
+            "not-valid": "The hex code format is incorrect",
+            "title": "Color of system messages",
+            "description": "When you use commands, the bot displays inserts that have an invisible color by default.\n\nYou can set your color according to the theme of your community.",
+            "current": "Current color: `{hex_color}`"
+        },
+        "auto-role": {
+            "button": {
+                "install": "Install roles",
+                "delete": "Delete roles"
+            },
+            "placeholder": "Select automatically assigned roles for new members",
+            "embed": {
+                "title": "Automatic roles",
+                "description": "The control panel for automatic roles.\nYou can install, edit, delete, and view such actions from the panel.\nIf you do not see the auto roles, then they are not selected!",
+                "field": "Selected roles:"
+            }
+        },
+        "welcomer": {
+            "button": {
+                "delete": "Delete message",
+                "view": "View message",
+                "install": "Install message"
+            },
+            "embed": {
+                "title": "Message greeting",
+                "description": "Automatic sending of messages when a participant logs on to the server\n\nIf you want to change the channel, just select it again and set the message\n\nTo change a message, select the current channel and set a new message for it",
+                "field": {
+                    "selected": "Selected greeting channel: {channel}",
+                    "failure": "Not all the data has been collected yet."
+                }
+            },
+            "dropdown-placeholder": "Select the welcome channel",
+            "modal": {
+                "title": "Message greeting",
+                "label": "Message",
+                "placeholder": "You can also use embed builder"
+            }
+        },
+        "thread": {
+            "init": {
+                "title": "Automatic messages in forums/threads",
+                "brief": "Auto-messages",
+                "description": "Add or change your automatic posts in forums/threads",
+                "placeholder": "Auto-message settings in branches/forums:",
+                "channel": "Channel: {channel}"
+            },
+            "addptional": {
+                "button.install-mes": "Install message",
+                "channel-error": "Auto-messages have already been installed on this channel",
+                "placeholder": "Select a channel for auto-messages"
+            },
+            "thread": {
+                "mes-not-found": "No message found",
+                "button": {
+                    "view": "View the message",
+                    "edit": "Edit a message",
+                    "delete": "Delete a message"
+                }
+            },
+            "modal": {
+                "label": "Message:",
+                "title": "Auto-messages",
+                "placeholder": "You can also use embed-builder"
+            }
+        },
+        "reactions": {
+            "init": {
+                "title": "Automatic reactions",
+                "brief": "Auto-reactions",
+                "description": "Control of automatic addition of reactions in channels",
+                "dddesc": "Channel: {channel}\nEmoji: {emojis}",
+                "placeholder": "Auto-reaction settings:"
+            },
+            "addres": {
+                "channel-error": "Auto-reactions have already been installed on this channel",
+                "install-emoji": "Install emoji",
+                "placeholder": "Select a channel for auto-reactions"
+            },
+            "button": {
+                "delete": "Delete reaction",
+                "edit": "Edit reaction"
+            },
+            "modal": {
+                "title": "Auto-reaction",
+                "label": "Emoji:"
+            }
+        },
+        "music": {
+            "title": "Music",
+            "max-queue-size": {
+                "name": "Max size",
+                "description": "Maximum track queue lenght.",
+                "value": "Maximum queue size: {size}\n"
+            },
+            "default-volume": {
+                "name": "Default volume",
+                "description": "The default music volume.",
+                "value": "Default volume music: {volume}\n"
+            },
+            "dj-roles": {
+                "failed": "The {role} role cannot be assigned and is used for integration or by a bot.",
+                "name": "Dj-roles",
+                "description": "Roles that can control music.",
+                "value": "Dj-roles: {roles}"
+            }
+        }
+    }
+}

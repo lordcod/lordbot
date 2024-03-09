@@ -182,7 +182,7 @@ class ConfirmView(nextcord.ui.View):
 
         name = interaction.user.display_name
         embed = nextcord.Embed(
-            title=lang_ConfirmView.old_idea.get(locale),
+            title=i18n.t(locale, 'ideas.confirm-view.old-idea'),
             color=nextcord.Color.red()
         )
         embed.set_author(
@@ -192,7 +192,7 @@ class ConfirmView(nextcord.ui.View):
         embed.add_field(name=i18n.t(
             locale, 'ideas.confrim-view.idea'), value=idea_content)
         embed.set_footer(
-            text=f'{lang_ConfirmView.refused.get(locale)} | {name}',
+            text=i18n.t(locale, 'ideas.confirm-view.refused', name=name),
             icon_url=interaction.user.display_avatar)
 
         author = interaction.guild.get_member(idea_author_id)
@@ -234,8 +234,8 @@ class IdeaModal(nextcord.ui.Modal):
         idea = self.idea.value
 
         embed = nextcord.Embed(
-            title=lang_IdeaModal.embed_title.get(locale),
-            description=lang_IdeaModal.embed_description.get(locale),
+            title=i18n.t(locale, 'ideas.globals.title'),
+            description=i18n.t(locale, 'ideas.idea-modal.embed-description'),
             color=color
         )
         embed.set_author(
@@ -270,7 +270,7 @@ class IdeaView(nextcord.ui.View):
             return
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
-        self.suggest.label = i18n.t(locale, 'ideas.globals.placeholder')
+        self.suggest.label = i18n.t(locale, 'ideas.globals.title')
 
     @nextcord.ui.button(
         label="Suggest an idea",
