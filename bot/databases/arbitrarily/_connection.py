@@ -1,6 +1,7 @@
 import psycopg2
 import sys
-sys.path.append(r"C:\Users\2008d\git\lordbot\bot\databases")
+
+sys.path.append(r'bot\databases')
 
 
 try:

@@ -97,8 +97,8 @@ class PermissionChecker:
             raise TypeError(retry)
 
     allowed_types = {
-        'allow-role': _is_allowed_role,
-        'allow-channel': _is_allowed_channel,
+        'allow-roles': _is_allowed_role,
+        'allow-channels': _is_allowed_channel,
         'cooldown': _is_cooldown
     }
 
