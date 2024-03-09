@@ -5,7 +5,7 @@ from .bonuses import Bonus
 from .._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.views import settings_menu
 
 

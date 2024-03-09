@@ -1,14 +1,9 @@
-import jmespath
 import nextcord
 from bot import languages
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
-from bot.databases.db import GuildDateBases
-from nextcord.utils import find
-from bot.languages.settings import (
-    languages as languages_trans,
-    button as button_name
-)
+from bot.databases import GuildDateBases
+from bot.languages import i18n
 
 
 class DropDown(nextcord.ui.Select):
@@ -28,7 +23,7 @@ class DropDown(nextcord.ui.Select):
         ]
 
         super().__init__(
-            placeholder=languages_trans.choose.get(locale),
+            placeholder=i18n.t(locale, 'settings.languages.choose'),
             min_values=1,
             max_values=1,
             options=options,
@@ -54,14 +49,14 @@ class Languages(DefaultSettingsView):
         locale = gdb.get('language')
 
         self.embed = nextcord.Embed(
-            title=languages_trans.title.get(locale),
-            description=languages_trans.description.get(locale),
+            title=i18n.t(locale, 'settings.languages.title'),
+            description=i18n.t(locale, 'settings.languages.description'),
             color=color
         )
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
 
         lang = DropDown(guild.id)
 

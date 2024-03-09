@@ -1,9 +1,10 @@
 import time
 import aiohttp
 import asyncio
+import enum
 
 
-class TextColors:
+class TextColors(enum.Enum):
     RESET = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
@@ -17,8 +18,11 @@ class TextColors:
     VIOLET = '\033[95m'
     CYAN = '\033[96m'
 
+    def __str__(self) -> str:
+        return self.value
 
-class DiscordTextColors:
+
+class DiscordTextColors(enum.Enum):
     RESET = '[0m'
 
     GREY = '[2;30m'
@@ -28,6 +32,9 @@ class DiscordTextColors:
     BLUE = '[2;34m'
     VIOLET = '[2;35m'
     CYAN = '[2;36m'
+
+    def __str__(self) -> str:
+        return self.value
 
 
 async def post_mes(data, time_string):
@@ -46,6 +53,7 @@ async def post_mes(data, time_string):
         async with session.post(url, data=data):
             pass
 
+
 @lambda _: _(False)
 class Logger:
     loop = None
@@ -59,7 +67,7 @@ class Logger:
             print(text)
 
     def on_logs(func):
-        def redirect(self, txt):
+        def redirect(self, txt: str):
             named_tuple = time.localtime()
             time_string = time.strftime("%m-%d-%Y %H:%M:%S", named_tuple)
 

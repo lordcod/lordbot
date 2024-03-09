@@ -1,10 +1,10 @@
 import nextcord
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 import re
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
 from bot.resources.info import DEFAULT_COLOR
-from bot.languages.settings import color as color_langs, button as button_name
+from bot.languages import i18n
 
 
 class Modal(nextcord.ui.Modal):
@@ -26,7 +26,7 @@ class Modal(nextcord.ui.Modal):
 
         hex_color = self.color.value
         if not (result := re.fullmatch(r"#?([0-9a-fA-F]{6})", hex_color)):
-            await interaction.response.send_message(color_langs.not_valid.get(locale),
+            await interaction.response.send_message(i18n.t(locale, 'settings.color.not-valid'),
                                                     ephemeral=True)
             return
 
@@ -48,20 +48,20 @@ class ColorView(DefaultSettingsView):
         hex_color = f"#{color:0>6x}".upper()
 
         self.embed = nextcord.Embed(
-            title=color_langs.title.get(locale),
-            description=color_langs.description.get(locale),
+            title=i18n.t(locale, 'settings.color.title'),
+            description=i18n.t(locale, 'settings.color.description'),
             color=color,
         )
         self.embed._fields = [
-            {"name": f"{color_langs.current.get(locale)}: `{hex_color}`",
+            {"name": i18n.t(locale, 'settings.color.current', hex_color=hex_color),
              "value": ""}
         ]
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.edit.label = button_name.edit.get(locale)
-        self.reset.label = button_name.reset.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.reset.label = i18n.t(locale, 'settings.button.reset')
 
     @nextcord.ui.button(label="Back", style=nextcord.ButtonStyle.red)
     async def back(self,

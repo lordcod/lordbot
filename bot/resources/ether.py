@@ -54,6 +54,9 @@ class Emoji:
     tickmark = '<a:tickmark:1165684814557495326>'
     cross = '<a:cross:1165684812250611732>'
 
+    success = '<a:success:1165684794361917611>'
+    warn = '<a:warn:1165684798686244874>'
+
 
 Channel_Type = {
     0: Emoji.channel_text,

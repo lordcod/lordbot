@@ -1,81 +1,75 @@
 import threading
 import asyncio
 
-from .load import load_db
-from .settings import Table, Colum
-from .misc.utils import get_info_colums
-from .handlers import (
-    establish_connection,
-    GuildDateBases,
-    EconomyMembedDB,
-    CommandDB,
-    RoleDateBases,
-    MongoDB
-)
+from .handlers import establish_connection
+from .settings import Table, Colum, PostType, set_connection
+from .db_engine import DataBase
+from .config import (host, port, user, password, db_name)
 
 from bot.resources import info
-from bot.misc.logger import Logger
 
-_connection = load_db()
+engine = DataBase.create_engine(host, port, user, password, db_name)
 
-
-def connection():
-    global _connection
-
-    if not _connection.closed == 0:
-        Logger.core("[Closed connection] Starting a database reboot")
-        _connection = load_db()
-
-    return _connection
+establish_connection(engine)
+set_connection(engine)
 
 
-class GuildsDB(Table, name="guilds", _connection=_connection):
-    id = Colum(data_type="BIGINT", primary_key=True)
-    language = Colum(data_type="TEXT",
+class GuildsDB(Table):
+    __tablename__ = "guilds"
+
+    id = Colum(data_type=PostType.BIGINT, primary_key=True)
+    language = Colum(data_type=PostType.TEXT,
                      default=info.DEFAULT_LANGUAGE)
-    prefix = Colum(data_type="TEXT",
+    prefix = Colum(data_type=PostType.TEXT,
                    default=info.DEFAULT_PREFIX)
-    color = Colum(data_type="BIGINT", default=info.DEFAULT_COLOR)
-    economic_settings = Colum(data_type="JSON",
+    color = Colum(data_type=PostType.BIGINT, default=info.DEFAULT_COLOR)
+    economic_settings = Colum(data_type=PostType.JSON,
                               default=info.DEFAULT_ECONOMY_SETTINGS)
-    music_settings = Colum(data_type="JSON", default="{}")
-    auto_roles = Colum(data_type="JSON", default="{}")
-    thread_messages = Colum(data_type="JSON", default="{}")
-    reactions = Colum(data_type="JSON", default="{}")
-    auto_translate = Colum(data_type="JSON", default="{}")
-    greeting_message = Colum(data_type="JSON", default="{}")
-    command_permissions = Colum(data_type="JSON", default="{}")
-    ideas = Colum(data_type="JSON", default="{}")
+    music_settings = Colum(data_type=PostType.JSON, default="{}")
+    auto_roles = Colum(data_type=PostType.JSON, default="{}")
+    tickettool = Colum(data_type=PostType.JSON, default="{}")
+    thread_messages = Colum(data_type=PostType.JSON, default="{}")
+    reactions = Colum(data_type=PostType.JSON, default="{}")
+    auto_translate = Colum(data_type=PostType.JSON, default="{}")
+    greeting_message = Colum(data_type=PostType.JSON, default="{}")
+    command_permissions = Colum(data_type=PostType.JSON, default="{}")
+    ideas = Colum(data_type=PostType.JSON, default="{}")
 
 
-class EconomicDB(Table, name="economic", _connection=_connection):
-    guild_id = Colum(data_type="BIGINT", not_null=True)
-    member_id = Colum(data_type="BIGINT", not_null=True)
-    balance = Colum(data_type="BIGINT", default="0")
-    bank = Colum(data_type="BIGINT", default="0")
-    daily = Colum(data_type="BIGINT", default="0")
-    weekly = Colum(data_type="BIGINT", default="0")
-    monthly = Colum(data_type="BIGINT", default="0")
+class EconomicDB(Table):
+    __tablename__ = "economic"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    balance = Colum(data_type=PostType.BIGINT, default="0")
+    bank = Colum(data_type=PostType.BIGINT, default="0")
+    daily = Colum(data_type=PostType.BIGINT, default="0")
+    weekly = Colum(data_type=PostType.BIGINT, default="0")
+    monthly = Colum(data_type=PostType.BIGINT, default="0")
 
 
-class RolesDB(Table, name="roles", _connection=_connection):
-    guild_id = Colum(data_type="BIGINT", not_null=True)
-    member_id = Colum(data_type="BIGINT", not_null=True)
-    role_id = Colum(data_type="BIGINT", not_null=True)
-    time = Colum(data_type="BIGINT", not_null=True)
+class RolesDB(Table):
+    __tablename__ = "roles"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    role_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
 
 
-class MongoDataBases(Table, name="mongo", _connection=_connection):
-    key_name = Colum(name="name", data_type="TEXT", primary_key=True)
-    values = Colum(data_type="JSON", default="{}")
+class BansDB(Table):
+    __tablename__ = "bans"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
 
 
-colums = {
-    'guilds': get_info_colums('guilds', _connection),
-    'economic': get_info_colums('economic', _connection)
-}
+class MongoDataBases(Table):
+    __tablename__ = "mongo"
 
-establish_connection(connection)
+    name = Colum(data_type=PostType.TEXT, primary_key=True)
+    values = Colum(data_type=PostType.JSON, default="{}")
 
 
 def db_forever():
@@ -84,10 +78,11 @@ def db_forever():
     try:
         loop.run_forever()
     finally:
-        connection().close()
+        engine.connection.close()
         loop.close()
         exit()
 
 
-thread = threading.Thread(target=db_forever, name='DataBase')
+thread = threading.Thread(
+    target=db_forever, name='DataBase')
 thread.start()

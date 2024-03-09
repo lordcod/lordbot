@@ -1,15 +1,13 @@
 import nextcord
 
+
 from .modal import ModalBuilder
 from .. import thread_message
 from .._view import DefaultSettingsView
 
 from bot.misc import utils
-from bot.databases.db import GuildDateBases
-from bot.languages.settings import (
-    thread as thread_langs,
-    button as button_name
-)
+from bot.languages import i18n
+from bot.databases import GuildDateBases
 
 
 class ThreadData(DefaultSettingsView):
@@ -23,11 +21,14 @@ class ThreadData(DefaultSettingsView):
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.message.label = thread_langs.thread.watch_message.get(locale)
-        self.edit_message.label = thread_langs.thread.edit_message.get(locale)
-        self.delete_message.label = thread_langs.thread.delete_message.get(
-            locale)
+        self.back.label = i18n.t(
+            locale, 'settings.button.back')
+        self.message.label = i18n.t(
+            locale, 'settings.thread.thread.button.view')
+        self.edit_message.label = i18n.t(
+            locale, 'settings.thread.thread.button.edit')
+        self.delete_message.label = i18n.t(
+            locale, 'settings.thread.thread.button.delete')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -47,8 +48,8 @@ class ThreadData(DefaultSettingsView):
         locale = gdb.get('language')
 
         if not channel_content:
-            await interaction.response.send_message(
-                thread_langs.thread.mes_not_found.get(locale))
+            await interaction.response.send_message(i18n.t(
+                locale, 'settings.thread.thread.mes-not-found'))
 
         content = await utils.generate_message(channel_content)
         await interaction.response.send_message(**content, ephemeral=True)

@@ -1,14 +1,18 @@
+from os import environ
+import yt_dlp
+import re
 import nextcord
 from nextcord.ext import commands
+from yandex_music_api import Client as YaClient
 from bot.misc.lordbot import LordBot
 
 from bot.views.selector_music import MusicView
-from bot.misc.voice import (yandex_music_requests, queue,
-                            MusicPlayer, current_players)
+from bot.misc.voice import (queue, MusicPlayer, current_players)
 from bot.misc.utils import clamp
+from dotenv import load_dotenv
 
-import re
-import yt_dlp
+load_dotenv()
+
 
 path = 'ffmpeg'
 
@@ -52,6 +56,7 @@ class Voice(commands.Cog):
     @commands.command()
     async def play(self, ctx: commands.Context, *, request: str):
         voice = ctx.guild.voice_client
+        yandex_client = YaClient(environ.get('yandex_api_token'))
 
         if voice is None:
             if not (ctx.author.voice):
@@ -67,10 +72,10 @@ class Voice(commands.Cog):
 
         if finder := YANDEX_MUSIC_SEARCH.fullmatch(request):
             found = finder.group(2)
-            tracks = await yandex_music_requests.get_list(found)
+            tracks = await yandex_client.get_list(found, 'track')
             track = tracks[0]
         else:
-            tracks = await yandex_music_requests.search(request)
+            tracks = await yandex_client.search(request)
             view = MusicView(ctx.guild.id, queue, MusicPlayer(
                 voice, mes, ctx.guild.id), tracks)
 

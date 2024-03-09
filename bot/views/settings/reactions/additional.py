@@ -1,14 +1,12 @@
 import nextcord
 
+
 from .modal import ModalBuilder
 from .. import reactions
 from .._view import DefaultSettingsView
 
-from bot.databases.db import GuildDateBases
-from bot.languages.settings import (
-    reactions as reaction_langs,
-    button as button_name
-)
+from bot.databases import GuildDateBases
+from bot.languages import i18n
 
 
 class DropDownBuilder(nextcord.ui.ChannelSelect):
@@ -17,7 +15,8 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         locale = self.gdb.get('language')
 
         super().__init__(
-            placeholder=reaction_langs.addres.ph.get(locale),
+            placeholder=i18n.t(
+                locale, 'settings.reactions.addres.placeholder'),
             channel_types=[nextcord.ChannelType.news,
                            nextcord.ChannelType.text]
         )
@@ -28,8 +27,8 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         locale: str = self.gdb.get('language')
 
         if channel.id in reacts:
-            await interaction.response.send_message(
-                reaction_langs.addres.channel_error.get(locale),
+            await interaction.response.send_message(i18n.t(
+                locale, 'settings.reactions.addres.channel-error'),
                 ephemeral=True)
             return
 
@@ -49,8 +48,9 @@ class InstallEmojiView(DefaultSettingsView):
             self.channel_id = channel_id
             self.install.disabled = False
 
-        self.back.label = button_name.back.get(locale)
-        self.install.label = reaction_langs.addres.install_emoji.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.install.label = i18n.t(
+            locale, 'settings.reactions.addres.install-emoji')
 
         DDB = DropDownBuilder(guild_id)
 

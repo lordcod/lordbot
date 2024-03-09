@@ -1,3 +1,4 @@
+from collections import namedtuple
 import nextcord
 
 import inspect
@@ -8,15 +9,27 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Self, Union, Mapping
+from typing import Coroutine, Self, Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 from functools import lru_cache
+from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
 
 
-number_type = Union[int, float]
+wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
+
+welcome_message_items = {
+    "None": wel_mes("None", None, None),
+    "my-image": wel_mes("My image", "Nope", "You will be able to enter a link to an image."),
+    "view-from-mountain": wel_mes("View from mountain", "https://i.postimg.cc/Hnpz0ycb/view-from-mountain.jpg", "Summer vibes, mountain views, sunset - all adds charm."),
+    "autumn-street": wel_mes("Autumn street", "https://i.postimg.cc/sXnQ8QHY/autumn-street.jpg", "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn."),
+    "winter-day": wel_mes("Winter day", "https://i.postimg.cc/qBhyYQ0g/winter-day.jpg", "Dazzling winter day, majestic mountain, small buildings, sparkling highway, snow-white covers."),
+    "magic-city": wel_mes("Magic city", "https://i.postimg.cc/hjJzk4kN/magic-city.jpg", "The beautiful atmosphere and scenic views from the boat."),
+    "city-dawn": wel_mes("City dawn", "https://i.postimg.cc/13J84NPL/city-dawn.jpg", "Starry sky, breeze, rustling leaves, crickets, fireflies, bonfire - perfect night.")
+}
+
 
 class DataRoleTimerHandlers:
     __instance = None
@@ -118,17 +131,18 @@ class MemberPayload(TempletePayload):
 
 
 class __LordFormatingTemplate(string.Template):
-    pattern = r'''
+    pattern = r"""
         \{(\s*)(?:
         (?P<escaped>\{) |
         (?P<named>[\._a-z][\._a-z0-9]*)(\s*)\} |
         (?P<braced>[\._a-z][\._a-z0-9]*)(\s*)\} |
         (?P<invalid>)
         )
-    '''
+    """
 
     def format(self, __mapping: Mapping[str, object]):
         return self.safe_substitute(__mapping)
+
 
 def lord_format(
     __value: object,
@@ -137,6 +151,24 @@ def lord_format(
     return __LordFormatingTemplate(__value).format(__mapping)
 
 
+async def clone_message(message: nextcord.Message) -> dict:
+    content = message.content
+    embeds = message.embeds
+    files = []
+    for attach in message.attachments:
+        filebytes = await attach.read()
+        files.append(nextcord.File(
+            fp=filebytes,
+            filename=attach.filename,
+            description=attach.description,
+            spoiler=attach.is_spoiler()
+        ))
+
+    return {
+        "content": content,
+        "embeds": embeds,
+        "files": files
+    }
 
 
 def cancel_atimerhandler(th: TimerHandle):
@@ -144,21 +176,14 @@ def cancel_atimerhandler(th: TimerHandle):
     coro.close()
     th.cancel()
 
-    def format(
-        self,
-        __mapping: Mapping[str, object],
-        **kwargs
-    ) -> str:
-        return self.safe_substitute(__mapping, **kwargs)
 
-
-def clamp(val: number_type,
-          minv: number_type,
-          maxv: number_type) -> number_type:
+def clamp(val: Union[int, float],
+          minv: Union[int, float],
+          maxv: Union[int, float]) -> Union[int, float]:
     return min(maxv, max(minv, val))
 
 
-async def getRandomQuote(lang='en'):
+async def getRandomQuote(lang: str = 'en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
     async with aiohttp.ClientSession() as session:
         async with session.post(url) as responce:
@@ -166,7 +191,7 @@ async def getRandomQuote(lang='en'):
             return json
 
 
-def calculate_time(string: str) -> (int | None):
+def calculate_time(string: str) -> int:
     coefficients = {
         's': 1,
         'm': 60,
@@ -175,6 +200,7 @@ def calculate_time(string: str) -> (int | None):
     }
     timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
     ftime = 0
+
     for number, word in timedate:
         if word not in coefficients:
             raise TypeError('Format time is not valid!')
@@ -205,6 +231,7 @@ async def generate_message(content: str) -> dict:
         content: dict = orjson.loads(content)
 
         message_content = content.get('plainText')
+        message['content'] = message_content
 
         title = content.get('title')
         description = content.get('description')
@@ -212,13 +239,11 @@ async def generate_message(content: str) -> dict:
         url = content.get('url')
         fields = content.get('fields', [])
 
-        message['content'] = message_content
-
         embed = nextcord.Embed(
             title=title,
             description=description,
             color=color,
-            url=url,
+            url=url
         )
 
         if thumbnail := content.get('thumbnail'):
@@ -251,7 +276,7 @@ async def generate_message(content: str) -> dict:
                 or author or footer or fields):
             message['embed'] = embed
         elif not message_content:
-            raise ValueError()
+            raise ValueError
     except (TypeError, ValueError, orjson.JSONDecodeError):
         message['content'] = content
     return message
@@ -262,6 +287,7 @@ async def generator_captcha(num):
     captcha_image = ImageCaptcha(
         width=400,
         height=220,
+        fonts=["assets/Nunito-Black.ttf"],
         font_sizes=(40, 70, 100)
     )
     data: BytesIO = captcha_image.generate(text)
@@ -279,31 +305,71 @@ def cut_back(string: str, length: int):
     return new_string
 
 
-async def generate_welcome_message(member: nextcord.Member) -> bytes:
-    background = Editor("assets/background.jpeg").resize((800, 450))
+def draw_gradient(
+    img: Image.Image,
+    start: Tuple[int, int, int],
+    end: Tuple[int, int, int]
+):
+    px = img.load()
+    for y in range(0, img.height):
+        color = tuple(int(start[i] + (end[i] - start[i])
+                      * y / img.height) for i in range(3))
+        for x in range(0, img.width):
+            px[x, y] = color
 
-    nunito = Font("assets/Nunito-ExtraBold.ttf", 50)
-    nunito_small = Font("assets/Nunito-Black.ttf", 25)
-    nunito_light = Font("assets/Nunito-Black.ttf", 20)
+
+def add_gradient(
+    backgroud: Image.Image,
+    font: ImageFont.FreeTypeFont,
+    text: str,
+    height: int,
+    color_start: Tuple[int, int, int],
+    color_stop: Tuple[int, int, int]
+) -> None:
+    w, h = font.getbbox(text)[2:]
+
+    gradient = Image.new("RGB", (w, h))
+    draw_gradient(gradient, color_start, color_stop)
+
+    im_text = Image.new("RGBA", (w, h))
+    d = ImageDraw.Draw(im_text)
+    d.text((0, 0), text, font=font)
+
+    backgroud.draft("RGBA", backgroud.size)
+    backgroud.paste(
+        gradient,
+        (int(backgroud.size[0]/2-im_text.size[0]/2), height),
+        im_text
+    )
+
+
+async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
+    background_image = await load_image_async(background_link)
+    background = Editor(background_image).resize((800, 450))
 
     profile_image = await load_image_async(
         member.display_avatar.with_size(128).url)
-    profile = Editor(profile_image).resize((150, 150)).circle_image()
+    profile = Editor(profile_image).resize((150, 150)).circle_image()\
+
+    nunito = Font("assets/Nunito-ExtraBold.ttf", 40)
+    nunito_small = Font("assets/Nunito-Black.ttf", 25)
+    nunito_light = Font("assets/Nunito-Black.ttf", 20)
 
     background.paste(profile, (325, 90))
     background.ellipse((325, 90), 150, 150, outline=(
         125, 249, 255), stroke_width=4)
-    background.text(
-        (400, 260),
-        f"WELCOME TO {cut_back(member.guild.name.upper(), 14)}",
-        color="white",
-        font=nunito,
-        align="center"
+    add_gradient(
+        background.image,
+        nunito.font,
+        f"WELCOME TO {member.guild.name.upper()}",
+        260,
+        (253, 187, 45),
+        (34, 193, 195)
     )
     background.text(
         (400, 320),
         member.display_name,
-        color="white",
+        color=0xff0000,
         font=nunito_small,
         align="center"
     )

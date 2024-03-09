@@ -1,10 +1,11 @@
+import nextcord
 from nextcord.ext import commands
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
 from bot.misc.logger import Logger
 from bot.resources import errors
-from bot.databases.db import CommandDB
+from bot.databases import CommandDB
 from bot.resources.errors import (CallbackCommandError,
                                   MissingRole,
                                   MissingChannel,
@@ -56,12 +57,11 @@ class PermissionChecker:
         ctx = self.ctx
         author = ctx.author
         aut_roles_ids = author._roles
-        perm_roles_ids = data.get("values", [])
 
-        if not perm_roles_ids:
+        if not data:
             return True
 
-        common = set(perm_roles_ids) & set(aut_roles_ids)
+        common = set(data) & set(aut_roles_ids)
         if not common:
             raise MissingRole()
         return True
@@ -70,13 +70,15 @@ class PermissionChecker:
         "The `is_allowed` subsection is needed to verify channels"
         ctx = self.ctx
         channel = ctx.channel
-        channels_ids = data.get("values", [])
+        channels_ids = data.get("channels", [])
+        categories_ids = data.get("categories", [])
 
-        if channel.id not in channels_ids:
+        if not (channel.id in channels_ids or
+                channel.category_id in categories_ids):
             raise MissingChannel()
         return True
 
-    async def _is_allowed_cooldown(self, data: dict) -> bool:
+    async def _is_cooldown(self, data: dict) -> bool:
         ctx = self.ctx
 
         cooldown = Cooldown.from_message(
@@ -95,9 +97,9 @@ class PermissionChecker:
             raise TypeError(retry)
 
     allowed_types = {
-        'role': _is_allowed_role,
-        'channel': _is_allowed_channel,
-        'cooldown': _is_allowed_cooldown
+        'allow-roles': _is_allowed_role,
+        'allow-channels': _is_allowed_channel,
+        'cooldown': _is_cooldown
     }
 
 
@@ -107,13 +109,14 @@ class command_event(commands.Cog):
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
-        # bot.event(self.on_error)
-        bot.event(self.on_command_error)
-        bot.event(self.on_application_error)
+        # bot.add_event(self.on_error)
+        bot.add_event(self.on_command_error)
+        bot.add_event(self.on_application_error)
 
         bot.add_check(self.permission_check)
 
-    async def on_application_error(self, interaction, error):
+    async def on_application_error(
+            self, interaction: nextcord.Interaction, error: Exception):
         pass
 
     async def on_command_error(self, ctx: commands.Context, error):

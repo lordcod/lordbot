@@ -1,6 +1,6 @@
 import nextcord
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.resources.info import DEFAULT_EMOJI
 
 from .. import economy

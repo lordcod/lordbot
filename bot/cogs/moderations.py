@@ -1,3 +1,4 @@
+
 import nextcord
 from nextcord.ext import commands
 
@@ -5,12 +6,12 @@ from bot.misc import utils
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.views.settings_menu import SettingsView
-from bot.databases.db import RoleDateBases, GuildDateBases
-from bot.resources.ether import Emoji
+from bot.views.delcat import DelCatView
+from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
 import io
-import asyncio
 import time
+import asyncio
 from typing import Optional
 
 
@@ -39,6 +40,81 @@ class moderations(commands.Cog):
 
         await ctx.send(embed=view.embed, view=view)
 
+    @nextcord.slash_command(name="delete-category")
+    @commands.has_permissions(manage_channels=True)
+    async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
+        view = DelCatView(interaction.user, category)
+
+        await interaction.response.send_message(embed=view.embed, view=view)
+
+    @commands.group(name='ban', aliases=["tempban"], invoke_without_command=True)
+    @commands.has_permissions(manage_roles=True)
+    async def temp_ban(
+        self,
+        ctx: commands.Context,
+        member: nextcord.Member,
+        ftime: Optional[utils.calculate_time] = None,
+        *,
+        reason: Optional[str] = None
+    ):
+        gdb = GuildDateBases(ctx.guild.id)
+        bsdb = BanDateBases(ctx.guild.id, member.id)
+        locale = gdb.get('language')
+        color = gdb.get('color')
+
+        embed = nextcord.Embed(
+            title="Temporary ban granted!",
+            description=(
+                f"Banned: {member.name}({member.id})\n"
+                f"Moderator: {ctx.author.name}({ctx.author.id})"
+            ),
+            color=color
+        )
+        if ftime is not None:
+            embed.add_field(
+                name="Time of action",
+                value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime, locale)})",
+                inline=False
+            )
+        if reason is not None:
+            embed.add_field(
+                name='Reason',
+                value=reason,
+                inline=False
+            )
+
+        if ftime is not None:
+            self.bot.loop.call_later(
+                ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
+
+            bsdb.insert(ftime+time.time())
+
+        await member.ban(reason=reason)
+
+        await ctx.send(embed=embed)
+
+    @temp_ban.command(name='list')
+    async def temp_ban_list(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+        color = gdb.get('color')
+
+        rsdb = BanDateBases(ctx.guild.id)
+        datas = rsdb.get_as_guild()
+
+        message = ""
+
+        for quantity, (member_id, ban_time) in enumerate(datas):
+            message += f"{quantity}. <@{member_id}>(<t:{ban_time}:R>)\n"
+
+        message = message or "There are no registered temporary roles on this server"
+        embed = nextcord.Embed(
+            title="Temp Bans",
+            description=message,
+            color=color
+        )
+
+        await ctx.send(embed=embed)
+
     @commands.group(name='temp-role', invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
     async def temp_role(
@@ -46,14 +122,13 @@ class moderations(commands.Cog):
         ctx: commands.Context,
         member: nextcord.Member,
         role: nextcord.Role,
-        stime: str
+        ftime: utils.calculate_time
     ):
         gdb = GuildDateBases(ctx.guild.id)
         rsdb = RoleDateBases(ctx.guild.id, member.id)
+        locale = gdb.get('language')
         color = gdb.get('color')
         _role_time = rsdb.get_as_role(role.id)
-
-        ftime = utils.calculate_time(stime)
 
         if _role_time is not None:
             self.bot.role_timer_handlers.cancel_th(ctx.guild.id,
@@ -69,7 +144,7 @@ class moderations(commands.Cog):
             )
             embed.add_field(
                 name='New time of action',
-                value=f'<t:{_role_time[0]}:f> → <t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})',
+                value=f'<t:{_role_time[0]}:f> → <t:{ftime+time.time() :.0f}:f> ({display_time(ftime, locale)})',
                 inline=False
             )
         else:
@@ -113,11 +188,7 @@ class moderations(commands.Cog):
 
         message = ""
 
-        for quantity, role_data in enumerate(datas):
-            member_id = role_data[0]
-            role_id = role_data[1]
-            role_time = role_data[2]
-
+        for quantity, (member_id, role_id, role_time) in enumerate(datas):
             member = ctx.guild.get_member(member_id)
             role = ctx.guild.get_role(role_id)
 
@@ -177,7 +248,7 @@ class moderations(commands.Cog):
 
         await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}', ephemeral=True)
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, aliases=["clear", "clean"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx: commands.Context, limit: int):
         if limit > 200:

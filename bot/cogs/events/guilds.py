@@ -2,7 +2,7 @@ import time
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 
@@ -24,7 +24,8 @@ class guilds_event(commands.Cog):
         gdb = GuildDateBases(guild.id)
         delay = 60 * 60 * 24 * 3
         gth = self.bot.loop.call_later(delay, gdb.delete)
-        self.bot.guild_timer_handlers[guild.id] = (gth, delay+time.time())
+        self.bot.guild_timer_handlers[guild.id] = (
+            gth, delay+time.time())
 
 
 def setup(bot):

@@ -40,8 +40,7 @@ execute(
     """
             UPDATE 
                 guilds 
-            SET 
-                ideas = %s
+            SET id = 1179069504186232852, ideas = %s
             WHERE 
                 id = %s
         """,

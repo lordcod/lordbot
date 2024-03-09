@@ -1,5 +1,20 @@
 # 📑 Change Log
 
+
+## Alpha/v0.2.2
+
+09.03.2024
+
+### What's Changed
+1. The `tempban` and `/deletecategory` commands have been added, as well as the functionality of linking an image to a welcome message. 
+2. The selector has been fixed, now all roles and channels are available. 
+3. The appearance of the `help` and `ping` commands has been changed. 
+4. The speed of command execution has decreased, as has the rate of database queries. 
+5. A new argument management system has been implemented. 
+6. The default color of system messages has now been updated to make them effectively invisible. 
+7. The ability to alter the charge type without re-entering data on replicas and delays has been added, and the time display has been corrected (previously only English was shown).
+
+
 ## Alpha/v0.2.1
 
 17.02.2024

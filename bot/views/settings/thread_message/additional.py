@@ -1,14 +1,12 @@
 import nextcord
 
+from bot.languages import i18n
+
 from .modal import ModalBuilder
 from .. import thread_message
 from .._view import DefaultSettingsView
 
-from bot.databases.db import GuildDateBases
-from bot.languages.settings import (
-    thread as thread_langs,
-    button as button_name
-)
+from bot.databases import GuildDateBases
 
 
 class ChannelDropDown(nextcord.ui.ChannelSelect):
@@ -16,7 +14,8 @@ class ChannelDropDown(nextcord.ui.ChannelSelect):
         self.gdb = GuildDateBases(guild_id)
         locale = self.gdb.get('language')
         super().__init__(
-            placeholder=thread_langs.addptional.placeholder.get(locale),
+            placeholder=i18n.t(
+                locale, 'settings.thread.addptional.placeholder'),
             channel_types=[nextcord.ChannelType.forum,
                            nextcord.ChannelType.text]
         )
@@ -27,8 +26,8 @@ class ChannelDropDown(nextcord.ui.ChannelSelect):
         forum_message = self.gdb.get('thread_messages')
 
         if channel.id in forum_message:
-            await interaction.response.send_message(
-                thread_langs.addptional.channel_error.get(locale))
+            await interaction.response.send_message(i18n.t(
+                locale, 'settings.thread.addptional.channel-error'))
             return
 
         view = InstallThreadView(channel.guild.id, channel.id)
@@ -46,8 +45,10 @@ class InstallThreadView(DefaultSettingsView):
 
         super().__init__()
 
-        self.back.label = button_name.back.get(locale)
-        self.install.label = thread_langs.addptional.install_mes.get(locale)
+        self.back.label = i18n.t(
+            locale, 'settings.button.back')
+        self.install.label = i18n.t(
+            locale, 'settings.thread.addptional.button.install-mes')
 
         DDB = ChannelDropDown(guild_id)
 

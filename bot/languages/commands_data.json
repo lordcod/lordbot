@@ -1,0 +1,1364 @@
+[
+    {
+        "name": "balance",
+        "category": "economy",
+        "aliases": [
+            "bal"
+        ],
+        "arguments": [
+            "[member]"
+        ],
+        "examples": [
+            [
+                "balance",
+                {
+                    "en": "Displays your balance",
+                    "ru": "Отображает ваш баланс",
+                    "id": "Menampilkan saldo Anda",
+                    "da": "Viser din balance",
+                    "de": "Zeigt Ihren Kontostand an",
+                    "es": "Muestra tu saldo",
+                    "fr": "Affiche votre solde",
+                    "pl": "Wyświetla saldo",
+                    "tr": "Bakiyenizi görüntüler"
+                }
+            ],
+            [
+                "balance @lordcode",
+                {
+                    "en": "Displays the balance of the lordcode participant",
+                    "ru": "Отображает баланс участника лордкода",
+                    "id": "Menampilkan saldo peserta lordcode",
+                    "da": "Viser saldoen for lordcode-deltageren",
+                    "de": "Zeigt den Kontostand des Lordcode-Teilnehmers an",
+                    "es": "Muestra el saldo del participante de Lordcode.",
+                    "fr": "Affiche le solde du participant Lordcode",
+                    "pl": "Wyświetla saldo uczestnika Lordcode",
+                    "tr": "Lordcode katılımcısının bakiyesini görüntüler"
+                }
+            ],
+            [
+                "balance 636824998123798531",
+                {
+                    "en": "Displays the balance of the participant with id 636824998123798531",
+                    "ru": "Отображает баланс участника с id 636824998123798531",
+                    "id": "Menampilkan saldo peserta dengan id 636824998123798531",
+                    "da": "Viser saldoen for deltageren med id 636824998123798531",
+                    "de": "Zeigt den Kontostand des Teilnehmers mit der ID 636824998123798531 an",
+                    "es": "Muestra el saldo del participante con id 636824998123798531",
+                    "fr": "Affiche le solde du participant avec l'identifiant 636824998123798531",
+                    "pl": "Wyświetla saldo uczestnika o identyfikatorze 636824998123798531",
+                    "tr": "636824998123798531 kimliğine sahip katılımcının bakiyesini görüntüler"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Displays the participant's balance as well as possible rewards that can be collected\n\nIf no participant is specified, the value is taken by the one who started the command",
+            "ru": "Отображает баланс участника, а также возможные вознаграждения, которые можно получить\n\nЕсли участник не указан, значение принимает тот, кто запустил команду",
+            "id": "Menampilkan saldo peserta serta kemungkinan hadiah yang dapat dikumpulkan \n\nJika tidak ada peserta yang ditentukan, nilainya diambil oleh orang yang memulai perintah",
+            "da": "Viser deltagerens balance samt mulige belønninger, der kan indsamles\n\nHvis der ikke er angivet nogen deltager, tages værdien af den, der startede kommandoen",
+            "de": "Zeigt das Guthaben des Teilnehmers sowie mögliche Belohnungen an, die gesammelt werden können\n\nWenn kein Teilnehmer angegeben ist, wird der Wert von demjenigen übernommen, der den Befehl gestartet hat.",
+            "es": "Muestra el saldo del participante, así como las posibles recompensas que se pueden cobrar\n\nSi no se especifica ningún participante, el valor lo toma quien inició el comando",
+            "fr": "Affiche le solde du participant ainsi que les éventuelles récompenses pouvant être collectées\n\nSi aucun participant n'est spécifié, la valeur est prise par celui qui a lancé la commande",
+            "pl": "Wyświetla saldo uczestnika, a także możliwe nagrody, które można zebrać\n\nJeśli żaden uczestnik nie jest określony, wartość jest pobierana przez tego, który uruchomił polecenie",
+            "tr": "Katılımcının bakiyesini ve toplanabilecek olası ödülleri görüntüler\n\nKatılımcı belirtilmezse, değer komutu başlatan kişi tarafından alınır"
+        },
+        "brief_descriptrion": {
+            "en": "Participant's balance",
+            "ru": "Баланс участника",
+            "id": "Saldo peserta",
+            "da": "Deltagerens balance",
+            "de": "Guthaben des Teilnehmers",
+            "es": "Saldo del participante",
+            "fr": "Solde du participant",
+            "pl": "Saldo uczestnika",
+            "tr": "Katılımcının bakiyesi"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "leaderboard",
+        "category": "economy",
+        "aliases": [
+            "lb",
+            "leaders",
+            "top"
+        ],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Shows statistics of the top 10 server participants by balance",
+            "ru": "Показывает статистику по 10 лучшим участникам сервера по балансу",
+            "id": "Menampilkan statistik dari 10 peserta server teratas berdasarkan saldo",
+            "da": "Viser statistik over de 10 bedste serverdeltagere efter balance",
+            "de": "Zeigt Statistiken der Top 10 Serverteilnehmer nach Saldo an",
+            "es": "Muestra estadísticas de los 10 mejores participantes del servidor por saldo",
+            "fr": "Affiche les statistiques des 10 meilleurs participants au serveur par solde",
+            "pl": "Pokazuje statystyki 10 najlepszych uczestników serwera według salda",
+            "tr": "En iyi 10 sunucu katılımcısının istatistiklerini bakiyeye göre gösterir"
+        },
+        "brief_descriptrion": {
+            "en": "Top server participants by balance",
+            "ru": "Лучшие участники сервера по балансу",
+            "id": "Peserta server teratas berdasarkan saldo",
+            "da": "Top server deltagere efter balance",
+            "de": "Top-Serverteilnehmer nach Saldo",
+            "es": "Principales participantes del servidor por saldo",
+            "fr": "Principaux participants au serveur par solde",
+            "pl": "Najlepsi uczestnicy serwera według salda",
+            "tr": "Bakiyeye göre en iyi sunucu katılımcıları"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "pay",
+        "category": "economy",
+        "aliases": [],
+        "arguments": [
+            "<member>",
+            "<amount>"
+        ],
+        "examples": [
+            [
+                "pay @lordcode 100",
+                {
+                    "en": "Transfers 100 coins to the account of the lordcode participant",
+                    "ru": "Переводит 100 монет на счет участника лордкода",
+                    "id": "Mentransfer 100 koin ke akun peserta lordcode",
+                    "da": "Overfører 100 mønter til lordcode-deltagerens konto",
+                    "de": "Überweist 100 Münzen auf das Konto des Lordcode-Teilnehmers",
+                    "es": "Transfiere 100 monedas a la cuenta del participante de Lordcode",
+                    "fr": "Transfère 100 pièces sur le compte du participant au Lordcode",
+                    "pl": "Przelewa 100 monet na konto uczestnika lordcode",
+                    "tr": "Lordcode katılımcısının hesabına 100 jeton aktarır"
+                }
+            ],
+            [
+                "pay 636824998123798531 100",
+                {
+                    "en": "Transfers 100 coins to the participant's account from ID 636824998123798531",
+                    "ru": "Переводит 100 монет на счет участника с ID 636824998123798531",
+                    "id": "Transfer 100 koin ke rekening peserta dari ID 636824998123798531",
+                    "da": "Overfører 100 mønter til deltagerens konto fra ID 636824998123798531",
+                    "de": "Überträgt 100 Münzen auf das Konto des Teilnehmers von der ID 636824998123798531",
+                    "es": "Transfiere 100 monedas a la cuenta del participante desde ID 636824998123798531",
+                    "fr": "Transfère 100 pièces sur le compte du participant à partir de l'ID 636824998123798531",
+                    "pl": "Przelewa 100 monet na konto uczestnika z ID 636824998123798531",
+                    "tr": "636824998123798531 numaralı kimlikten katılımcının hesabına 100 jeton aktarılır"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Transfers the specified amount to the selected participant",
+            "ru": "Переводит указанную сумму выбранному участнику",
+            "id": "Mentransfer jumlah yang ditentukan ke peserta yang dipilih",
+            "da": "Overfører det angivne beløb til den valgte deltager",
+            "de": "Überweist den angegebenen Betrag an den ausgewählten Teilnehmer",
+            "es": "Transfiere la cantidad especificada al participante seleccionado",
+            "fr": "Transfère le montant spécifié au participant sélectionné",
+            "pl": "Przekazuje określoną kwotę wybranemu Uczestnikowi",
+            "tr": "Belirtilen tutarı seçilen katılımcıya aktarır"
+        },
+        "brief_descriptrion": {
+            "en": "Transfers money",
+            "ru": "Переводит деньги",
+            "id": "Transfer uang",
+            "da": "Overfører penge",
+            "de": "Überweisungen Geld",
+            "es": "Transferencias de dinero",
+            "fr": "Transferts d'argent",
+            "pl": "Przelewy pieniądze",
+            "tr": "Para transferi"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "daily",
+        "category": "economy",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Issues a cash reward once a day",
+            "ru": "Выдает денежное вознаграждение один раз в день",
+            "id": "Mengeluarkan hadiah uang tunai sekali sehari",
+            "da": "Udsteder en kontant belønning en gang om dagen",
+            "de": "Gibt einmal täglich eine Geldprämie aus",
+            "es": "Emite una recompensa en efectivo una vez al día",
+            "fr": "Émet une récompense en espèces une fois par jour",
+            "pl": "Wydaje nagrodę pieniężną raz dziennie",
+            "tr": "Günde bir kez nakit ödül verir"
+        },
+        "brief_descriptrion": {
+            "en": "Daily cash rewards",
+            "ru": "Ежедневные денежные вознаграждения",
+            "id": "Hadiah uang tunai harian",
+            "da": "Daglige kontante belønninger",
+            "de": "Tägliche Geldprämien",
+            "es": "Recompensas diarias en efectivo",
+            "fr": "Récompenses quotidiennes en espèces",
+            "pl": "Codzienne nagrody pieniężne",
+            "tr": "Günlük nakit ödüller"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "weekly",
+        "category": "economy",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Issues a cash reward once a week",
+            "ru": "Выдает денежное вознаграждение раз в неделю",
+            "id": "Mengeluarkan hadiah uang tunai seminggu sekali",
+            "da": "Udsteder en kontant belønning en gang om ugen",
+            "de": "Gibt einmal pro Woche eine Geldprämie aus",
+            "es": "Emite una recompensa en efectivo una vez a la semana",
+            "fr": "Émet une récompense en espèces une fois par semaine",
+            "pl": "Wydaje nagrodę pieniężną raz w tygodniu",
+            "tr": "Haftada bir kez nakit ödül verir"
+        },
+        "brief_descriptrion": {
+            "en": "Weekly cash rewards",
+            "ru": "Еженедельные денежные вознаграждения",
+            "id": "Hadiah uang tunai mingguan",
+            "da": "Ugentlige kontante belønninger",
+            "de": "Wöchentliche Geldprämien",
+            "es": "Recompensas semanales en efectivo",
+            "fr": "Récompenses hebdomadaires en espèces",
+            "pl": "Cotygodniowe nagrody pieniężne",
+            "tr": "Haftalık nakit ödüller"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "monthly",
+        "category": "economy",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Issues a cash reward once a month",
+            "ru": "Выдает денежное вознаграждение раз в месяц",
+            "id": "Mengeluarkan hadiah uang tunai sebulan sekali",
+            "da": "Udsteder en kontant belønning en gang om måneden",
+            "de": "Gibt einmal im Monat eine Geldprämie aus",
+            "es": "Emite una recompensa en efectivo una vez al mes",
+            "fr": "Émet une récompense en espèces une fois par mois",
+            "pl": "Wydaje nagrodę pieniężną raz w miesiącu",
+            "tr": "Ayda bir kez nakit ödül verir"
+        },
+        "brief_descriptrion": {
+            "en": "Monthly cash rewards",
+            "ru": "Ежемесячное денежное вознаграждение",
+            "id": "Hadiah uang tunai bulanan",
+            "da": "Månedlige kontantbelønninger",
+            "de": "Monatliche Geldprämien",
+            "es": "Recompensas mensuales en efectivo",
+            "fr": "Récompenses mensuelles en espèces",
+            "pl": "Miesięczne nagrody pieniężne",
+            "tr": "Aylık nakit ödüller"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "deposit",
+        "category": "economy",
+        "aliases": [
+            "dep"
+        ],
+        "arguments": [
+            "<amount>"
+        ],
+        "examples": [
+            [
+                "deposit 100",
+                {
+                    "en": "Transfers 100 coins to the bank",
+                    "ru": "Переводит 100 монет в банк",
+                    "id": "Transfer 100 koin ke bank",
+                    "da": "Overfører 100 mønter til banken",
+                    "de": "Überweist 100 Münzen an die Bank",
+                    "es": "Transfiere 100 monedas al banco.",
+                    "fr": "Transfère 100 pièces à la banque",
+                    "pl": "Przekazuje 100 monet do banku",
+                    "tr": "Bankaya 100 jeton aktarır"
+                }
+            ],
+            [
+                "deposit all",
+                {
+                    "en": "Transfers all coins to the bank",
+                    "ru": "Переносит все монеты в банк",
+                    "id": "Transfer semua koin ke bank",
+                    "da": "Overfører alle mønter til banken",
+                    "de": "Überträgt alle Münzen an die Bank",
+                    "es": "Transfiere todas las monedas al banco.",
+                    "fr": "Transfère toutes les pièces à la banque",
+                    "pl": "Przekazuje wszystkie monety do banku",
+                    "tr": "Tüm paraları bankaya aktarır"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Transfers the entered amount of money to the bank protecting your funds from robbery",
+            "ru": "Переводит введенную сумму денег в банк, защищая ваши средства от ограбления",
+            "id": "Mentransfer jumlah uang yang dimasukkan ke bank melindungi dana Anda dari perampokan",
+            "da": "Overfører det indtastede beløb til banken, der beskytter dine midler mod røveri",
+            "de": "Überweist den eingegebenen Geldbetrag an die Bank, um Ihr Geld vor Raub zu schützen",
+            "es": "Transfiere la cantidad de dinero ingresada al banco protegiendo sus fondos contra robos",
+            "fr": "Transfère le montant d'argent saisi à la banque protégeant vos fonds contre le vol",
+            "pl": "Przekazuje wprowadzoną kwotę pieniędzy do banku chroniącego twoje środki przed rabunkiem",
+            "tr": "Girilen para miktarını, paranızı soygundan koruyan bankaya aktarır"
+        },
+        "brief_descriptrion": {
+            "en": "Transfers the entered amount of money to the bank",
+            "ru": "Переводит введенную сумму денег в банк",
+            "id": "Mentransfer jumlah uang yang dimasukkan ke bank",
+            "da": "Overfører det indtastede beløb til banken",
+            "de": "Überweist den eingegebenen Geldbetrag an die Bank",
+            "es": "Transfiere la cantidad de dinero ingresada al banco",
+            "fr": "Transfère le montant saisi à la banque",
+            "pl": "Przekazuje wprowadzoną kwotę pieniędzy do banku",
+            "tr": "Girilen para miktarını bankaya aktarır"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "withdraw",
+        "category": "economy",
+        "aliases": [
+            "wd"
+        ],
+        "arguments": [
+            "<amount>"
+        ],
+        "examples": [
+            [
+                "withdraw 100",
+                {
+                    "en": "Transfers 100 coins from the bank back to your account",
+                    "ru": "Переводит 100 монет из банка обратно на ваш счет",
+                    "id": "Transfer 100 koin dari bank kembali ke rekening Anda",
+                    "da": "Overfører 100 mønter fra banken tilbage til din konto",
+                    "de": "Überweist 100 Münzen von der Bank zurück auf Ihr Konto",
+                    "es": "Transfiere 100 monedas del banco a su cuenta",
+                    "fr": "Transfère 100 pièces de la banque vers votre compte",
+                    "pl": "Przelewa 100 monet z banku z powrotem na Twoje konto",
+                    "tr": "100 jetonu bankadan hesabınıza geri aktarır"
+                }
+            ],
+            [
+                "withdraw all",
+                {
+                    "en": "Transfers all coins from the bank back to your account",
+                    "ru": "Переводит все монеты из банка обратно на ваш счет",
+                    "id": "Transfer semua koin dari bank kembali ke rekening Anda",
+                    "da": "Overfører alle mønter fra banken tilbage til din konto",
+                    "de": "Überträgt alle Coins von der Bank zurück auf Ihr Konto",
+                    "es": "Transfiere todas las monedas del banco a su cuenta",
+                    "fr": "Transfère toutes les pièces de la banque vers votre compte",
+                    "pl": "Przesyła wszystkie monety z banku z powrotem na Twoje konto",
+                    "tr": "Bankadaki tüm paraları hesabınıza geri aktarır"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Redirects your funds from the bank back to your account\n\nPlease note that if you lose your funds, it is not possible to return them",
+            "ru": "Перенаправляет ваши средства из банка обратно на ваш счет\n\nПожалуйста, обратите внимание, что если вы потеряете свои средства, вернуть их будет невозможно",
+            "id": "Mengalihkan dana Anda dari bank kembali ke rekening Anda\n\nHarap dicatat bahwa jika Anda kehilangan dana, tidak mungkin mengembalikannya",
+            "da": "Omdirigerer dine penge fra banken tilbage til din konto\n\nBemærk, at hvis du mister dine penge, er det ikke muligt at returnere dem",
+            "de": "Leitet Ihr Geld von der Bank zurück auf Ihr Konto\n\nBitte beachten Sie, dass es bei Verlust Ihres Geldes nicht möglich ist, es zurückzugeben.",
+            "es": "Redirige sus fondos del banco a su cuenta\n\nTenga en cuenta que si pierde sus fondos, no es posible devolverlos",
+            "fr": "Redirige vos fonds de la banque vers votre compte\n\nVeuillez noter que si vous perdez vos fonds, il n'est pas possible de les restituer",
+            "pl": "Przekierowuje środki z banku z powrotem na twoje konto\n\nPamiętaj, że jeśli stracisz środki, nie możesz ich zwrócić",
+            "tr": "Przekierowuje środki z banku z powrotem na twoje konto\n\nPamiętaj, że jeśli stracisz środki, nie możesz ich zwrócić"
+        },
+        "brief_descriptrion": {
+            "en": "Transfers the amount back to the account",
+            "ru": "Переводит сумму обратно на счет",
+            "id": "Mentransfer jumlah tersebut kembali ke rekening",
+            "da": "Overfører beløbet tilbage til kontoen",
+            "de": "Überweist den Betrag zurück auf das Konto",
+            "es": "Transfiere el importe de vuelta a la cuenta",
+            "fr": "Transfère le montant sur le compte",
+            "pl": "Przelewa kwotę z powrotem na konto",
+            "tr": "Tutarı hesaba geri aktarır"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "gift",
+        "category": "economy",
+        "aliases": [],
+        "arguments": [
+            "[member]",
+            "<amount>"
+        ],
+        "examples": [
+            [
+                "gift 100",
+                {
+                    "en": "Gives you 100 coins.",
+                    "ru": "Дает вам 100 монет.",
+                    "id": "Memberi Anda 100 koin.",
+                    "da": "Giver dig 100 mønter.",
+                    "de": "Gibt Ihnen 100 Münzen.",
+                    "es": "Te da 100 monedas.",
+                    "fr": "Vous donne 100 pièces.",
+                    "pl": "Daje ci 100 monet.",
+                    "tr": "Size 100 jeton verir."
+                }
+            ],
+            [
+                "gift @lordcode 100",
+                {
+                    "en": "Gives member lordcode 100 coins.",
+                    "ru": "Дает участнику лорд-код 100 монет.",
+                    "id": "Memberikan lordcode anggota 100 koin.",
+                    "da": "Giver medlem herrekode 100 mønter.",
+                    "de": "Gibt dem Mitglied Lordcode 100 Münzen.",
+                    "es": "Le da al miembro Lordcode 100 monedas.",
+                    "fr": "Donne au membre Lordcode 100 pièces.",
+                    "pl": "Daje członkowi Lordcode 100 monet.",
+                    "tr": "Üyeye 100 jeton lord kodu verir."
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Adds a certain amount to the selected participant\nIf the participant is not selected, the team performer acts instead",
+            "ru": "Добавляет определенную сумму выбранному участнику\nЕсли участник не выбран, вместо него действует исполнитель команды",
+            "id": "Menambahkan jumlah tertentu ke peserta yang dipilih\nJika peserta tidak dipilih, pemain tim bertindak sebagai gantinya",
+            "da": "Tilføjer et bestemt beløb til den valgte deltager\nHvis deltageren ikke er valgt, handler holdudøveren i stedet",
+            "de": "Fügt dem ausgewählten Teilnehmer einen bestimmten Betrag hinzu\nWenn der Teilnehmer nicht ausgewählt wird, handelt stattdessen der Team Performer",
+            "es": "Agrega una cierta cantidad al participante seleccionado\nSi el participante no es seleccionado, el ejecutante del equipo actúa en su lugar",
+            "fr": "Ajoute un certain montant au participant sélectionné\nSi le participant n'est pas sélectionné, l'interprète de l'équipe agit à la place",
+            "pl": "Dodaje określoną kwotę do wybranego uczestnika\nJeśli uczestnik nie zostanie wybrany, wykonawca zespołu działa zamiast tego",
+            "tr": "Seçilen katılımcıya belirli bir miktar ekler\nKatılımcı seçilmezse, bunun yerine takım oyuncusu hareket eder"
+        },
+        "brief_descriptrion": {
+            "en": "Adds the amount to the participant",
+            "ru": "Добавляет сумму участнику",
+            "id": "Menambahkan jumlah tersebut ke peserta",
+            "da": "Tilføjer beløbet til deltageren",
+            "de": "Fügt dem Teilnehmer den Betrag hinzu",
+            "es": "Agrega la cantidad al participante",
+            "fr": "Ajoute le montant au participant",
+            "pl": "Dodaje kwotę do uczestnika",
+            "tr": "Tutarı katılımcıya ekler"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "take",
+        "category": "economy",
+        "aliases": [],
+        "arguments": [
+            "[member]",
+            "<amount>"
+        ],
+        "examples": [
+            [
+                "take 100",
+                {
+                    "en": "Takes you 100 coins.",
+                    "ru": "Берет с вас 100 монет.",
+                    "id": "Membawa Anda 100 koin.",
+                    "da": "Giver dig 100 mønter.",
+                    "de": "Bringt Ihnen 100 Münzen.",
+                    "es": "Te lleva 100 monedas.",
+                    "fr": "Cela vous prend 100 pièces.",
+                    "pl": "Zabierze ci 100 monet.",
+                    "tr": "100 jeton alır."
+                }
+            ],
+            [
+                "take @lordcode 100",
+                {
+                    "en": "Takes member lordcode 100 coins.",
+                    "ru": "Берет члена лорд-кода 100 монет.",
+                    "id": "Mengambil lordcode anggota 100 koin.",
+                    "da": "Tager medlem herrekode 100 mønter.",
+                    "de": "Benötigt Mitglieds-Lordcode 100 Münzen.",
+                    "es": "Toma miembro Lordcode 100 monedas.",
+                    "fr": "Prend le code seigneur du membre 100 pièces.",
+                    "pl": "Zajmuje członkostwo Lordcode 100 monet.",
+                    "tr": "Üye lord kodunu 100 jeton alır."
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Takes a certain amount to the selected participant\nIf the participant is not selected, the team performer acts instead",
+            "ru": "Выплачивает определенную сумму выбранному участнику\nЕсли участник не выбран, вместо него действует исполнитель команды",
+            "id": "Mengambil jumlah tertentu untuk peserta yang dipilih\nJika peserta tidak dipilih, pemain tim bertindak sebagai gantinya",
+            "da": "Tager et vist beløb til den valgte deltager\nHvis deltageren ikke er valgt, handler holdudøveren i stedet",
+            "de": "Nimmt dem ausgewählten Teilnehmer einen bestimmten Betrag\nWenn der Teilnehmer nicht ausgewählt wird, handelt stattdessen der Team Performer",
+            "es": "Toma una cierta cantidad para el participante seleccionado\nSi el participante no es seleccionado, el ejecutante del equipo actúa en su lugar",
+            "fr": "Prend un certain montant au participant sélectionné\nSi le participant n'est pas sélectionné, l'interprète de l'équipe agit à la place",
+            "pl": "Pobiera określoną kwotę wybranemu Uczestnikowi\nJeśli uczestnik nie zostanie wybrany, wykonawca zespołu działa zamiast tego",
+            "tr": "Seçilen katılımcıya belirli bir miktar alır\nKatılımcı seçilmezse, bunun yerine takım oyuncusu hareket eder"
+        },
+        "brief_descriptrion": {
+            "en": "Takes the amount to the participant",
+            "ru": "Забирает сумму у участнику",
+            "id": "Membawa jumlah tersebut ke peserta",
+            "da": "Tager beløbet til deltageren",
+            "de": "Überweist den Betrag an den Teilnehmer",
+            "es": "Lleva la cantidad al participante",
+            "fr": "Remet le montant au participant",
+            "pl": "Przyjmuje kwotę do uczestnika",
+            "tr": "Tutarı katılımcıya alır"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "help",
+        "category": "major",
+        "aliases": [],
+        "arguments": [
+            "[command]"
+        ],
+        "examples": [
+            [
+                "help ping",
+                {
+                    "en": "Shows help about the `ping` command",
+                    "ru": "Показывает справку о команде ping.",
+                    "id": "Menampilkan bantuan tentang perintah `ping`",
+                    "da": "Viser hjælp om kommandoen `ping`",
+                    "de": "Zeigt Hilfe zum Befehl „ping“.",
+                    "es": "Muestra ayuda sobre el comando `ping`",
+                    "fr": "Affiche de l'aide sur la commande `ping`",
+                    "pl": "Wyświetla pomoc dotyczącą polecenia `ping`",
+                    "tr": "'ping' komutuyla ilgili yardımı gösterir"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "A command describing the bot's functions",
+            "ru": "Команда, описывающая функции бота",
+            "id": "Perintah yang menjelaskan fungsi bot",
+            "da": "En kommando, der beskriver botens funktioner",
+            "de": "Ein Befehl, der die Funktionen des Bots beschreibt",
+            "es": "Un comando que describe las funciones del bot",
+            "fr": "Une commande décrivant les fonctions du bot",
+            "pl": "Polecenie opisujące funkcje bota",
+            "tr": "Botun işlevlerini açıklayan bir komut"
+        },
+        "brief_descriptrion": {
+            "en": "Current command",
+            "ru": "Текущая команда",
+            "id": "Tim saat ini",
+            "da": "Det nuværende hold",
+            "de": "Aktueller Befehl",
+            "es": "Equipo actual",
+            "fr": "Équipe actuelle",
+            "pl": "Obecny zespół",
+            "tr": "Mevcut takım"
+        },
+        "allowed_disabled": false
+    },
+    {
+        "name": "ping",
+        "category": "major",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Shows the performance and current status of the bot",
+            "ru": "Показывает производительность и текущее состояние бота",
+            "id": "Menunjukkan kinerja dan status bot saat ini",
+            "da": "Viser botens ydeevne og aktuelle status",
+            "de": "Zeigt die Leistung und den aktuellen Status des Bots an",
+            "es": "Muestra el rendimiento y el estado actual del bot",
+            "fr": "Affiche les performances et l'état actuel du bot",
+            "pl": "Pokazuje wydajność i aktualny stan bota",
+            "tr": "Botun performansını ve mevcut durumunu gösterir"
+        },
+        "brief_descriptrion": {
+            "en": "Current bot delay",
+            "ru": "Текущая задержка бота",
+            "id": "Penundaan bot saat ini",
+            "da": "Aktuel bot forsinkelse",
+            "de": "Aktuelle Bot-Verzögerung",
+            "es": "Retraso actual del bot",
+            "fr": "Délai actuel du bot",
+            "pl": "Aktualne opóźnienie bota",
+            "tr": "Geçerli bot gecikmesi"
+        },
+        "allowed_disabled": false
+    },
+    {
+        "name": "invite",
+        "category": "major",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Issues a link inviting the bot to the server",
+            "ru": "Выдает ссылку, приглашающую бота на сервер",
+            "id": "Menerbitkan tautan yang mengundang bot ke server",
+            "da": "Udsteder et link, der inviterer bot til serveren",
+            "de": "Gibt einen Link aus, der den Bot zum Server einlädt",
+            "es": "Emite un enlace que invita al bot al servidor",
+            "fr": "Émet un lien invitant le bot sur le serveur",
+            "pl": "Wystawia link zapraszający bota na serwer",
+            "tr": "Botu sunucuya davet eden bir bağlantı verir"
+        },
+        "brief_descriptrion": {
+            "en": "Bot invitation link",
+            "ru": "Ссылка на приглашение бота",
+            "id": "Tautan undangan bot",
+            "da": "Bot invitation link",
+            "de": "Bot-Einladungslink",
+            "es": "Enlace de invitación de bots",
+            "fr": "Lien d'invitation de bot",
+            "pl": "Link do zaproszenia bota",
+            "tr": "Bot davet bağlantısı"
+        },
+        "allowed_disabled": false
+    },
+    {
+        "name": "captcha",
+        "category": "major",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Shows a picture on which the text is encrypted within 30 seconds the user must solve the captcha",
+            "ru": "Показывает картинку, на которой зашифрован текст, в течение 30 секунд пользователь должен разгадать капчу",
+            "id": "Menampilkan gambar di mana teks dienkripsi dalam waktu 30 detik pengguna harus menyelesaikan captcha",
+            "da": "Viser et billede, hvor teksten er krypteret inden for 30 sekunder brugeren skal løse captcha",
+            "de": "Zeigt ein Bild an, auf dem der Text verschlüsselt ist Innerhalb von 30 Sekunden muss der Benutzer das Captcha lösen",
+            "es": "Muestra una imagen en la que el texto está cifrado en 30 segundos el usuario debe resolver el captcha",
+            "fr": "Affiche une image sur laquelle le texte est crypté dans les 30 secondes, l'utilisateur doit résoudre le captcha",
+            "pl": "Pokazuje obraz, na którym tekst jest szyfrowany w ciągu 30 sekund użytkownik musi rozwiązać captcha",
+            "tr": "Kullanıcının captcha'yı çözmesi gereken metnin 30 saniye içinde şifrelendiği bir resmi gösterir"
+        },
+        "brief_descriptrion": {
+            "en": "Test command",
+            "ru": "Тестовая команда",
+            "id": "Perintah uji",
+            "da": "Testkommando",
+            "de": "Befehl testen",
+            "es": "Comando de prueba",
+            "fr": "Commande de test",
+            "pl": "Polecenie testowe",
+            "tr": "Test komutu"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "join",
+        "category": "voice",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Enters the channel with the user who called the command",
+            "ru": "Входит в канал с пользователем, который вызвал команду",
+            "id": "Memasuki saluran dengan pengguna yang memanggil perintah",
+            "da": "Går ind i kanalen med den bruger, der kaldte kommandoen",
+            "de": "Betritt den Kanal mit dem Benutzer, der den Befehl aufgerufen hat",
+            "es": "Ingresa al canal con el usuario que llamó al comando",
+            "fr": "Entre dans le canal avec l'utilisateur qui a appelé la commande",
+            "pl": "Wchodzi do kanału z użytkownikiem, który wywołał polecenie",
+            "tr": "Komutu çağıran kullanıcı ile kanala girer"
+        },
+        "brief_descriptrion": {
+            "en": "Enters the channel",
+            "ru": "Входит в канал",
+            "id": "Memasuki saluran",
+            "da": "Går ind i kanalen",
+            "de": "Betritt den Kanal",
+            "es": "Entra en el canal",
+            "fr": "Entre dans le canal",
+            "pl": "Wchodzi do kanału",
+            "tr": "Kanala girer"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "leave",
+        "category": "voice",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Comes out the channel with the user who called the command",
+            "ru": "Выходит канал с пользователем, который вызвал команду",
+            "id": "Keluar dari saluran dengan pengguna yang memanggil perintah",
+            "da": "Kommer ud af kanalen med den bruger, der kaldte kommandoen",
+            "de": "Gibt den Kanal mit dem Benutzer aus, der den Befehl aufgerufen hat",
+            "es": "Sale del canal con el usuario que llamó al comando",
+            "fr": "Sort le canal avec l'utilisateur qui a appelé la commande",
+            "pl": "Wychodzi kanał z użytkownikiem, który wywołał polecenie",
+            "tr": "Komutu çağıran kullanıcıyla birlikte kanaldan çıkar"
+        },
+        "brief_descriptrion": {
+            "en": "Comes out the channel",
+            "ru": "Выходит из канала",
+            "id": "Keluar dari saluran",
+            "da": "Kommer ud af kanalen",
+            "de": "Kommt aus dem Kanal",
+            "es": "Sale del canal",
+            "fr": "Sort le canal",
+            "pl": "Wychodzi z kanału",
+            "tr": "Kanaldan çıkıyor"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "play",
+        "category": "voice",
+        "aliases": [],
+        "arguments": [
+            "<title/url>"
+        ],
+        "examples": [
+            [
+                "play A Sky Full of Stars",
+                {
+                    "en": "Run a search for the song `A Sky Full of Stars` and it will prompt you to choose the desired author.",
+                    "ru": "Запустите поиск по песне `A Sky Full of Stars` и он предложит вам выбрать нужного автора.",
+                    "id": "Jalankan pencarian untuk lagu `Langit Penuh Bintang` dan Anda akan diminta untuk memilih penulis yang diinginkan.",
+                    "da": "Kør en søgning efter sangen \"A Sky Full of Stars\", og den vil bede dig om at vælge den ønskede forfatter.",
+                    "de": "Führen Sie eine Suche nach dem Lied „A Sky Full of Stars“ durch und Sie werden aufgefordert, den gewünschten Autor auszuwählen.",
+                    "es": "Ejecute una búsqueda de la canción \"A Sky Full of Stars\" y se le pedirá que elija el autor deseado.",
+                    "fr": "Lancez une recherche sur la chanson « A Sky Full of Stars » et il vous sera demandé de choisir l'auteur souhaité.",
+                    "pl": "Uruchom wyszukiwanie utworu „A Sky Full of Stars”, a wyświetli się monit o wybranie żądanego autora.",
+                    "tr": "'A Sky Full of Stars' şarkısını arayın ve istediğiniz yazarı seçmenizi isteyecektir."
+                }
+            ],
+            [
+                "play https://music.yandex.ru/album/2207193/track/17646450",
+                {
+                    "en": "Launch the song from the specified link.",
+                    "da": "Start sangen fra det angivne link.",
+                    "de": "Starten Sie den Song über den angegebenen Link.",
+                    "es": "Inicie la canción desde el enlace especificado.",
+                    "fr": "Lancez la chanson à partir du lien spécifié.",
+                    "id": "Luncurkan lagu dari tautan yang ditentukan.",
+                    "pl": "Uruchom utwór z podanego linku.",
+                    "ru": "Запустите песню по указанной ссылке.",
+                    "tr": "Şarkıyı belirtilen bağlantıdan başlatın."
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Starts playing the music set by the user\nAs a cloud with music is [**Yandex Music**](<https://music.yandex.ru>)",
+            "ru": "Начинает воспроизводиться музыка, установленная пользователем\nВ качестве облака с музыкой используется [**Яндекс Музыка**](<https://music.yandex.ru>)",
+            "id": "Mulai memutar musik yang disetel oleh pengguna\nSebagai awan dengan musik adalah [**Yandex Music**](<https://music.yandex.ru>)",
+            "da": "Begynder at afspille musik indstillet af brugeren\nSom en sky med musik er [**Yandeks Musik**](<https://music.yandex.ru>)",
+            "de": "Startet die Wiedergabe der vom Benutzer eingestellten Musik\nAls Wolke mit Musik ist [**Yandex Music**](https://music.yandex.ru )",
+            "es": "Comienza a reproducir la música configurada por el usuario\nComo una nube con música es [**Yandex Music**](<https://music.yandex.ru>)",
+            "fr": "Démarre la lecture de la musique définie par l'utilisateur\nComme un nuage avec de la musique est [**Yandex Music**](<https://music.yandex.ru>)",
+            "pl": "Rozpoczyna odtwarzanie muzyki ustawionej przez użytkownika\nJako chmura z muzyką jest [**Yandex Music**](<https://music.yandex.ru>)",
+            "tr": "Kullanıcı tarafından ayarlanan müziği çalmaya başlar\nMüzikli bir bulut gibi [**Yandex Müzik**](<https://music.yandex.ru>)"
+        },
+        "brief_descriptrion": {
+            "en": "Starts playing music",
+            "ru": "Начинает воспроизводиться музыка",
+            "id": "Mulai memutar musik",
+            "da": "Begynder at spille musik",
+            "de": "Startet die Musikwiedergabe",
+            "es": "Comienza a reproducir música",
+            "fr": "Commence à jouer de la musique",
+            "pl": "Rozpoczyna odtwarzanie muzyki",
+            "tr": "Müzik çalmaya başlar"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "stop",
+        "category": "voice",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Stops the current music stream",
+            "ru": "Останавливает текущий музыкальный поток",
+            "id": "Menghentikan aliran musik saat ini",
+            "da": "Stopper den aktuelle musikstrøm",
+            "de": "Startet die Musikwiedergabe Stoppt den aktuellen Musikstream",
+            "es": "Detiene la transmisión de música actual",
+            "fr": "Arrête le flux de musique en cours",
+            "pl": "Zatrzymuje bieżący strumień muzyki",
+            "tr": "Geçerli müzik akışını durdurur"
+        },
+        "brief_descriptrion": {
+            "en": "Stops the music",
+            "ru": "Останавливает музыку",
+            "id": "Menghentikan musik",
+            "da": "Stopper musikken",
+            "de": "Stoppt die Musik",
+            "es": "Detiene la música",
+            "fr": "Arrête la musique",
+            "pl": "Zatrzymuje muzykę",
+            "tr": "Müziği durdurur"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "pause",
+        "category": "voice",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Stops the current music stream in the future which can be continued",
+            "ru": "Останавливает текущий музыкальный поток в будущем, который может быть продолжен",
+            "id": "Menghentikan aliran musik saat ini di masa mendatang yang dapat dilanjutkan",
+            "da": "Stopper den aktuelle musikstrøm i fremtiden, som kan fortsættes",
+            "de": "Stoppt den aktuellen Musikstream in der Zukunft, der fortgesetzt werden kann",
+            "es": "Detiene la transmisión de música actual en el futuro, que puede continuar",
+            "fr": "Arrête le flux de musique actuel à l'avenir qui peut être poursuivi",
+            "pl": "Zatrzymuje bieżący strumień muzyki w przyszłości, który może być kontynuowany",
+            "tr": "Gelecekte devam edebilecek mevcut müzik akışını durdurur"
+        },
+        "brief_descriptrion": {
+            "en": "Assigns a pause for music",
+            "ru": "Назначает музыкальную паузу",
+            "id": "Menetapkan jeda untuk musik",
+            "da": "Tildeler en pause til musik",
+            "de": "Weist eine Pause für Musik zu",
+            "es": "Asigna una pausa para la música",
+            "fr": "Attribue une pause pour la musique",
+            "pl": "Przypisuje pauzę dla muzyki",
+            "tr": "Müzik için bir duraklama atar"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "resume",
+        "category": "voice",
+        "aliases": [],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Resumes the music stream that was completed by the necessary means in order to continue in the future",
+            "ru": "Возобновляет музыкальный поток, который был завершен необходимыми средствами для продолжения в будущем",
+            "id": "Melanjutkan aliran musik yang diselesaikan dengan cara yang diperlukan untuk melanjutkan di masa mendatang",
+            "da": "Genoptager musikstrømmen, der blev afsluttet med de nødvendige midler for at fortsætte i fremtiden",
+            "de": "Setzt den Musikstream fort, der mit den erforderlichen Mitteln abgeschlossen wurde, um in Zukunft fortzufahren",
+            "es": "Reanuda la transmisión de música que se completó por los medios necesarios para continuar en el futuro",
+            "fr": "Reprend le flux de musique qui a été complété par les moyens nécessaires pour continuer à l'avenir",
+            "pl": "Wznawia strumień muzyczny, który został ukończony niezbędnymi środkami, aby kontynuować w przyszłości",
+            "tr": "Gelecekte de devam edebilmek için gerekli araçlarla tamamlanan müzik akışını sürdürür"
+        },
+        "brief_descriptrion": {
+            "en": "Resumes music",
+            "ru": "Возобновляет воспроизведение музыки",
+            "id": "Melanjutkan musik",
+            "da": "Genoptager Musik",
+            "de": "Setzt die Musik fort",
+            "es": "Reanuda la música",
+            "fr": "Reprend la musique",
+            "pl": "Wznawia muzykę",
+            "tr": "Müziğe devam eder"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "volume",
+        "category": "voice",
+        "aliases": [],
+        "arguments": [
+            "<volume>"
+        ],
+        "examples": [
+            [
+                "volume 100",
+                {
+                    "en": "Sets the maximum volume for music.",
+                    "ru": "Устанавливает максимальную громкость музыки.",
+                    "id": "Mengatur volume maksimum untuk musik.",
+                    "da": "Indstiller den maksimale lydstyrke for musik.",
+                    "de": "Legt die maximale Lautstärke für Musik fest.",
+                    "es": "Establece el volumen máximo para la música.",
+                    "fr": "Définit le volume maximum de la musique.",
+                    "pl": "Ustawia maksymalną głośność muzyki.",
+                    "tr": "Müziğin maksimum ses düzeyini ayarlar."
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Set the volume to the current music stream from 1 to 100",
+            "ru": "Установите громкость текущего музыкального потока в диапазоне от 1 до 100",
+            "id": "Atur volume ke aliran musik saat ini dari 1 hingga 100",
+            "da": "Indstil lydstyrken til den aktuelle musikstrøm fra 1 til 100",
+            "de": "Stellen Sie die Lautstärke auf den aktuellen Musikstream von 1 bis 100 ein",
+            "es": "Ajuste el volumen de la transmisión de música actual de 1 a 100",
+            "fr": "Réglez le volume sur le flux de musique actuel de 1 à 100",
+            "pl": "Ustaw głośność na bieżący strumień muzyki od 1 do 100",
+            "tr": "Ses seviyesini geçerli müzik akışına 1'den 100'e ayarlayın"
+        },
+        "brief_descriptrion": {
+            "en": "Sets the volume",
+            "ru": "Устанавливает громкость",
+            "id": "Mengatur volume",
+            "da": "Indstiller lydstyrken",
+            "de": "Stellt die Lautstärke ein",
+            "es": "Ajusta el volumen",
+            "fr": "Règle le volume",
+            "pl": "Ustawia głośność",
+            "tr": "Ses seviyesini ayarlar"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "purge",
+        "category": "moderation",
+        "aliases": [
+            "clear",
+            "clean"
+        ],
+        "arguments": [
+            "<limit>"
+        ],
+        "examples": [
+            [
+                "purge 10",
+                {
+                    "en": "Clear the last 10 messages in the channel",
+                    "ru": "Очистить последние 10 сообщений в канале",
+                    "id": "Hapus 10 pesan terakhir di saluran",
+                    "da": "Ryd de sidste 10 beskeder i kanalen",
+                    "de": "Löschen Sie die letzten 10 Nachrichten im Kanal",
+                    "es": "Borrar los últimos 10 mensajes del canal.",
+                    "fr": "Effacer les 10 derniers messages de la chaîne",
+                    "pl": "Wyczyść ostatnie 10 wiadomości na kanale",
+                    "tr": "Kanaldaki son 10 mesajı temizle"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Clears the chat the specified number of times",
+            "ru": "Очищает чат указанное количество раз",
+            "id": "Menghapus obrolan beberapa kali yang ditentukan",
+            "da": "Rydder chatten det angivne antal gange",
+            "de": "Löscht den Chat die angegebene Anzahl von Malen",
+            "es": "Borra el chat el número especificado de veces",
+            "fr": "Efface le chat le nombre de fois spécifié",
+            "pl": "Czyści czat określoną liczbę razy",
+            "tr": "Sohbeti belirtilen sayıda temizler"
+        },
+        "brief_descriptrion": {
+            "en": "Clears the chat the specified number of times",
+            "ru": "Очищает чат указанное количество раз",
+            "id": "Menghapus obrolan beberapa kali yang ditentukan",
+            "da": "Rydder chatten det angivne antal gange",
+            "de": "Löscht den Chat die angegebene Anzahl von Malen",
+            "es": "Borra el chat el número especificado de veces",
+            "fr": "Efface le chat le nombre de fois spécifié",
+            "pl": "Czyści czat określoną liczbę razy",
+            "tr": "Sohbeti belirtilen sayıda temizler"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "purge user",
+        "category": "moderation",
+        "aliases": [
+            "clear user",
+            "clean user"
+        ],
+        "arguments": [
+            "<member>",
+            "<limit>"
+        ],
+        "examples": [
+            [
+                "purge user @lordcode 10",
+                {
+                    "en": "Clear the last 10 messages sent by the lordcode member in the channel",
+                    "ru": "Очистить последние 10 сообщений, отправленных участником лордкода на канале.",
+                    "id": "Hapus 10 pesan terakhir yang dikirim oleh anggota lordcode di saluran",
+                    "da": "Ryd de sidste 10 beskeder sendt af lordcode-medlemmet i kanalen",
+                    "de": "Löschen Sie die letzten 10 Nachrichten, die vom Lordcode-Mitglied im Kanal gesendet wurden",
+                    "es": "Borra los últimos 10 mensajes enviados por el miembro de Lordcode en el canal.",
+                    "fr": "Effacez les 10 derniers messages envoyés par le membre Lordcode dans la chaîne",
+                    "pl": "Wyczyść ostatnie 10 wiadomości wysłanych przez członka lordcode na kanale",
+                    "tr": "Lordcode üyesinin kanala gönderdiği son 10 mesajı temizleyin"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Clears the chat a specified number of times after the specified user sends a message.",
+            "ru": "Очищает чат указанное количество раз после того, как указанный пользователь отправит сообщение.",
+            "id": "Menghapus obrolan beberapa kali setelah pengguna tertentu mengirim pesan.",
+            "da": "Rydder chatten et angivet antal gange, efter at den angivne bruger har sendt en besked.",
+            "de": "Löscht den Chat eine bestimmte Anzahl von Malen, nachdem der angegebene Benutzer eine Nachricht gesendet hat.",
+            "es": "Borra el chat una cantidad específica de veces después de que el usuario especificado envía un mensaje.",
+            "fr": "Efface le chat un nombre de fois spécifié après que l'utilisateur spécifié a envoyé un message.",
+            "pl": "Czyści czat określoną liczbę razy po wysłaniu wiadomości przez określonego użytkownika.",
+            "tr": "Belirtilen kullanıcı mesaj gönderdikten sonra sohbeti belirtilen sayıda temizler."
+        },
+        "brief_descriptrion": {
+            "en": "Clears the chat a specified number of times after the specified user sends a message.",
+            "ru": "Очищает чат указанное количество раз после того, как указанный пользователь отправит сообщение.",
+            "id": "Menghapus obrolan beberapa kali setelah pengguna tertentu mengirim pesan.",
+            "da": "Rydder chatten et angivet antal gange, efter at den angivne bruger har sendt en besked.",
+            "de": "Löscht den Chat eine bestimmte Anzahl von Malen, nachdem der angegebene Benutzer eine Nachricht gesendet hat.",
+            "es": "Borra el chat una cantidad específica de veces después de que el usuario especificado envía un mensaje.",
+            "fr": "Efface le chat un nombre de fois spécifié après que l'utilisateur spécifié a envoyé un message.",
+            "pl": "Czyści czat określoną liczbę razy po wysłaniu wiadomości przez określonego użytkownika.",
+            "tr": "Belirtilen kullanıcı mesaj gönderdikten sonra sohbeti belirtilen sayıda temizler."
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "purge between",
+        "category": "moderation",
+        "aliases": [
+            "clear between",
+            "clean between"
+        ],
+        "arguments": [
+            "<message_start>",
+            "[message_stop]"
+        ],
+        "examples": [
+            [
+                "purge between 1214583337776320524 1214584228889497610",
+                {
+                    "en": "Clears the chat between message 1214583337776320524 and 1214584228889497610",
+                    "ru": "Очищает чат между сообщениями 1214583337776320524 и 1214584228889497610.",
+                    "id": "Menghapus obrolan antara pesan 1214583337776320524 dan 1214584228889497610",
+                    "da": "Rydder chatten mellem besked 12145833337776320524 og 1214584228889497610",
+                    "de": "Löscht den Chat zwischen der Nachricht 1214583337776320524 und 1214584228889497610",
+                    "es": "Borra el chat entre el mensaje 1214583337776320524 y 1214584228889497610",
+                    "fr": "Efface le chat entre le message 12145833337776320524 et 1214584228889497610",
+                    "pl": "Czyści czat między wiadomościami 1214583337776320524 i 1214584228889497610",
+                    "tr": "1214583337776320524 ve 1214584228889497610 mesajları arasındaki sohbeti temizler"
+                }
+            ],
+            [
+                "purge between 1214583337776320524",
+                {
+                    "en": "Clears the chat from message 1214583337776320524 to the current one",
+                    "ru": "Очищает чат от сообщения 1214583337776320524 до текущего.",
+                    "id": "Menghapus obrolan dari pesan 1214583337776320524 ke pesan saat ini",
+                    "da": "Rydder chatten fra besked 12145833337776320524 til den nuværende",
+                    "de": "Löscht den Chat von der Nachricht 1214583337776320524 zur aktuellen",
+                    "es": "Borra el chat del mensaje 1214583337776320524 al actual",
+                    "fr": "Efface le chat du message 1214583337776320524 au message actuel",
+                    "pl": "Czyści czat z wiadomości 1214583337776320524 do bieżącej",
+                    "tr": "1214583337776320524 numaralı mesajdan mevcut mesaja kadar olan sohbeti temizler"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Clears the chat between messages",
+            "ru": "Очищает чат между сообщениями",
+            "id": "Menghapus obrolan antar pesan",
+            "da": "Rydder chatten mellem beskeder",
+            "de": "Löscht den Chat zwischen Nachrichten",
+            "es": "Borra el chat entre mensajes.",
+            "fr": "Efface le chat entre les messages",
+            "pl": "Czyści czat pomiędzy wiadomościami",
+            "tr": "Mesajlar arasındaki sohbeti temizler"
+        },
+        "brief_descriptrion": {
+            "en": "Clears the chat between messages",
+            "ru": "Очищает чат между сообщениями",
+            "id": "Menghapus obrolan antar pesan",
+            "da": "Rydder chatten mellem beskeder",
+            "de": "Löscht den Chat zwischen Nachrichten",
+            "es": "Borra el chat entre mensajes.",
+            "fr": "Efface le chat entre les messages",
+            "pl": "Czyści czat pomiędzy wiadomościami",
+            "tr": "Mesajlar arasındaki sohbeti temizler"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "ban",
+        "category": "moderation",
+        "aliases": [
+            "tempban"
+        ],
+        "arguments": [
+            "<member>",
+            "<time>",
+            "[reason]"
+        ],
+        "examples": [
+            [
+                "ban @lordocde 10m advertising",
+                {
+                    "en": "Will ban lordcode for 10 minutes due to advertising",
+                    "da": "Vil forbyde lordcode i 10 minutter på grund af reklame",
+                    "de": "Wird Lordcode wegen Werbung für 10 Minuten sperren",
+                    "es": "Prohibirá a Lordcode durante 10 minutos debido a la publicidad.",
+                    "fr": "Lordcode sera interdit pendant 10 minutes à cause de la publicité.",
+                    "id": "Akan melarang lordcode selama 10 menit karena iklan",
+                    "pl": "Zablokuje lordcode na 10 minut z powodu reklam",
+                    "ru": "Забанят лордкодера на 10 минут из-за рекламы",
+                    "tr": "Lordcode reklam nedeniyle 10 dakika süreyle yasaklanacak"
+                }
+            ],
+            [
+                "ban 636824998123798531 1h",
+                {
+                    "en": "Ban a participant with ID 636824998123798531 for 1 hour for no reason",
+                    "da": "Forbyd en deltager med ID 636824998123798531 i 1 time uden grund",
+                    "de": "Einen Teilnehmer mit der ID 636824998123798531 ohne Angabe von Gründen für 1 Stunde sperren",
+                    "es": "Banear a un participante con DNI 636824998123798531 durante 1 hora sin motivo",
+                    "fr": "Bannir un participant avec l'ID 636824998123798531 pendant 1 heure sans raison",
+                    "id": "Ban peserta dengan ID 636824998123798531 selama 1 jam tanpa alasan",
+                    "pl": "Zablokuj uczestnika o identyfikatorze 636824998123798531 na 1 godzinę bez powodu",
+                    "ru": "Забанить участника с ID 636824998123798531 на 1 час без причины",
+                    "tr": "636824998123798531 ID'li bir katılımcıyı 1 saat süreyle sebepsiz yere yasaklayın"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Restricts the user's access to the server completely",
+            "da": "Begrænser brugerens adgang til serveren fuldstændigt",
+            "de": "Schränkt den Zugriff des Benutzers auf den Server vollständig ein",
+            "es": "Restringe completamente el acceso del usuario al servidor.",
+            "fr": "Restreint complètement l'accès de l'utilisateur au serveur",
+            "id": "Membatasi akses pengguna ke server sepenuhnya",
+            "pl": "Całkowicie ogranicza dostęp użytkownika do serwera",
+            "ru": "Полностью ограничивает доступ пользователя к серверу",
+            "tr": "Kullanıcının sunucuya erişimini tamamen kısıtlar"
+        },
+        "brief_descriptrion": {
+            "en": "Restricts the user's access to the server completely",
+            "da": "Begrænser brugerens adgang til serveren fuldstændigt",
+            "de": "Schränkt den Zugriff des Benutzers auf den Server vollständig ein",
+            "es": "Restringe completamente el acceso del usuario al servidor.",
+            "fr": "Restreint complètement l'accès de l'utilisateur au serveur",
+            "id": "Membatasi akses pengguna ke server sepenuhnya",
+            "pl": "Całkowicie ogranicza dostęp użytkownika do serwera",
+            "ru": "Полностью ограничивает доступ пользователя к серверу",
+            "tr": "Kullanıcının sunucuya erişimini tamamen kısıtlar"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "ban list",
+        "category": "moderation",
+        "aliases": [
+            "tempban list"
+        ],
+        "arguments": [],
+        "examples": [],
+        "descriptrion": {
+            "en": "Issues a sheet with all temporary bans that were issued by the bot",
+            "da": "Udsender et ark med alle midlertidige forbud, der blev udstedt af botten",
+            "de": "Gibt ein Blatt mit allen vorübergehenden Sperren aus, die vom Bot ausgesprochen wurden",
+            "es": "Emite una hoja con todas las prohibiciones temporales emitidas por el bot.",
+            "fr": "Émet une feuille avec toutes les interdictions temporaires émises par le bot",
+            "id": "Mengeluarkan sheet dengan semua larangan sementara yang dikeluarkan oleh bot",
+            "pl": "Wydaje arkusz ze wszystkimi tymczasowymi banami, które zostały wydane przez bota",
+            "ru": "Выдает лист со всеми временными банами, которые были выданы ботом",
+            "tr": "Bot tarafından verilen tüm geçici yasakları içeren bir sayfa düzenler"
+        },
+        "brief_descriptrion": {
+            "en": "Issues a sheet with all temporary bans that were issued by the bot",
+            "da": "Udsender et ark med alle midlertidige forbud, der blev udstedt af botten",
+            "de": "Gibt ein Blatt mit allen vorübergehenden Sperren aus, die vom Bot ausgesprochen wurden",
+            "es": "Emite una hoja con todas las prohibiciones temporales emitidas por el bot.",
+            "fr": "Émet une feuille avec toutes les interdictions temporaires émises par le bot",
+            "id": "Mengeluarkan sheet dengan semua larangan sementara yang dikeluarkan oleh bot",
+            "pl": "Wydaje arkusz ze wszystkimi tymczasowymi banami, które zostały wydane przez bota",
+            "ru": "Выдает лист со всеми временными банами, которые были выданы ботом",
+            "tr": "Bot tarafından verilen tüm geçici yasakları içeren bir sayfa düzenler"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "temp-role",
+        "category": "moderation",
+        "aliases": [],
+        "arguments": [
+            "<member>",
+            "<role>",
+            "<time>"
+        ],
+        "examples": [
+            [
+                "temp-role @lordcode @role 12h",
+                {
+                    "en": "Issues the role of role for 12 hours to the participant lordcode.",
+                    "ru": "Выдает участнику лордкод роль на 12 часов.",
+                    "id": "Mengeluarkan peran peran selama 12 jam ke lordcode peserta.",
+                    "da": "Uddeler rollen som rolle i 12 timer til deltagerens herrekode.",
+                    "de": "Vergibt die Rolle der Rolle für 12 Stunden an den Teilnehmer-Lordcode.",
+                    "es": "Emite el rol de rol durante 12 horas al participante lordcode.",
+                    "fr": "Attribue le rôle de rôle pendant 12 heures au Lordcode du participant.",
+                    "pl": "Przydziela rolę roli na 12 godzin użytkownikowi lordcode.",
+                    "tr": "Katılımcı lord koduna 12 saatlik rol rolünü verir."
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Adds roles to a certain participant for a while or forever\nYou can summarize the roles\nThe time is indicated in the format `1d1h1m1s` the values can be combined and also duplicated, for example `1d2h1d`",
+            "ru": "Добавляет роли определенному участнику на некоторое время или навсегда\nВы можете суммировать роли\nВремя указано в формате `1d1h1m1s` значения могут комбинироваться, а также дублироваться, например `1d2h1d`",
+            "id": "Menambahkan peran ke peserta tertentu untuk sementara atau selamanya\nAnda dapat meringkas peran\nWaktu ditunjukkan dalam format '1d1h1m1s' nilainya dapat digabungkan dan juga digandakan, misalnya `1d2h1d`",
+            "da": "Tilføjer roller til en bestemt deltager i et stykke tid eller for evigt\nDu kan opsummere rollerne\nTiden er angivet i formatet '1d1h1m1s' værdierne kan kombineres og også duplikeres, for eksempel `1d2h1d`",
+            "de": "Fügt einem bestimmten Teilnehmer für eine Weile oder für immer Rollen hinzu\nSie können die Rollen zusammenfassen\nDie Uhrzeit wird im Format `1t1h1m1s' angegeben Die Werte können kombiniert und auch dupliziert werden, zum Beispiel `1t2h1d`",
+            "es": "Agrega roles a un determinado participante por un tiempo o para siempre\nPuedes resumir los roles\nLa hora se indica en el formato` 1d1h1m1s' los valores se pueden combinar y también duplicar, por ejemplo `1d2h1d`\n\nEjemplo:",
+            "fr": "Ajoute des rôles à un certain participant pendant un certain temps ou pour toujours\nL'heure est indiquée au format '1d1h1m1s' les valeurs peuvent être combinées et également dupliquées, par exemple `1d2h1d`",
+            "pl": "Dodaje role do określonego uczestnika na chwilę lub na zawsze\nMożesz podsumować role\nCzas jest wskazany w formacie '1d1h1m1s' wartości można łączyć, a także powielać, na przykład '1d2h1d`",
+            "tr": "Belirli bir katılımcıya bir süre veya sonsuza kadar roller ekler\nZaman '1d1h1m1s' biçiminde gösterilir değerler birleştirilebilir ve ayrıca çoğaltılabilir, örneğin '1d2h1d`"
+        },
+        "brief_descriptrion": {
+            "en": "Adds roles to a certain participant for a while or forever",
+            "ru": "Добавляет роли определенному участнику на некоторое время или навсегда",
+            "id": "Menambahkan peran ke peserta tertentu untuk sementara atau selamanya",
+            "da": "Tilføjer roller til en bestemt deltager i et stykke tid eller for evigt",
+            "de": "Fügt einem bestimmten Teilnehmer für eine Weile oder für immer Rollen hinzu",
+            "es": "Agrega roles a un determinado participante por un tiempo o para siempre",
+            "fr": "Ajoute des rôles à un certain participant pendant un certain temps ou pour toujours",
+            "pl": "Dodaje role do określonego uczestnika na chwilę lub na zawsze",
+            "tr": "Belirli bir katılımcıya bir süre veya sonsuza kadar roller ekler"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "temp-role list",
+        "category": "moderation",
+        "aliases": [],
+        "arguments": [
+            "[member]"
+        ],
+        "examples": [
+            [
+                "temp-role list",
+                {
+                    "en": "Shows all temporary roles",
+                    "ru": "Показывает все временные роли",
+                    "id": "Menampilkan semua peran sementara",
+                    "da": "Viser alle midlertidige roller",
+                    "de": "Zeigt alle temporären Rollen an",
+                    "es": "Muestra todos los roles temporales",
+                    "fr": "Affiche tous les rôles temporaires",
+                    "pl": "Pokazuje wszystkie role tymczasowe",
+                    "tr": "Tüm geçici rolleri gösterir"
+                }
+            ],
+            [
+                "temp-role list @lordcode",
+                {
+                    "en": "Shows all temporary roles assigned to the lordcode member",
+                    "ru": "Показывает все временные роли, назначенные участнику лордкода.",
+                    "id": "Menampilkan semua peran sementara yang ditetapkan ke anggota lordcode",
+                    "da": "Viser alle midlertidige roller, der er tildelt lordcode-medlemmet",
+                    "de": "Zeigt alle temporären Rollen an, die dem Lordcode-Mitglied zugewiesen sind",
+                    "es": "Muestra todos los roles temporales asignados al miembro de Lordcode",
+                    "fr": "Affiche tous les rôles temporaires attribués au membre Lordcode",
+                    "pl": "Pokazuje wszystkie tymczasowe role przypisane do członka lordcode",
+                    "tr": "Lordcode üyesine atanan tüm geçici rolleri gösterir"
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Provides a list of temporary roles for the server or member.\nIf `member` is not specified, it shows a list of all temporary roles on the server.\nIf specified, it shows only those roles that belong to the participant.\nThe roles assigned to are always not shown in the list.",
+            "ru": "Предоставляет список временных ролей для сервера или участника.\nЕсли `member` не указан, то отображается список всех временных ролей на сервере.\nЕсли указано, то отображаются только те роли, которые принадлежат участнику.\nРоли назначенные на всегда не отображаются в списке.",
+            "id": "Menyediakan daftar peran sementara untuk server atau anggota.\nJika `member` tidak ditentukan, ini menampilkan daftar semua peran sementara di server.\nJika ditentukan, itu hanya menunjukkan peran yang menjadi milik peserta.\nPeran yang ditugaskan selalu tidak ditampilkan dalam daftar.",
+            "da": "Indeholder en liste over midlertidige roller for serveren eller medlemmet.\nHvis `member` ikke er angivet, viser den en liste over alle midlertidige roller på serveren.\nHvis det er angivet, viser det kun de roller, der tilhører deltageren.\nDe roller, der er tildelt, vises altid ikke på listen.",
+            "de": "Stellt eine Liste temporärer Rollen für den Server oder das Mitglied bereit.\nWenn `member` nicht angegeben ist, wird eine Liste aller temporären Rollen auf dem Server angezeigt.\nWenn angegeben, werden nur die Rollen angezeigt, die dem Teilnehmer gehören.\nDie zugewiesenen Rollen werden immer nicht in der Liste angezeigt.",
+            "es": "Proporciona una lista de roles temporales para el servidor o miembro .\nSi no se especifica `member`, muestra una lista de todos los roles temporales en el servidor.\nSi se especifica, muestra solo los roles que pertenecen al participante.\nLos roles asignados no siempre se muestran en la lista.",
+            "fr": "Fournit une liste de rôles temporaires pour le serveur ou le membre.\nSi `member`  n'est pas spécifié, il affiche une liste de tous les rôles temporaires sur le serveur.\nSi spécifié, il n'affiche que les rôles qui appartiennent au participant.\nLes rôles attribués à ne sont toujours pas affichés dans la liste.",
+            "pl": "Zawiera listę tymczasowych ról dla serwera lub członka.\nJeśli `member` nie jest określony, wyświetla listę wszystkich tymczasowych ról na serwerze.\nJeśli określono, pokazuje tylko te role, które należą do uczestnika.\nPrzypisane role zawsze nie są wyświetlane na liście.",
+            "tr": "Sunucu veya üye için geçici rollerin bir listesini sağlar.\n`member` belirtilmemişse, sunucudaki tüm geçici rollerin bir listesini gösterir.\nBelirtilirse, yalnızca katılımcıya ait olan rolleri gösterir.\nAtanan roller her zaman listede gösterilmez."
+        },
+        "brief_descriptrion": {
+            "en": "Provides a list of temporary roles for the server or member",
+            "ru": "Предоставляет список временных ролей для сервера или участника",
+            "id": "Menyediakan daftar peran sementara untuk server atau anggota",
+            "da": "Indeholder en liste over midlertidige roller for serveren eller medlemmet",
+            "de": "Stellt eine Liste temporärer Rollen für den Server oder das Mitglied bereit",
+            "es": "Proporciona una lista de roles temporales para el servidor o miembro",
+            "fr": "Fournit une liste de rôles temporaires pour le serveur ou le membre",
+            "pl": "Udostępnia listę tymczasowych ról dla serwera lub członka",
+            "tr": "Sunucu veya üye için geçici rollerin bir listesini sağlar"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "say",
+        "category": "moderation",
+        "aliases": [],
+        "arguments": [
+            "<text/json>"
+        ],
+        "examples": [
+            [
+                "say Hello",
+                {
+                    "en": "Send `Hello` to the current chat.",
+                    "ru": "Отправьте «Привет» в текущий чат.",
+                    "id": "Kirim `Halo` ke obrolan saat ini.",
+                    "da": "Send \"Hej\" til den aktuelle chat.",
+                    "de": "Senden Sie „Hallo“ an den aktuellen Chat.",
+                    "es": "Envía \"Hola\" al chat actual.",
+                    "fr": "Envoyez « Bonjour » au chat en cours.",
+                    "pl": "Wyślij „Witam” do bieżącego czatu.",
+                    "tr": "Mevcut sohbete 'Merhaba' gönderin."
+                }
+            ],
+            [
+                "say {\"title\": \"Hello\"}",
+                {
+                    "en": "Send embed with title `Hello` to the current chat.",
+                    "ru": "Отправьте вставку с заголовком «Привет» в текущий чат.",
+                    "id": "Kirim penyematan dengan judul `Halo` ke obrolan saat ini.",
+                    "da": "Send indlejring med titlen \"Hej\" til den aktuelle chat.",
+                    "de": "Einbettung mit dem Titel „Hallo“ an den aktuellen Chat senden.",
+                    "es": "Enviar inserción con el título \"Hola\" al chat actual.",
+                    "fr": "Envoyez l'intégration avec le titre « Bonjour » au chat actuel.",
+                    "pl": "Wyślij osadzenie z tytułem „Witam” do bieżącego czatu.",
+                    "tr": "Mevcut sohbete 'Merhaba' başlığını içeren yerleştirmeyi gönderin."
+                }
+            ]
+        ],
+        "descriptrion": {
+            "en": "Sends a message on behalf of the bot using a unique [**embed builder**](<https://lordcord.fun/embed-builder>) or plain text",
+            "ru": "Отправляет сообщение от имени бота, используя уникальный [**embed конструктор**](<https://lordcord.fun/embed-builder>) или обычный текст",
+            "id": "Mengirim pesan atas nama bot menggunakan unik [**pembuat sematan**](<https://lordcord.fun/embed-builder>) atau teks biasa",
+            "da": "Sender en besked på vegne af bot ved hjælp af en unik [**embed builder**](<https://lordcord.fun/embed-builder>) eller almindelig tekst",
+            "de": "Sendet eine Nachricht im Namen des Bots mit einem eindeutigen [**Einbettungsersteller *](<https://lordcord.fun/embed-builder>) oder Klartext",
+            "es": "Envía un mensaje en nombre del bot usando un único [**constructor de incrustaciones**](<https://lordcord.fun/embed-builder>) o texto sin formato",
+            "fr": "Envoie un message au nom du bot en utilisant un unique [**constructeur d'intégration**](<https://lordcord.fun/embed-builder>) ou texte brut",
+            "pl": "Wysyła wiadomość w imieniu bota za pomocą unikalnego [**embed builder**](<https://lordcord.fun/embed-builder>) lub zwykły tekst",
+            "tr": "Bot adına benzersiz bir mesaj gönderir [**gömme oluşturucu**](<https://lordcord.fun/embed-builder>) veya düz metin"
+        },
+        "brief_descriptrion": {
+            "en": "Sends a message",
+            "ru": "Отправляет сообщение",
+            "id": "Mengirim pesan",
+            "da": "Sender en besked",
+            "de": "Sendet eine Nachricht",
+            "es": "Envía un mensaje",
+            "fr": "Envoie un message",
+            "pl": "Wysyła wiadomość",
+            "tr": "Bir mesaj gönderir"
+        },
+        "allowed_disabled": true
+    },
+    {
+        "name": "settings",
+        "category": "moderation",
+        "aliases": [
+            "set",
+            "setting"
+        ],
+        "arguments": [],
+        "descriptrion": {
+            "en": "Opens special bot management settings as well as its extensions",
+            "ru": "Открывает специальные настройки управления ботом, а также его расширения",
+            "id": "Mengirim pesan",
+            "da": "Sender en besked",
+            "de": "Sendet eine Nachricht",
+            "es": "Envía un mensaje",
+            "fr": "Envoie un message",
+            "pl": "Wysyła wiadomość",
+            "tr": "Mesaj gönderir"
+        },
+        "brief_descriptrion": {
+            "en": "Opens the bot settings",
+            "ru": "Открывает настройки бота",
+            "id": "Membuka pengaturan bot",
+            "da": "Åbner botindstillingerne",
+            "de": "Öffnet die Bot-Einstellungen",
+            "es": "Abre la configuración del bot",
+            "fr": "Ouvre les paramètres du bot",
+            "pl": "Otwiera ustawienia bota",
+            "tr": "Bot ayarlarını açar"
+        },
+        "allowed_disabled": false
+    }
+]

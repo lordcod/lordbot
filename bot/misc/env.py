@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
-
 class Tokens:
     token_anprim = environ.get("anprim_token")
     token_lord_cord = environ.get("lordcord_token")

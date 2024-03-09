@@ -1,6 +1,5 @@
 from typing import Any, Dict, Union
-import ujson as json
-from psycopg2.extensions import connection
+import orjson
 
 
 class Json:
@@ -9,18 +8,18 @@ class Json:
             try:
                 result = func(data)
                 return result
-            except:
+            except Exception:
                 return data
         return wrapped
 
     @on_error
     def loads(data):
-        data = json.loads(data)
+        data = orjson.loads(data)
         return data
 
     @on_error
     def dumps(data):
-        data = json.dumps(data)
+        data = orjson.dumps(data).decode()
         return data
 
 
@@ -30,7 +29,7 @@ class Formating:
             try:
                 result = func(data)
                 return result
-            except:
+            except Exception:
                 return data
         return wrapped
 
@@ -49,39 +48,9 @@ class Formating:
     def dumps(data: Dict[Union[str, int], Any]):
         new_data = {}
         for key in data:
-
-            if type(key) == int:
+            if isinstance(key, int):
                 new_data[str(key)] = data[key]
             else:
                 new_data[key] = data[key]
         return new_data
 
-
-def register_table(table_name: str, variable: str, connection: connection):
-    with connection.cursor() as cursor:
-        cursor.execute(
-            f"CREATE TABLE IF NOT EXISTS {table_name} ({variable})"
-        )
-
-
-def get_info_colums(table_name: str, connection: connection) -> Union[list, None]:
-    query = """
-        SELECT
-            column_name,
-            ordinal_position,
-            data_type,
-            column_default
-        FROM
-            information_schema.columns
-        WHERE
-            table_name = %s;
-    """
-    with connection.cursor() as cursor:
-        cursor.execute(query, (table_name,))
-
-        info = cursor.fetchall()
-
-        if not info:
-            return None
-
-        return list(info)

@@ -1,3 +1,4 @@
+import timeit
 from typing import Callable
 import nextcord
 from nextcord.ext import commands, application_checks
@@ -6,14 +7,11 @@ from bot.misc.lordbot import LordBot
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
-from bot.databases.db import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.resources import info
 from bot.views.translate import TranslateView
-from bot.languages import (
-    captcha as lang_captcha,
-    activiti as lang_activiti,
-    data as lang_datas
-)
+from bot.languages import i18n
+from bot.languages import data as lang_data
 
 import jmespath
 import googletrans
@@ -32,12 +30,28 @@ class basic(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
-        content = (
-            "Pong!🏓🎉\n"
-            f"Latency: {(self.bot.latency)*100:.1f}ms"
+        gdb = GuildDateBases(ctx.guild.id)
+
+        stime = timeit.default_timer()
+        color = gdb.get('color')
+        ftime = timeit.default_timer()
+
+        discord_latency_ms = round(self.bot.latency*100, 2)
+        databases_latency_ms = round((ftime-stime)*100, 2)
+        command_latency_ms = round(
+            (discord_latency_ms*2)+(databases_latency_ms*10), 2)
+
+        embed = nextcord.Embed(
+            title="Pong!🏓🎉",
+            description=(
+                f"Discord latency: {discord_latency_ms}ms\n"
+                f"Databases latency: {databases_latency_ms}ms\n"
+                f"Command processing latency: {command_latency_ms}ms\n"
+            ),
+            color=color
         )
 
-        await ctx.send(content)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
@@ -48,12 +62,7 @@ class basic(commands.Cog):
             scopes=("bot", "applications.commands"),
         )
 
-        content = (
-            "Special bot invitation to the server:\n"
-            f"{invite_link}"
-        )
-
-        await ctx.send(content)
+        await ctx.send(f"[**Click to add to your server**]({invite_link})")
 
     @commands.command()
     async def captcha(self, ctx: commands.Context):
@@ -62,33 +71,24 @@ class basic(commands.Cog):
         data, code = await utils.generator_captcha(random.randint(3, 7))
         image_file = nextcord.File(
             data, filename="captcha.png", description="Captcha", spoiler=True)
-        await ctx.send(content=lang_captcha.enter.get(lang), file=image_file)
+        await ctx.send(content=i18n.t(lang, 'captcha.enter'), file=image_file)
         check: Callable[
-            [nextcord.Message], bool] = lambda mes: mes.channel == ctx.channel and mes.author == ctx.author
+            [nextcord.Message],
+            bool] = lambda mes: (mes.channel == ctx.channel
+                                 and mes.author == ctx.author)
         try:
             message: nextcord.Message = await self.bot.wait_for("message",
                                                                 timeout=30,
                                                                 check=check)
         except asyncio.TimeoutError:
-            await ctx.send(content=lang_captcha.failed.get(lang))
+            await ctx.send(content=i18n.t(lang, 'captcha.failed'))
             return
 
         if message.content.upper() == code:
             await ctx.send((f"{Emoji.congratulation}"
-                           f"{lang_captcha.congratulation.get(lang)}"))
+                            f"{i18n.t(lang, 'captcha.congratulation')}"))
         else:
-            await ctx.send(content=lang_captcha.failed.get(lang))
-
-    @commands.command(name="welcome-message")
-    async def welcome_message(self, ctx: commands.Context):
-        image_bytes = await utils.generate_welcome_message(ctx.author)
-
-        file = nextcord.File(image_bytes, "welcome-message.png")
-
-        embed = nextcord.Embed()
-        embed.set_image("attachment://welcome-message.png")
-
-        await ctx.send(embed=embed, file=file)
+            await ctx.send(content=i18n.t(lang, 'captcha.failed'))
 
     @nextcord.slash_command(
         name="activiti",
@@ -125,7 +125,7 @@ class basic(commands.Cog):
             )
         except (nextcord.HTTPException, nextcord.NotFound):
             await interaction.response.send_message(
-                content=lang_activiti.failed.get(lang))
+                content=i18n.t(lang, 'activiti.failed'))
             return
 
         view = nextcord.ui.View(timeout=None)
@@ -133,16 +133,16 @@ class basic(commands.Cog):
             label="Activiti", emoji=Emoji.roketa, url=inv.url))
 
         embed = nextcord.Embed(
-            title=f"**{lang_activiti.embed_title.get(lang)}**",
+            title=i18n.t(lang, 'activiti.embed.title'),
             color=color,
-            description=lang_activiti.embed_description.get(lang)
+            description=i18n.t(lang, 'activiti.embed.description')
         )
         embed.add_field(
-            name=lang_activiti.fields_label.get(lang),
+            name=i18n.t(lang, 'activiti.fields.label'),
             value=activiti.get('label')
         )
         embed.add_field(
-            name=lang_activiti.fields_max_user.get(lang),
+            name=i18n.t(lang, 'activiti.fields.max-user'),
             value=activiti.get('max_user')
         )
 
@@ -155,14 +155,16 @@ class basic(commands.Cog):
         inters: nextcord.Interaction,
         message: nextcord.Message
     ):
+        gdb = GuildDateBases(inters.guild_id)
+        locale = gdb.get('language')
+
         if not message.content:
-            await inters.response.send_message("This message has no content, "
-                                               "so we will not be able to "
-                                               "translate it.",
+            await inters.response.send_message(i18n.t(locale, 'translate.failed'),
                                                ephemeral=True)
+            return
 
         data = jmespath.search(
-            f"[?discord_language=='{inters.locale}']|[0]", lang_datas)
+            f"[?discord_language=='{inters.locale}']|[0]", lang_data)
 
         result = translator.translate(
             text=message.content, dest=data.get('google_language'))

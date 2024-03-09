@@ -1,5 +1,6 @@
 import nextcord
 
+
 from .dj_roles import DjRolesView
 from .volume import VolumeView
 from .max_size import MaxSizeView
@@ -7,8 +8,8 @@ from .max_size import MaxSizeView
 from bot.views import settings_menu
 from bot.resources.ether import Emoji
 from bot.views.settings._view import DefaultSettingsView
-from bot.databases.db import GuildDateBases
-from bot.languages.settings import button as button_name
+from bot.databases import GuildDateBases
+from bot.languages import i18n
 
 
 distribution = {
@@ -19,24 +20,30 @@ distribution = {
 
 
 class MusicDropDown(nextcord.ui.StringSelect):
-    def __init__(self) -> None:
+    def __init__(self, guild_id) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = gdb.get('language')
+
         options = [
             nextcord.SelectOption(
-                label="Dj-roles",
+                label=i18n.t(locale, 'settings.music.dj-roles.name'),
                 value="dj_roles",
-                description="Roles that can control music.",
+                description=i18n.t(
+                    locale, 'settings.music.dj-roles.description'),
                 emoji=Emoji.music
             ),
             nextcord.SelectOption(
-                label="Max size",
+                label=i18n.t(locale, 'settings.music.max-queue-size.name'),
                 value="max_size",
-                description="Maximum track queue length.",
+                description=i18n.t(
+                    locale, 'settings.music.max-queue-size.description'),
                 emoji=Emoji.playlist
             ),
             nextcord.SelectOption(
-                label="Default volume",
+                label=i18n.t(locale, 'settings.music.default-volume.name'),
                 value="volume",
-                description="The default music volume.",
+                description=i18n.t(
+                    locale, 'settings.music.default-volume.description'),
                 emoji=Emoji.volume_up
             ),
         ]
@@ -59,27 +66,34 @@ class MusicView(DefaultSettingsView):
         description = ''
 
         if max_size := music_settings.get("queue-max-size"):
-            description += f"Maximum queue size: {max_size}\n"
+            description += i18n.t(locale,
+                                  'settings.music.max-queue-size.value',
+                                  size=max_size)
         if volume := music_settings.get("volume"):
-            description += f"Default volume music: {volume}\n"
+            description += i18n.t(locale,
+                                  'settings.music.default-volume.value',
+                                  volume=volume)
         if dj_role_ids := music_settings.get("dj-roles"):
             dj_roles = filter(
                 lambda item: item is not None,
                 map(guild.get_role, dj_role_ids)
             )
-            description += f"Dj-roles: {', '.join([role.mention for role in dj_roles])}"
+            description += i18n.t(locale,
+                                  'settings.music.dj-roles.value',
+                                  roles=', '.join([role.mention for role in dj_roles]))
 
         self.embed = nextcord.Embed(
-            title='Music',
+            title=i18n.t(locale,
+                         'settings.music.title'),
             description=description,
             color=color
         )
 
         super().__init__()
 
-        self.add_item(MusicDropDown())
+        self.add_item(MusicDropDown(guild.id))
 
-        self.back.label = button_name.back.get(locale)
+        self.back.label = i18n.t(locale, 'settings.button.back')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

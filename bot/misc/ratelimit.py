@@ -27,10 +27,8 @@ class CooldownGuild:
         self.check_register()
 
     def check_register(self) -> None:
-        if self.guild_id not in data:
-            data[self.guild_id] = {}
-        if self.command_name not in data[self.guild_id]:
-            data[self.guild_id][self.command_name] = {}
+        data.setdefault(self.guild_id, {})
+        data[self.guild_id].setdefault(self.command_name, {})
 
     def get(self) -> Union[None, float]:
         cooldata: dict = data[self.guild_id][self.command_name]
@@ -101,12 +99,9 @@ class CooldownMember:
         self.check_register()
 
     def check_register(self) -> None:
-        if self.guild_id not in data:
-            data[self.guild_id] = {}
-        if self.command_name not in data[self.guild_id]:
-            data[self.guild_id][self.command_name] = {}
-        if self.member_id not in data[self.guild_id][self.command_name]:
-            data[self.guild_id][self.command_name][self.member_id] = {}
+        data.setdefault(self.guild_id, {})
+        data[self.guild_id].setdefault(self.command_name, {})
+        data[self.guild_id][self.command_name].setdefault(self.member_id, {})
 
     def get(self) -> Union[None, float]:
         cooldata: dict = data[self.guild_id][self.command_name][self.member_id]
@@ -193,4 +188,4 @@ class Cooldown:
 
 
 def reset_cooldown(guild_id: int, command_name: str) -> None:
-    return data.get(guild_id, {}).pop(command_name)
+    data.get(guild_id, {}).pop(command_name)

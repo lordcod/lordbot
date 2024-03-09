@@ -1,17 +1,15 @@
+from asyncio import iscoroutinefunction
+import inspect
 import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
 from bot.misc.time_transformer import display_time
-from bot.databases.db import GuildDateBases
-from bot.languages import errors
+from bot.databases import GuildDateBases
+from bot.languages import i18n
+from bot.languages.help import get_command
 
-from inspect import Parameter
 from typing import Union
-
-
-class ErrorTypeChannel(Exception):
-    pass
 
 
 class DisabledCommand(commands.CommandError):
@@ -36,6 +34,13 @@ class MissingChannel(commands.CommandError):
     pass
 
 
+def attach_exception(*errors: Exception):
+    def wrapped(func):
+        func.__attachment_errors__ = errors
+        return func
+    return wrapped
+
+
 class CommandOnCooldown(commands.CommandError):
     def __init__(self, retry_after: float) -> None:
         self.retry_after: float = retry_after
@@ -51,121 +56,143 @@ class CallbackCommandError:
         self.locale = self.gdb.get('language')
 
     async def process(self):
-        Logger.info(f'[{self.error.__class__.__name__}] {self.error}')
-        for error in self.errors:
-            name = error.__name__
-            error_name = self.error.__class__.__name__
+        for name, item in inspect.getmembers(self):
+            allow_errors = getattr(item, "__attachment_errors__", None)
+            if allow_errors is None or not iscoroutinefunction(item):
+                continue
 
-            if name == error_name:
-                await error(self)
+            if isinstance(self.error, allow_errors):
+                await item()
                 break
         else:
             await self.OfterError()
 
+    @attach_exception(commands.MissingPermissions)
     async def MissingPermissions(self):
-        content = errors.MissingPermissions.get(self.locale)
+        content = i18n.t(self.locale, 'errors.MissingPermissions')
 
         await self.ctx.send(content)
 
+    @attach_exception(commands.BotMissingPermissions)
     async def BotMissingPermissions(self):
-        content = errors.BotMissingPermissions.get(self.locale)
+        content = i18n.t(self.locale, 'errors.BotMissingPermissions')
 
         await self.ctx.send(content)
 
+    @attach_exception(MissingRole)
     async def MissingRole(self):
-        content = errors.MissingRole.get(self.locale)
+        content = i18n.t(self.locale, 'errors.MissingRole')
 
         await self.ctx.send(content)
 
+    @attach_exception(MissingChannel)
     async def MissingChannel(self):
-        content = errors.MissingChannel.get(self.locale)
+        content = i18n.t(self.locale, 'errors.MissingChannel')
 
         await self.ctx.send(content)
 
+    @attach_exception(commands.CommandNotFound)
     async def CommandNotFound(self):
-        content = errors.CommandNotFound.get(self.locale)
+        content = i18n.t(self.locale, 'errors.CommandNotFound')
 
         await self.ctx.send(
             content=content,
             delete_after=5
         )
 
+    @attach_exception(commands.NotOwner)
+    async def NotOwner(self):
+        content = i18n.t(self.locale, 'errors.NotOwner')
+
+        await self.ctx.send(content=content)
+
+    @attach_exception(OnlyTeamError)
+    async def OnlyTeamError(self):
+        content = i18n.t(self.locale, 'errors.OnlyTeamError')
+
+        await self.ctx.send(content)
+
+    @attach_exception(commands.BadArgument)
+    async def BadArgument(self):
+        title = i18n.t(self.locale, 'errors.BadArgument')
+        color = self.gdb.get('color')
+
+        cmd_data = get_command(self.ctx.command.name)
+        using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
+
+        embed = nextcord.Embed(
+            title=title,
+            description=i18n.t(
+                self.locale, "help.command-embed.using_command", using=using),
+            color=color
+        )
+        embed.set_footer(text=i18n.t(
+            self.locale, "help.arguments"))
+
+        if examples := cmd_data.get('examples'):
+            for num, (excmd, descript) in enumerate(examples, start=1):
+                embed.add_field(
+                    name=i18n.t(
+                        self.locale, 'help.command-embed.example', number=num),
+                    value=f"`{excmd}`\n{descript.get(self.locale)}",
+                    inline=False
+                )
+
+        await self.ctx.send(embed=embed)
+
+    @attach_exception(commands.MissingRequiredArgument)
+    async def MissingRequiredArgument(self):
+        title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
+        color = self.gdb.get('color')
+
+        cmd_data = get_command(self.ctx.command.name)
+        using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
+
+        embed = nextcord.Embed(
+            title=title,
+            description=i18n.t(
+                self.locale, "help.command-embed.using_command", using=using),
+            color=color
+        )
+        embed.set_footer(text=i18n.t(
+            self.locale, "help.arguments"))
+
+        if examples := cmd_data.get('examples'):
+            for num, (excmd, descript) in enumerate(examples, start=1):
+                embed.add_field(
+                    name=i18n.t(
+                        self.locale, 'help.command-embed.example', number=num),
+                    value=f"`{excmd}`\n{descript.get(self.locale)}",
+                    inline=False
+                )
+
+        await self.ctx.send(embed=embed)
+
+    @attach_exception(CommandOnCooldown)
     async def CommandOnCooldown(self):
         color = self.gdb.get('color')
 
         embed = nextcord.Embed(
-            title=errors.CommandOnCooldown.title.get(self.locale),
-            description=(
-                f'{errors.CommandOnCooldown.description.get(self.locale)} '
-                f"{display_time(self.error.retry_after, self.locale)}"
-            ),
+            title=i18n.t(self.locale, 'errors.CommandOnCooldown.title'),
+            description=i18n.t(self.locale, 'errors.CommandOnCooldown.description',
+                               delay=display_time(self.error.retry_after,
+                                                  self.locale)),
             color=color
         )
 
         await self.ctx.send(embed=embed, delete_after=5.0)
 
-    async def NotOwner(self):
-        content = errors.NotOwner.get(self.locale)
-
-        await self.ctx.send(content=content)
-
-    async def CheckFailure(self):
-        content = errors.CheckFailure.get(self.locale)
-
-        await self.ctx.send(content)
-
-    async def BadArgument(self):
-        content = errors.BadArgument.get(self.locale)
-
-        await self.ctx.send(content)
-
-    async def DisabledCommand(self):
-        content = errors.DisabledCommand.get(self.locale)
-
-        await self.ctx.send(content)
-
-    async def MissingRequiredArgument(self):
-        param: Parameter = self.error.param
-        content = (f'{errors.MissingRequiredArgument.get(self.locale)} - '
-                   f'{param.name}')
-
-        await self.ctx.send(content)
-
+    @attach_exception(NotActivateEconomy)
     async def NotActivateEconomy(self):
-        content = errors.NotActivateEconomy.get(self.locale)
+        content = i18n.t(self.locale, 'errors.NotActivateEconomy')
 
         await self.ctx.send(content)
 
-    async def OnlyTeamError(self):
-        content = errors.OnlyTeamError.get(self.locale)
+    @attach_exception(DisabledCommand, commands.DisabledCommand)
+    async def DisabledCommand(self):
+        content = i18n.t(self.locale, 'errors.DisabledCommand')
 
         await self.ctx.send(content)
-
-    async def MemberNotFound(self):
-        content = errors.MemberNotFound.get(self.locale)
-
-        await self.ctx.send(content)
-
-    async def BadUnionArgument(self):
-        await self.BadArgument()
 
     async def OfterError(self):
-        pass
-
-    errors = [
-        MissingPermissions,
-        MissingRole,
-        MissingChannel,
-        BotMissingPermissions,
-        DisabledCommand,
-        CommandNotFound,
-        CommandOnCooldown,
-        NotOwner,
-        CheckFailure,
-        BadArgument,
-        MissingRequiredArgument,
-        OnlyTeamError,
-        NotActivateEconomy,
-        MemberNotFound,
-        BadUnionArgument
-    ]
+        Logger.info(f"[{self.error.__class__.__name__}]: {self.error}")

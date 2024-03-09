@@ -1,71 +1,77 @@
 from __future__ import annotations
-from typing import Callable
-from psycopg2.extensions import connection as psycoon
+from psycopg2.extras import DictCursor
+from ..db_engine import DataBase
 from ..misc.error_handler import on_error
 
-connection: Callable[[], psycoon]
+engine: DataBase = None
 
 
-class EconomyMembedDB:
+class EconomyMemberDB:
     def __init__(self, guild_id: int, member_id: int = None) -> None:
         self.guild_id = guild_id
         self.member_id = member_id
 
+        self.data = self._get()
+
     @on_error()
     def get_leaderboards(self):
-        with connection().cursor() as cursor:
-            cursor.execute(
-                """SELECT 
-                 member_id, balance, bank, balance+bank as total
+        leaderboard = engine.fetchall(
+            """SELECT member_id, balance, bank, balance+bank as total
                 FROM economic
                 WHERE guild_id = %s
                 ORDER BY total DESC""",
-                (self.guild_id,)
-            )
+            (self.guild_id,)
+        )
 
-            guild = cursor.fetchall()
-
-            return guild
+        return leaderboard
 
     @on_error()
-    def get(self):
-        with connection().cursor() as cursor:
+    def _get(self):
+        with engine.connection.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(
-                'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s', (self.guild_id, self.member_id))
+                'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
+                (self.guild_id, self.member_id))
+            data = cursor.fetchone()
 
-            guild = cursor.fetchone()
+        if not data:
+            self.insert()
+            data = self._get()
 
-            return guild
+        return data
 
     @on_error()
     def insert(self):
-        with connection().cursor() as cursor:
-            cursor.execute(
-                'INSERT INTO economic (guild_id,member_id) VALUES (%s,%s)', (self.guild_id, self.member_id))
+        engine.execute(
+            'INSERT INTO economic (guild_id, member_id) VALUES (%s,%s)', (self.guild_id, self.member_id))
 
     @on_error()
     def update(self, arg, value):
-        if not self.get():
-            self.insert()
-
-        with connection().cursor() as cursor:
-            cursor.execute(f'UPDATE economic SET {arg} = %s WHERE guild_id = %s AND member_id = %s', (
-                value, self.guild_id, self.member_id))
+        engine.execute(f'UPDATE economic SET {arg} = %s WHERE guild_id = %s AND member_id = %s', (
+            value, self.guild_id, self.member_id))
 
     @on_error()
-    def update_list(self, args):
-        for key in args:
-            value = args[key]
-            self.update(key, value)
+    def update_list(self, args: dict):
+        keys = ', '.join([f"{a} = %s" for a in args.keys()])
+        values = [*args.values(), self.guild_id, self.member_id]
+        engine.execute(
+            f'UPDATE economic SET {keys} WHERE guild_id = %s AND member_id = %s', values)
 
     @on_error()
     def delete(self):
-        with connection().cursor() as cursor:
-            cursor.execute(
-                'DELETE FROM economic WHERE guild_id = %s AND member_id = %s', (self.guild_id, self.member_id))
+        engine.execute(
+            'DELETE FROM economic WHERE guild_id = %s AND member_id = %s', (self.guild_id, self.member_id))
 
     @on_error()
     def delete_guild(self):
-        with connection().cursor() as cursor:
-            cursor.execute(
-                'DELETE FROM economic WHERE guild_id = %s', (self.guild_id,))
+        engine.execute(
+            'DELETE FROM economic WHERE guild_id = %s', (self.guild_id,))
+
+    def get(self, __name, __default=None):
+        return self.data.get(__name, __default)
+
+    def __getitem__(self, item):
+        return self.get(item)
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+        self.update(key, value)
