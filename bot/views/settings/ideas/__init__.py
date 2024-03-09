@@ -8,6 +8,7 @@ from bot.databases import GuildDateBases
 from bot.views import settings_menu
 from bot.views.ideas import IdeaView
 from bot.languages import i18n
+from bot.misc.time_transformer import display_time
 
 
 class DropDown(nextcord.ui.Select):
@@ -31,6 +32,10 @@ class DropDown(nextcord.ui.Select):
                 label='Moderation roles',
                 value='moderation-roles'
             ),
+            nextcord.SelectOption(
+                label='Cooldown',
+                value='cooldown'
+            )
         ]
 
         super().__init__(
@@ -77,6 +82,10 @@ class IdeasView(DefaultSettingsView):
                 ideas.get("channel-approved-id")):
             self.embed.description += ("Channel approved: "
                                        f"{channel_approved.mention}\n")
+
+        if cooldown := ideas.get('cooldown'):
+            self.embed.description += ("Cooldown: "
+                                       f"{display_time(cooldown)}\n")
 
         if moderation_role_ids := ideas.get("moderation-role-ids"):
             moderation_roles = filter(lambda item: item is not None,

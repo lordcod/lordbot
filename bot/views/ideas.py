@@ -232,7 +232,8 @@ class IdeaModal(nextcord.ui.Modal):
             style=nextcord.TextInputStyle.short,
             placeholder="If you want, you can attach an image",
             min_length=10,
-            max_length=1500
+            max_length=150,
+            required=False
         )
         self.add_item(self.image)
 
@@ -244,6 +245,7 @@ class IdeaModal(nextcord.ui.Modal):
         color = gdb.get('color')
         ideas_data = gdb.get('ideas')
         channel_offers_id = ideas_data.get('channel-offers-id')
+        cooldown = ideas_data.get('cooldown', 0)
 
         channel = interaction.guild.get_channel(channel_offers_id)
         idea = self.idea.value
@@ -277,7 +279,7 @@ class IdeaModal(nextcord.ui.Modal):
         mdb.set(mes.id, idea_data)
 
         Timeout.set(interaction.guild_id,
-                    interaction.user.id, time.time()+(60*30))
+                    interaction.user.id, time.time()+cooldown)
 
 
 class IdeaView(nextcord.ui.View):

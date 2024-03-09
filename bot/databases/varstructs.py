@@ -8,6 +8,7 @@ IdeasPayload = TypedDict(
     'IdeasPayload',
     {
         "enabled": Optional[bool],
+        "cooldown": Optional[int],
 
         "channel-suggest-id": int,
         "message-suggest-id": int,
