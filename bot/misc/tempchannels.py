@@ -12,7 +12,7 @@ nextcord.Permissions
 _db_data = []
 _guild_data = {
     'category_id': 1216365743671873678,
-    'trigger_channel_id': 1216365803042246756,
+    'trigger_channel_id': 0,  # 1216365803042246756,
     'owner_permission': nextcord.PermissionOverwrite(
         manage_channels=True,
         manage_permissions=True,
