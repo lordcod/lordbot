@@ -1,4 +1,7 @@
+import asyncio
 from collections import namedtuple
+import emoji
+
 import nextcord
 
 import inspect
@@ -9,7 +12,7 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Self, Tuple, Union, Mapping
+from typing import Coroutine, Dict,  Optional,  Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -29,46 +32,6 @@ welcome_message_items = {
     "magic-city": wel_mes("Magic city", "https://i.postimg.cc/hjJzk4kN/magic-city.jpg", "The beautiful atmosphere and scenic views from the boat."),
     "city-dawn": wel_mes("City dawn", "https://i.postimg.cc/13J84NPL/city-dawn.jpg", "Starry sky, breeze, rustling leaves, crickets, fireflies, bonfire - perfect night.")
 }
-
-
-class DataRoleTimerHandlers:
-    __instance = None
-    data = None
-
-    def __new__(cls) -> Self:
-        if cls.__instance is None:
-            cls.__instance = object.__new__(cls)
-            cls.data = {}
-        return cls.__instance
-
-    def __init__(self) -> None:
-        pass
-
-    def register(self,
-                 guild_id: int,
-                 member_id: int):
-        if guild_id not in self.data:
-            self.data[guild_id] = {}
-        if member_id not in self.data[guild_id]:
-            self.data[guild_id][member_id] = {}
-
-    def add_th(self,
-               guild_id: int,
-               member_id: int,
-               role_id: int,
-               rth: TimerHandle):
-        self.register(guild_id, member_id)
-        self.data[guild_id][member_id][role_id] = rth
-
-    def cancel_th(self,
-                  guild_id: int,
-                  member_id: int,
-                  role_id: int):
-        self.register(guild_id, member_id)
-        th = self.data[guild_id][member_id].get(role_id)
-        if th is None:
-            return
-        cancel_atimerhandler(th)
 
 
 class TempletePayload:
@@ -171,16 +134,48 @@ async def clone_message(message: nextcord.Message) -> dict:
     }
 
 
-def cancel_atimerhandler(th: TimerHandle):
-    coro: Coroutine = th._args[0]
-    coro.close()
-    th.cancel()
+class LordTimerHandler:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+        self.loop = loop
+        self.data: Dict[Union[str, int], TimerHandle] = {}
+
+    def create_timer_handler(
+        self,
+        delay: float,
+        coro: Coroutine,
+        key: Optional[Union[str, int]] = None
+    ):
+        th = self.loop.call_later(delay,  self.loop.create_task, coro)
+        if key is not None:
+            self.data[key] = th
+
+    def close_as_key(self, key: Union[str, int]):
+        th = self.data.get(key)
+        if th is None:
+            return
+        coro: Coroutine = th._args[0]
+        coro.close()
+        th.cancel()
+
+    def close_as_th(th: TimerHandle):
+        coro: Coroutine = th._args[0]
+        coro.close()
+        th.cancel()
 
 
 def clamp(val: Union[int, float],
           minv: Union[int, float],
           maxv: Union[int, float]) -> Union[int, float]:
     return min(maxv, max(minv, val))
+
+
+def is_emoji(text: str) -> bool:
+    text = text.strip()
+    if regex.fullmatch(r'<a?:.+?:\d{18}>', text):
+        return True
+    if text in emoji.EMOJI_DATA:
+        return True
+    return False
 
 
 async def getRandomQuote(lang: str = 'en'):

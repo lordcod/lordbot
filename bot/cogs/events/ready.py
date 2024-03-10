@@ -34,11 +34,8 @@ class ready_event(commands.Cog):
 
         for (guild_id, member_id, ban_time) in datas:
             mbrsd = BanDateBases(guild_id, member_id)
-            self.bot.loop.call_later(
-                ban_time-time.time(),
-                asyncio.create_task,
-                mbrsd.remove_ban(self.bot._connection)
-            )
+            self.bot.lord_handler_timer.create_timer_handler(
+                ban_time-time.time(), mbrsd.remove_ban(self.bot._connection), f"ban:{guild_id}:{member_id}")
 
     async def process_temp_roles(self):
         rsdb = RoleDateBases()
@@ -54,14 +51,8 @@ class ready_event(commands.Cog):
 
             mrsdb = RoleDateBases(guild_id, member_id)
 
-            rth = self.bot.loop.call_later(
-                role_time-time.time(),
-                asyncio.create_task,
-                mrsdb.remove_role(member, role)
-            )
-
-            self.bot.role_timer_handlers.add_th(
-                guild.id, member.id, role.id, rth)
+            self.bot.lord_handler_timer.create_timer_handler(
+                role_time-time.time(), mrsdb.remove_role(member, role), f"role:{guild_id}:{member_id}:{role_id}")
 
 
 def setup(bot):
