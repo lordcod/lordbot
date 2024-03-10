@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import aiohttp
 import nextcord
 from nextcord.ext import commands
 
@@ -60,6 +61,7 @@ class LordBot(commands.Bot):
     ) -> None:
         i18n.from_folder("./bot/languages/localization")
         i18n.config['locale'] = 'en'
+        self.session = aiohttp.ClientSession()
         super().__init__(command_prefix=self.get_command_prefixs,
                          intents=nextcord.Intents.all(),
                          help_command=None)
