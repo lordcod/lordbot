@@ -1,3 +1,4 @@
+
 import nextcord
 import time
 
@@ -57,16 +58,17 @@ class ConfirmModal(nextcord.ui.Modal):
         idea_image = idea_data.get('image')
         idea_content = idea_data.get('idea')
         idea_author_id = idea_data.get('user_id')
+        idea_author = interaction.guild.get_member(idea_author_id)
 
         reason = self.reason.value
 
         embed = nextcord.Embed(
-            title=i18n.t(locale, 'ideas.confirm-modal.embed.title'),
+            title=i18n.t(locale, 'ideas.globals.embed-title'),
             color=nextcord.Color.green()
         )
         embed.set_author(
-            name=interaction.user.display_name,
-            icon_url=interaction.user.display_avatar
+            name=idea_author.display_name,
+            icon_url=idea_author.display_avatar
         )
         embed.add_field(
             name=i18n.t(locale, 'ideas.confirm-modal.embed.field'),
@@ -74,9 +76,8 @@ class ConfirmModal(nextcord.ui.Modal):
         )
         embed.set_image(idea_image)
 
-        author = interaction.guild.get_member(idea_author_id)
         content = i18n.t(locale, 'ideas.confirm-modal.idea.content',
-                         mention=author.mention)
+                         mention=idea_author.mention)
 
         views = ConfirmView(interaction.guild_id)
         views.approve.disabled = True
@@ -127,29 +128,34 @@ class ConfirmView(nextcord.ui.View):
         self.deny.label = i18n.t(
             locale, 'ideas.confirm-view.button.deny')
 
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = gdb.get('language')
+
+        ideas_data: IdeasPayload = gdb.get('ideas')
+        enabled: bool = ideas_data.get('enabled', False)
+
+        moderation_role_ids = ideas_data.get('moderation-role-ids', [])
+        role_ids = set(interaction.user._roles)
+        moderation_roles = set(moderation_role_ids)
+
+        if enabled is False:
+            await interaction.response.send_message(i18n.t(
+                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
+            return False
+
+        if not role_ids & moderation_roles:
+            await interaction.response.defer(ephemeral=True)
+            return False
+
+        return True
+
     @nextcord.ui.button(label="Approve",
                         style=nextcord.ButtonStyle.green,
                         custom_id='ideas-confirm:confirm')
     async def approve(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
-        ideas_data: IdeasPayload = gdb.get('ideas')
-        moderation_role_ids = ideas_data.get('moderation-role-ids', [])
-        enabled: bool = ideas_data.get('enabled', False)
-
-        if enabled is False:
-            await interaction.response.send_message(i18n.t(
-                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
-            return
-
-        role_ids = set(interaction.user._roles)
-        moderation_roles = set(moderation_role_ids)
-        if not role_ids & moderation_roles:
-            await interaction.response.defer(ephemeral=True)
-            return
-
         modal = ConfirmModal(interaction.guild_id)
         await interaction.response.send_modal(modal)
 
@@ -161,13 +167,6 @@ class ConfirmView(nextcord.ui.View):
 
         gdb = GuildDateBases(interaction.guild_id)
         locale = gdb.get('language')
-        ideas_data: IdeasPayload = gdb.get('ideas')
-        moderation_role_ids = ideas_data.get('moderation-role-ids', [])
-        enabled: bool = ideas_data.get('enabled', False)
-        if enabled is False:
-            await interaction.response.send_message(i18n.t(
-                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
-            return
 
         mdb = MongoDB('ideas')
         idea_data = mdb.get(interaction.message.id)
@@ -177,32 +176,26 @@ class ConfirmView(nextcord.ui.View):
         idea_content = idea_data.get('idea')
         idea_image = idea_data.get('image')
         idea_author_id = idea_data.get('user_id')
+        idea_author = interaction.guild.get_member(idea_author_id)
 
-        role_ids = set(interaction.user._roles)
-        moderation_roles = set(moderation_role_ids)
-        if not (interaction.user.id == idea_author_id
-                or role_ids & moderation_roles):
-            return
-
-        name = interaction.user.display_name
         embed = nextcord.Embed(
             title=i18n.t(locale, 'ideas.confirm-view.old-idea'),
             color=nextcord.Color.red()
         )
         embed.set_author(
-            name=interaction.user.display_name,
-            icon_url=interaction.user.display_avatar
+            name=idea_author.display_name,
+            icon_url=idea_author.display_avatar
         )
         embed.add_field(name=i18n.t(
             locale, 'ideas.confirm-view.idea'), value=idea_content)
         embed.set_footer(
-            text=i18n.t(locale, 'ideas.confirm-view.refused', name=name),
+            text=i18n.t(locale, 'ideas.confirm-view.refused',
+                        name=interaction.user.display_name),
             icon_url=interaction.user.display_avatar)
         embed.set_image(idea_image)
 
-        author = interaction.guild.get_member(idea_author_id)
         content = i18n.t(locale, 'ideas.confirm-view.idea-content',
-                         mention=author.mention)
+                         mention=idea_author.mention)
 
         self.approve.disabled = True
         self.deny.disabled = True
@@ -225,8 +218,7 @@ class IdeaModal(nextcord.ui.Modal):
             max_length=1500
         )
         self.add_item(self.idea)
-        
-        
+
         self.image = nextcord.ui.TextInput(
             label="Image url",
             style=nextcord.TextInputStyle.short,

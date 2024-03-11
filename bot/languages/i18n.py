@@ -56,7 +56,8 @@ def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
         elif isinstance(value, list):
             for num, text in enumerate(value):
                 dest_dict.setdefault(key, [])
-                dest_dict[key][num] = translator.translate(text, dest, src).text
+                dest_dict[key][num] = translator.translate(
+                    text, dest, src).text
         else:
             dest_dict[key] = translator.translate(value, dest, src).text
     return dest_dict
@@ -153,7 +154,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    from_folder("./bot/languages/localization")
+    # from_folder("./bot/languages/localization")
 
     # Translation dict
     # for lang in default_languages:
@@ -172,7 +173,7 @@ if __name__ == "__main__":
 
     # Translation to default languages and added
     # add_dict_translations(
-    #     "help.record", translation_with_languages("en", "Record", default_languages))
+    #     "ideas.confirm-modal.approve", translation_with_languages("en", "Approved | {mention}", default_languages))
 
     # To any locales format
     # data = to_any_locales()
@@ -198,4 +199,4 @@ if __name__ == "__main__":
     # )
     # print(resource_dict)
 
-    # to_folder("./bot/languages/localization")
+    to_folder("./bot/languages/localization")
