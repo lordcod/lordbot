@@ -4,10 +4,14 @@ import time
 
 from typing import Optional
 
+import re
 from bot.resources.ether import Emoji
 from bot.databases.varstructs import IdeasPayload
 from bot.databases import MongoDB, GuildDateBases
 from bot.languages import i18n
+
+
+REGEXP_URL = re.compile(r'https?:\/\/(.+)')
 
 
 @lambda _: _()
@@ -34,7 +38,7 @@ class ConfirmModal(nextcord.ui.Modal):
         super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
         self.reason = nextcord.ui.TextInput(
-            label=i18n.t(locale, 'ideas.confirm-modal.reason-label'),
+            label=i18n.t(locale, 'ideas.confirm-modal.reason'),
             required=False,
             style=nextcord.TextInputStyle.paragraph,
             min_length=0,
@@ -62,55 +66,47 @@ class ConfirmModal(nextcord.ui.Modal):
 
         reason = self.reason.value
 
-        embed = nextcord.Embed(
-            title=i18n.t(locale, 'ideas.globals.embed-title'),
-            color=nextcord.Color.green()
-        )
-        embed.set_author(
-            name=idea_author.display_name,
-            icon_url=idea_author.display_avatar
-        )
-        embed.add_field(
-            name=i18n.t(locale, 'ideas.confirm-modal.embed.field'),
-            value=idea_content
-        )
-        embed.set_image(idea_image)
-
-        content = i18n.t(locale, 'ideas.confirm-modal.idea.content',
+        content = i18n.t(locale, 'ideas.confirm-modal.content',
                          mention=idea_author.mention)
 
-        views = ConfirmView(interaction.guild_id)
-        views.approve.disabled = True
-        views.deny.disabled = True
+        embed = nextcord.Embed(
+            title=i18n.t(locale, 'ideas.confirm-modal.title'),
+            color=nextcord.Color.green()
+        )
+        embed.set_image(idea_image)
+        embed.add_field(
+            name=i18n.t(locale, 'ideas.confirm-modal.essence'),
+            value=idea_content
+        )
+        embed.set_footer(
+            text=i18n.t(locale, 'ideas.confirm-modal.approve',
+                        name=interaction.user.display_name),
+            icon_url=interaction.user.display_avatar)
 
-        await interaction.message.edit(content=content, embed=embed, view=views)
+        if reason:
+            embed.add_field(
+                name=i18n.t(locale, 'ideas.confirm-modal.reason'),
+                value=reason,
+                inline=False
+            )
+
+        view = ConfirmView(interaction.guild_id)
+        view.approve.disabled = True
+        view.deny.disabled = True
+
+        await interaction.message.edit(content=content, embed=embed, view=view)
 
         if channel_approved_id is None:
             return
 
-        channel = interaction.guild.get_channel(channel_approved_id)
+        approved_channel = interaction.guild.get_channel(channel_approved_id)
 
-        embed_accept = nextcord.Embed(
-            title=i18n.t(locale, 'ideas.confirm-modal.idea.embed.title'),
-            color=nextcord.Color.green()
+        embed.set_author(
+            name=idea_author.display_name,
+            icon_url=idea_author.display_avatar
         )
-        embed_accept.add_field(
-            name=i18n.t(locale, 'ideas.confirm-modal.idea.embed.field'),
-            value=idea_content,
-            inline=False
-        )
-        embed_accept.set_image(idea_image)
-        if reason:
-            embed_accept.add_field(
-                name=i18n.t(locale, 'ideas.confirm-modal.idea.embed.reason'),
-                value=reason,
-                inline=False
-            )
-        embed_accept.set_footer(
-            text=interaction.user.display_name,
-            icon_url=interaction.user.display_avatar
-        )
-        await channel.send(content=content, embed=embed_accept)
+
+        await approved_channel.send(embed=embed)
 
 
 class ConfirmView(nextcord.ui.View):
@@ -179,7 +175,7 @@ class ConfirmView(nextcord.ui.View):
         idea_author = interaction.guild.get_member(idea_author_id)
 
         embed = nextcord.Embed(
-            title=i18n.t(locale, 'ideas.confirm-view.old-idea'),
+            title=i18n.t(locale, 'ideas.confirm-view.title'),
             color=nextcord.Color.red()
         )
         embed.set_author(
@@ -241,6 +237,10 @@ class IdeaModal(nextcord.ui.Modal):
 
         channel = interaction.guild.get_channel(channel_offers_id)
         idea = self.idea.value
+        image = self.image.value
+
+        if not REGEXP_URL.fullmatch(image):
+            image = None
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'ideas.globals.title'),
@@ -253,10 +253,9 @@ class IdeaModal(nextcord.ui.Modal):
         )
         embed.add_field(name=i18n.t(
             locale, 'ideas.idea-modal.idea'), value=idea)
-        embed.set_image(self.image.value)
+        embed.set_image(image)
 
-        mes = await channel.send(content=interaction.user.mention,
-                                 embed=embed,
+        mes = await channel.send(embed=embed,
                                  view=ConfirmView(interaction.guild_id))
         await mes.add_reaction(Emoji.tickmark)
         await mes.add_reaction(Emoji.cross)

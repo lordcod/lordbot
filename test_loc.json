@@ -496,7 +496,15 @@
             }
         },
         "DisabledEconomy": {
-            "ru": "Система экономики отключена на сервере"
+            "da": "Økonomisystemet er deaktiveret på serveren",
+            "de": "Das Sparsystem ist auf dem Server deaktiviert",
+            "en": "The economy system is disabled on the server",
+            "es": "El sistema económico está deshabilitado en el servidor.",
+            "fr": "Le système d'économie est désactivé sur le serveur",
+            "id": "Sistem ekonomi dinonaktifkan di server",
+            "pl": "System ekonomiczny jest wyłączony na serwerze",
+            "ru": "На сервере отключена система экономики",
+            "tr": "Sunucuda ekonomi sistemi devre dışı bırakıldı"
         }
     },
     "music-selector": {
@@ -526,15 +534,15 @@
     "ideas": {
         "globals": {
             "title": {
-                "da": "Foreslå en idé",
-                "de": "Schlagen Sie eine Idee vor",
-                "en": "Suggest an idea",
-                "es": "Sugerir una idea",
-                "fr": "Proposer une idée",
-                "id": "Sarankan sebuah ide",
-                "pl": "Zaproponuj pomysł",
-                "ru": "Предложите идею",
-                "tr": "Bir fikir öner"
+                "da": "Foreslog en idé",
+                "de": "Habe eine Idee vorgeschlagen",
+                "en": "Suggested an idea",
+                "es": "sugirió una idea",
+                "fr": "A suggéré une idée",
+                "id": "Menyarankan sebuah ide",
+                "pl": "Zasugerował pomysł",
+                "ru": "Предложил идею",
+                "tr": "Bir fikir önerdi"
             },
             "ideas-disabled": {
                 "da": "Modulet **idé** er deaktiveret på denne server",
@@ -544,7 +552,7 @@
                 "fr": "Le module **idea** est désactivé sur ce serveur",
                 "id": "Modul **ide** dinonaktifkan di server ini",
                 "pl": "Moduł **idea** jest wyłączony na tym serwerze",
-                "ru": "Модуль **идей** отключен на этом сервере",
+                "ru": "Модуль **idea** отключен на этом сервере.",
                 "tr": "**idea** modülü bu sunucuda devre dışı bırakıldı"
             },
             "embed-title": {
@@ -563,7 +571,6 @@
             "reason-label": {
                 "da": "Argument:",
                 "de": "Streit:",
-                "en": "Argument:",
                 "es": "Argumento:",
                 "fr": "Argument:",
                 "id": "Argumen:",
@@ -588,26 +595,25 @@
                     "fr": "Vieille idée !",
                     "id": "Ide lama!",
                     "pl": "Stary pomysł!",
+                    "ru": "Старая идея!",
                     "tr": "Eski fikir!"
                 }
             },
             "idea": {
                 "content": {
-                    "da": "Din idé er godkendt!",
-                    "de": "Ihre Idee ist genehmigt!",
-                    "en": "{mention} Your idea is approved!",
-                    "es": "¡Tu idea está aprobada!",
-                    "fr": "Votre idée est approuvée !",
-                    "id": "Ide Anda disetujui!",
-                    "pl": "Twój pomysł został zatwierdzony!",
+                    "da": "{mention} Din idé er godkendt!",
+                    "de": "{mention} Ihre Idee ist genehmigt!",
+                    "es": "{mention} ¡Tu idea está aprobada!",
+                    "fr": "{mention} Votre idée est approuvée !",
+                    "id": "{mention} Ide Anda disetujui!",
+                    "pl": "{mention} Twój pomysł został zatwierdzony!",
                     "ru": "{mention}, Ваша идея одобрена!",
-                    "tr": "Fikriniz onaylandı!"
+                    "tr": "{mention} Fikriniz onaylandı!"
                 },
                 "embed": {
                     "title": {
                         "da": "Idéen er godkendt!",
                         "de": "Die Idee wird angenommen!",
-                        "en": "The idea is approved!",
                         "es": "¡La idea está aprobada!",
                         "fr": "L'idée est approuvée !",
                         "id": "Idenya disetujui!",
@@ -618,7 +624,6 @@
                     "field": {
                         "da": "Essensen af ​​ideen:",
                         "de": "Der Kern der Idee:",
-                        "en": "The essence of the idea:",
                         "es": "La esencia de la idea:",
                         "fr": "L'essence de l'idée :",
                         "id": "Inti dari idenya:",
@@ -629,7 +634,6 @@
                     "reason": {
                         "da": "Bekræftelsesargument:",
                         "de": "Bestätigungsargument:",
-                        "en": "Confirmation argument:",
                         "es": "Argumento de confirmación:",
                         "fr": "Argument de confirmation :",
                         "id": "Argumen konfirmasi:",
@@ -640,19 +644,59 @@
                 }
             },
             "approve": {
-                "da": "Godkendt | {mention}",
-                "de": "Genehmigt | {mention}",
-                "en": "Approved | {mention}",
-                "es": "Aprobado | {mention}",
-                "fr": "Approuvé | {mention}",
-                "id": "Disetujui | {mention}",
-                "pl": "Zatwierdzone | {mention}",
-                "ru": "Одобрено | {mention}",
-                "tr": "Onaylandı | {mention}"
+                "da": "Godkendt | {name}",
+                "de": "Genehmigt | {name}",
+                "en": "Approved | {name}",
+                "es": "Aprobado | {name}",
+                "fr": "Approuvé | {name}",
+                "id": "Disetujui | {name}",
+                "pl": "Zatwierdzone | {name}",
+                "ru": "Одобрено | {имя}",
+                "tr": "Onaylandı | {name}"
             },
-            "embed.field": {
-                "en": "Old idea!",
-                "ru": "Старая идея!"
+            "title": {
+                "da": "Idéen er godkendt!",
+                "de": "Die Idee wird angenommen!",
+                "en": "The idea is approved!",
+                "es": "¡La idea está aprobada!",
+                "fr": "L'idée est approuvée !",
+                "id": "Idenya disetujui!",
+                "pl": "Pomysł został zatwierdzony!",
+                "ru": "Идея одобрена!",
+                "tr": "Fikir onaylandı!"
+            },
+            "content": {
+                "da": "{mention} Din idé er godkendt!",
+                "de": "{mention} Ihre Idee wurde genehmigt!",
+                "en": "{mention} Your idea is approved!",
+                "es": "{mention} ¡Tu idea está aprobada!",
+                "fr": "{mention} Votre idée est approuvée !",
+                "id": "{mention} Ide Anda disetujui!",
+                "pl": "{mention} Twój pomysł został zatwierdzony!",
+                "ru": "{mention} Ваша идея одобрена!",
+                "tr": "{mention} Fikriniz onaylandı!"
+            },
+            "essence": {
+                "da": "Essensen af ​​ideen:",
+                "de": "Der Kern der Idee:",
+                "en": "The essence of the idea:",
+                "es": "La esencia de la idea:",
+                "fr": "L'essence de l'idée :",
+                "id": "Inti dari idenya:",
+                "pl": "Istota pomysłu:",
+                "ru": "Суть идеи:",
+                "tr": "Fikrin özü:"
+            },
+            "reason": {
+                "da": "Bekræftelsesargument:",
+                "de": "Bestätigungsargument:",
+                "en": "Confirmation argument:",
+                "es": "Argumento de confirmación:",
+                "fr": "Argument de confirmation :",
+                "id": "Argumen konfirmasi:",
+                "pl": "Argument potwierdzający:",
+                "ru": "Аргумент подтверждения:",
+                "tr": "Onay argümanı:"
             }
         },
         "confirm-view": {
@@ -665,7 +709,7 @@
                     "fr": "Approuver",
                     "id": "Menyetujui",
                     "pl": "Zatwierdzić",
-                    "ru": "Одобрить",
+                    "ru": "Утвердить",
                     "tr": "Onaylamak"
                 },
                 "deny": {
@@ -676,14 +720,13 @@
                     "fr": "Refuser",
                     "id": "Membantah",
                     "pl": "Zaprzeczyć",
-                    "ru": "Отказать",
+                    "ru": "Отрицать",
                     "tr": "Reddetmek"
                 }
             },
             "old-idea": {
                 "da": "En forældet idé!",
                 "de": "Eine veraltete Idee!",
-                "en": "An outdated idea!",
                 "es": "¡Una idea obsoleta!",
                 "fr": "Une idée dépassée !",
                 "id": "Ide yang ketinggalan jaman!",
@@ -699,29 +742,41 @@
                 "fr": "Idée:",
                 "id": "Ide:",
                 "pl": "Pomysł:",
+                "ru": "Идея:",
                 "tr": "Fikir:"
             },
             "refused": {
-                "da": "Afviste",
-                "de": "Abgelehnt",
+                "da": "Afvist | {name}",
+                "de": "Abgelehnt | {name}",
                 "en": "Refused | {name}",
-                "es": "Rechazado",
-                "fr": "Refusé",
-                "id": "Ditolak",
-                "pl": "Odrzucony",
-                "ru": "Отказано | {name}",
-                "tr": "Reddedildi"
+                "es": "Rechazado | {name}",
+                "fr": "Refusé | {name}",
+                "id": "Menolak | {name}",
+                "pl": "Odmówił | {name}",
+                "ru": "Отказался | {имя}",
+                "tr": "Reddedildi | {name}"
             },
             "idea-content": {
-                "da": "Din idé er blevet afvist!",
-                "de": "Ihre Idee wurde abgelehnt!",
+                "da": "{mention} Din idé er blevet afvist!",
+                "de": "{mention} Ihre Idee wurde abgelehnt!",
                 "en": "{mention} Your idea has been rejected!",
-                "es": "¡Tu idea ha sido rechazada!",
-                "fr": "Votre idée a été rejetée !",
-                "id": "Ide Anda telah ditolak!",
-                "pl": "Twój pomysł został odrzucony!",
-                "ru": "{mention}, Ваша идея была отклонена!",
-                "tr": "Fikriniz reddedildi!"
+                "es": "{mention} ¡Tu idea ha sido rechazada!",
+                "fr": "{mention} Votre idée a été rejetée !",
+                "id": "{mention} Ide Anda telah ditolak!",
+                "pl": "{mention} Twój pomysł został odrzucony!",
+                "ru": "{mention} Ваша идея отклонена!",
+                "tr": "{mention} Fikriniz reddedildi!"
+            },
+            "title": {
+                "da": "Ideen er afvist!",
+                "de": "Die Idee wird abgelehnt!",
+                "en": "The idea is refused!",
+                "es": "¡La idea es rechazada!",
+                "fr": "L'idée est refusée !",
+                "id": "Idenya ditolak!",
+                "pl": "Pomysł został odrzucony!",
+                "ru": "Идея отвергнута!",
+                "tr": "Fikir reddedildi!"
             }
         },
         "idea-modal": {
@@ -744,7 +799,7 @@
                 "fr": "Décrivez votre idée de manière aussi détaillée que possible avec des exemples d'utilisation.",
                 "id": "Jelaskan ide Anda sedetail mungkin dengan contoh penggunaan.",
                 "pl": "Opisz swój pomysł tak szczegółowo, jak to możliwe, za pomocą przykładów użycia.",
-                "ru": "Опишите свою идею как можно более подробно с примерами использования.",
+                "ru": "Опишите свою идею как можно подробнее с примерами использования.",
                 "tr": "Fikrinizi kullanım örnekleriyle mümkün olduğunca ayrıntılı olarak açıklayın."
             },
             "embed-description": {
@@ -755,7 +810,7 @@
                 "fr": "Que l’idée soit approuvée ou non dépend de vous !",
                 "id": "Disetujui atau tidaknya ide itu tergantung pada Anda!",
                 "pl": "To, czy pomysł zostanie zaakceptowany, czy nie, zależy od Ciebie!",
-                "ru": "Будет ли идея одобрена или нет, зависит только от вас!",
+                "ru": "Одобрится идея или нет, зависит от вас!",
                 "tr": "Fikrin onaylanıp onaylanmaması size bağlıdır!"
             },
             "idea": {
@@ -766,13 +821,14 @@
                 "fr": "Idée:",
                 "id": "Ide:",
                 "pl": "Pomysł:",
+                "ru": "Идея:",
                 "tr": "Fikir:"
             },
             "thread-name": {
                 "da": "Diskussion af ideen fra {name}",
                 "de": "Diskussion der Idee von {name}",
                 "en": "Discussion of the idea from {name}",
-                "es": "Discusión de la idea de {name}",
+                "es": "Discusión de la idea de {nombre}",
                 "fr": "Discussion de l'idée de {name}",
                 "id": "Diskusi ide dari {name}",
                 "pl": "Dyskusja na temat pomysłu od {name}",
@@ -780,16 +836,18 @@
                 "tr": "{name}'ın fikrinin tartışılması"
             }
         },
-        "idea-view.timeout-message": {
-            "da": "Du kan kun foreslå en idé én gang hvert 30. minut\nNæste mulighed for at indsende en idé vil være gennem:",
-            "de": "Sie können nur alle 30 Minuten eine Idee vorschlagen\nDie nächste Möglichkeit, eine Idee einzureichen, besteht über:",
-            "en": "You can only propose an idea once every 30 minutes\nThe next opportunity to submit an idea will be through: <t:{time}:R>",
-            "es": "Sólo puedes proponer una idea una vez cada 30 minutos.\nLa próxima oportunidad para enviar una idea será a través de:",
-            "fr": "Vous ne pouvez proposer une idée qu'une fois toutes les 30 minutes\nLa prochaine opportunité de soumettre une idée sera :",
-            "id": "Anda hanya dapat mengajukan ide setiap 30 menit sekali\nKesempatan selanjutnya untuk menyampaikan ide adalah melalui:",
-            "pl": "Pomysł można zaproponować tylko raz na 30 minut\nNastępną okazją do zgłoszenia pomysłu będzie:",
-            "ru": "Вы можете предлагать идею только раз в 30 минут\nСледующая возможность представить идею будет через: ",
-            "tr": "Bir fikri yalnızca 30 dakikada bir önerebilirsiniz\nBir fikir göndermek için bir sonraki fırsat şu şekilde olacaktır:"
+        "idea-view": {
+            "timeout-message": {
+                "da": "Du kan kun foreslå en idé én gang hvert 30. minut\nNæste mulighed for at indsende en idé vil være gennem: <t:{time}:R>",
+                "de": "Sie können nur alle 30 Minuten eine Idee vorschlagen\nDie nächste Möglichkeit, eine Idee einzureichen, besteht über: <t:{time}:R>",
+                "en": "You can only propose an idea once every 30 minutes\nThe next opportunity to submit an idea will be through: <t:{time}:R>",
+                "es": "Sólo puedes proponer una idea una vez cada 30 minutos.\nLa próxima oportunidad para enviar una idea será a través de: <t:{time}:R>",
+                "fr": "Vous ne pouvez proposer une idée qu'une fois toutes les 30 minutes\nLa prochaine opportunité de soumettre une idée sera : <t:{time}:R>",
+                "id": "Anda hanya dapat mengajukan ide setiap 30 menit sekali\nKesempatan penyampaian ide selanjutnya adalah melalui: <t:{time}:R>",
+                "pl": "Pomysł można zaproponować tylko raz na 30 minut\nNastępną okazją do przesłania pomysłu będzie: <t:{time}:R>",
+                "ru": "Предлагать идею можно только раз в 30 минут.\nСледующая возможность подать идею будет через: <t:{time}:R>",
+                "tr": "Yalnızca 30 dakikada bir fikir önerebilirsiniz\nFikir göndermek için bir sonraki fırsat şu şekilde olacaktır: <t:{time}:R>"
+            }
         }
     },
     "settings": {
@@ -1386,15 +1444,28 @@
                 }
             },
             "addptional": {
-                "button.install_mes": {
-                    "da": "Installationsmeddelelse",
-                    "de": "Nachricht installieren",
-                    "es": "Instalar mensaje",
-                    "fr": "Message d'installation",
-                    "id": "Instal pesan",
-                    "pl": "Zainstaluj wiadomość",
-                    "ru": "Установить сообщение",
-                    "tr": "Mesajı yükle"
+                "button": {
+                    "install_mes": {
+                        "da": "Installationsmeddelelse",
+                        "de": "Nachricht installieren",
+                        "es": "Instalar mensaje",
+                        "fr": "Message d'installation",
+                        "id": "Instal pesan",
+                        "pl": "Zainstaluj wiadomość",
+                        "ru": "Установить сообщение",
+                        "tr": "Mesajı yükle"
+                    },
+                    "install-mes": {
+                        "da": "Installationsmeddelelse",
+                        "de": "Nachricht installieren",
+                        "en": "Install message",
+                        "es": "Instalar mensaje",
+                        "fr": "Message d'installation",
+                        "id": "Instal pesan",
+                        "pl": "Zainstaluj wiadomość",
+                        "ru": "Установить сообщение",
+                        "tr": "Mesajı yükle"
+                    }
                 },
                 "channel-error": {
                     "da": "Automatiske beskeder er allerede blevet installeret på denne kanal",
@@ -1417,9 +1488,6 @@
                     "pl": "Wybierz kanał dla automatycznych wiadomości",
                     "ru": "Выберете канал для авто-сообщений",
                     "tr": "Otomatik mesajlar için bir kanal seçin"
-                },
-                "button.install-mes": {
-                    "en": "Install message"
                 }
             },
             "thread": {
@@ -1659,12 +1727,26 @@
             },
             "button": {
                 "delete": {
+                    "da": "Slet reaktion",
+                    "de": "Reaktion löschen",
                     "en": "Delete reaction",
-                    "ru": "Удалить реакцию"
+                    "es": "Eliminar reacción",
+                    "fr": "Supprimer la réaction",
+                    "id": "Hapus reaksi",
+                    "pl": "Usuń reakcję",
+                    "ru": "Удалить реакцию",
+                    "tr": "Tepkiyi sil"
                 },
                 "edit": {
+                    "da": "Rediger reaktion",
+                    "de": "Reaktion bearbeiten",
                     "en": "Edit reaction",
-                    "ru": "Редактировать реакцию"
+                    "es": "Editar reacción",
+                    "fr": "Modifier la réaction",
+                    "id": "Sunting reaksi",
+                    "pl": "Edytuj reakcję",
+                    "ru": "Изменить реакцию",
+                    "tr": "Tepkiyi düzenle"
                 }
             }
         },

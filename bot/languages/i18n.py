@@ -162,13 +162,13 @@ if __name__ == "__main__":
     #         continue
     #     print(lang)
     #     trd = translate_dict(
-    #         "en", lang, resource_dict['en']["settings"]['music'])
+    #         "en", lang, resource_dict['en']["ideas"])
     #     print(trd)
-    #     parser(trd, lang, "settings.music", loadable=False)
+    #     parser(trd, lang, "ideas", loadable=False)
 
     # Translate to default languages
     # data = translation_with_languages(
-    #     "en", "Issues a sheet with all temporary bans that were issued by the bot", default_languages)
+    #     "en", "Delete reaction", default_languages)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
@@ -182,21 +182,6 @@ if __name__ == "__main__":
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    # to_i18n_translation(
-    #     {
-    #         "failed": {
-    #             "da": "Rollen {role} kan ikke tildeles og bruges til integration eller af en bot.",
-    #             "de": "Die Rolle {role} kann nicht zugewiesen werden und wird zur Integration oder von einem Bot verwendet.",
-    #             "en": "The {role} role cannot be assigned and is used for integration or by a bot.",
-    #             "es": "El rol {role} no se puede asignar y se usa para la integración o por un bot.",
-    #             "fr": "Le rôle {role} ne peut pas être attribué et est utilisé pour l'intégration ou par un bot.",
-    #             "id": "Peran {role} tidak dapat ditetapkan dan digunakan untuk integrasi atau dengan bot.",
-    #             "pl": "Rola {role} nie można przypisać i służy do integracji lub przez bot.",
-    #             "ru": "Роль {role} не может быть назначена, потому что используется для интеграции или бота.",
-    #             "tr": "{role} rolü atanamaz ve entegrasyon veya bir bot tarafından kullanılır.",
-    #         }
-    #     }
-    # )
-    # print(resource_dict)
+    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
     to_folder("./bot/languages/localization")
