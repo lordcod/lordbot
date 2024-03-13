@@ -7,10 +7,11 @@ from nextcord.ext import commands
 from bot.misc.utils import LordTimerHandler
 from bot.languages import i18n
 from bot.databases import GuildDateBases
-from typing import Coroutine, List, Optional
+from typing import Coroutine, List, Optional, Dict
 
 
 class LordBot(commands.Bot):
+    invites_data: Dict[int, List[nextcord.Invite]] = {}
     timeouts = {}
     guild_timer_handlers = {}
 
