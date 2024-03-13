@@ -61,10 +61,6 @@ class LordBot(commands.Bot):
 
         setattr(self, name, coro)
 
-    def dispatch(self, event_name: asyncio.Any, *args: asyncio.Any, **kwargs: asyncio.Any) -> None:
-        print(event_name, args, kwargs)
-        return super().dispatch(event_name, *args, **kwargs)
-
     def __init__(self) -> None:
         shard_id, shard_count = map(int, input("Shared info: ").split("/"))
         super().__init__(
