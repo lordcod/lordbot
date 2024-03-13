@@ -1,4 +1,3 @@
-from typing import Optional
 import nextcord
 from nextcord.ext import commands
 
@@ -7,6 +6,7 @@ from bot.misc.logger import Logger
 from bot.databases import GuildDateBases
 
 import functools
+from typing import Dict, List, Optional
 
 from bot.misc.lordbot import LordBot
 
@@ -31,8 +31,9 @@ class members_event(commands.Cog):
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
 
-        await self.auto_roles(member, gdb)
-        await self.auto_message(member, gdb)
+        self.bot.loop.create_task(self.auto_roles(member, gdb))
+        self.bot.loop.create_task(self.auto_message(member, gdb))
+        self.bot.loop.create_task(self.process_invites(member, gdb))
 
     @on_error
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
@@ -72,6 +73,43 @@ class members_event(commands.Cog):
             message_data["file"] = file
 
         await channel.send(**message_data)
+
+    async def process_invites(self, member: nextcord.Member, gdb: GuildDateBases) -> nextcord.Invite | None:
+        old_invites = self.bot.invites_data.get(member.guild.id, [])
+        new_invites = await member.guild.invites()
+        self.bot.invites_data[member.guild.id] = new_invites
+
+        invite = None
+
+        for oinv in old_invites:
+            for ninv in new_invites:
+                if ninv.uses >= oinv.uses:
+                    invite = ninv
+                    break
+
+        if invite is None:
+            return
+
+        invites = gdb.get('invites', [])
+        invites.append((member.id, invite.inviter.id, invite.code))
+        gdb.set('invites', invites)
+
+    @commands.command()
+    async def getinvite(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
+        gdb = GuildDateBases(ctx.guild.id)
+        invites = gdb.get('invites', [])
+
+        if member is None:
+            await ctx.send(invites)
+            return
+
+        meminvites = []
+
+        for inv in invites:
+            if inv[1] == member.id:
+                meminvites.append(inv)
+
+        await ctx.send(meminvites)
 
 
 def setup(bot):

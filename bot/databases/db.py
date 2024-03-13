@@ -27,6 +27,7 @@ class GuildsDB(Table):
                               default=info.DEFAULT_ECONOMY_SETTINGS)
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
+    invites = Colum(data_type=PostType.JSON, default="{}")
     tickettool = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")

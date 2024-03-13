@@ -6,7 +6,6 @@ from bot.misc.lordbot import LordBot
 from bot.views.ideas import (ConfirmView, IdeaView)
 
 import time
-import asyncio
 
 
 class ready_event(commands.Cog):
