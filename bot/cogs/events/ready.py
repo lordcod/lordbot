@@ -1,3 +1,4 @@
+import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
@@ -22,7 +23,13 @@ class ready_event(commands.Cog):
         self.bot.add_view(ConfirmView())
         self.bot.add_view(IdeaView())
 
+        await self.bot.change_presence(activity=nextcord.Game(name=f"shard | {self.bot.shard_id} / {self.bot.shard_count}"))
+
         Logger.success(f"The bot is registered as {self.bot.user}")
+
+    @commands.Cog.listener()
+    async def on_shard_connect(self, shard_int: int):
+        print("Conneted shard {}".format(shard_int))
 
     @commands.Cog.listener()
     async def on_disconnect(self):
