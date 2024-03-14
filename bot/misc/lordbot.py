@@ -7,12 +7,13 @@ from nextcord.ext import commands
 from bot.misc.utils import LordTimerHandler
 from bot.languages import i18n
 from bot.databases import GuildDateBases
-from typing import Coroutine, List, Optional, Dict
+from typing import Coroutine, List, Optional, Dict, Any
 
 from bot.resources.info import DEFAULT_PREFIX
 
 
-class LordBot(commands.Bot):
+class LordBot(commands.AutoShardedBot):
+    ya_requests: Any = None
     invites_data: Dict[int, List[nextcord.Invite]] = {}
     timeouts = {}
     guild_timer_handlers = {}
@@ -23,7 +24,6 @@ class LordBot(commands.Bot):
         msg: nextcord.Message
     ) -> List[str]:
         "Returns a list of prefixes that can be used when using bot commands"
-        print(f"{msg.author.display_name} sended message!")
         if msg.guild is None:
             return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
         gdb = GuildDateBases(msg.guild.id)
@@ -62,12 +62,15 @@ class LordBot(commands.Bot):
         setattr(self, name, coro)
 
     def __init__(self) -> None:
-        shard_id, shard_count = map(int, input("Shared info: ").split("/"))
+        shard_ids, shard_count = input("Shared info: ").split("/")
+        shard_count = int(shard_count)
+        shard_ids = list(map(int, shard_ids.split(",")))
+
         super().__init__(
             command_prefix=self.get_command_prefixs,
             intents=nextcord.Intents.all(),
             help_command=None,
-            shard_id=shard_id,
+            shard_ids=shard_ids,
             shard_count=shard_count
         )
         i18n.from_folder("./bot/languages/localization")
