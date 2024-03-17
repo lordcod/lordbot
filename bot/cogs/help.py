@@ -30,7 +30,7 @@ def get_using(
     locale: str,
     command: help_info.CommandOption
 ) -> str:
-    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(command.get('arguments')) if command.get('arguments') else ''}")
+    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join([arg.get(locale) for arg in command.get('arguments')]) if command.get('arguments') else ''}")
 
 
 class help(commands.Cog):

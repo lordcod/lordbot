@@ -4,6 +4,7 @@ import re
 import nextcord
 from nextcord.ext import commands
 from yandex_music_api import Client as YaClient
+from yandex_music_api.coonector import Requsts as YaRequsts
 from bot.misc.lordbot import LordBot
 
 from bot.views.selector_music import MusicView
@@ -35,6 +36,10 @@ YANDEX_MUSIC_SEARCH = re.compile(
 class Voice(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+        requests = YaRequsts(bot.session)
+        self.yandex_client = YaClient(environ.get(
+            'yandex_api_token'), requests=requests)
+        self.bot.ya_requests = requests
 
     @commands.command()
     async def join(self, ctx: commands.Context):
@@ -56,7 +61,6 @@ class Voice(commands.Cog):
     @commands.command()
     async def play(self, ctx: commands.Context, *, request: str):
         voice = ctx.guild.voice_client
-        yandex_client = YaClient(environ.get('yandex_api_token'))
 
         if voice is None:
             if not (ctx.author.voice):
@@ -72,10 +76,10 @@ class Voice(commands.Cog):
 
         if finder := YANDEX_MUSIC_SEARCH.fullmatch(request):
             found = finder.group(2)
-            tracks = await yandex_client.get_list(found, 'track')
+            tracks = await self.yandex_client.get_list(found, 'track')
             track = tracks[0]
         else:
-            tracks = await yandex_client.search(request)
+            tracks = await self.yandex_client.search(request)
             view = MusicView(ctx.guild.id, queue, MusicPlayer(
                 voice, mes, ctx.guild.id), tracks)
 
