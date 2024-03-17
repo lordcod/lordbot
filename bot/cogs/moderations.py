@@ -3,6 +3,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc import utils
+from bot.misc.utils import TimeCalculator
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.views.settings_menu import SettingsView
@@ -11,7 +12,6 @@ from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
 import io
 import time
-import asyncio
 from typing import Optional
 
 
@@ -53,7 +53,7 @@ class moderations(commands.Cog):
         self,
         ctx: commands.Context,
         member: nextcord.Member,
-        ftime: Optional[utils.calculate_time] = None,
+        ftime: Optional[TimeCalculator] = None,
         *,
         reason: Optional[str] = None
     ):
@@ -124,7 +124,7 @@ class moderations(commands.Cog):
         ctx: commands.Context,
         member: nextcord.Member,
         role: nextcord.Role,
-        ftime: utils.calculate_time
+        ftime: TimeCalculator
     ):
         gdb = GuildDateBases(ctx.guild.id)
         rsdb = RoleDateBases(ctx.guild.id, member.id)
