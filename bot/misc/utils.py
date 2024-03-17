@@ -1,8 +1,13 @@
+from __future__ import annotations
 import asyncio
 from collections import namedtuple
+import time
+from typing import Any, TypeVar
 import emoji
 
 import nextcord
+from nextcord.ext import commands
+
 
 import inspect
 import regex
@@ -22,6 +27,7 @@ from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
 
 
+T = TypeVar('T')
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
@@ -222,6 +228,89 @@ def calculate_time(string: str) -> int:
         ftime += number*multiplier
 
     return ftime
+
+
+class TimeCalculator:
+    def __init__(
+        self,
+        default_coefficient: int = 60,
+        refundable: T = int,
+        coefficients: Optional[dict] = None,
+        operatable_time: bool = False
+    ) -> None:
+        self.default_coefficient = default_coefficient
+        self.refundable = refundable
+        self.operatable_time = operatable_time
+
+        if coefficients is None:
+            self.coefficients = {
+                's': 1,
+                'm': 60,
+                'h': 3600,
+                'd': 86400
+            }
+        else:
+            self.coefficients = coefficients
+
+    def convert(self, *args) -> T:
+        try:
+            return self.basic_convert(*args)
+        except Exception:
+            pass
+
+        try:
+            return self.async_convert(*args)
+        except Exception:
+            pass
+
+        raise TypeError
+
+    @staticmethod
+    def get_numeric(argument: str) -> Optional[Union[int, float]]:
+        try:
+            return int(argument)
+        except ValueError:
+            pass
+        try:
+            return float(argument)
+        except ValueError:
+            pass
+        return None
+
+    def basic_convert(
+        self,
+        argument: Any
+    ) -> T:
+        if not isinstance(argument, str):
+            raise TypeError
+
+        if numeric := self.get_numeric(argument):
+            ftime = numeric*self.default_coefficient
+            if self.operatable_time:
+                ftime += time.time()
+            return self.refundable(ftime)
+
+        timedate = regex.findall(r'(\d+)([a-zA-Z]+)', argument)
+        ftime = 0
+
+        for number, word in timedate:
+            if word not in self.coefficients:
+                raise TypeError('Format time is not valid!')
+
+            multiplier = self.coefficients[word]
+            ftime += int(number)*multiplier
+
+        if self.operatable_time:
+            ftime += time.time()
+
+        return self.refundable(ftime)
+
+    async def async_convert(
+        self,
+        ctx: commands.Context,
+        argument: Any
+    ) -> T:
+        return self.basic_convert(argument)
 
 
 @lru_cache()
