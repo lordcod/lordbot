@@ -175,14 +175,23 @@ class LordTimerHandler:
         th = self.data.get(key)
         if th is None:
             return
-        coro: Coroutine = th._args[0]
-        coro.close()
+        arg = th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
         th.cancel()
 
-    def close_as_th(th: TimerHandle):
-        coro: Coroutine = th._args[0]
-        coro.close()
+    def close_as_th(self, th: TimerHandle):
+        arg = th._args and th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
         th.cancel()
+
+    def call_as_key(self, key: Union[str, int]):
+        th = self.data.get(key)
+        if th is None:
+            return
+        th._run()
+        self.close_as_th(th)
 
 
 def clamp(val: Union[int, float],
@@ -206,28 +215,6 @@ async def getRandomQuote(lang: str = 'en'):
         async with session.post(url) as responce:
             json = await responce.json()
             return json
-
-
-def calculate_time(string: str) -> int:
-    coefficients = {
-        's': 1,
-        'm': 60,
-        'h': 3600,
-        'd': 86400
-    }
-    timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
-    ftime = 0
-
-    for number, word in timedate:
-        if word not in coefficients:
-            raise TypeError('Format time is not valid!')
-
-        number = int(number)
-        multiplier = coefficients[word]
-
-        ftime += number*multiplier
-
-    return ftime
 
 
 class TimeCalculator:

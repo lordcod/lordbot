@@ -1,4 +1,5 @@
 
+import time
 import nextcord
 from nextcord.ext import commands, application_checks
 from nextcord.utils import oauth_url
@@ -62,18 +63,20 @@ class basic(commands.Cog):
         prize: str,
         description: str,
         quantity: int,
-        date_end: TimeCalculator(operatable_time=True)
+        date_end: TimeCalculator
     ):
-        await Giveaway.create(
+        giveaway = await Giveaway.create(
             ctx.guild,
             ctx.channel,
             sponser,
             prize,
             description,
             quantity,
-            date_end,
+            date_end+time.time(),
             []
         )
+        self.bot.lord_handler_timer.create_timer_handler(
+            date_end, giveaway.complete(), f'giveaway:{giveaway.message_id}')
 
     @commands.command()
     async def invite(self, ctx: commands.Context):

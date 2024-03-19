@@ -1,19 +1,11 @@
+import asyncio
 import nextcord
+import random
 from typing import List
 from bot.databases import localdb
 from bot.views import giveaway as views_giveaway
 
 GIVEAWAY_DB = localdb.get_table('giveaway')
-
-
-data = {
-    "guild_id": 1179069504186232852,
-    "sponser_id": 636824998123798531,
-    "prize": "LordCord Pro",
-    "quantity": 1,
-    "date_end": 1710606949,
-    "types": []
-}
 
 
 class GiveawayTypesChecker:
@@ -86,6 +78,7 @@ class Giveaway:
             "date_end": date_end,
             "types": types,
             "entries_ids": [],
+            "completed": False,
             "winners": None
         }
 
@@ -97,15 +90,39 @@ class Giveaway:
 
         return cls(guild, message.id)
 
+    async def complete(self) -> None:
+        self.update_giveaway_data()
+
+        winner_ids = random.choices(
+            self.giveaway_data['entries_ids'], k=self.giveaway_data['quantity'])
+        winners = map(self.guild.get_member,
+                      winner_ids)
+
+        self.giveaway_data['winners'] = winner_ids
+        self.giveaway_data['completed'] = True
+        GIVEAWAY_DB[self.message_id] = self.giveaway_data
+
+        channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
+
+        asyncio.create_task(self.update_message())
+        asyncio.create_task(channel.send(
+            f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the LordCord Premium!"))
+
+    def update_giveaway_data(self) -> None:
+        self.giveaway_data = GIVEAWAY_DB[self.message_id]
+
     async def update_message(self) -> None:
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
         message = channel.get_partial_message(self.message_id)
-        embed = self.get_embed(self.giveaway_data)
+        embed = self.get_completed_embed() if self.giveaway_data.get(
+            'completed') else self.get_embed(self.giveaway_data)
+        view = None if self.giveaway_data.get(
+            'completed') else views_giveaway.GiveawayView()
 
-        await message.edit(embed=embed, view=views_giveaway.GiveawayView())
+        await message.edit(embed=embed, view=view)
 
     @staticmethod
-    def get_embed(giveaway_data: dict) -> nextcord.Embed:
+    def get_embed(giveaway_data) -> nextcord.Embed:
         embed = nextcord.Embed(
             title=giveaway_data.get("prize"),
             description=giveaway_data.get("description")
@@ -118,6 +135,27 @@ class Giveaway:
                 f"Sponsored by <@{giveaway_data.get('sponser_id')}>\n"
                 f"Entries: **{len(giveaway_data.get('entries_ids'))}**\n"
                 f"Winners: **{giveaway_data.get('quantity')}**"
+            )
+        )
+
+        return embed
+
+    def get_completed_embed(self) -> nextcord.Embed:
+        winners = map(self.guild.get_member,
+                      self.giveaway_data.get('winners'))
+
+        embed = nextcord.Embed(
+            title=self.giveaway_data.get("prize"),
+            description=self.giveaway_data.get("description")
+        )
+
+        embed.add_field(
+            name='',
+            value=(
+                f"Ends: <t:{self.giveaway_data.get('date_end') :.0f}:f> (<t:{self.giveaway_data.get('date_end') :.0f}:R>)\n"
+                f"Sponsored by <@{self.giveaway_data.get('sponser_id')}>\n"
+                f"Entries: **{len(self.giveaway_data.get('entries_ids'))}**\n"
+                f"Winners: **{', '.join([wu.mention for wu in winners])}**"
             )
         )
 
