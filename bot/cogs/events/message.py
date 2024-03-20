@@ -8,11 +8,8 @@ from bot.misc.lordbot import LordBot
 from bot.languages import i18n
 
 import googletrans
-import random
 
 translator = googletrans.Translator()
-EXP_STATE_DB = localdb.get_table('exps')
-
 EXP_STATE_DB = localdb.get_table('exps')
 
 

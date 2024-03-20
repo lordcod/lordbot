@@ -38,6 +38,14 @@ class voice_state_event(commands.Cog):
 
         VOICE_STATE_DB[member.id] = total_voice_time+voice_time
 
+        await self.give_exp(member, voice_time)
+
+    async def give_exp(self, member: nextcord.Member, voice_time: float) -> None:
+        print(
+            f"Give {voice_time * EXP_STATE_DB.get(member.id, 0) * 0.5} exp")
+        EXP_STATE_DB[member.id] = voice_time * \
+            EXP_STATE_DB.get(member.id, 0) * 0.5
+
 
 def setup(bot):
     bot.add_cog(voice_state_event(bot))
