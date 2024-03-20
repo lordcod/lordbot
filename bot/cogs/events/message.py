@@ -62,22 +62,24 @@ class message_event(commands.Cog):
             asyncio.create_task(message.channel.send(embed=embed))
 
     async def give_score(self, message: nextcord.Message) -> None:
+        if message.author.bot:
+            return
         lmu = LAST_MESSAGES_USER.get(
             f"{message.guild.id}:{message.channel.id}")
         LAST_MESSAGES_USER[f"{message.guild.id}:{message.channel.id}"] = message.author.id
         if lmu == message.author.id and SCORE_DELAYS.get(message.author.id, 0) > time.time():
             return
 
-        multiplier = 0.1
+        multiplier = 1
         user_level = 1
 
         SCORE_STATE_DB.setdefault(message.author.id, 0)
         SCORE_STATE_DB[message.author.id] += random.randint(
-            5, 15) * multiplier / user_level
+            5, 10) * multiplier / user_level
         SCORE_DELAYS[message.author.id] = time.time() + 10
 
         print(
-            f"Current score is {SCORE_STATE_DB[message.author.id]}")
+            f"{message.author.display_name} M Current score is {SCORE_STATE_DB[message.author.id]}")
 
 
 def setup(bot):

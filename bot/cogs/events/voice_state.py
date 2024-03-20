@@ -41,14 +41,14 @@ class voice_state_event(commands.Cog):
         await self.give_score(member, voice_time)
 
     async def give_score(self, member: nextcord.Member, voice_time: float) -> None:
-        multiplier = 0.1
+        multiplier = 1
         user_level = 1
 
         SCORE_STATE_DB.setdefault(member.id, 0)
         SCORE_STATE_DB[member.id] += voice_time * 0.5 * multiplier / user_level
 
         print(
-            f"Current exp is {SCORE_STATE_DB[member.id]}")
+            f"{member.display_name} TV Current score is {SCORE_STATE_DB[member.id]}")
 
 
 def setup(bot):
