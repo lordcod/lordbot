@@ -1,9 +1,23 @@
+from typing import TypeVar, overload
+
+T = TypeVar("T")
+
 data = {}
 
 
-def get_table(table_name):
+@overload
+def get_table(table_name, default: T) -> T:
+    ...
+
+
+@overload
+def get_table(table_name) -> dict:
+    ...
+
+
+def get_table(table_name, default: T = None) -> T:
     if table_name not in data:
-        data[table_name] = {}
+        data[table_name] = {} if default is None else default
     return data[table_name]
 
 
