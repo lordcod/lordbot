@@ -8,8 +8,10 @@ from bot.misc.lordbot import LordBot
 from bot.languages import i18n
 
 import googletrans
+import random
 
 translator = googletrans.Translator()
+EXP_STATE_DB = localdb.get_table('exps')
 
 EXP_STATE_DB = localdb.get_table('exps')
 
@@ -54,6 +56,9 @@ class message_event(commands.Cog):
             )
 
             asyncio.create_task(message.channel.send(embed=embed))
+
+        EXP_STATE_DB[message.author.id] = EXP_STATE_DB.get(
+            message.author.id, 0) + random.randint(5, 15) * 0.1
 
 
 def setup(bot):
