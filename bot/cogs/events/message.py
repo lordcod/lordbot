@@ -1,13 +1,17 @@
+import asyncio
+import random
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import GuildDateBases
+from bot.databases import GuildDateBases, localdb
 from bot.misc.lordbot import LordBot
 from bot.languages import i18n
 
 import googletrans
 
 translator = googletrans.Translator()
+
+EXP_STATE_DB = localdb.get_table('exps')
 
 
 class message_event(commands.Cog):
@@ -33,7 +37,7 @@ class message_event(commands.Cog):
         if data_reactions:
             for reat in data_reactions:
                 try:
-                    await message.add_reaction(reat)
+                    asyncio.create_task(message.add_reaction(reat))
                 except nextcord.HTTPException:
                     break
 
@@ -49,7 +53,7 @@ class message_event(commands.Cog):
                 value=i18n.t(locale, 'bot-info.prefix-server', prefix=prefix)
             )
 
-            await message.channel.send(embed=embed)
+            asyncio.create_task(message.channel.send(embed=embed))
 
 
 def setup(bot):
