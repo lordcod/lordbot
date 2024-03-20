@@ -1,4 +1,4 @@
-from typing import TypeVar, overload
+from typing import Any, TypeVar, overload
 
 T = TypeVar("T")
 
@@ -15,7 +15,7 @@ def get_table(table_name) -> dict:
     ...
 
 
-def get_table(table_name, default: T = None) -> T:
+def get_table(table_name, default: Any = None) -> Any:
     if table_name not in data:
         data[table_name] = {} if default is None else default
     return data[table_name]

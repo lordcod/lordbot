@@ -1,5 +1,6 @@
 import asyncio
 import random
+import time
 import nextcord
 from nextcord.ext import commands
 
@@ -10,7 +11,10 @@ from bot.languages import i18n
 import googletrans
 
 translator = googletrans.Translator()
-EXP_STATE_DB = localdb.get_table('exps')
+
+SCORE_STATE_DB = localdb.get_table('score')
+SCORE_DELAYS = {}
+LAST_MESSAGES_USER = {}
 
 
 class message_event(commands.Cog):
@@ -22,23 +26,26 @@ class message_event(commands.Cog):
     async def on_message(self, message: nextcord.Message):
         if message.guild is None:
             return
+        asyncio.create_task(self.add_reactions(message))
+        asyncio.create_task(self.process_mention(message))
+        asyncio.create_task(self.give_score(message))
 
+    async def add_reactions(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
 
-        color = gdb.get('color')
-        locale = gdb.get('language')
-        prefix = gdb.get('prefix')
-
-        reactions: dict = gdb.get('reactions')
-
-        data_reactions = reactions.get(message.channel.id)
-
-        if data_reactions:
+        if (reactions := gdb.get('reactions')) and (data_reactions := reactions.get(message.channel.id)):
             for reat in data_reactions:
                 try:
                     asyncio.create_task(message.add_reaction(reat))
                 except nextcord.HTTPException:
                     break
+
+    async def process_mention(self, message: nextcord.Message) -> None:
+        gdb = GuildDateBases(message.guild.id)
+
+        color = gdb.get('color')
+        locale = gdb.get('language')
+        prefix = gdb.get('prefix')
 
         if message.content.strip() == self.bot.user.mention:
             embed = nextcord.Embed(
@@ -54,8 +61,23 @@ class message_event(commands.Cog):
 
             asyncio.create_task(message.channel.send(embed=embed))
 
-        EXP_STATE_DB[message.author.id] = EXP_STATE_DB.get(
-            message.author.id, 0) + random.randint(5, 15) * 0.1
+    async def give_score(self, message: nextcord.Message) -> None:
+        lmu = LAST_MESSAGES_USER.get(
+            f"{message.guild.id}:{message.channel.id}")
+        LAST_MESSAGES_USER[f"{message.guild.id}:{message.channel.id}"] = message.author.id
+        if lmu == message.author.id and SCORE_DELAYS.get(message.author.id, 0) > time.time():
+            return
+
+        multiplier = 0.1
+        user_level = 1
+
+        SCORE_STATE_DB.setdefault(message.author.id, 0)
+        SCORE_STATE_DB[message.author.id] += random.randint(
+            5, 15) * multiplier / user_level
+        SCORE_DELAYS[message.author.id] = time.time() + 10
+
+        print(
+            f"Current score is {SCORE_STATE_DB[message.author.id]}")
 
 
 def setup(bot):

@@ -8,7 +8,7 @@ from bot.misc.lordbot import LordBot
 
 
 VOICE_STATE_DB = localdb.get_table('voice_state')
-EXP_STATE_DB = localdb.get_table('exps')
+SCORE_STATE_DB = localdb.get_table('score')
 TEMP_VOICE_STATE_DB = {}
 
 
@@ -38,13 +38,17 @@ class voice_state_event(commands.Cog):
 
         VOICE_STATE_DB[member.id] = total_voice_time+voice_time
 
-        await self.give_exp(member, voice_time)
+        await self.give_score(member, voice_time)
 
-    async def give_exp(self, member: nextcord.Member, voice_time: float) -> None:
+    async def give_score(self, member: nextcord.Member, voice_time: float) -> None:
+        multiplier = 0.1
+        user_level = 1
+
+        SCORE_STATE_DB.setdefault(member.id, 0)
+        SCORE_STATE_DB[member.id] += voice_time * 0.5 * multiplier / user_level
+
         print(
-            f"Give {voice_time * EXP_STATE_DB.get(member.id, 0) * 0.5} exp")
-        EXP_STATE_DB[member.id] = voice_time * \
-            EXP_STATE_DB.get(member.id, 0) * 0.5
+            f"Current exp is {SCORE_STATE_DB[member.id]}")
 
 
 def setup(bot):
