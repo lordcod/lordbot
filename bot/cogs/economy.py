@@ -14,7 +14,7 @@ from typing import Optional, Union, Literal
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
 
 
-class economy(commands.Cog):
+class Economy(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
@@ -278,7 +278,7 @@ class economy(commands.Cog):
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
+            await ctx.send(f"The maximum amount for this server - {1_000_000 :,}{currency_emoji}")
             return
         if 0 >= sum:
             await ctx.send("The amount must be positive")
@@ -300,7 +300,7 @@ class economy(commands.Cog):
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
+            await ctx.send(f"The maximum amount for this server - {1_000_000 :,}{currency_emoji}")
             return
         if 0 >= sum:
             await ctx.send("The amount must be positive")
@@ -316,4 +316,4 @@ class economy(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(economy(bot))
+    bot.add_cog(Economy(bot))

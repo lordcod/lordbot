@@ -4,7 +4,7 @@ from nextcord.ext import commands
 from bot.misc.lordbot import LordBot
 
 
-class interactions_event(commands.Cog):
+class InteractionsEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         bot.add_event(self.on_interaction)
@@ -15,4 +15,4 @@ class interactions_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(interactions_event(bot))
+    bot.add_cog(InteractionsEvent(bot))

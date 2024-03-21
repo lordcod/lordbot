@@ -7,7 +7,7 @@ from bot.resources import check
 import os
 
 
-class teams(commands.Cog):
+class Teams(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
@@ -67,4 +67,4 @@ class teams(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(teams(bot))
+    bot.add_cog(Teams(bot))

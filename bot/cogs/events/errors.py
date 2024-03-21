@@ -103,7 +103,7 @@ class PermissionChecker:
     }
 
 
-class command_event(commands.Cog):
+class CommandEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -138,4 +138,4 @@ class command_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(command_event(bot))
+    bot.add_cog(CommandEvent(bot))

@@ -13,9 +13,11 @@ import io
 import time
 import asyncio
 from typing import Optional
+time_now = None
+time_stamp = None
 
 
-class moderations(commands.Cog):
+class Moderations(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
@@ -316,4 +318,4 @@ class moderations(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(moderations(bot))
+    bot.add_cog(Moderations(bot))

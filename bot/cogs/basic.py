@@ -24,7 +24,7 @@ translator = googletrans.Translator()
 EMOJI_REGEXP = re.compile(r"<(a?):([a-zA-Z_-]+):(\d{19})>")
 
 
-class basic(commands.Cog):
+class Basic(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
@@ -177,4 +177,4 @@ class basic(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(basic(bot))
+    bot.add_cog(Basic(bot))
