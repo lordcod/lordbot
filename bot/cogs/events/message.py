@@ -2,6 +2,7 @@ import asyncio
 import random
 import time
 import nextcord
+import math
 from nextcord.ext import commands
 
 from bot.databases import GuildDateBases, localdb
@@ -75,7 +76,7 @@ class message_event(commands.Cog):
 
         SCORE_STATE_DB.setdefault(message.author.id, 0)
         SCORE_STATE_DB[message.author.id] += random.randint(
-            5, 10) * multiplier / user_level
+            0, 10) * multiplier / math.sqrt(user_level)
         SCORE_DELAYS[message.author.id] = time.time() + 10
 
         print(

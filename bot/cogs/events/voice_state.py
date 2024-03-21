@@ -1,5 +1,6 @@
 
 import time
+import math
 import nextcord
 from nextcord.ext import commands
 
@@ -45,7 +46,8 @@ class voice_state_event(commands.Cog):
         user_level = 1
 
         SCORE_STATE_DB.setdefault(member.id, 0)
-        SCORE_STATE_DB[member.id] += voice_time * 0.5 * multiplier / user_level
+        SCORE_STATE_DB[member.id] += voice_time * \
+            0.5 * multiplier / math.sqrt(user_level)
 
         print(
             f"{member.display_name} TV Current score is {SCORE_STATE_DB[member.id]}")
