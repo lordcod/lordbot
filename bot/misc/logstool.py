@@ -1,0 +1,43 @@
+
+import datetime
+from typing import Optional
+import nextcord
+
+
+class Logs:
+    def __init__(self, guild: nextcord.Guild) -> None:
+        self.guild = guild
+        self.logs_data = []
+
+    async def delete_message(self, message: nextcord.Message) -> None: ...
+
+    async def edit_message(self, message: nextcord.Message) -> None: ...
+
+    async def add_role(self, role: nextcord.Role) -> None: ...
+
+    async def remove_role(self, role: nextcord.Role) -> None: ...
+
+    async def change_role(self, *args) -> None: ...
+
+    async def delete_role(self, role: nextcord.Role) -> None: ...
+
+    async def add_channel(
+        self, channel: nextcord.abc.GuildChannel) -> None: ...
+
+    async def change_channel(
+        self, channel: nextcord.abc.GuildChannel) -> None: ...
+
+    async def delete_channel(
+        self, channel: nextcord.abc.GuildChannel) -> None: ...
+
+    async def timeout(
+        self, member: nextcord.Member, time_new: datetime.datetime, reason: Optional[str]) -> None: ...
+
+    async def kick(self, user: nextcord.User,
+                   reason: Optional[str]) -> None: ...
+
+    async def ban(self, user: nextcord.User,
+                  time_new: Optional[datetime.datetime], reason: Optional[str]) -> None: ...
+
+    async def change_bot_settings(
+        self, user: nextcord.User, *args) -> None: ...
