@@ -30,7 +30,7 @@ class DropDown(nextcord.ui.Select):
             ),
             nextcord.SelectOption(
                 label='Moderation roles',
-                value='moderation-roles'
+                value='moderation_roles'
             ),
             nextcord.SelectOption(
                 label='Cooldown',
@@ -70,16 +70,16 @@ class IdeasView(DefaultSettingsView):
 
         super().__init__()
 
-        if channel_suggest := guild.get_channel(ideas.get("channel-suggest-id")):
+        if channel_suggest := guild.get_channel(ideas.get("channel_suggest_id")):
             self.embed.description += ("Channel suggest: "
                                        f"{channel_suggest.mention}\n")
 
-        if channel_offers := guild.get_channel(ideas.get("channel-offers-id")):
+        if channel_offers := guild.get_channel(ideas.get("channel_offers_id")):
             self.embed.description += ("Channel offers: "
                                        f"{channel_offers.mention}\n")
 
         if channel_approved := guild.get_channel(
-                ideas.get("channel-approved-id")):
+                ideas.get("channel_approved_id")):
             self.embed.description += ("Channel approved: "
                                        f"{channel_approved.mention}\n")
 
@@ -87,7 +87,7 @@ class IdeasView(DefaultSettingsView):
             self.embed.description += ("Cooldown: "
                                        f"{display_time(cooldown)}\n")
 
-        if moderation_role_ids := ideas.get("moderation-role-ids"):
+        if moderation_role_ids := ideas.get("moderation_role_ids"):
             moderation_roles = filter(lambda item: item is not None,
                                       [guild.get_role(role_id)
                                        for role_id in moderation_role_ids])
@@ -122,8 +122,8 @@ class IdeasView(DefaultSettingsView):
         color = gdb.get('color')
         ideas: IdeasPayload = gdb.get('ideas')
 
-        channel_suggest_id = ideas.get("channel-suggest-id")
-        channel_offers_id = ideas.get("channel-offers-id")
+        channel_suggest_id = ideas.get("channel_suggest_id")
+        channel_offers_id = ideas.get("channel_offers_id")
 
         channel_suggest = interaction.guild.get_channel(channel_suggest_id)
         channel_offers = interaction.guild.get_channel(channel_offers_id)
@@ -150,7 +150,7 @@ class IdeasView(DefaultSettingsView):
 
         message_suggest = await channel_suggest.send(embed=embed, view=view)
 
-        ideas['message-suggest-id'] = message_suggest.id
+        ideas['message_suggest_id'] = message_suggest.id
         ideas['enabled'] = True
 
         gdb.set('ideas', ideas)
@@ -165,19 +165,16 @@ class IdeasView(DefaultSettingsView):
         gdb = GuildDateBases(interaction.guild_id)
         ideas: IdeasPayload = gdb.get('ideas')
 
-        channel_suggest_id = ideas.get("channel-suggest-id")
+        channel_suggest_id = ideas.get("channel_suggest_id")
         channel_suggest = interaction.guild.get_channel(channel_suggest_id)
+        message_suggest_id = ideas.get("message_suggest_id")
 
-        message_suggest_id = ideas.get("message-suggest-id")
-
-        if channel_suggest_id and channel_suggest and message_suggest_id:
+        if channel_suggest and message_suggest_id:
             message_suggest = channel_suggest.get_partial_message(
                 message_suggest_id)
             try:
                 await message_suggest.delete()
-            except (nextcord.errors.NotFound |
-                    nextcord.errors.Forbidden |
-                    nextcord.errors.HTTPException):
+            except nextcord.errors.HTTPException:
                 pass
 
         ideas['enabled'] = False

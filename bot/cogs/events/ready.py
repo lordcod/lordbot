@@ -3,10 +3,9 @@ from nextcord.ext import commands
 from bot.misc.logger import Logger
 from bot.databases import RoleDateBases, BanDateBases
 from bot.misc.lordbot import LordBot
-from bot.views.ideas import (ConfirmView, IdeaView)
+from bot.views.ideas import ConfirmView, ReactionConfirmView, IdeaView
 
 import time
-import asyncio
 
 
 class ready_event(commands.Cog):
@@ -16,10 +15,12 @@ class ready_event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+
         await self.process_temp_roles()
         await self.process_temp_bans()
 
         self.bot.add_view(ConfirmView())
+        self.bot.add_view(ReactionConfirmView())
         self.bot.add_view(IdeaView())
 
         Logger.success(f"The bot is registered as {self.bot.user}")

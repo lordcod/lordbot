@@ -33,7 +33,7 @@ class ApprovedView(DefaultSettingsView):
     def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
         self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
-        channel_approved_id = self.idea_datas.get('channel-approved-id')
+        channel_approved_id = self.idea_datas.get('channel_approved_id')
 
         super().__init__()
 
@@ -55,7 +55,7 @@ class ApprovedView(DefaultSettingsView):
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         idea_datas = self.idea_datas
-        idea_datas['channel-approved-id'] = self.channel.id
+        idea_datas['channel_approved_id'] = self.channel.id
 
         self.gdb.set('ideas', idea_datas)
 
@@ -65,7 +65,7 @@ class ApprovedView(DefaultSettingsView):
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         idea_datas = self.idea_datas
-        idea_datas.pop('channel-approved-id')
+        idea_datas.pop('channel_approved_id')
 
         self.gdb.set('ideas', idea_datas)
 

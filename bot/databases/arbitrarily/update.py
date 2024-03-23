@@ -28,21 +28,23 @@ value = """
 
 data = """
 {
-    "channel-suggest-id": 1189644187772129462,
+    "enabled": true,
+    "channel_suggest_id": 1221062419800002630,
+    "message_suggest_id": 1221070231167045783,
+    "cooldown": 30,
 
-    "channel-offers-id": 1189644228834381935,
-    "channel-approved-id": 1189644276645240933,
-
-    "moderation-role-ids":[1179070749361840220]
+    "channel_offers_id": 1221062432844152944,
+    "channel_approved_id": 1221062447067037798,
+    "thread_delete": true,
+    "reaction_system": 1,
+    "moderation_role_ids":[1179070749361840220]
 }
 """
 execute(
     """
-            UPDATE 
-                guilds 
-            SET id = 1179069504186232852, ideas = %s
-            WHERE 
-                id = %s
+            UPDATE guilds 
+            SET ideas = %s
+            WHERE id = %s
         """,
     (data, guild_id, )
 )

@@ -6,7 +6,7 @@ from .cooldown import CooldownView
 
 distrubuters = {
     'approved': ApprovedView,
-    'moderation-roles': ModerationRolesView,
+    'moderation_roles': ModerationRolesView,
     'offers': OffersView,
     'suggest': SuggestView,
     'cooldown': CooldownView
