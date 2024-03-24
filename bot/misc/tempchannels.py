@@ -8,31 +8,12 @@ class _TempChannelData(NamedTuple):
     owner_id: int
 
 
-nextcord.Permissions
 _db_data = []
 _guild_data = {
     'category_id': 1216365743671873678,
     'trigger_channel_id': 0,  # 1216365803042246756,
-    'owner_permission': nextcord.PermissionOverwrite(
-        manage_channels=True,
-        manage_permissions=True,
-        create_instant_invite=True,
-        view_channel=True,
-        connect=True,
-        speak=True,
-        stream=True,
-        use_voice_activation=True,
-        priority_speaker=True
-    ),
-    'everyone_permission': nextcord.PermissionOverwrite(
-        create_instant_invite=True,
-        view_channel=True,
-        connect=True,
-        speak=True,
-        stream=True,
-        use_voice_activation=True,
-        priority_speaker=True
-    ),
+    'owner_permission': (305137425, 0),
+    'everyone_permission': (36701953, 0),
     'channel_name': '{count}-{name}'
 }
 
@@ -85,6 +66,10 @@ class TempChannels:
 
     @classmethod
     async def create(cls, guild: nextcord.Guild, member: nextcord.Member) -> 'TempChannels':
+        owner_permission_allow, owner_permission_deny = _guild_data.get(
+            'owner_permission')
+        everyone_permission_allow, everyone_permission_deny = _guild_data.get(
+            'everyone_permission')
         channel = await guild.create_voice_channel(
             name=_guild_data.get('channel_name').format(
                 count=TempChannelsDataBases.get_count(guild.id),
@@ -92,12 +77,14 @@ class TempChannels:
             ),
             category=guild.get_channel(_guild_data.get('category_id')),
             overwrites={
-                member: _guild_data.get('owner_permission'),
-                guild.default_role: _guild_data.get('everyone_permission')
+                member: nextcord.PermissionOverwrite.from_pair(nextcord.Permissions(
+                    owner_permission_allow), nextcord.Permissions(owner_permission_deny)),
+                guild.default_role: nextcord.PermissionOverwrite.from_pair(nextcord.Permissions(
+                    everyone_permission_allow), nextcord.Permissions(everyone_permission_deny))
             }
         )
-        await member.move_to(channel)
         TempChannelsDataBases.create(guild.id, member.id, channel.id)
+        await member.move_to(channel)
         return cls(channel)
 
     async def delete(self) -> None:
