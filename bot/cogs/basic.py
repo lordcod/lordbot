@@ -55,6 +55,14 @@ class basic(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
+    async def avatar(self, ctx: commands.Context, member: nextcord.Member) -> None:
+        embed = nextcord.Embed(
+            title=f"Avatar of the {member.display_name} member")
+        embed.set_image(member.display_avatar.url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
     async def invite(self, ctx: commands.Context):
         invite_link = oauth_url(
             client_id=self.bot.user.id,
