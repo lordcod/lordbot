@@ -10,15 +10,16 @@ from bot.databases import GuildDateBases, EconomyMemberDB
 
 
 class EconomyLeaderboardView(menus.Main):
-    def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: List[list], leaderboard_indexs: List[int]):
+    def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]):
         self.guild = guild
         self.gdb = GuildDateBases(guild.id)
         self.economy_settings = self.gdb.get('economic_settings')
         self.currency_emoji = self.economy_settings.get("emoji")
         self.leaderboard_indexs = leaderboard_indexs
         self._embed = embed
-        print(len(leaderboards), leaderboard_indexs)
+
         super().__init__(leaderboards)
+
         self.handler_disable()
 
         self.remove_item(self.button_previous)
@@ -28,17 +29,9 @@ class EconomyLeaderboardView(menus.Main):
     def embed(self) -> nextcord.Embed:
         self._embed.clear_fields()
         for (member_id, balance, bank, total) in self.value[self.index]:
-            member = self.guild.get_member(member_id)
-            if not member or 0 >= total:
-                try:
-                    self.leaderboard_indexs.remove(member_id)
-                except ValueError:
-                    pass
-                continue
-
+            member = self.guild._state.get_user(member_id)
             index = self.leaderboard_indexs.index(member_id)+1
             award = get_award(index)
-
             self._embed.add_field(
                 name=f"{award}. {member.display_name}",
                 value=(
@@ -47,10 +40,22 @@ class EconomyLeaderboardView(menus.Main):
                 ),
                 inline=False
             )
+
         return self._embed
 
     async def callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.edit_message(embed=self.embed, view=self)
+
+
+def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
+    for (member_id, balance, bank, total) in leaderboard.copy():
+        member = guild._state.get_user(member_id)
+        if not member or 0 >= total:
+            try:
+                leaderboard.remove(
+                    (member_id, balance, bank, total))
+            except ValueError:
+                pass
 
 
 class Leaderboards(commands.Cog):
@@ -66,7 +71,8 @@ class Leaderboards(commands.Cog):
 
         emdb = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         leaderboard = emdb.get_leaderboards()
-        fission_leaderboards = FissionIterator(leaderboard, 10).to_list()
+        clear_empty_leaderboard(ctx.guild, leaderboard)
+        fission_leaderboards = FissionIterator(leaderboard, 6).to_list()
         leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
         user_index = leaderboard_indexs.index(ctx.author.id)+1
 

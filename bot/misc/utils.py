@@ -202,11 +202,7 @@ def clamp(val: Union[int, float],
 
 def is_emoji(text: str) -> bool:
     text = text.strip()
-    if regex.fullmatch(r'<a?:.+?:\d{18}>', text):
-        return True
-    if text in emoji.EMOJI_DATA:
-        return True
-    return False
+    return any((regex.fullmatch(r'<a?:.+?:\d{18}>', text), text in emoji.EMOJI_DATA))
 
 
 async def getRandomQuote(lang: str = 'en'):
