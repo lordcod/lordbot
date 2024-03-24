@@ -12,7 +12,8 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Dict,  Optional,  Tuple, Union, Mapping
+from typing import (Coroutine, Dict,  Optional,  Tuple, Union,
+                    Mapping, Any, Iterable, SupportsIndex, Self)
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -161,6 +162,36 @@ class LordTimerHandler:
         coro: Coroutine = th._args[0]
         coro.close()
         th.cancel()
+
+
+class FissionIterator:
+    def __init__(self, iterable: Iterable[Any], count: int) -> None:
+        self.iterable = list(iterable)
+        self.count = count
+        self.value = 0
+        self.max_value = False
+
+    def __iter__(self) -> Self:
+        return self
+
+    def __next__(self) -> Any:
+        if self.max_value:
+            raise StopIteration
+        items = []
+        stop = self.value+self.count
+        if stop >= len(self.iterable):
+            stop = len(self.iterable)
+            self.max_value = True
+        for item in self.iterable[self.value:stop]:
+            items.append(item)
+        self.value = stop
+        return items
+
+    def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
+        return list(iter(self))[__value]
+
+    def to_list(self):
+        return list(iter(self))
 
 
 def clamp(val: Union[int, float],

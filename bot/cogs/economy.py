@@ -123,55 +123,6 @@ class economy(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="leaderboard", aliases=["lb", "leaders", "top"])
-    async def leaderboard(self, ctx: commands.Context):
-        message = await ctx.send("Uploading data...")
-
-        gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get("color")
-        economy_settings: dict = gdb.get('economic_settings')
-        currency_emoji = economy_settings.get("emoji")
-
-        emdb = EconomyMemberDB(ctx.guild.id, ctx.author.id)
-        leaderboard = emdb.get_leaderboards()
-
-        leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
-        user_index = leaderboard_indexs.index(ctx.author.id)+1
-
-        file_pedestal = nextcord.File(
-            "assets/pedestal.png", filename="pedestal.png")
-        embed = nextcord.Embed(
-            title="List of leaders by balance",
-            description=f"**{ctx.author.display_name}**, Your position in the top: **{user_index}**",
-            color=color
-        )
-        embed.set_thumbnail(
-            "attachment://pedestal.png")
-        embed.set_footer(
-            text=ctx.guild.name,
-            icon_url=ctx.guild.icon
-        )
-
-        for (member_id, balance, bank, total) in leaderboard[0:10]:
-            member = ctx.guild.get_member(member_id)
-            if not member or 0 >= total:
-                leaderboard_indexs.remove(member_id)
-                continue
-
-            index = leaderboard_indexs.index(member_id)+1
-            award = get_award(index)
-
-            embed.add_field(
-                name=f"{award}. {member.display_name}",
-                value=(
-                    f"Cash: {balance}{currency_emoji} | In bank: {bank}{currency_emoji}\n"
-                    f"Total balance: {total}{currency_emoji}"
-                ),
-                inline=False
-            )
-        await message.delete()
-        await ctx.send(embed=embed, file=file_pedestal)
-
     @commands.command(name="pay")
     async def pay(self, ctx: commands.Context, member: nextcord.Member, sum: int):
         gdb = GuildDateBases(ctx.guild.id)
