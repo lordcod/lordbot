@@ -19,6 +19,7 @@ class IdeasPayload(PartialIdeasPayload, total=True):
     moderation_role_ids: Optional[List[int]]
     reaction_system: Optional[int]
     thread_delete: Optional[bool]
+    allow_image: Optional[bool]
     # User id,  moderator_id, reason
     ban_users: Optional[List[Tuple[int, int, str]]]
     # User id, moderator_id, Timestamp, reason

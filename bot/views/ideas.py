@@ -342,6 +342,8 @@ class IdeaModal(nextcord.ui.Modal):
     def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
+        ideas_data: IdeasPayload = gdb.get('ideas')
+        allow_image = ideas_data.get('allow_image', True)
 
         super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
@@ -362,7 +364,8 @@ class IdeaModal(nextcord.ui.Modal):
             max_length=150,
             required=False
         )
-        self.add_item(self.image)
+        if allow_image:
+            self.add_item(self.image)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
