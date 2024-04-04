@@ -14,7 +14,7 @@ class Main(ui.View):
             atr = getattr(self, f'button_{kw}')
             atr.emoji = kwargs[kw]
 
-    async def handler_disable(self):
+    def handler_disable(self):
         if self.index > 0:
             self.button_previous.disabled = False
             self.button_backward.disabled = False
@@ -69,7 +69,7 @@ class Main(ui.View):
                               button: nextcord.ui.Button, interaction:
                                   nextcord.Interaction):
         self.index = 0
-        await self.handler_disable()
+        self.handler_disable()
         await self.previous(button, interaction)
         await self.callback(button, interaction)
 
@@ -78,7 +78,7 @@ class Main(ui.View):
                               button: nextcord.ui.Button,
                               interaction: nextcord.Interaction):
         self.index -= 1
-        await self.handler_disable()
+        self.handler_disable()
         await self.backward(button, interaction)
         await self.callback(button, interaction)
 
@@ -87,7 +87,7 @@ class Main(ui.View):
                              button: nextcord.ui.Button,
                              interaction: nextcord.Interaction):
         self.index += 1
-        await self.handler_disable()
+        self.handler_disable()
         await self.forward(button, interaction)
         await self.callback(button, interaction)
 
@@ -96,6 +96,6 @@ class Main(ui.View):
                           button: nextcord.ui.Button,
                           interaction: nextcord.Interaction):
         self.index = self.len
-        await self.handler_disable()
+        self.handler_disable()
         await self.next(button, interaction)
         await self.callback(button, interaction)
