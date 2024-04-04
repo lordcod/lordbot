@@ -13,8 +13,9 @@ import googletrans
 
 translator = googletrans.Translator()
 
+MESSAGE_STATE_DB = localdb.get_table('messages')
 SCORE_STATE_DB = localdb.get_table('score')
-SCORE_DELAYS = {}
+BETWEEN_MESSAGES_TIME = {}
 LAST_MESSAGES_USER = {}
 
 
@@ -27,9 +28,12 @@ class message_event(commands.Cog):
     async def on_message(self, message: nextcord.Message):
         if message.guild is None:
             return
-        asyncio.create_task(self.add_reactions(message))
-        asyncio.create_task(self.process_mention(message))
-        asyncio.create_task(self.give_score(message))
+        await asyncio.gather(
+            self.add_reactions(message),
+            self.process_mention(message),
+            self.give_score(message),
+            self.give_message_score(message)
+        )
 
     async def add_reactions(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
@@ -62,13 +66,20 @@ class message_event(commands.Cog):
 
             asyncio.create_task(message.channel.send(embed=embed))
 
+    async def give_message_score(self, message: nextcord.Message) -> None:
+        MESSAGE_STATE_DB.setdefault(message.author.id, 0)
+        MESSAGE_STATE_DB[message.author.id] += 1
+        
+        print(
+            f"{message.author.display_name} M Current count message is {MESSAGE_STATE_DB[message.author.id]}")
+
     async def give_score(self, message: nextcord.Message) -> None:
         if message.author.bot:
             return
         lmu = LAST_MESSAGES_USER.get(
             f"{message.guild.id}:{message.channel.id}")
         LAST_MESSAGES_USER[f"{message.guild.id}:{message.channel.id}"] = message.author.id
-        if lmu == message.author.id and SCORE_DELAYS.get(message.author.id, 0) > time.time():
+        if lmu == message.author.id and BETWEEN_MESSAGES_TIME.get(message.author.id, 0) > time.time():
             return
 
         multiplier = 1
@@ -77,7 +88,7 @@ class message_event(commands.Cog):
         SCORE_STATE_DB.setdefault(message.author.id, 0)
         SCORE_STATE_DB[message.author.id] += random.randint(
             0, 10) * multiplier / math.sqrt(user_level)
-        SCORE_DELAYS[message.author.id] = time.time() + 10
+        BETWEEN_MESSAGES_TIME[message.author.id] = time.time() + 10
 
         print(
             f"{message.author.display_name} M Current score is {SCORE_STATE_DB[message.author.id]}")

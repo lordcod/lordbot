@@ -3,8 +3,8 @@ from nextcord import ui
 
 
 class Main(ui.View):
-    def __init__(self, value: list):
-        super().__init__(timeout=None)
+    def __init__(self, value: list, timeout: float | None = None):
+        super().__init__(timeout=timeout)
         self.len = len(value)-1
         self.index = 0
         self.value = value

@@ -181,11 +181,13 @@ class LordTimerHandler:
 
 
 class FissionIterator:
+    __list = None
     def __init__(self, iterable: Iterable[Any], count: int) -> None:
         self.iterable = list(iterable)
         self.count = count
         self.value = 0
         self.max_value = False
+        self.__list = self.to_list()
 
     def __iter__(self) -> Self:
         return self
@@ -204,10 +206,12 @@ class FissionIterator:
         return items
 
     def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
-        return list(iter(self))[__value]
+        return self.__list[__value]
 
     def to_list(self):
-        return list(iter(self))
+        if self.__list is None:
+            return list(iter(self))
+        return self.__list
 
 
 def clamp(val: Union[int, float],
