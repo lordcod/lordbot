@@ -93,7 +93,7 @@ class Colum:
 
     def add_colum(self, table_name: str) -> None:
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     ADD {self.name} {self.data_type.value}
                     {" PRIMARY KEY" if self.primary_key is True else ""}
@@ -104,7 +104,7 @@ class Colum:
 
     def drop_colum(self, table_name: str) -> None:
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     DROP COLUMN {self.name};
                 """
@@ -113,7 +113,7 @@ class Colum:
     def change_name(self, table_name: str, new_name: str) -> None:
         self.name = new_name
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     RENAME COLUMN {self.name} TO {new_name};
                 """
@@ -122,7 +122,7 @@ class Colum:
     def change_default(self, table_name: str, new_default: str) -> None:
         self.default = new_default
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     ALTER COLUMN {self.name} SET DEFAULT '{new_default}';
                 """
@@ -130,7 +130,7 @@ class Colum:
 
     def change_type(self, table_name: str, new_type: PostType) -> None:
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     ALTER COLUMN {self.name} TYPE {new_type.value};
                 """
