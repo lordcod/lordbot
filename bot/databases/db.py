@@ -44,3 +44,34 @@ class EconomicDB(Table):
     daily = Colum(data_type=PostType.BIGINT, default="0")
     weekly = Colum(data_type=PostType.BIGINT, default="0")
     monthly = Colum(data_type=PostType.BIGINT, default="0")
+
+
+class RolesDB(Table):
+    __tablename__ = "roles"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    role_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
+
+
+class BansDB(Table):
+    __tablename__ = "bans"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
+
+
+class MongoDataBases(Table):
+    __tablename__ = "mongo"
+
+    name = Colum(data_type=PostType.TEXT, primary_key=True)
+    values = Colum(data_type=PostType.JSON, default="{}")
+
+
+GuildsDB.create_table()
+EconomicDB.create_table()
+RolesDB.create_table()
+BansDB.create_table()
+MongoDataBases.create_table()

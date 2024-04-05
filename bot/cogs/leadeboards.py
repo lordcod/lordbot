@@ -65,6 +65,16 @@ class EconomyLeaderboardView(menus.Main):
     async def callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.edit_message(embed=self.embed, view=self)
 
+class LeaderboardDropDown(nextcord.ui.StringSelect):
+    def __init__(self, guild_id: int) -> None:
+        super().__init__(
+            options=[
+                nextcord.SelectOption(
+                    
+                )
+            ]
+        )
+
 class LeaderboardTypes:
     @staticmethod
     async def set_balance_lb(ctx: commands.Context, message: nextcord.Message):
@@ -104,6 +114,7 @@ class LeaderboardTypes:
         locale = gdb.get('language')
         leaderboard = sorted(VOICE_STATE_DB.items(), key=get_item_param, reverse=True)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
+
         try:
             user_index = leaderboard_indexs.index(ctx.author.id) + 1
         except ValueError:
@@ -133,6 +144,80 @@ class LeaderboardTypes:
 
         await message.edit(content="", embed=embed,  file=file_pedestal)
 
+    @staticmethod
+    async def set_messages_lb(ctx: commands.Context, message: nextcord.Message):
+        gdb = GuildDateBases(ctx.guild.id)
+        color = gdb.get("color")
+        locale = gdb.get('language')
+        leaderboard = sorted(MESSAGE_STATE_DB.items(), key=get_item_param, reverse=True)
+        leaderboard_indexs = [member_id for member_id, _ in leaderboard]
+
+        try:
+            user_index = leaderboard_indexs.index(ctx.author.id) + 1
+        except ValueError:
+            user_index = len(leaderboard_indexs) + 1
+
+        file_pedestal = nextcord.File(
+            "assets/pedestal.png", filename="pedestal.png")
+        embed = nextcord.Embed(
+            title="List of leaders by message",
+            description=f"**{ctx.author.display_name}**, Your position in the top: **{user_index}**",
+            color=color
+        )
+        embed.set_thumbnail(
+            "attachment://pedestal.png")
+        embed.set_footer(
+            text=ctx.guild.name,
+            icon_url=ctx.guild.icon
+        )
+
+        for index, (member_id, count_message) in enumerate(leaderboard[:10], start=1):
+            member = ctx.guild.get_member(member_id)
+            embed.add_field(
+                name=f"{get_award(index)}. {member.display_name}",
+                value=f"Message count: **{count_message}**",
+                inline=False
+            )
+
+        await message.edit(content="", embed=embed,  file=file_pedestal)
+
+    @staticmethod
+    async def set_score_lb(ctx: commands.Context, message: nextcord.Message):
+        gdb = GuildDateBases(ctx.guild.id)
+        color = gdb.get("color")
+        locale = gdb.get('language')
+        leaderboard = sorted(SCORE_STATE_DB.items(), key=get_item_param, reverse=True)
+        leaderboard_indexs = [member_id for member_id, _ in leaderboard]
+
+        try:
+            user_index = leaderboard_indexs.index(ctx.author.id) + 1
+        except ValueError:
+            user_index = len(leaderboard_indexs) + 1
+
+        file_pedestal = nextcord.File(
+            "assets/pedestal.png", filename="pedestal.png")
+        embed = nextcord.Embed(
+            title="List of leaders by score",
+            description=f"**{ctx.author.display_name}**, Your position in the top: **{user_index}**",
+            color=color
+        )
+        embed.set_thumbnail(
+            "attachment://pedestal.png")
+        embed.set_footer(
+            text=ctx.guild.name,
+            icon_url=ctx.guild.icon
+        )
+
+        for index, (member_id, score) in enumerate(leaderboard[:10], start=1):
+            member = ctx.guild.get_member(member_id)
+            embed.add_field(
+                name=f"{get_award(index)}. {member.display_name}",
+                value=f"Score: **{score :.0f}**",
+                inline=False
+            )
+
+        await message.edit(content="", embed=embed,  file=file_pedestal)
+
 class Leaderboards(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
@@ -140,7 +225,7 @@ class Leaderboards(commands.Cog):
     @commands.command(name="leaderboard", aliases=["lb", "leaders", "top"])
     async def leaderboard(self, ctx: commands.Context):
         message = await ctx.send("Uploading data...")
-        await LeaderboardTypes.set_voicetime_lb(ctx, message)
+        await LeaderboardTypes.set_score_lb(ctx, message)
 
 
 
