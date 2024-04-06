@@ -1,6 +1,7 @@
 import asyncio
 import nextcord
 import random
+from datetime import datetime
 from typing import List
 from bot.databases import localdb
 from bot.views import giveaway as views_giveaway
@@ -42,6 +43,13 @@ class GiveawayTypesChecker:
         8: check_min_level
     }
 
+class GiveawayConfig:
+    prize: str = None
+    sponsor: nextcord.Member = None
+    channel: nextcord.TextChannel = None
+    description: str = None
+    quantity: int = 1
+    date_end: int | float = None
 
 class Giveaway:
     def __init__(
@@ -57,6 +65,10 @@ class Giveaway:
         self.giveaway_data: dict = GIVEAWAY_DB.get(message_id)
 
     @classmethod
+    def set_lord_timer_handler(cls, lord_handler_timer):
+        cls.lord_handler_timer = lord_handler_timer
+
+    @classmethod
     async def create(
         cls,
         guild: nextcord.Guild,
@@ -65,18 +77,17 @@ class Giveaway:
         prize: str,
         description: str,
         quantity: int,
-        date_end: int,
-        types: List[int]
+        date_end: int
     ) -> 'Giveaway':
         giveaway_data = {
             "guild_id": guild.id,
             "channel_id": channel.id,
-            "sponser_id": sponser.id,
+            "sponsor_id": sponser.id,
             "prize": prize,
             "description": description,
             "quantity": quantity,
             "date_end": date_end,
-            "types": types,
+            "types": [],
             "entries_ids": [],
             "completed": False,
             "winners": None
@@ -90,11 +101,39 @@ class Giveaway:
 
         return cls(guild, message.id)
 
+    @classmethod
+    async def create_as_config(
+        cls,
+        guild: nextcord.Guild,
+        giveaway_config: GiveawayConfig
+    ) -> 'Giveaway':
+        giveaway_data = {
+            "guild_id": guild.id,
+            "channel_id": giveaway_config.channel.id,
+            "sponsor_id": giveaway_config.sponsor.id,
+            "prize": giveaway_config.prize,
+            "description": giveaway_config.description,
+            "quantity": giveaway_config.quantity,
+            "date_end": giveaway_config.date_end,
+            "types": [],
+            "entries_ids": [],
+            "completed": False,
+            "winners": None
+        }
+
+        embed = cls.get_embed(giveaway_data)
+
+        message = await giveaway_config.channel.send(embed=embed, view=views_giveaway.GiveawayView())
+
+        GIVEAWAY_DB[message.id] = giveaway_data
+
+        return cls(guild, message.id)
+
     async def complete(self) -> None:
         self.update_giveaway_data()
 
         winner_ids = random.choices(
-            self.giveaway_data['entries_ids'], k=self.giveaway_data['quantity'])
+            self.giveaway_data['entries_ids'], k=min(len(self.giveaway_data['entries_ids']), self.giveaway_data['quantity']))
         winners = map(self.guild.get_member,
                       winner_ids)
 
@@ -106,7 +145,7 @@ class Giveaway:
 
         asyncio.create_task(self.update_message())
         asyncio.create_task(channel.send(
-            f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the LordCord Premium!"))
+            f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the {self.giveaway_data['prize']}!"))
 
     def update_giveaway_data(self) -> None:
         self.giveaway_data = GIVEAWAY_DB[self.message_id]
@@ -116,8 +155,8 @@ class Giveaway:
         message = channel.get_partial_message(self.message_id)
         embed = self.get_completed_embed() if self.giveaway_data.get(
             'completed') else self.get_embed(self.giveaway_data)
-        view = None if self.giveaway_data.get(
-            'completed') else views_giveaway.GiveawayView()
+        view = views_giveaway.GiveawayView(
+            ) if not self.giveaway_data.get('completed') else None
 
         await message.edit(embed=embed, view=view)
 
@@ -132,7 +171,7 @@ class Giveaway:
             name='',
             value=(
                 f"Ends: <t:{giveaway_data.get('date_end') :.0f}:f> (<t:{giveaway_data.get('date_end') :.0f}:R>)\n"
-                f"Sponsored by <@{giveaway_data.get('sponser_id')}>\n"
+                f"Sponsored by <@{giveaway_data.get('sponsor_id')}>\n"
                 f"Entries: **{len(giveaway_data.get('entries_ids'))}**\n"
                 f"Winners: **{giveaway_data.get('quantity')}**"
             )
@@ -153,7 +192,7 @@ class Giveaway:
             name='',
             value=(
                 f"Ends: <t:{self.giveaway_data.get('date_end') :.0f}:f> (<t:{self.giveaway_data.get('date_end') :.0f}:R>)\n"
-                f"Sponsored by <@{self.giveaway_data.get('sponser_id')}>\n"
+                f"Sponsored by <@{self.giveaway_data.get('sponsor_id')}>\n"
                 f"Entries: **{len(self.giveaway_data.get('entries_ids'))}**\n"
                 f"Winners: **{', '.join([wu.mention for wu in winners])}**"
             )

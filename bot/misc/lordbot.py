@@ -5,6 +5,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc.utils import LordTimerHandler
+from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
 from typing import Coroutine, List, Optional, Dict, Any
@@ -77,3 +78,4 @@ class LordBot(commands.AutoShardedBot):
         i18n.config['locale'] = 'en'
         self.session = aiohttp.ClientSession()
         self.lord_handler_timer = LordTimerHandler(self.loop)
+        misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)

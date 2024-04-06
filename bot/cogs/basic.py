@@ -7,7 +7,7 @@ from nextcord.utils import oauth_url
 from bot.resources.ether import Emoji
 from bot.misc import utils
 from bot.misc.utils import TimeCalculator
-from bot.misc.giveaway import Giveaway
+from bot.views.giveaway import GiveawaySettingsView
 from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
 from bot.resources import info
@@ -19,6 +19,7 @@ import jmespath
 import timeit
 import googletrans
 import asyncio
+import datetime
 import random
 from typing import Callable
 
@@ -56,27 +57,9 @@ class basic(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def giveaway(
-        self,
-        ctx: commands.Context,
-        sponser: nextcord.Member,
-        prize: str,
-        description: str,
-        quantity: int,
-        date_end: TimeCalculator
-    ):
-        giveaway = await Giveaway.create(
-            ctx.guild,
-            ctx.channel,
-            sponser,
-            prize,
-            description,
-            quantity,
-            date_end+time.time(),
-            []
-        )
-        self.bot.lord_handler_timer.create_timer_handler(
-            date_end, giveaway.complete(), f'giveaway:{giveaway.message_id}')
+    async def giveaway(self, ctx: commands.Context):
+        view = GiveawaySettingsView(ctx.guild.id)
+        await ctx.send(embed=view.embed, view=view)
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
