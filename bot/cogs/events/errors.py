@@ -11,8 +11,6 @@ from bot.resources.errors import (CallbackCommandError,
                                   MissingChannel,
                                   CommandOnCooldown)
 
-TrueType = type(True)
-NumberType = (int, float)
 
 
 class PermissionChecker:
