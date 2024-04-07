@@ -2,35 +2,45 @@
 
 import asyncio
 import datetime
+from discord import Interaction
 import nextcord
 import time
 from typing import Optional
 from bot.databases import localdb
 from bot.misc import giveaway as misc_giveaway
-from bot.misc.utils import TimeCalculator
+from bot.misc.utils import TimeCalculator, traslate_to_timestamp
 
 GIVEAWAY_DB = localdb.get_table('giveaway')
 
 class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
-    def __init__(self, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+        self.member = member
         self.giveaway_config = giveaway_config
         super().__init__(placeholder="Choose a giveaway sponsor")
+    
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        return interaction.user == self.member
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         self.giveaway_config.sponsor = self.values[0]
         
-        view = GiveawaySettingsView(interaction.guild_id, self.giveaway_config)
+        view = GiveawaySettingsView(self.member, interaction.guild_id, self.giveaway_config)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
-    def __init__(self, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+        self.member = member
         self.giveaway_config = giveaway_config
         super().__init__(placeholder="Choose a giveaway channel", channel_types=[nextcord.ChannelType.news, nextcord.ChannelType.text])
+    
+    
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        return interaction.user == self.member
     
     async def callback(self, interaction: nextcord.Interaction) -> None:
         self.giveaway_config.channel = self.values[0]
         
-        view = GiveawaySettingsView(interaction.guild_id, self.giveaway_config)
+        view = GiveawaySettingsView(self.member, interaction.guild_id, self.giveaway_config)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 class GiveawaySettingsPrizeModal(nextcord.ui.Modal):
@@ -61,10 +71,9 @@ class GiveawaySettingsPrizeModal(nextcord.ui.Modal):
         self.giveaway_config.prize = self.prize.value
         self.giveaway_config.quantity = int(self.quantity.value)
         
-        view = GiveawaySettingsView(interaction.guild_id, self.giveaway_config)
+        view = GiveawaySettingsView(interaction.user, interaction.guild_id, self.giveaway_config)
         await interaction.response.edit_message(embed=view.embed, view=view)
         
-
 class GiveawaySettingsDescriptionModal(nextcord.ui.Modal):
     def __init__(self, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
         self.giveaway_config = giveaway_config
@@ -80,9 +89,8 @@ class GiveawaySettingsDescriptionModal(nextcord.ui.Modal):
     async def callback(self, interaction: nextcord.Interaction):
         self.giveaway_config.description = self.description.value
         
-        view = GiveawaySettingsView(interaction.guild_id, self.giveaway_config)
+        view = GiveawaySettingsView(interaction.user, interaction.guild_id, self.giveaway_config)
         await interaction.response.edit_message(embed=view.embed, view=view)
-        
 
 class GiveawaySettingsDateendModal(nextcord.ui.Modal):
     def __init__(self, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
@@ -94,26 +102,17 @@ class GiveawaySettingsDateendModal(nextcord.ui.Modal):
             label="Date end",
             style=nextcord.TextInputStyle.paragraph,
             placeholder=(
-                "1h15m\n"
-                "08:15:27 2018-06-29"
+                "01.01.2023\n"
+                "01.01.2023 12:30\n"
+                "01.01.2023 12:30:45\n"
+                "12:30\n"
+                "1d2m3h4m5s"
             )
         )
         self.add_item(self.date_end)
 
     async def callback(self, interaction: nextcord.Interaction):
-        str_date = self.date_end.value
-        date_end = None
-        
-        try:
-            date_end = datetime.datetime.strptime(str_date, '%H:%M:%S %Y-%m-%d').timestamp()
-        except ValueError:
-            pass
-        
-        try:
-            if date_end: raise ValueError
-            date_end =  TimeCalculator(operatable_time=True).convert(str_date)
-        except ValueError:
-            pass
+        date_end = traslate_to_timestamp(self.date_end.value)
         
         if not date_end:
             await interaction.response.send_message("Date format is invalid!")
@@ -121,22 +120,18 @@ class GiveawaySettingsDateendModal(nextcord.ui.Modal):
         
         self.giveaway_config.date_end = date_end
         
-        view = GiveawaySettingsView(interaction.guild_id, self.giveaway_config)
+        view = GiveawaySettingsView(interaction.user, interaction.guild_id, self.giveaway_config)
         await interaction.response.edit_message(embed=view.embed, view=view)
-        
-        
-        
-        
-
 
 class GiveawaySettingsView(nextcord.ui.View):
     embed: nextcord.Embed
     
-    def __init__(self, guild_id: int, giveaway_config: Optional['misc_giveaway.GiveawayConfig'] = None) -> None:
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: Optional['misc_giveaway.GiveawayConfig'] = None) -> None:
         self.giveaway_config = giveaway_config or misc_giveaway.GiveawayConfig()
+        self.member = member
         super().__init__()
-        self.add_item(GiveawaySettingsChannelDropDown(guild_id, self.giveaway_config))
-        self.add_item(GiveawaySettingsSponsorDropDown(guild_id, self.giveaway_config))
+        self.add_item(GiveawaySettingsChannelDropDown(member, guild_id, self.giveaway_config))
+        self.add_item(GiveawaySettingsSponsorDropDown(member, guild_id, self.giveaway_config))
         
         self.embed = nextcord.Embed(title=f"Giveaway prize: {self.giveaway_config.quantity if self.giveaway_config.quantity else 1} {self.giveaway_config.prize if self.giveaway_config.prize else 'no prize'}")
         
@@ -146,7 +141,7 @@ class GiveawaySettingsView(nextcord.ui.View):
             name="Addtionally information",
             value=(
                 f"Channel: {self.giveaway_config.channel.mention if self.giveaway_config.channel else 'no channel'}\n"
-                f"Sponsor: {self.giveaway_config.sponsor.mention if self.giveaway_config.sponsor else 'no sponsor'}\n"
+                f"Sponsor: {self.giveaway_config.sponsor.mention if self.giveaway_config.sponsor else member.mention}\n"
                 f"Date end: {f'<t:{self.giveaway_config.date_end :.0f}:f>' if self.giveaway_config.date_end else 'no date end'}"
             )
         )
@@ -158,6 +153,8 @@ class GiveawaySettingsView(nextcord.ui.View):
         if self.giveaway_config.date_end:
             self.date_end.style = nextcord.ButtonStyle.blurple
 
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        return interaction.user == self.member
     
     @nextcord.ui.button(label="Create giveaway", style=nextcord.ButtonStyle.success)
     async def create(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

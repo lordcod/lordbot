@@ -19,7 +19,6 @@ import jmespath
 import timeit
 import googletrans
 import asyncio
-import datetime
 import random
 from typing import Callable
 
@@ -57,8 +56,9 @@ class basic(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.has_permissions(administrator=True)
     async def giveaway(self, ctx: commands.Context):
-        view = GiveawaySettingsView(ctx.guild.id)
+        view = GiveawaySettingsView(ctx.author, ctx.guild.id)
         await ctx.send(embed=view.embed, view=view)
 
     @commands.command()

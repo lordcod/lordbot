@@ -1,9 +1,9 @@
 import asyncio
 import nextcord
-import random
-from datetime import datetime
-from typing import List
+from typing import List, Coroutine, Any
 from bot.databases import localdb
+from bot.databases.varstructs import GiveawayData
+from bot.misc import utils
 from bot.views import giveaway as views_giveaway
 
 GIVEAWAY_DB = localdb.get_table('giveaway')
@@ -43,6 +43,7 @@ class GiveawayTypesChecker:
         8: check_min_level
     }
 
+
 class GiveawayConfig:
     prize: str = None
     sponsor: nextcord.Member = None
@@ -51,7 +52,10 @@ class GiveawayConfig:
     quantity: int = 1
     date_end: int | float = None
 
+
 class Giveaway:
+    giveaway_data: GiveawayData
+
     def __init__(
         self,
         guild: nextcord.Guild,
@@ -62,7 +66,7 @@ class Giveaway:
 
         self.guild = guild
         self.message_id = message_id
-        self.giveaway_data: dict = GIVEAWAY_DB.get(message_id)
+        self.giveaway_data = GIVEAWAY_DB.get(message_id)
 
     @classmethod
     def set_lord_timer_handler(cls, lord_handler_timer):
@@ -79,6 +83,8 @@ class Giveaway:
         quantity: int,
         date_end: int
     ) -> 'Giveaway':
+        key, token = utils.generate_random_token()
+
         giveaway_data = {
             "guild_id": guild.id,
             "channel_id": channel.id,
@@ -90,7 +96,9 @@ class Giveaway:
             "types": [],
             "entries_ids": [],
             "completed": False,
-            "winners": None
+            "winners": None,
+            "key": key,
+            "token": token
         }
 
         embed = cls.get_embed(giveaway_data)
@@ -102,38 +110,33 @@ class Giveaway:
         return cls(guild, message.id)
 
     @classmethod
-    async def create_as_config(
+    def create_as_config(
         cls,
         guild: nextcord.Guild,
         giveaway_config: GiveawayConfig
-    ) -> 'Giveaway':
-        giveaway_data = {
-            "guild_id": guild.id,
-            "channel_id": giveaway_config.channel.id,
-            "sponsor_id": giveaway_config.sponsor.id,
-            "prize": giveaway_config.prize,
-            "description": giveaway_config.description,
-            "quantity": giveaway_config.quantity,
-            "date_end": giveaway_config.date_end,
-            "types": [],
-            "entries_ids": [],
-            "completed": False,
-            "winners": None
-        }
-
-        embed = cls.get_embed(giveaway_data)
-
-        message = await giveaway_config.channel.send(embed=embed, view=views_giveaway.GiveawayView())
-
-        GIVEAWAY_DB[message.id] = giveaway_data
-
-        return cls(guild, message.id)
+    ) -> Coroutine[Any, Any, 'Giveaway']:
+        return cls.create(
+            guild=guild,
+            channel=giveaway_config.channel,
+            sponser=giveaway_config.sponsor,
+            prize=giveaway_config.prize,
+            description=giveaway_config.description,
+            quantity=giveaway_config.quantity,
+            date_end=giveaway_config.date_end
+        )
 
     async def complete(self) -> None:
         self.update_giveaway_data()
 
-        winner_ids = random.choices(
-            self.giveaway_data['entries_ids'], k=min(len(self.giveaway_data['entries_ids']), self.giveaway_data['quantity']))
+        winner_number = utils.decrypt_token(
+            self.giveaway_data.get('key'), self.giveaway_data.get('token'))
+        winner_ids = []
+        entries_ids = self.giveaway_data.get('entries_ids').copy()
+
+        for _ in range(self.giveaway_data.get('quantity')):
+            win = entries_ids.pop(winner_number % len(entries_ids))
+            winner_ids.append(win)
+
         winners = map(self.guild.get_member,
                       winner_ids)
 
@@ -156,41 +159,40 @@ class Giveaway:
         embed = self.get_completed_embed() if self.giveaway_data.get(
             'completed') else self.get_embed(self.giveaway_data)
         view = views_giveaway.GiveawayView(
-            ) if not self.giveaway_data.get('completed') else None
+        ) if not self.giveaway_data.get('completed') else None
 
         await message.edit(embed=embed, view=view)
 
     @staticmethod
-    def get_embed(giveaway_data) -> nextcord.Embed:
+    def get_embed(giveaway_data: dict) -> nextcord.Embed:
+        giveaway_description = giveaway_data.get(
+            'description')+'\n\n' if giveaway_data.get('description') else ''
         embed = nextcord.Embed(
             title=giveaway_data.get("prize"),
-            description=giveaway_data.get("description")
-        )
-
-        embed.add_field(
-            name='',
-            value=(
+            description=(
+                f"{giveaway_description}"
                 f"Ends: <t:{giveaway_data.get('date_end') :.0f}:f> (<t:{giveaway_data.get('date_end') :.0f}:R>)\n"
                 f"Sponsored by <@{giveaway_data.get('sponsor_id')}>\n"
                 f"Entries: **{len(giveaway_data.get('entries_ids'))}**\n"
                 f"Winners: **{giveaway_data.get('quantity')}**"
             )
         )
+        embed.set_footer(
+            text=f"Key: {giveaway_data.get('key')}"
+        )
 
         return embed
 
     def get_completed_embed(self) -> nextcord.Embed:
-        winners = map(self.guild.get_member,
-                      self.giveaway_data.get('winners'))
-
+        winners = filter(lambda item: item is not None,
+                         map(self.guild.get_member,
+                             self.giveaway_data.get('winners')))
+        giveaway_description = self.giveaway_data.get(
+            'description')+'\n\n' if self.giveaway_data.get('description') else ''
         embed = nextcord.Embed(
             title=self.giveaway_data.get("prize"),
-            description=self.giveaway_data.get("description")
-        )
-
-        embed.add_field(
-            name='',
-            value=(
+            description=(
+                f"{giveaway_description}"
                 f"Ends: <t:{self.giveaway_data.get('date_end') :.0f}:f> (<t:{self.giveaway_data.get('date_end') :.0f}:R>)\n"
                 f"Sponsored by <@{self.giveaway_data.get('sponsor_id')}>\n"
                 f"Entries: **{len(self.giveaway_data.get('entries_ids'))}**\n"
