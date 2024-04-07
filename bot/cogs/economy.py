@@ -17,14 +17,6 @@ from bot.views.economy_shop import EconomyShopView
 
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
 
-guild_shop_data = [
-    {"role_id": 1213860890395287653, "amount": 100, "name": "Green"},
-    {"role_id": 1213860899300053003, "amount": 200, "limit": 5},
-    {"role_id": 1213860908896624731, "amount": 300},
-    {"role_id": 1213860917734023210, "amount": 400},
-    {"role_id": 1213860926629879861, "amount": 500, "name": "Green + Blue"}
-]
-
 
 class economy(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
@@ -186,9 +178,7 @@ class economy(commands.Cog):
 
     @commands.command()
     async def shop(self, ctx: commands.Context):
-        eft = FissionIterator(guild_shop_data.get(
-            "roles", []), COUNT_ROLES_PAGE).to_list()
-        view = EconomyShopView(ctx.guild, eft)
+        view = EconomyShopView(ctx.guild)
         await ctx.send(embed=view.embed, view=view)
 
     @commands.command(name="pay")
