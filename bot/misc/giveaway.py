@@ -3,10 +3,9 @@ import nextcord
 from typing import List, Coroutine, Any
 from bot.databases import localdb
 from bot.databases.varstructs import GiveawayData
+from bot.databases import GuildDateBases
 from bot.misc import utils
 from bot.views import giveaway as views_giveaway
-
-GIVEAWAY_DB = localdb.get_table('giveaway')
 
 
 class GiveawayTypesChecker:
@@ -61,12 +60,15 @@ class Giveaway:
         guild: nextcord.Guild,
         message_id: int
     ) -> None:
-        if message_id not in GIVEAWAY_DB:
+        gdb = GuildDateBases(guild.id)
+        giveaways = gdb.get('giveaways')
+
+        if message_id not in giveaways:
             raise TypeError
 
         self.guild = guild
         self.message_id = message_id
-        self.giveaway_data = GIVEAWAY_DB.get(message_id)
+        self.giveaway_data = giveaways.get(message_id)
 
     @classmethod
     def set_lord_timer_handler(cls, lord_handler_timer):
@@ -83,6 +85,8 @@ class Giveaway:
         quantity: int,
         date_end: int
     ) -> 'Giveaway':
+        gdb = GuildDateBases(guild.id)
+        giveaways = gdb.get('giveaways')
         key, token = utils.generate_random_token()
 
         giveaway_data = {
@@ -105,7 +109,9 @@ class Giveaway:
 
         message = await channel.send(embed=embed, view=views_giveaway.GiveawayView())
 
-        GIVEAWAY_DB[message.id] = giveaway_data
+        giveaways[message.id] = giveaway_data
+
+        gdb.set('giveaways', giveaways)
 
         return cls(guild, message.id)
 
@@ -126,7 +132,8 @@ class Giveaway:
         )
 
     async def complete(self) -> None:
-        self.update_giveaway_data()
+        gdb = GuildDateBases(self.guild.id)
+        giveaways = gdb.get('giveaways')
 
         winner_number = utils.decrypt_token(
             self.giveaway_data.get('key'), self.giveaway_data.get('token'))
@@ -142,16 +149,14 @@ class Giveaway:
 
         self.giveaway_data['winners'] = winner_ids
         self.giveaway_data['completed'] = True
-        GIVEAWAY_DB[self.message_id] = self.giveaway_data
+        giveaways[self.message_id] = self.giveaway_data
+        gdb.set('giveaways', giveaways)
 
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
 
         asyncio.create_task(self.update_message())
         asyncio.create_task(channel.send(
             f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the {self.giveaway_data['prize']}!"))
-
-    def update_giveaway_data(self) -> None:
-        self.giveaway_data = GIVEAWAY_DB[self.message_id]
 
     async def update_message(self) -> None:
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
@@ -206,7 +211,13 @@ class Giveaway:
         return member_id in self.giveaway_data.get('entries_ids')
 
     def promote_participant(self, member_id: int) -> None:
+        gdb = GuildDateBases(self.guild.id)
+        giveaways = gdb.get('giveaways')
         self.giveaway_data.get('entries_ids').append(member_id)
+        giveaways[self.message_id] = self.giveaway_data
 
     def demote_participant(self, member_id: int) -> None:
+        gdb = GuildDateBases(self.guild.id)
+        giveaways = gdb.get('giveaways')
         self.giveaway_data.get('entries_ids').remove(member_id)
+        giveaways[self.message_id] = self.giveaway_data

@@ -25,6 +25,7 @@ class GuildsDB(Table):
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
     invites = Colum(data_type=PostType.JSON, default="{}")
+    giveaways = Colum(data_type=PostType.JSON, default="{}")
     tickettool = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
@@ -44,3 +45,7 @@ class EconomicDB(Table):
     daily = Colum(data_type=PostType.BIGINT, default="0")
     weekly = Colum(data_type=PostType.BIGINT, default="0")
     monthly = Colum(data_type=PostType.BIGINT, default="0")
+
+
+GuildsDB.create_table()
+EconomicDB.create_table()
