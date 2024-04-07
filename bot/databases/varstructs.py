@@ -27,3 +27,4 @@ class RoleShopPayload(TypedDict):
     limit: Optional[int]
     name: Optional[str]
     description: Optional[str]
+    using_limit: Optional[int]

@@ -6,6 +6,7 @@ from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
+from bot.resources.info import COUNT_ROLES_PAGE
 from bot.misc.utils import FissionIterator, get_award
 from nextcord.utils import escape_markdown
 
@@ -16,15 +17,13 @@ from bot.views.economy_shop import EconomyShopView
 
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
 
-guild_shop_data = {
-    "roles": [
-        {"role_id": 1213860890395287653, "amount": 100, "name": "Green"},
-        {"role_id": 1213860899300053003, "amount": 200},
-        {"role_id": 1213860908896624731, "amount": 300},
-        {"role_id": 1213860917734023210, "amount": 400},
-        {"role_id": 1213860926629879861, "amount": 500, "name": "Green + Blue"}
-    ]
-}
+guild_shop_data = [
+    {"role_id": 1213860890395287653, "amount": 100, "name": "Green"},
+    {"role_id": 1213860899300053003, "amount": 200, "limit": 5},
+    {"role_id": 1213860908896624731, "amount": 300},
+    {"role_id": 1213860917734023210, "amount": 400},
+    {"role_id": 1213860926629879861, "amount": 500, "name": "Green + Blue"}
+]
 
 
 class economy(commands.Cog):
@@ -38,7 +37,7 @@ class economy(commands.Cog):
         es = gdb.get('economic_settings')
         operate = es.get('operate', False)
         if not operate:
-            raise NotActivateEconomy("Economy is not enabled on the server")
+            raise NotActivateEconomy("Economy is disabled on the server")
         return True
 
     async def handler_rewards(self, ctx: commands.Context):
@@ -187,7 +186,8 @@ class economy(commands.Cog):
 
     @commands.command()
     async def shop(self, ctx: commands.Context):
-        eft = FissionIterator(guild_shop_data.get("roles", []), 10).to_list()
+        eft = FissionIterator(guild_shop_data.get(
+            "roles", []), COUNT_ROLES_PAGE).to_list()
         view = EconomyShopView(ctx.guild, eft)
         await ctx.send(embed=view.embed, view=view)
 
