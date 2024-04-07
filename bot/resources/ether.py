@@ -1,5 +1,7 @@
+from enum import StrEnum
 
-class Emoji:
+
+class Emoji(StrEnum):
     # Channels
     category = '<:category:1166001036553621534>'
     channel_text = '<:channel_text:1166001040198484178>'
@@ -10,6 +12,7 @@ class Emoji:
     thread = '<:thread:1166096258511937666>'
 
     # Economy
+    diamod = '<:diamond:1183363436780978186>'
     bagmoney = '<:bagmoney:1178745646128300083>'
     bank = '<:bank:1178745652352663663> '
     money = '<:money:1178745649248882770>'

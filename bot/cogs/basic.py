@@ -1,12 +1,14 @@
-import timeit
-from typing import Callable
+
+import time
 import nextcord
 from nextcord.ext import commands, application_checks
 from nextcord.utils import oauth_url
-from bot.misc.lordbot import LordBot
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
+from bot.misc.utils import TimeCalculator
+from bot.views.giveaway import GiveawaySettingsView
+from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
 from bot.resources import info
 from bot.views.translate import TranslateView
@@ -14,14 +16,13 @@ from bot.languages import i18n
 from bot.languages import data as lang_data
 
 import jmespath
+import timeit
 import googletrans
 import asyncio
 import random
-import re
+from typing import Callable
 
 translator = googletrans.Translator()
-
-EMOJI_REGEXP = re.compile(r"<(a?):([a-zA-Z_-]+):(\d{19})>")
 
 
 class basic(commands.Cog):
@@ -53,6 +54,12 @@ class basic(commands.Cog):
         )
 
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def giveaway(self, ctx: commands.Context):
+        view = GiveawaySettingsView(ctx.author, ctx.guild.id)
+        await ctx.send(embed=view.embed, view=view)
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
@@ -124,7 +131,7 @@ class basic(commands.Cog):
                 target_type=nextcord.InviteTarget.embedded_application,
                 target_application_id=activiti.get('id')
             )
-        except (nextcord.HTTPException, nextcord.NotFound):
+        except nextcord.HTTPException:
             await interaction.response.send_message(
                 content=i18n.t(lang, 'activiti.failed'))
             return

@@ -1,8 +1,13 @@
+from __future__ import annotations
 import asyncio
 from collections import namedtuple
+import time
+from typing import Any, TypeVar, overload
 import emoji
 
 import nextcord
+from nextcord.ext import commands
+
 
 import inspect
 import regex
@@ -20,8 +25,10 @@ from io import BytesIO
 from functools import lru_cache
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
+from cryptography.fernet import Fernet
 
 
+T = TypeVar('T')
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
@@ -123,6 +130,20 @@ class __LordFormatingTemplate(string.Template):
         return self.safe_substitute(__mapping)
 
 
+class Tokenizer:
+    @staticmethod
+    def encrypt(message: bytes, key: bytes) -> bytes:
+        return Fernet(key).encrypt(message)
+
+    @staticmethod
+    def decrypt(token: bytes, key: bytes) -> bytes:
+        return Fernet(key).decrypt(token)
+
+    @staticmethod
+    def generate_key() -> bytes:
+        return Fernet.generate_key()
+
+
 def lord_format(
     __value: object,
     __mapping: Mapping[str, object]
@@ -169,14 +190,23 @@ class LordTimerHandler:
         th = self.data.get(key)
         if th is None:
             return
-        coro: Coroutine = th._args[0]
-        coro.close()
+        arg = th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
         th.cancel()
 
-    def close_as_th(th: TimerHandle):
-        coro: Coroutine = th._args[0]
-        coro.close()
+    def close_as_th(self, th: TimerHandle):
+        arg = th._args and th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
         th.cancel()
+
+    def call_as_key(self, key: Union[str, int]):
+        th = self.data.get(key)
+        if th is None:
+            return
+        th._run()
+        self.close_as_th(th)
 
 
 def clamp(val: Union[int, float],
@@ -194,6 +224,24 @@ def is_emoji(text: str) -> bool:
     return False
 
 
+def randquan(quan: int) -> int:
+    if 0 >= quan:
+        raise ValueError
+    return random.randint(10**(quan-1), int('9'*quan))
+
+
+def generate_random_token() -> Tuple[str, str]:
+    message = randquan(100).to_bytes(100)
+    key = Fernet.generate_key()
+    token = Tokenizer.encrypt(message, key)
+    return key.decode(), token.decode()
+
+
+def decrypt_token(key: str, token: str) -> int:
+    res = Tokenizer.decrypt(token.encode(), key.encode())
+    return int.from_bytes(res)
+
+
 async def getRandomQuote(lang: str = 'en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
     async with aiohttp.ClientSession() as session:
@@ -202,26 +250,163 @@ async def getRandomQuote(lang: str = 'en'):
             return json
 
 
-def calculate_time(string: str) -> int:
-    coefficients = {
-        's': 1,
-        'm': 60,
-        'h': 3600,
-        'd': 86400
-    }
-    timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
-    ftime = 0
+class TimeCalculator:
+    def __init__(
+        self,
+        default_coefficient: int = 60,
+        refundable: T = int,
+        coefficients: Optional[dict] = None,
+        operatable_time: bool = False
+    ) -> None:
+        self.default_coefficient = default_coefficient
+        self.refundable = refundable
+        self.operatable_time = operatable_time
 
-    for number, word in timedate:
-        if word not in coefficients:
+        if coefficients is None:
+            self.coefficients = {
+                's': 1,
+                'm': 60,
+                'h': 3600,
+                'd': 86400
+            }
+        else:
+            self.coefficients = coefficients
+
+    @overload
+    def convert(
+        self,
+        argument: str
+    ) -> T:
+        pass
+
+    @overload
+    def convert(
+        self,
+        ctx: commands.Context,
+        argument: str
+    ) -> Coroutine[Any, Any, T]:
+        pass
+
+    def convert(self, *args) -> T | Coroutine[Any, Any, T]:
+        try:
+            return self.async_convert(*args)
+        except Exception:
+            pass
+
+        try:
+            return self.basic_convert(*args)
+        except Exception:
+            pass
+
+        raise TypeError
+
+    def basic_convert(
+        self,
+        argument: Any
+    ) -> T:
+        if not (isinstance(argument, str)
+                and regex.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
             raise TypeError('Format time is not valid!')
 
-        number = int(number)
-        multiplier = coefficients[word]
+        timedate: list[tuple[str, str]] = regex.findall(
+            r'(\d+)([a-zA-Z\s]+)', argument)
+        ftime = 0
 
-        ftime += number*multiplier
+        for number, word in timedate:
+            if word.strip() not in self.coefficients:
+                raise TypeError('Format time is not valid!')
 
-    return ftime
+            multiplier = self.coefficients[word.strip()]
+            ftime += int(number)*multiplier
+
+        if not ftime:
+            raise TypeError('Format time is not valid!')
+        if self.operatable_time:
+            ftime += time.time()
+
+        return self.refundable(ftime)
+
+    async def async_convert(
+        self,
+        ctx: commands.Context,
+        argument: Any
+    ) -> T:
+        return self.basic_convert(argument)
+
+
+def traslate_to_timestamp(arg: str) -> int | None:
+    try:
+        tdt = datetime.strptime(arg, '%H:%M')
+        return datetime(
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            hour=tdt.hour,
+            minute=tdt.minute
+        ).timestamp()
+    except ValueError:
+        pass
+    try:
+        tdt = datetime.strptime(arg, '%H:%M:%S')
+        return datetime(
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            hour=tdt.hour,
+            minute=tdt.minute,
+            second=tdt.second
+        ).timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y %H:%M').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y %H:%M:%S').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M %d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M:%S %d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M %Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M:%S %Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d %H:%M').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d %H:%M:%S').timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return TimeCalculator(operatable_time=True).convert(arg)
+    except ValueError:
+        pass
+
+    return None
 
 
 @lru_cache()
