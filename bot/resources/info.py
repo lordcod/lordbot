@@ -7,7 +7,7 @@ DEFAULT_LANGUAGE = 'en'
 DEFAULT_EMOJI = '<:diamond:1183363436780978186>'
 DEFAULT_ECONOMY_SETTINGS = orjson.dumps({'emoji': DEFAULT_EMOJI}).decode()
 
-COUNT_ROLES_PAGE = 2
+COUNT_ROLES_PAGE = 5
 
 activities_list = [
     {
