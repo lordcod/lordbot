@@ -17,7 +17,7 @@ class Reminder(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True)
+    @commands.command()
     async def reminder(self, ctx: commands.Context, time_now: calculate_time, *, text: str) -> None:
         self.bot.loop.call_later(
             time_now, asyncio.create_task, self.process_reminder(time.time(), ctx.channel, text))
