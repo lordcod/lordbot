@@ -35,6 +35,7 @@ class CreatePoll(nextcord.ui.Modal):
         await interaction.response.defer()
 
         gdb = GuildDateBases(interaction.guild_id)
+        color = gdb.get('color')
         polls = gdb.get('polls')
 
         question = self.question.value
@@ -54,7 +55,7 @@ class CreatePoll(nextcord.ui.Modal):
         embed = nextcord.Embed(
             title=question,
             description=description,
-            color=0xffba08
+            color=color
         )
         if sketch:
             embed.add_field(name='Description:', value=sketch)

@@ -26,6 +26,7 @@ class Polls(commands.Cog):
 
         gdb = GuildDateBases(interaction.guild_id)
         polls = gdb.get('polls')
+        color = gdb.get('color')
         poll_data: dict = polls.get(message.id, {})
 
         user_id = poll_data.get('user_id')
@@ -48,7 +49,7 @@ class Polls(commands.Cog):
         embed = nextcord.Embed(
             title=title,
             description=text,
-            color=0xffba08,
+            color=color,
             timestamp=interaction.created_at
         )
         embed.set_footer(text="The voting has been completed!")
