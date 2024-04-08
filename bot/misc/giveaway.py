@@ -60,18 +60,22 @@ class Giveaway:
         guild: nextcord.Guild,
         message_id: int
     ) -> None:
-        gdb = GuildDateBases(guild.id)
-        giveaways = gdb.get('giveaways')
-
-        if message_id not in giveaways:
-            raise TypeError
-
         self.guild = guild
         self.message_id = message_id
-        self.giveaway_data = giveaways.get(message_id)
+        self.gdb = GuildDateBases(guild.id)
+        self.fetch_giveaway_data()
+
+    def fetch_giveaway_data(self) -> None:
+        self.giveaways = self.gdb.get('giveaways')
+        self.giveaway_data = self.giveaways.get(self.message_id)
+
+    def update_giveaway_data(self, giveaway_data: GiveawayData) -> None:
+        self.giveaways = self.gdb.get('giveaways')
+        self.giveaways[self.message_id] = giveaway_data
+        self.gdb.set('giveaways', self.giveaways)
 
     @classmethod
-    def set_lord_timer_handler(cls, lord_handler_timer):
+    def set_lord_timer_handler(cls, lord_handler_timer) -> None:
         cls.lord_handler_timer = lord_handler_timer
 
     @classmethod
@@ -106,11 +110,9 @@ class Giveaway:
         }
 
         embed = cls.get_embed(giveaway_data)
-
         message = await channel.send(embed=embed, view=views_giveaway.GiveawayView())
 
         giveaways[message.id] = giveaway_data
-
         gdb.set('giveaways', giveaways)
 
         return cls(guild, message.id)
@@ -132,8 +134,7 @@ class Giveaway:
         )
 
     async def complete(self) -> None:
-        gdb = GuildDateBases(self.guild.id)
-        giveaways = gdb.get('giveaways')
+        self.fetch_giveaway_data()
 
         winner_number = utils.decrypt_token(
             self.giveaway_data.get('key'), self.giveaway_data.get('token'))
@@ -149,16 +150,19 @@ class Giveaway:
 
         self.giveaway_data['winners'] = winner_ids
         self.giveaway_data['completed'] = True
-        giveaways[self.message_id] = self.giveaway_data
-        gdb.set('giveaways', giveaways)
+        self.update_giveaway_data(self.giveaway_data)
 
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
+        gw_message = channel.get_partial_message(self.message_id)
 
         asyncio.create_task(self.update_message())
         asyncio.create_task(channel.send(
-            f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the {self.giveaway_data['prize']}!"))
+            f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the {self.giveaway_data['prize']}!",
+            reference=gw_message))
 
     async def update_message(self) -> None:
+        self.fetch_giveaway_data()
+
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
         message = channel.get_partial_message(self.message_id)
         embed = self.get_completed_embed() if self.giveaway_data.get(
@@ -181,9 +185,6 @@ class Giveaway:
                 f"Entries: **{len(giveaway_data.get('entries_ids'))}**\n"
                 f"Winners: **{giveaway_data.get('quantity')}**"
             )
-        )
-        embed.set_footer(
-            text=f"Key: {giveaway_data.get('key')}"
         )
 
         return embed
@@ -208,16 +209,15 @@ class Giveaway:
         return embed
 
     def check_participation(self, member_id: int) -> bool:
+        self.fetch_giveaway_data()
         return member_id in self.giveaway_data.get('entries_ids')
 
     def promote_participant(self, member_id: int) -> None:
-        gdb = GuildDateBases(self.guild.id)
-        giveaways = gdb.get('giveaways')
+        self.fetch_giveaway_data()
         self.giveaway_data.get('entries_ids').append(member_id)
-        giveaways[self.message_id] = self.giveaway_data
+        self.update_giveaway_data(self.giveaway_data)
 
     def demote_participant(self, member_id: int) -> None:
-        gdb = GuildDateBases(self.guild.id)
-        giveaways = gdb.get('giveaways')
+        self.fetch_giveaway_data()
         self.giveaway_data.get('entries_ids').remove(member_id)
-        giveaways[self.message_id] = self.giveaway_data
+        self.update_giveaway_data(self.giveaway_data)
