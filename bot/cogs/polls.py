@@ -3,11 +3,10 @@ import nextcord
 from nextcord.ext import commands
 
 
-from bot.databases import localdb
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.create_poll import CreatePoll
 
-db = localdb.get_table('polls')
 alphabet = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯',
             '🇰', '🇱', '🇲', '🇳', '🇴', '🇵', '🇶', '🇷', '🇸', '🇹',
             '🇺', '🇻', '🇼', '🇽', '🇾', '🇿']
@@ -25,7 +24,9 @@ class Polls(commands.Cog):
     async def finish_poll(self, interaction: nextcord.Interaction, message: nextcord.Message):
         await interaction.response.defer(ephemeral=True, with_message=False)
 
-        poll_data: dict = db.get(message.id, {})
+        gdb = GuildDateBases(interaction.guild_id)
+        polls = gdb.get('polls')
+        poll_data: dict = polls.get(message.id, {})
 
         user_id = poll_data.get('user_id')
         title = poll_data.get('title')
@@ -40,8 +41,8 @@ class Polls(commands.Cog):
             [react.count for react in message.reactions], start=-len(message.reactions))
         text = ''
         for num, opt in enumerate(options):
-            percent = (0 if total_count == 0 else (
-                message.reactions[num])/total_count) * 100
+            percent = (0 if total_count ==
+                       0 else message.reactions[num].count-1) / total_count * 100
             text += f'* **{percent :.0f}%**  |  {alphabet[num]} `{opt}`\n'
 
         embed = nextcord.Embed(
@@ -57,6 +58,4 @@ class Polls(commands.Cog):
 
 
 def setup(bot):
-    cog = Polls(bot)
-
-    bot.add_cog(cog)
+    bot.add_cog(Polls(bot))

@@ -1,10 +1,7 @@
 
 import nextcord
+from bot.databases import GuildDateBases
 
-
-from bot.databases import localdb
-
-db = localdb.get_table('polls')
 alphabet = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯',
             '🇰', '🇱', '🇲', '🇳', '🇴', '🇵', '🇶', '🇷', '🇸', '🇹', '🇺', '🇻', '🇼', '🇽', '🇾', '🇿']
 
@@ -36,6 +33,9 @@ class CreatePoll(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction):
         await interaction.response.defer()
+
+        gdb = GuildDateBases(interaction.guild_id)
+        polls = gdb.get('polls')
 
         question = self.question.value
         choices = self.choices.value.split('\n')[:len(alphabet)]
@@ -70,4 +70,6 @@ class CreatePoll(nextcord.ui.Modal):
             'user_id': interaction.user.id,
             'options': choices,
         }
-        db[message.id] = poll_data
+        polls[message.id] = poll_data
+
+        gdb.set('polls', polls)
