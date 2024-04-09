@@ -26,6 +26,7 @@ class ready_event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_disconnect(self):
+        await self.bot.session.close()
         Logger.core("Bot is disconnect")
 
     async def process_temp_bans(self):
@@ -43,9 +44,9 @@ class ready_event(commands.Cog):
 
         for (guild_id, member_id, role_id, role_time) in datas:
             if not (
-                (guild := self.bot.get_guild(guild_id)) and
-                (member := guild.get_member(member_id)) and
-                (role := guild.get_role(role_id))
+                (guild := self.bot.get_guild(guild_id))
+                and (member := guild.get_member(member_id))
+                and (role := guild.get_role(role_id))
             ):
                 continue
 
