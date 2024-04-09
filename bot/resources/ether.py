@@ -61,7 +61,7 @@ class Emoji(StrEnum):
     warn = '<a:warn:1165684798686244874>'
 
 
-Channel_Type = {
+channel_types_emoji = {
     0: Emoji.channel_text,
     1: Emoji.channel_text,
     2: Emoji.channel_voice,
