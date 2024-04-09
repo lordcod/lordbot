@@ -33,8 +33,7 @@ class Queue:
         return val
 
     def register_guild(self, guild_id):
-        if guild_id not in self.data:
-            self.data[guild_id] = []
+        self.data.setdefault(guild_id, [])
 
     def get_all(self, guild_id):
         self.register_guild(guild_id)
