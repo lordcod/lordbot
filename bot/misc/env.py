@@ -1,10 +1,9 @@
-from enum import StrEnum
 from os import environ
 from dotenv import load_dotenv
 load_dotenv()
 
 
-class Tokens(StrEnum):
+class Tokens:
     token_anprim = environ.get("anprim_token")
     token_lord_cord = environ.get("lordcord_token")
     token_lord_kind = environ.get("lordkind_token")
