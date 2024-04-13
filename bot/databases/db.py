@@ -25,10 +25,12 @@ class GuildsDB(Table):
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
     invites = Colum(data_type=PostType.JSON, default="{}")
+    giveaways = Colum(data_type=PostType.JSON, default="{}")
     tickettool = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
     auto_translate = Colum(data_type=PostType.JSON, default="{}")
+    polls = Colum(data_type=PostType.JSON, default="{}")
     greeting_message = Colum(data_type=PostType.JSON, default="{}")
     command_permissions = Colum(data_type=PostType.JSON, default="{}")
     ideas = Colum(data_type=PostType.JSON, default="{}")
@@ -44,3 +46,27 @@ class EconomicDB(Table):
     daily = Colum(data_type=PostType.BIGINT, default="0")
     weekly = Colum(data_type=PostType.BIGINT, default="0")
     monthly = Colum(data_type=PostType.BIGINT, default="0")
+
+
+class RolesDB(Table):
+    __tablename__ = "roles"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    role_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
+
+
+class BansDB(Table):
+    __tablename__ = "bans"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
+
+
+class MongoDataBases(Table):
+    __tablename__ = "mongo"
+
+    name = Colum(data_type=PostType.TEXT, primary_key=True)
+    values = Colum(data_type=PostType.JSON, default="{}")

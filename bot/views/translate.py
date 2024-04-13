@@ -15,8 +15,6 @@ class TranslateDropDown(nextcord.ui.Select):
 
         super().__init__(
             placeholder=i18n.t(locale, 'translate.placeholder'),
-            min_values=1,
-            max_values=1,
             options=[
                 nextcord.SelectOption(
                     label=lang.get('native_name'),
@@ -29,20 +27,18 @@ class TranslateDropDown(nextcord.ui.Select):
             ]
         )
 
-    async def callback(self, inter: nextcord.Interaction):
-        await inter.response.defer()
+    async def callback(self, interaction: nextcord.Interaction):
+        await interaction.response.defer()
 
         dest = self.values[0]
-        result = translator.translate(text=inter.message.content, dest=dest)
+        result = translator.translate(
+            text=interaction.message.content, dest=dest)
 
-        view = TranslateView(inter.guild_id, dest)
-
-        await inter.edit_original_message(content=result.text, view=view)
+        view = TranslateView(interaction.guild_id, dest)
+        await interaction.edit_original_message(content=result.text, view=view)
 
 
 class TranslateView(nextcord.ui.View):
     def __init__(self, guild_id: int, dest: Optional[str] = None) -> None:
         super().__init__(timeout=None)
-
-        TDD = TranslateDropDown(guild_id, dest)
-        self.add_item(TDD)
+        self.add_item(TranslateDropDown(guild_id, dest))
