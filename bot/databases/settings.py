@@ -227,10 +227,7 @@ class Table:
         force_colums: bool = True
     ) -> None:
         cls.__tablename__ = (cls.__tablename__ or cls.__name__).lower()
-        cls.force_colums = force_colums
 
-    @classmethod
-    def create_table(cls):
         engine.execute(
             f"CREATE TABLE IF NOT EXISTS {cls.__tablename__} ()")
 
@@ -243,6 +240,6 @@ class Table:
             item.name = item.name or name
             reserved_colums.append(item.name)
             TableAPI.add_colum(cls.__tablename__, item, cls.colums)
-        if cls.force_colums is True:
+        if force_colums is True:
             TableAPI.delete_ofter_colums(
                 cls.__tablename__, cls.colums, reserved_colums)

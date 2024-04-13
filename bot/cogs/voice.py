@@ -36,10 +36,9 @@ YANDEX_MUSIC_SEARCH = re.compile(
 class Voice(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-        requests = YaRequsts(bot.session)
+        requsts = YaRequsts(bot.session)
         self.yandex_client = YaClient(environ.get(
-            'yandex_api_token'), requests=requests)
-        self.bot.ya_requests = requests
+            'yandex_api_token'), requests=requsts)
 
     @commands.command()
     async def join(self, ctx: commands.Context):

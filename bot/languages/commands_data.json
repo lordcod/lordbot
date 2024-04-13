@@ -6,17 +6,7 @@
             "bal"
         ],
         "arguments": [
-            {
-                "en": "[member]",
-                "da": "[medlem]",
-                "de": "[Mitglied]",
-                "es": "[miembro]",
-                "fr": "[membre]",
-                "id": "[anggota]",
-                "pl": "[członek]",
-                "ru": "[участник]",
-                "tr": "[üye]"
-            }
+            "[member]"
         ],
         "examples": [
             [
@@ -124,28 +114,8 @@
         "category": "economy",
         "aliases": [],
         "arguments": [
-            {
-                "en": "<member>",
-                "da": "<medlem>",
-                "de": "<Mitglied>",
-                "es": "<miembro>",
-                "fr": "<membre>",
-                "id": "<anggota>",
-                "pl": "<członek>",
-                "ru": "<участник>",
-                "tr": "<üye>"
-            },
-            {
-                "en": "<amount>",
-                "da": "<beløb>",
-                "de": "<Betrag>",
-                "es": "<cantidad>",
-                "fr": "<montant>",
-                "id": "<jumlah>",
-                "pl": "<kwota>",
-                "ru": "<сумма>",
-                "tr": "<miktar>"
-            }
+            "<member>",
+            "<amount>"
         ],
         "examples": [
             [
@@ -295,17 +265,7 @@
             "dep"
         ],
         "arguments": [
-            {
-                "en": "<amount>",
-                "da": "<beløb>",
-                "de": "<Betrag>",
-                "es": "<cantidad>",
-                "fr": "<montant>",
-                "id": "<jumlah>",
-                "pl": "<kwota>",
-                "ru": "<сумма>",
-                "tr": "<miktar>"
-            }
+            "<amount>"
         ],
         "examples": [
             [
@@ -368,17 +328,7 @@
             "wd"
         ],
         "arguments": [
-            {
-                "en": "<amount>",
-                "da": "<beløb>",
-                "de": "<Betrag>",
-                "es": "<cantidad>",
-                "fr": "<montant>",
-                "id": "<jumlah>",
-                "pl": "<kwota>",
-                "ru": "<сумма>",
-                "tr": "<miktar>"
-            }
+            "<amount>"
         ],
         "examples": [
             [
@@ -439,28 +389,8 @@
         "category": "economy",
         "aliases": [],
         "arguments": [
-            {
-                "en": "[member]",
-                "da": "[medlem]",
-                "de": "[Mitglied]",
-                "es": "[miembro]",
-                "fr": "[membre]",
-                "id": "[anggota]",
-                "pl": "[członek]",
-                "ru": "[участник]",
-                "tr": "[üye]"
-            },
-            {
-                "en": "<amount>",
-                "da": "<beløb>",
-                "de": "<Betrag>",
-                "es": "<cantidad>",
-                "fr": "<montant>",
-                "id": "<jumlah>",
-                "pl": "<kwota>",
-                "ru": "<сумма>",
-                "tr": "<miktar>"
-            }
+            "[member]",
+            "<amount>"
         ],
         "examples": [
             [
@@ -521,28 +451,8 @@
         "category": "economy",
         "aliases": [],
         "arguments": [
-            {
-                "en": "[member]",
-                "da": "[medlem]",
-                "de": "[Mitglied]",
-                "es": "[miembro]",
-                "fr": "[membre]",
-                "id": "[anggota]",
-                "pl": "[członek]",
-                "ru": "[участник]",
-                "tr": "[üye]"
-            },
-            {
-                "en": "<amount>",
-                "da": "<beløb>",
-                "de": "<Betrag>",
-                "es": "<cantidad>",
-                "fr": "<montant>",
-                "id": "<jumlah>",
-                "pl": "<kwota>",
-                "ru": "<сумма>",
-                "tr": "<miktar>"
-            }
+            "[member]",
+            "<amount>"
         ],
         "examples": [
             [
@@ -563,7 +473,7 @@
                 "take @lordcode 100",
                 {
                     "en": "Takes member lordcode 100 coins.",
-                    "ru": "Берет участника лорд-кода 100 монет.",
+                    "ru": "Берет члена лорд-кода 100 монет.",
                     "id": "Mengambil lordcode anggota 100 koin.",
                     "da": "Tager medlem herrekode 100 mønter.",
                     "de": "Benötigt Mitglieds-Lordcode 100 Münzen.",
@@ -603,17 +513,7 @@
         "category": "major",
         "aliases": [],
         "arguments": [
-            {
-                "en": "[command]",
-                "da": "[kommando]",
-                "de": "[Befehl]",
-                "es": "[dominio]",
-                "fr": "[commande]",
-                "id": "[memerintah]",
-                "pl": "[Komenda]",
-                "ru": "[команда]",
-                "tr": "[emretmek]"
-            }
+            "[command]"
         ],
         "examples": [
             [
@@ -805,17 +705,7 @@
         "category": "voice",
         "aliases": [],
         "arguments": [
-            {
-                "en": "<title/url>",
-                "da": "<title/url>",
-                "de": "<Titel/URL>",
-                "es": "<título/url>",
-                "fr": "<titre/url>",
-                "id": "<judul/url>",
-                "pl": "<tytuł/url>",
-                "ru": "<название/URL>",
-                "tr": "<başlık/url>"
-            }
+            "<title/url>"
         ],
         "examples": [
             [
@@ -963,17 +853,7 @@
         "category": "voice",
         "aliases": [],
         "arguments": [
-            {
-                "en": "<volume>",
-                "da": "<volumen>",
-                "de": "<Lautstärke>",
-                "es": "<volumen>",
-                "fr": "<volume>",
-                "id": "<volume>",
-                "pl": "<objętość>",
-                "ru": "<громкость>",
-                "tr": "<hacim>"
-            }
+            "<volume>"
         ],
         "examples": [
             [
@@ -1023,17 +903,7 @@
             "clean"
         ],
         "arguments": [
-            {
-                "en": "<limit>",
-                "da": "<grænse>",
-                "de": "<Limit>",
-                "es": "<límite>",
-                "fr": "<limite>",
-                "id": "<batas>",
-                "pl": "<limit>",
-                "ru": "<предел>",
-                "tr": "<sınır>"
-            }
+            "<limit>"
         ],
         "examples": [
             [
@@ -1083,28 +953,8 @@
             "clean user"
         ],
         "arguments": [
-            {
-                "en": "<member>",
-                "da": "<medlem>",
-                "de": "<Mitglied>",
-                "es": "<miembro>",
-                "fr": "<membre>",
-                "id": "<anggota>",
-                "pl": "<członek>",
-                "ru": "<участник>",
-                "tr": "<üye>"
-            },
-            {
-                "en": "<limit>",
-                "da": "<grænse>",
-                "de": "<Limit>",
-                "es": "<límite>",
-                "fr": "<limite>",
-                "id": "<batas>",
-                "pl": "<limit>",
-                "ru": "<предел>",
-                "tr": "<sınır>"
-            }
+            "<member>",
+            "<limit>"
         ],
         "examples": [
             [
@@ -1154,28 +1004,8 @@
             "clean between"
         ],
         "arguments": [
-            {
-                "en": "<message_start>",
-                "da": "<besked_start>",
-                "de": "<message_start>",
-                "es": "<mensaje_inicio>",
-                "fr": "<début_message>",
-                "id": "<pesan_mulai>",
-                "pl": "<początek_wiadomości>",
-                "ru": "<начало_сообщения>",
-                "tr": "<message_start>"
-            },
-            {
-                "en": "[message_stop]",
-                "da": "[besked_stop]",
-                "de": "[message_stop]",
-                "es": "[mensaje_parada]",
-                "fr": "[message_stop]",
-                "id": "[pesan_berhenti]",
-                "pl": "[wiadomość_stop]",
-                "ru": "[message_stop]",
-                "tr": "[message_stop]"
-            }
+            "<message_start>",
+            "[message_stop]"
         ],
         "examples": [
             [
@@ -1238,39 +1068,9 @@
             "tempban"
         ],
         "arguments": [
-            {
-                "en": "<member>",
-                "da": "<medlem>",
-                "de": "<Mitglied>",
-                "es": "<miembro>",
-                "fr": "<membre>",
-                "id": "<anggota>",
-                "pl": "<członek>",
-                "ru": "<участник>",
-                "tr": "<üye>"
-            },
-            {
-                "en": "<time>",
-                "da": "<tid>",
-                "de": "<Zeit>",
-                "es": "<hora>",
-                "fr": "<heure>",
-                "id": "<waktu>",
-                "pl": "<czas>",
-                "ru": "<время>",
-                "tr": "<zaman>"
-            },
-            {
-                "en": "[reason]",
-                "da": "[grund]",
-                "de": "[Grund]",
-                "es": "[razón]",
-                "fr": "[raison]",
-                "id": "[alasan]",
-                "pl": "[powód]",
-                "ru": "[причина]",
-                "tr": "[sebep]"
-            }
+            "<member>",
+            "<time>",
+            "[reason]"
         ],
         "examples": [
             [
@@ -1363,39 +1163,9 @@
         "category": "moderation",
         "aliases": [],
         "arguments": [
-            {
-                "en": "<member>",
-                "da": "<medlem>",
-                "de": "<Mitglied>",
-                "es": "<miembro>",
-                "fr": "<membre>",
-                "id": "<anggota>",
-                "pl": "<członek>",
-                "ru": "<участник>",
-                "tr": "<üye>"
-            },
-            {
-                "en": "<role>",
-                "da": "<rolle>",
-                "de": "<Rolle>",
-                "es": "<rol>",
-                "fr": "<rôle>",
-                "id": "<peran>",
-                "pl": "<rola>",
-                "ru": "<роль>",
-                "tr": "<rol>"
-            },
-            {
-                "en": "<time>",
-                "da": "<tid>",
-                "de": "<Zeit>",
-                "es": "<hora>",
-                "fr": "<heure>",
-                "id": "<waktu>",
-                "pl": "<czas>",
-                "ru": "<время>",
-                "tr": "<zaman>"
-            }
+            "<member>",
+            "<role>",
+            "<time>"
         ],
         "examples": [
             [
@@ -1442,17 +1212,7 @@
         "category": "moderation",
         "aliases": [],
         "arguments": [
-            {
-                "en": "[member]",
-                "da": "[medlem]",
-                "de": "[Mitglied]",
-                "es": "[miembro]",
-                "fr": "[membre]",
-                "id": "[anggota]",
-                "pl": "[członek]",
-                "ru": "[участник]",
-                "tr": "[üye]"
-            }
+            "[member]"
         ],
         "examples": [
             [
@@ -1513,17 +1273,7 @@
         "category": "moderation",
         "aliases": [],
         "arguments": [
-            {
-                "en": "<text/json>",
-                "da": "<text/json>",
-                "de": "<text/json>",
-                "es": "<texto/json>",
-                "fr": "<texte/json>",
-                "id": "<teks/json>",
-                "pl": "<tekst/json>",
-                "ru": "<текст/json>",
-                "tr": "<metin/json>"
-            }
+            "<text/json>"
         ],
         "examples": [
             [
