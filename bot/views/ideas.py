@@ -306,8 +306,8 @@ class IdeaView(nextcord.ui.View):
 
         gdb = GuildDateBases(interaction.guild_id)
         ideas_data: IdeasPayload = gdb.get('ideas')
-        enabled: bool = ideas_data.get('enabled', False)
-        if enabled is False:
+        enabled: bool = ideas_data.get('enabled')
+        if not enabled:
             await interaction.response.send_message(i18n.t(locale, 'ideas.globals.ideas-disabled'), ephemeral=True)
             return
 

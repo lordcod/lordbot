@@ -24,7 +24,7 @@ def on_error(func):
     return wrapped
 
 
-class members_event(commands.Cog):
+class MembersEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -133,4 +133,4 @@ class members_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(members_event(bot))
+    bot.add_cog(MembersEvent(bot))

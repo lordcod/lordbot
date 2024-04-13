@@ -1,3 +1,4 @@
+
 import nextcord
 from nextcord.ext import commands
 from bot.misc.lordbot import LordBot
@@ -18,10 +19,15 @@ class PermissionChecker:
         self.ctx = ctx
 
     async def process(self) -> bool:
+        if self.ctx.guild is None:
+            return True
+
         ctx = self.ctx
         command_name = ctx.command.qualified_name
         cdb = CommandDB(ctx.guild.id)
         self.command_permissions = cdb.get(command_name, {})
+
+        return True
 
         enabled = await self.is_enabled()
         allowed = await self.is_allowed()
@@ -101,15 +107,15 @@ class PermissionChecker:
     }
 
 
-class command_event(commands.Cog):
+class CommandEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
-        # bot.add_event(self.on_error)
-        bot.add_event(self.on_command_error)
-        bot.add_event(self.on_application_error)
+        # bot.set_event(self.on_error)
+        bot.set_event(self.on_command_error)
+        bot.set_event(self.on_application_error)
 
         bot.add_check(self.permission_check)
 
@@ -136,4 +142,4 @@ class command_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(command_event(bot))
+    bot.add_cog(CommandEvent(bot))

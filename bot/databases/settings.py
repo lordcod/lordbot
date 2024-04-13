@@ -93,7 +93,7 @@ class Colum:
 
     def add_colum(self, table_name: str) -> None:
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     ADD {self.name} {self.data_type.value}
                     {" PRIMARY KEY" if self.primary_key is True else ""}
@@ -104,7 +104,7 @@ class Colum:
 
     def drop_colum(self, table_name: str) -> None:
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     DROP COLUMN {self.name};
                 """
@@ -113,7 +113,7 @@ class Colum:
     def change_name(self, table_name: str, new_name: str) -> None:
         self.name = new_name
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     RENAME COLUMN {self.name} TO {new_name};
                 """
@@ -122,7 +122,7 @@ class Colum:
     def change_default(self, table_name: str, new_default: str) -> None:
         self.default = new_default
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     ALTER COLUMN {self.name} SET DEFAULT '{new_default}';
                 """
@@ -130,7 +130,7 @@ class Colum:
 
     def change_type(self, table_name: str, new_type: PostType) -> None:
         engine.execute(
-            f"""
+                f"""
                     ALTER TABLE {table_name}
                     ALTER COLUMN {self.name} TYPE {new_type.value};
                 """
@@ -227,7 +227,10 @@ class Table:
         force_colums: bool = True
     ) -> None:
         cls.__tablename__ = (cls.__tablename__ or cls.__name__).lower()
+        cls.force_colums = force_colums
 
+    @classmethod
+    def create_table(cls):
         engine.execute(
             f"CREATE TABLE IF NOT EXISTS {cls.__tablename__} ()")
 
@@ -240,6 +243,6 @@ class Table:
             item.name = item.name or name
             reserved_colums.append(item.name)
             TableAPI.add_colum(cls.__tablename__, item, cls.colums)
-        if force_colums is True:
+        if cls.force_colums is True:
             TableAPI.delete_ofter_colums(
                 cls.__tablename__, cls.colums, reserved_colums)

@@ -8,7 +8,7 @@ from .._view import DefaultSettingsView
 
 from bot.views import settings_menu
 from bot.databases import GuildDateBases
-from bot.resources.ether import Channel_Type
+from bot.resources.ether import channel_types_emoji
 
 
 class DropDown(nextcord.ui.StringSelect):
@@ -23,7 +23,7 @@ class DropDown(nextcord.ui.StringSelect):
         options = [
             nextcord.SelectOption(
                 label=chnl.name,
-                emoji=Channel_Type[chnl.type.value],
+                emoji=channel_types_emoji[chnl.type.value],
                 value=chnl.id
             )
             for chnl in channels
