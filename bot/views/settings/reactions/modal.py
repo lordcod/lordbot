@@ -1,5 +1,7 @@
 import nextcord
 
+from bot.misc.utils import is_emoji
+
 from .. import reactions
 
 from bot.databases import GuildDateBases
@@ -26,6 +28,7 @@ class ModalBuilder(nextcord.ui.Modal):
             label=i18n.t(
                 locale, 'settings.reactions.modal.label'),
             placeholder='<:name:id>',
+            default_value=None,
             required=False
         )
 
@@ -33,6 +36,7 @@ class ModalBuilder(nextcord.ui.Modal):
             label=i18n.t(
                 locale, 'settings.reactions.modal.label'),
             placeholder='😀',
+            default_value=None,
             required=False
         )
 
@@ -43,15 +47,16 @@ class ModalBuilder(nextcord.ui.Modal):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
         reacts: dict = gdb.get('reactions')
-        emojis = [self.emoji_1.value]
+        emojis = list(filter(
+            lambda item: item,
+            [self.emoji_1.value, self.emoji_2.value, self.emoji_3.value]
+        ))
 
-        emoji_2 = self.emoji_2.value
-        if emoji_2:
-            emojis.append(emoji_2)
-
-        emoji_3 = self.emoji_3.value
-        if emoji_3:
-            emojis.append(emoji_3)
+        for num, emo in enumerate(emojis, start=1):
+            if not is_emoji(emo):
+                await interaction.response.send_message(
+                    f"You have entered an incorrect emoji into the form number {num}", ephemeral=True)
+                return
 
         channel_id = self.channel_id
         reacts[channel_id] = emojis

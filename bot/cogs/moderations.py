@@ -62,6 +62,9 @@ class moderations(commands.Cog):
         locale = gdb.get('language')
         color = gdb.get('color')
 
+        self.bot.lord_handler_timer.close_as_key(
+            f"ban:{ctx.guild.id}:{member.id}")
+
         embed = nextcord.Embed(
             title="Temporary ban granted!",
             description=(
@@ -82,10 +85,9 @@ class moderations(commands.Cog):
                 value=reason,
                 inline=False
             )
-
         if ftime is not None:
-            self.bot.loop.call_later(
-                ftime, asyncio.create_task, bsdb.remove_ban(ctx.guild._state))
+            self.bot.lord_handler_timer.create_timer_handler(
+                ftime, bsdb.remove_ban(ctx.guild._state), f"ban:{ctx.guild.id}:{member.id}")
 
             bsdb.insert(ftime+time.time())
 
@@ -131,9 +133,8 @@ class moderations(commands.Cog):
         _role_time = rsdb.get_as_role(role.id)
 
         if _role_time is not None:
-            self.bot.role_timer_handlers.cancel_th(ctx.guild.id,
-                                                   member.id,
-                                                   role.id)
+            self.bot.lord_handler_timer.close_as_key(
+                f"role:{ctx.guild.id}:{member.id}:{role.id}")
             embed = nextcord.Embed(
                 title="The duration of the role has been changed",
                 color=color)
@@ -164,11 +165,8 @@ class moderations(commands.Cog):
 
         rsdb.set_role(role.id, ftime+time.time())
 
-        rth = self.bot.loop.call_later(
-            ftime, asyncio.create_task, rsdb.remove_role(member, role))
-
-        self.bot.role_timer_handlers.add_th(
-            ctx.guild.id, member.id, role.id, rth)
+        self.bot.lord_handler_timer.create_timer_handler(
+            ftime, rsdb.remove_role(member, role), f"role:{ctx.guild.id}:{member.id}:{role.id}")
 
         await member.add_roles(role)
 

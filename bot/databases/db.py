@@ -31,6 +31,7 @@ class GuildsDB(Table):
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
     auto_translate = Colum(data_type=PostType.JSON, default="{}")
+    polls = Colum(data_type=PostType.JSON, default="{}")
     greeting_message = Colum(data_type=PostType.JSON, default="{}")
     command_permissions = Colum(data_type=PostType.JSON, default="{}")
     ideas = Colum(data_type=PostType.JSON, default="{}")
