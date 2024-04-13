@@ -28,7 +28,7 @@ class Queue:
     def __init__(self) -> None:
         self.data = {}
 
-    def token_generator(self) -> int:
+    def token_generate(self) -> int:
         val = random.randint(1000000, 9999999)
         return val
 
