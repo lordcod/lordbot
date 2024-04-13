@@ -5,11 +5,14 @@ from os import environ
 
 token = environ["lordkind_token"]
 
+
 class MyBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.ipc = ipc.Server(self, host="192.168.1.15", secret_key="my_secret_key")  # create our IPC Server
+        # create our IPC Server
+        self.ipc = ipc.Server(self, host="localhost",
+                              secret_key="my_secret_key")
 
     async def on_ready(self):
         """Called upon the READY event"""
@@ -30,9 +33,7 @@ my_bot = MyBot(command_prefix="!", intents=nextcord.Intents.all())
 
 @my_bot.ipc.route()
 async def get_member_count(data):
-    guild = my_bot.get_guild(data.guild_id)  # get the guild object using parsed guild_id
-    
-    return guild.member_count  # return the member count to the client
+    return 100
 
 
 if __name__ == "__main__":

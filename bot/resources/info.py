@@ -1,10 +1,11 @@
 import orjson
+from bot.resources.ether import Emoji
 
 
 DEFAULT_PREFIX = 'l.'
 DEFAULT_COLOR = 2829617
 DEFAULT_LANGUAGE = 'en'
-DEFAULT_EMOJI = '<:diamond:1183363436780978186>'
+DEFAULT_EMOJI = Emoji.diamod
 DEFAULT_ECONOMY_SETTINGS = orjson.dumps({'emoji': DEFAULT_EMOJI}).decode()
 
 COUNT_ROLES_PAGE = 5

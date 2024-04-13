@@ -1,3 +1,4 @@
+import nextcord
 from nextcord.ext import commands
 
 from bot.misc.logger import Logger
@@ -6,13 +7,14 @@ from bot.misc.lordbot import LordBot
 from bot.views.ideas import (ConfirmView, IdeaView)
 
 import time
-import asyncio
 
 
 class ready_event(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
+        bot.set_event(self.on_disconnect)
+        bot.set_event(self.on_shard_connect)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -22,9 +24,13 @@ class ready_event(commands.Cog):
         self.bot.add_view(ConfirmView())
         self.bot.add_view(IdeaView())
 
+        await self.bot.change_presence(activity=nextcord.Game(name=f"Alpha test bot"))
+
         Logger.success(f"The bot is registered as {self.bot.user}")
 
-    @commands.Cog.listener()
+    async def on_shard_connect(self, shard_int: int):
+        Logger.success("Conneted shard {}".format(shard_int))
+
     async def on_disconnect(self):
         await self.bot.session.close()
         Logger.core("Bot is disconnect")

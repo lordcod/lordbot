@@ -3,7 +3,7 @@ from nextcord.ext import ipc
 
 
 async def main():
-    ipc_client = ipc.Client(host="192.168.1.15", secret_key="my_secret_key")
+    ipc_client = ipc.Client(host="localhost", secret_key="my_secret_key")
 
     await asyncio.sleep(5)
 
