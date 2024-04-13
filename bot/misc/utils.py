@@ -206,48 +206,6 @@ class LordTimerHandler:
 
 
 class FissionIterator:
-    __list = None
-
-    def __init__(self, iterable: Iterable[Any], count: int) -> None:
-        self.iterable = list(iterable)
-        self.count = count
-        self.value = 0
-        self.max_value = False
-        self.__list = self.to_list()
-
-    def __iter__(self) -> Self:
-        return self
-
-    def __next__(self) -> Any:
-        if self.max_value:
-            raise StopIteration
-        items = []
-        stop = self.value+self.count
-        if stop >= len(self.iterable):
-            stop = len(self.iterable)
-            self.max_value = True
-        for item in self.iterable[self.value:stop]:
-            items.append(item)
-        self.value = stop
-        return items
-
-    def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
-        return self.__list[__value]
-
-    def to_list(self):
-        if self.__list is None:
-            return list(iter(self))
-        return self.__list
-
-    def call_as_key(self, key: Union[str, int]):
-        th = self.data.get(key)
-        if th is None:
-            return
-        th._run()
-        self.close_as_th(th)
-
-
-class FissionIterator:
     def __init__(self, iterable: Iterable[Any], count: int) -> None:
         self.iterable = list(iterable)
         self.count = count
@@ -286,6 +244,24 @@ def clamp(val: Union[int, float],
 def is_emoji(text: str) -> bool:
     text = text.strip()
     return any((regex.fullmatch(r'<a?:.+?:\d{18}>', text), text in emoji.EMOJI_DATA))
+
+
+def randquan(quan: int) -> int:
+    if 0 >= quan:
+        raise ValueError
+    return random.randint(10**(quan-1), int('9'*quan))
+
+
+def generate_random_token() -> Tuple[str, str]:
+    message = randquan(100).to_bytes(100)
+    key = Fernet.generate_key()
+    token = Tokenizer.encrypt(message, key)
+    return key.decode(), token.decode()
+
+
+def decrypt_token(key: str, token: str) -> int:
+    res = Tokenizer.decrypt(token.encode(), key.encode())
+    return int.from_bytes(res)
 
 
 async def getRandomQuote(lang: str = 'en'):

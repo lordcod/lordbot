@@ -2,9 +2,8 @@ import asyncio
 import nextcord
 from nextcord.ext import commands
 
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
-
-nextcord.ui.Button.to_component_dict
 
 
 class InteractionsEvent(commands.Cog):
@@ -14,15 +13,20 @@ class InteractionsEvent(commands.Cog):
         super().__init__()
 
     async def dis_interaction_failed(self, interaction: nextcord.Interaction):
-        if interaction.type not in (2, 3, 5):
+        gdb = GuildDateBases(interaction.guild_id)
+        color = gdb.get('color')
+
+        if interaction.type not in {2, 3, 5}:
             return
+
         await asyncio.sleep(2.5-self.bot.latency)
         if interaction.response.is_done():
             return
 
         embed = nextcord.Embed(
             title="The interaction time has expired",
-            description="If you need to use the interaction, call the associated command"
+            description="If you need to use the interaction, call the associated command",
+            color=color
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 

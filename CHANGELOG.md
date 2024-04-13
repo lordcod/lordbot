@@ -1,6 +1,13 @@
 # 📑 Change Log
 
 
+## Alpha/v0.3.1
+
+14.04.2024
+
+### What's Changed
+
+
 ## Alpha/v0.2.2
 
 09.03.2024
