@@ -2,7 +2,7 @@ import asyncio
 import functools
 
 
-def transfer_to_async(cls):
+def to_coroutine(cls):
     @functools.wraps(cls)
     async def wrapped(*args, **kwargs):
         self = cls(*args, **kwargs)
@@ -11,7 +11,7 @@ def transfer_to_async(cls):
     return wrapped
 
 
-@transfer_to_async
+@to_coroutine
 class Test:
     "| Coroutine |"
 
