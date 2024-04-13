@@ -3,8 +3,9 @@ from nextcord import ui
 
 
 class Main(ui.View):
-    def __init__(self, value: list):
-        super().__init__(timeout=None)
+
+    def __init__(self, value: list, timeout: float | None = None):
+        super().__init__(timeout=timeout)
         self.len = len(value)
         self.index = 0
         self.value = value
@@ -97,6 +98,6 @@ class Main(ui.View):
                           button: nextcord.ui.Button,
                           interaction: nextcord.Interaction):
         self.index = self.len-1
-        self.handler_disable()
+        await self.handler_disable()
         await self.next(button, interaction)
         await self.callback(button, interaction)
