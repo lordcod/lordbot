@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Coroutine
 import nextcord
 import asyncio
@@ -45,6 +46,11 @@ class DelCatView(nextcord.ui.View):
                 self.locale, "delcat.accept.description", count=len(self.category.channels)),
             color=0x57F287
         )
+
+        for channel in self.category.channels:
+            asyncio.create_task(channel.delete())
+        await self.category.delete()
+
         await interaction.message.edit(embed=embed, view=None)
 
     @ nextcord.ui.button(label="Cancel", style=nextcord.ButtonStyle.red)
