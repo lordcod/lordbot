@@ -72,9 +72,8 @@ class ShopAcceptView(nextcord.ui.View):
             reason="Buying a role in the store"
         )
         for rd in shop_info:
-            if rd.get('role_id') != self.data.get('role_id'):
-                continue
-            rd['using_limit'] = rd.get('using_limit', 0) + 1
+            if rd.get('role_id') == self.data.get('role_id'):
+                rd['using_limit'] = rd.get('using_limit', 0) + 1
         economy_settings['shop'] = shop_info
         self.gdb.set('economic_settings', economy_settings)
         emdb['balance'] -= self.data.get('amount')

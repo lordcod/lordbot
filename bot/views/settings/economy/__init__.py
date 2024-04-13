@@ -2,6 +2,7 @@ import nextcord
 
 from .emoji import EmojiView
 from .bonuses import Bonus
+from .shop import ShopView
 from .._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
@@ -17,7 +18,10 @@ class DropDown(nextcord.ui.Select):
             ),
             nextcord.SelectOption(
                 label='Change the emoji', emoji=Emoji.emoji, value='emoji'
-            )
+            ),
+            nextcord.SelectOption(
+                label='Change the shop roles', emoji=Emoji.auto_role, value='shop'
+            ),
         ]
 
         super().__init__(
@@ -29,11 +33,12 @@ class DropDown(nextcord.ui.Select):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
-        lists = {
+        distrubutes = {
             'bonus': Bonus,
-            'emoji': EmojiView
+            'emoji': EmojiView,
+            'shop': ShopView
         }
-        view = lists[value](interaction.guild)
+        view = distrubutes[value](interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)
 
 
@@ -57,9 +62,8 @@ class Economy(DefaultSettingsView):
 
         super().__init__()
 
-        self.economy_dd = DropDown()
-
-        self.add_item(self.economy_dd)
+        economy_dd = DropDown()
+        self.add_item(economy_dd)
 
         if operate:
             self.economy_switcher.label = "Disable"
@@ -70,7 +74,7 @@ class Economy(DefaultSettingsView):
             self.economy_switcher.style = nextcord.ButtonStyle.green
             self.economy_switcher_value = True
 
-            self.economy_dd.disabled = True
+            economy_dd.disabled = True
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
