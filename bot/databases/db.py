@@ -47,5 +47,25 @@ class EconomicDB(Table):
     monthly = Colum(data_type=PostType.BIGINT, default="0")
 
 
-GuildsDB.create_table()
-EconomicDB.create_table()
+class RolesDB(Table):
+    __tablename__ = "roles"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    role_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
+
+
+class BansDB(Table):
+    __tablename__ = "bans"
+
+    guild_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    member_id = Colum(data_type=PostType.BIGINT, nullable=True)
+    time = Colum(data_type=PostType.BIGINT, nullable=True)
+
+
+class MongoDataBases(Table):
+    __tablename__ = "mongo"
+
+    name = Colum(data_type=PostType.TEXT, primary_key=True)
+    values = Colum(data_type=PostType.JSON, default="{}")
