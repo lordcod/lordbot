@@ -5,7 +5,7 @@ from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 
-class guilds_event(commands.Cog):
+class GuildsEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -24,4 +24,4 @@ class guilds_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(guilds_event(bot))
+    bot.add_cog(GuildsEvent(bot))

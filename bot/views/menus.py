@@ -3,16 +3,18 @@ from nextcord import ui
 
 
 class Main(ui.View):
+
     def __init__(self, value: list, timeout: float | None = None):
         super().__init__(timeout=timeout)
-        self.len = len(value)-1
+        self.len = len(value)
         self.index = 0
         self.value = value
+        self.handler_disable()
 
     def custom_emoji(self, **kwargs):
-        for kw in kwargs:
-            atr = getattr(self, f'button_{kw}')
-            atr.emoji = kwargs[kw]
+        for key, value in kwargs.items():
+            atr = getattr(self, f'button_{key}')
+            setattr(atr, 'emoji', value)
 
     def handler_disable(self):
         if self.index > 0:
@@ -23,11 +25,11 @@ class Main(ui.View):
             self.button_previous.disabled = True
             self.button_backward.disabled = True
 
-        if self.index < self.len:
+        if self.index < self.len-1:
             self.button_forward.disabled = False
             self.button_next.disabled = False
 
-        if self.index >= self.len:
+        if self.index >= self.len-1:
             self.button_forward.disabled = True
             self.button_next.disabled = True
 
@@ -82,7 +84,7 @@ class Main(ui.View):
         await self.backward(button, interaction)
         await self.callback(button, interaction)
 
-    @ui.button(emoji='▶', style=nextcord.ButtonStyle.grey, custom_id='12girni3')
+    @ui.button(emoji='▶', style=nextcord.ButtonStyle.grey)
     async def button_forward(self,
                              button: nextcord.ui.Button,
                              interaction: nextcord.Interaction):
@@ -95,7 +97,7 @@ class Main(ui.View):
     async def button_next(self,
                           button: nextcord.ui.Button,
                           interaction: nextcord.Interaction):
-        self.index = self.len
-        self.handler_disable()
+        self.index = self.len-1
+        await self.handler_disable()
         await self.next(button, interaction)
         await self.callback(button, interaction)
