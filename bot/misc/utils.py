@@ -1,5 +1,13 @@
+from __future__ import annotations
+import asyncio
 from collections import namedtuple
+import time
+from typing import Any, TypeVar, overload
+import emoji
+
 import nextcord
+from nextcord.ext import commands
+
 
 import inspect
 import regex
@@ -7,17 +15,20 @@ import string
 import random
 import aiohttp
 import orjson
+import threading
 
 from asyncio import TimerHandle
-from typing import Coroutine, Self, Tuple, Union, Mapping
+from typing import Any, Coroutine, Dict, Iterable,  Optional, Self, SupportsIndex,  Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 from functools import lru_cache
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
+from cryptography.fernet import Fernet
 
 
+T = TypeVar('T')
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
@@ -29,46 +40,6 @@ welcome_message_items = {
     "magic-city": wel_mes("Magic city", "https://i.postimg.cc/hjJzk4kN/magic-city.jpg", "The beautiful atmosphere and scenic views from the boat."),
     "city-dawn": wel_mes("City dawn", "https://i.postimg.cc/13J84NPL/city-dawn.jpg", "Starry sky, breeze, rustling leaves, crickets, fireflies, bonfire - perfect night.")
 }
-
-
-class DataRoleTimerHandlers:
-    __instance = None
-    data = None
-
-    def __new__(cls) -> Self:
-        if cls.__instance is None:
-            cls.__instance = object.__new__(cls)
-            cls.data = {}
-        return cls.__instance
-
-    def __init__(self) -> None:
-        pass
-
-    def register(self,
-                 guild_id: int,
-                 member_id: int):
-        if guild_id not in self.data:
-            self.data[guild_id] = {}
-        if member_id not in self.data[guild_id]:
-            self.data[guild_id][member_id] = {}
-
-    def add_th(self,
-               guild_id: int,
-               member_id: int,
-               role_id: int,
-               rth: TimerHandle):
-        self.register(guild_id, member_id)
-        self.data[guild_id][member_id][role_id] = rth
-
-    def cancel_th(self,
-                  guild_id: int,
-                  member_id: int,
-                  role_id: int):
-        self.register(guild_id, member_id)
-        th = self.data[guild_id][member_id].get(role_id)
-        if th is None:
-            return
-        cancel_atimerhandler(th)
 
 
 class TempletePayload:
@@ -130,6 +101,21 @@ class MemberPayload(TempletePayload):
         return self.tag
 
 
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__(self,  *args, **kwargs):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
+
+
 class __LordFormatingTemplate(string.Template):
     pattern = r"""
         \{(\s*)(?:
@@ -142,6 +128,20 @@ class __LordFormatingTemplate(string.Template):
 
     def format(self, __mapping: Mapping[str, object]):
         return self.safe_substitute(__mapping)
+
+
+class Tokenizer:
+    @staticmethod
+    def encrypt(message: bytes, key: bytes) -> bytes:
+        return Fernet(key).encrypt(message)
+
+    @staticmethod
+    def decrypt(token: bytes, key: bytes) -> bytes:
+        return Fernet(key).decrypt(token)
+
+    @staticmethod
+    def generate_key() -> bytes:
+        return Fernet.generate_key()
 
 
 def lord_format(
@@ -171,16 +171,106 @@ async def clone_message(message: nextcord.Message) -> dict:
     }
 
 
-def cancel_atimerhandler(th: TimerHandle):
-    coro: Coroutine = th._args[0]
-    coro.close()
-    th.cancel()
+class LordTimerHandler:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+        self.loop = loop
+        self.data: Dict[Union[str, int], TimerHandle] = {}
+
+    def create_timer_handler(
+        self,
+        delay: float,
+        coro: Coroutine,
+        key: Optional[Union[str, int]] = None
+    ):
+        th = self.loop.call_later(delay,  self.loop.create_task, coro)
+        if key is not None:
+            print(f"Create new timer handle {coro.__name__}({key})")
+            self.data[key] = th
+
+    def close_as_key(self, key: Union[str, int]):
+        th = self.data.get(key)
+        if th is None:
+            return
+        arg = th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
+        th.cancel()
+
+    def close_as_th(self, th: TimerHandle):
+        arg = th._args and th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
+        th.cancel()
+
+    def call_as_key(self, key: Union[str, int]):
+        th = self.data.get(key)
+        if th is None:
+            return
+        th._run()
+        self.close_as_th(th)
+
+
+class FissionIterator:
+    def __init__(self, iterable: Iterable[Any], count: int) -> None:
+        self.iterable = list(iterable)
+        self.count = count
+        self.value = 0
+        self.max_value = False
+
+    def __iter__(self) -> Self:
+        return self
+
+    def __next__(self) -> Any:
+        if self.max_value:
+            raise StopIteration
+        items = []
+        stop = self.value+self.count
+        if stop >= len(self.iterable):
+            stop = len(self.iterable)
+            self.max_value = True
+        for item in self.iterable[self.value:stop]:
+            items.append(item)
+        self.value = stop
+        return items
+
+    def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
+        return list(iter(self))[__value]
+
+    def to_list(self):
+        return list(iter(self))
 
 
 def clamp(val: Union[int, float],
           minv: Union[int, float],
           maxv: Union[int, float]) -> Union[int, float]:
     return min(maxv, max(minv, val))
+
+
+def is_emoji(text: str) -> bool:
+    text = text.strip()
+    if not regex.fullmatch(r'<a?:.+?:\d{18}>', text):
+        return False
+    if text not in emoji.EMOJI_DATA:
+        return False
+    return True
+
+
+def randquan(quan: int) -> int:
+    if 0 >= quan:
+        raise ValueError
+    return random.randint(10**(quan-1), int('9'*quan))
+
+
+def generate_random_token() -> Tuple[str, str]:
+    message = randquan(100).to_bytes(100)
+    key = Fernet.generate_key()
+    token = Tokenizer.encrypt(message, key)
+    return key.decode(), token.decode()
+
+
+def decrypt_token(key: str, token: str) -> int:
+    res = Tokenizer.decrypt(token.encode(), key.encode())
+    return int.from_bytes(res)
 
 
 async def getRandomQuote(lang: str = 'en'):
@@ -191,26 +281,163 @@ async def getRandomQuote(lang: str = 'en'):
             return json
 
 
-def calculate_time(string: str) -> int:
-    coefficients = {
-        's': 1,
-        'm': 60,
-        'h': 3600,
-        'd': 86400
-    }
-    timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
-    ftime = 0
+class TimeCalculator:
+    def __init__(
+        self,
+        default_coefficient: int = 60,
+        refundable: T = int,
+        coefficients: Optional[dict] = None,
+        operatable_time: bool = False
+    ) -> None:
+        self.default_coefficient = default_coefficient
+        self.refundable = refundable
+        self.operatable_time = operatable_time
 
-    for number, word in timedate:
-        if word not in coefficients:
+        if coefficients is None:
+            self.coefficients = {
+                's': 1,
+                'm': 60,
+                'h': 3600,
+                'd': 86400
+            }
+        else:
+            self.coefficients = coefficients
+
+    @overload
+    def convert(
+        self,
+        argument: str
+    ) -> T:
+        pass
+
+    @overload
+    def convert(
+        self,
+        ctx: commands.Context,
+        argument: str
+    ) -> Coroutine[Any, Any, T]:
+        pass
+
+    def convert(self, *args) -> T | Coroutine[Any, Any, T]:
+        try:
+            return self.async_convert(*args)
+        except Exception:
+            pass
+
+        try:
+            return self.basic_convert(*args)
+        except Exception:
+            pass
+
+        raise TypeError
+
+    def basic_convert(
+        self,
+        argument: Any
+    ) -> T:
+        if not (isinstance(argument, str)
+                and regex.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
             raise TypeError('Format time is not valid!')
 
-        number = int(number)
-        multiplier = coefficients[word]
+        timedate: list[tuple[str, str]] = regex.findall(
+            r'(\d+)([a-zA-Z\s]+)', argument)
+        ftime = 0
 
-        ftime += number*multiplier
+        for number, word in timedate:
+            if word.strip() not in self.coefficients:
+                raise TypeError('Format time is not valid!')
 
-    return ftime
+            multiplier = self.coefficients[word.strip()]
+            ftime += int(number)*multiplier
+
+        if not ftime:
+            raise TypeError('Format time is not valid!')
+        if self.operatable_time:
+            ftime += time.time()
+
+        return self.refundable(ftime)
+
+    async def async_convert(
+        self,
+        ctx: commands.Context,
+        argument: Any
+    ) -> T:
+        return self.basic_convert(argument)
+
+
+def traslate_to_timestamp(arg: str) -> int | None:
+    try:
+        tdt = datetime.strptime(arg, '%H:%M')
+        return datetime(
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            hour=tdt.hour,
+            minute=tdt.minute
+        ).timestamp()
+    except ValueError:
+        pass
+    try:
+        tdt = datetime.strptime(arg, '%H:%M:%S')
+        return datetime(
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            hour=tdt.hour,
+            minute=tdt.minute,
+            second=tdt.second
+        ).timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y %H:%M').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y %H:%M:%S').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M %d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M:%S %d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M %Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M:%S %Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d %H:%M').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d %H:%M:%S').timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return TimeCalculator(operatable_time=True).convert(arg)
+    except ValueError:
+        pass
+
+    return None
 
 
 @lru_cache()

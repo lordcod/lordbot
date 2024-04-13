@@ -4,31 +4,31 @@ from ... import ideas
 from bot.views.settings._view import DefaultSettingsView
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
-from bot.misc.utils import calculate_time
+from bot.misc.utils import TimeCalculator
 
 
 class CooldownModal(nextcord.ui.Modal):
     def __init__(self, guild_id: int):
         self.gdb = GuildDateBases(guild_id)
-        
+
         super().__init__("Cooldown")
-        
+
         self.coldtime = nextcord.ui.TextInput(
             "Enter the time to delay between ideas",
             max_length=100
         )
         self.add_item(self.coldtime)
-    
+
     async def callback(self, interaction: nextcord.Interaction) -> None:
         try:
-            cooltime = calculate_time(self.coldtime.value)
+            cooltime = TimeCalculator().convert(self.coldtime.value)
         except ValueError:
             await interaction.response.send_message("It is necessary to write the time in the `1d2h10m` format")
             return
         idea_datas: IdeasPayload = self.gdb.get('ideas')
         idea_datas['cooldown'] = cooltime
         self.gdb.set('ideas', idea_datas)
-        
+
         view = CooldownView(interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)
 
@@ -41,7 +41,6 @@ class CooldownView(DefaultSettingsView):
         self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
 
         super().__init__()
-
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

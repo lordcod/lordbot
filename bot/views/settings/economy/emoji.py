@@ -2,6 +2,7 @@ import nextcord
 
 from bot.databases import GuildDateBases
 from bot.resources.info import DEFAULT_EMOJI
+from bot.misc.utils import is_emoji
 
 from .. import economy
 from .._view import DefaultSettingsView
@@ -9,7 +10,7 @@ from .._view import DefaultSettingsView
 
 class Modal(nextcord.ui.Modal):
     def __init__(self, guild_id, present) -> None:
-        super().__init__("Rewards", timeout=300)
+        super().__init__("Emoji", timeout=300)
 
         self.present = present
         self.emoji = nextcord.ui.TextInput(
@@ -21,6 +22,10 @@ class Modal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction):
         value = self.emoji.value
+
+        if not is_emoji(value):
+            await interaction.response.send_message("You have entered an incorrect emoji", ephemeral=True)
+            return
 
         gdb = GuildDateBases(interaction.guild_id)
         economy_settings = gdb.get('economic_settings')

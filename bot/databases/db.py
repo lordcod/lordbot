@@ -1,6 +1,3 @@
-import threading
-import asyncio
-
 from .handlers import establish_connection
 from .settings import Table, Colum, PostType, set_connection
 from .db_engine import DataBase
@@ -27,6 +24,8 @@ class GuildsDB(Table):
                               default=info.DEFAULT_ECONOMY_SETTINGS)
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
+    invites = Colum(data_type=PostType.JSON, default="{}")
+    giveaways = Colum(data_type=PostType.JSON, default="{}")
     tickettool = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
@@ -70,19 +69,3 @@ class MongoDataBases(Table):
 
     name = Colum(data_type=PostType.TEXT, primary_key=True)
     values = Colum(data_type=PostType.JSON, default="{}")
-
-
-def db_forever():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_forever()
-    finally:
-        engine.connection.close()
-        loop.close()
-        exit()
-
-
-thread = threading.Thread(
-    target=db_forever, name='DataBase')
-thread.start()
