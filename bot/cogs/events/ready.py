@@ -9,7 +9,7 @@ from bot.views.ideas import (ConfirmView, IdeaView)
 import time
 
 
-class ready_event(commands.Cog):
+class ReadyEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -63,4 +63,4 @@ class ready_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(ready_event(bot))
+    bot.add_cog(ReadyEvent(bot))
