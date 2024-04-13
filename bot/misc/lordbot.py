@@ -1,10 +1,9 @@
 from __future__ import annotations
 import asyncio
-import aiohttp
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc.utils import LordTimerHandler
+from bot.misc.utils import DataRoleTimerHandlers
 from bot.languages import i18n
 from bot.databases import GuildDateBases
 from typing import Coroutine, List, Optional
@@ -12,6 +11,7 @@ from typing import Coroutine, List, Optional
 
 class LordBot(commands.Bot):
     timeouts = {}
+    role_timer_handlers = DataRoleTimerHandlers()
     guild_timer_handlers = {}
 
     @staticmethod
@@ -55,11 +55,11 @@ class LordBot(commands.Bot):
 
         setattr(self, name, coro)
 
-    def __init__(self) -> None:
+    def __init__(
+        self
+    ) -> None:
+        i18n.from_folder("./bot/languages/localization")
+        i18n.config['locale'] = 'en'
         super().__init__(command_prefix=self.get_command_prefixs,
                          intents=nextcord.Intents.all(),
                          help_command=None)
-        i18n.from_folder("./bot/languages/localization")
-        i18n.config['locale'] = 'en'
-        self.session = aiohttp.ClientSession()
-        self.lord_handler_timer = LordTimerHandler(self.loop)

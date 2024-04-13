@@ -1,4 +1,3 @@
-import asyncio
 from typing import Any, Coroutine
 import nextcord
 
@@ -33,7 +32,7 @@ class DelCatView(nextcord.ui.View):
         )
 
         for channel in self.category.channels:
-            asyncio.create_task(channel.delete())
+            await channel.delete()
         await self.category.delete()
 
         await interaction.message.edit(embed=embed, view=None)

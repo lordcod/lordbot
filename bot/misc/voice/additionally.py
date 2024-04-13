@@ -98,7 +98,7 @@ class MusicPlayer:
 
         await self.play()
 
-    async def update_message(self):
+    async def update_message(self, num=0, diration=0):
         embed = nextcord.Embed(
             title=f"{self.data.title} - {', '.join(self.data.artist_names)}",
             description=convertor_time(self.data.diration),
@@ -128,7 +128,7 @@ class MusicPlayer:
         current_players.pop(self.guild_id)
 
     async def play(self):
-        await self.update_message()
+        asyncio.create_task(self.update_message())
 
         music_url = await self.data.download_link()
         source = nextcord.FFmpegPCMAudio(

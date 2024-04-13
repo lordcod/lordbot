@@ -11,7 +11,7 @@ resource_dict = {}
 
 
 def _load_file(filename: str) -> bytes:
-    with open(filename, "rb") as f:
+    with open(filename, 'rb') as f:
         return f.read()
 
 
@@ -20,7 +20,6 @@ def _parse_json(content: str) -> dict:
 
 
 def add_res_translation(key: str, value: str, locale: str):
-    resource_dict.setdefault(locale, {})
     data = resource_dict[locale]
     data_keys = key.split(".")
     for num, tk in enumerate(data_keys, start=1):
@@ -32,10 +31,8 @@ def add_res_translation(key: str, value: str, locale: str):
         data = data[tk]
 
 
-def add_translation(
-    key: str, value: str, locale: Optional[str] = None, loadable: bool = False
-) -> None:
-    locale = locale or config.get("locale")
+def add_translation(key: str, value: str, locale: Optional[str] = None, loadable: bool = False) -> None:
+    locale = locale or config.get('locale')
     memoization_dict.setdefault(locale, {})
     memoization_dict[locale][key] = value
     if not loadable:
@@ -59,7 +56,7 @@ def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
                 dest_dict[key][num] = translator.translate(
                     text, dest, src).text
         else:
-            dest_dict[key] = translator.translate(value, dest, src).text
+            dest_dict[key] = translator.translate(value,  dest, src).text
     return dest_dict
 
 
@@ -98,16 +95,6 @@ def to_any_locales() -> dict:
     return new_data
 
 
-def to_i18n_translation(data: dict, path: Optional[str] = None) -> None:
-    for key, value in data.items():
-        if not isinstance(value, dict):
-            raise ValueError("Use another method")
-        if set(default_languages) & set(value.keys()):
-            add_dict_translations(f"{path+'.' if path else ''}{key}", value)
-        else:
-            to_i18n_translation(value, f"{path+'.' if path else ''}{key}")
-
-
 def from_folder(foldername: str) -> None:
     for filename in os.listdir(foldername):
         if not filename.endswith(".json"):
@@ -125,28 +112,29 @@ def to_folder(foldername: str) -> str:
             file.write(jsondata)
 
 
-def parser(
-    json_resource: dict,
-    locale: Optional[str] = None,
-    prefix: Optional[str] = None,
-    loadable: bool = True,
-) -> None:
+def parser(json_resource: dict, locale: Optional[str] = None, prefix: Optional[str] = None, loadable: bool = True) -> None:
     for key, value in json_resource.items():
         if isinstance(value, dict):
             parser(
-                value, locale, f"{prefix+'.' if prefix else ''}{key}", loadable=loadable
+                value,
+                locale,
+                f"{prefix+'.' if prefix else ''}{key}",
+                loadable=loadable
             )
         else:
             add_translation(
-                f"{prefix+'.' if prefix else ''}{key}", value, locale, loadable=loadable
-            )
+                f"{prefix+'.' if prefix else ''}{key}", value, locale, loadable=loadable)
 
 
-def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
+def t(
+    locale: Optional[str] = None,
+    path: Optional[str] = "",
+    **kwargs
+) -> str:
     if locale not in memoization_dict:
-        locale = config.get("locale")
+        locale = config.get('locale')
     if path not in memoization_dict[locale]:
-        data = memoization_dict[config.get("locale")][path]
+        data = memoization_dict[config.get('locale')][path]
     else:
         data = memoization_dict[locale][path]
 
@@ -154,34 +142,29 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    # from_folder("./bot/languages/localization")
+    from_folder("./bot/languages/localization")
 
-    # Translation dict
     # for lang in default_languages:
     #     if lang == "en":
     #         continue
     #     print(lang)
     #     trd = translate_dict(
-    #         "en", lang, resource_dict['en']["ideas"])
+    #         "en", lang, resource_dict['en']["settings"]['music'])
     #     print(trd)
-    #     parser(trd, lang, "ideas", loadable=False)
+    #     parser(trd, lang, "settings.music", loadable=False)
 
-    # Translate to default languages
     # data = translation_with_languages(
-    #     "en", "Delete reaction", default_languages)
+    #     "en", "Issues a sheet with all temporary bans that were issued by the bot", default_languages)
     # print(orjson.dumps(data).decode())
 
-    # Translation to default languages and added
     # add_dict_translations(
-    #     "ideas.confirm-modal.approve", translation_with_languages("en", "Approved | {mention}", default_languages))
+    #     "help.record", translation_with_languages("en", "Record", default_languages))
 
-    # To any locales format
     # data = to_any_locales()
-    # with open("test_loc.json", "+wb") as file:
+    # with open("test_loc.json", "wb") as file:
     #     jsondata = orjson.dumps(data)
     #     file.write(jsondata)
 
-    # To i18n format as any locales format
-    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
+    print(t("ideas.confirm-view.button.approve"))
 
-    to_folder("./bot/languages/localization")
+    # to_folder("./bot/languages/localization")

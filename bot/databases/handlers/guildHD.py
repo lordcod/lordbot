@@ -65,6 +65,3 @@ class GuildDateBases:
 
         engine.execute('DELETE FROM guilds WHERE id = %s',
                        (self.guild_id,))
-
-    async def adelete(self):
-        self.delete()
