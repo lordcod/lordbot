@@ -154,21 +154,22 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    from_folder("./bot/languages/localization")
+    # from_folder("./bot/languages/localization")
 
     # Translation dict
-    for lang in default_languages:
-        if lang == "en":
-            continue
-        print(lang)
-        trd = translate_dict(
-            "en", lang, resource_dict['en']['delcat'])
-        print(trd)
-        parser(trd, lang, "delcat", loadable=False)
+    # for lang in default_languages:
+    #     if lang == "en":
+    #         continue
+    #     print(lang)
+    #     trd = translate_dict(
+    #         "en", lang, resource_dict['en']['delcat'])
+    #     print(trd)
+    #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    # data = translation_with_languages(
-    #     "en", "Delete reaction", default_languages)
+    data = translation_with_languages(
+        "en", "<time>", default_languages)
+    print(data)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
@@ -184,4 +185,4 @@ if __name__ == "__main__":
     # To i18n format as any locales format
     # to_i18n_translation(_parse_json(_load_file("bot/languages/any_localization.json")))
 
-    to_folder("./bot/languages/localization")
+    # to_folder("./bot/languages/localization")
