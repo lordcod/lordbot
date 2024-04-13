@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 import aiohttp
 import nextcord
+import regex
 from nextcord.ext import commands
 
 from bot.misc.utils import LordTimerHandler
@@ -11,6 +12,17 @@ from bot.databases import GuildDateBases
 from typing import Coroutine, List, Optional, Dict, Any
 
 from bot.resources.info import DEFAULT_PREFIX
+
+
+def get_shard_list(shard_ids: str):
+    res = []
+    for shard in shard_ids.split(","):
+        if data := regex.fullmatch(r"(\d+)-(\d+)", shard):
+            res.extend(range(int(data.group(1)),
+                             int(data.group(2))))
+        else:
+            res.append(int(shard))
+    return res
 
 
 class LordBot(commands.AutoShardedBot):
@@ -65,7 +77,7 @@ class LordBot(commands.AutoShardedBot):
     def __init__(self) -> None:
         shard_ids, shard_count = input("Shared info: ").split("/")
         shard_count = int(shard_count)
-        shard_ids = list(map(int, shard_ids.split(",")))
+        shard_ids = get_shard_list(shard_ids)
 
         super().__init__(
             command_prefix=self.get_command_prefixs,

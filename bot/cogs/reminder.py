@@ -8,7 +8,7 @@ from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
-from bot.misc.utils import calculate_time
+from bot.misc.utils import translate_to_timestamp
 
 REMINDER_DB = localdb.get_table('')
 
@@ -18,12 +18,15 @@ class Reminder(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def reminder(self, ctx: commands.Context, time_now: calculate_time, *, text: str) -> None:
+    async def reminder(self, ctx: commands.Context, time_now: translate_to_timestamp, *, text: str) -> None:
+        if time.time() > time_now:
+            await ctx.send("You must specify a time that is later than the current time.")
+            return
         self.bot.loop.call_later(
-            time_now, asyncio.create_task, self.process_reminder(time.time(), ctx.channel, text))
-        await ctx.send(f"🛎️ OK, I'll mention you here on <t:{time.time() + time_now :.0f}:f>(<t:{time.time() + time_now :.0f}:R>)")
+            time_now-time.time(), asyncio.create_task, self.process_reminder(time.time(), ctx.author, ctx.channel, text))
+        await ctx.send(f"🛎️ OK, I'll mention you here on <t:{time_now :.0f}:f>(<t:{time_now :.0f}:R>)")
 
-    async def process_reminder(self, time_old: float, channel: nextcord.TextChannel, text: str) -> None:
+    async def process_reminder(self, time_old: float, member: nextcord.Member, channel: nextcord.TextChannel, text: str) -> None:
         gdb = GuildDateBases(channel.guild.id)
         color = gdb.get('color')
         embed = nextcord.Embed(
@@ -36,7 +39,7 @@ class Reminder(commands.Cog):
             value=text
         )
 
-        await channel.send(embed=embed)
+        await channel.send(member.mention, embed=embed)
 
 
 def setup(bot):

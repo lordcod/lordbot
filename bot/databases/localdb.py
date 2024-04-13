@@ -15,7 +15,7 @@ def get_table(table_name: str) -> dict:
 
 
 def get_table(table_name, default: Any = None):
-    data.setdefault(table_name, default)
+    data.setdefault(table_name, default if default is not None else {})
     return data[table_name]
 
 

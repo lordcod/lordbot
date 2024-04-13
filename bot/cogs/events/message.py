@@ -69,9 +69,6 @@ class MessageEvent(commands.Cog):
     async def give_message_score(self, message: nextcord.Message) -> None:
         MESSAGE_STATE_DB.setdefault(message.author.id, 0)
         MESSAGE_STATE_DB[message.author.id] += 1
-        
-        print(
-            f"{message.author.display_name} M Current count message is {MESSAGE_STATE_DB[message.author.id]}")
 
     async def give_score(self, message: nextcord.Message) -> None:
         if message.author.bot:
@@ -89,9 +86,6 @@ class MessageEvent(commands.Cog):
         SCORE_STATE_DB[message.author.id] += random.randint(
             0, 10) * multiplier / math.sqrt(user_level)
         BETWEEN_MESSAGES_TIME[message.author.id] = time.time() + 10
-
-        print(
-            f"{message.author.display_name} M Current score is {SCORE_STATE_DB[message.author.id]}")
 
 
 def setup(bot):

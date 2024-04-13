@@ -7,7 +7,7 @@ import nextcord
 import time
 from typing import Optional
 from bot.misc import giveaway as misc_giveaway
-from bot.misc.utils import traslate_to_timestamp
+from bot.misc.utils import translate_to_timestamp
 
 
 class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
@@ -118,7 +118,7 @@ class GiveawaySettingsDateendModal(nextcord.ui.Modal):
         self.add_item(self.date_end)
 
     async def callback(self, interaction: nextcord.Interaction):
-        date_end = traslate_to_timestamp(self.date_end.value)
+        date_end = translate_to_timestamp(self.date_end.value)
 
         if not date_end:
             await interaction.response.send_message("Date format is invalid!")

@@ -49,9 +49,6 @@ class voice_state_event(commands.Cog):
         SCORE_STATE_DB[member.id] += voice_time * \
             0.5 * multiplier / math.sqrt(user_level)
 
-        print(
-            f"{member.display_name} TV Current score is {SCORE_STATE_DB[member.id]}")
-
 
 def setup(bot):
     bot.add_cog(voice_state_event(bot))

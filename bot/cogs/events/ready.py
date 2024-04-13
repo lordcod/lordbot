@@ -3,8 +3,9 @@ from nextcord.ext import commands
 
 from bot.misc.logger import Logger
 from bot.databases import RoleDateBases, BanDateBases
+from bot.languages.help import get_command
 from bot.misc.lordbot import LordBot
-from bot.views.ideas import (ConfirmView, IdeaView)
+from bot.views.ideas import ConfirmView, IdeaView
 
 import time
 

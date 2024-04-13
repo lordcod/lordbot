@@ -380,7 +380,7 @@ class TimeCalculator:
         return self.basic_convert(argument)
 
 
-def traslate_to_timestamp(arg: str) -> int | None:
+def translate_to_timestamp(arg: str) -> int | None:
     try:
         tdt = datetime.strptime(arg, '%H:%M')
         return datetime(
