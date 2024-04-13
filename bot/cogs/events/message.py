@@ -10,13 +10,16 @@ import googletrans
 translator = googletrans.Translator()
 
 
-class message_event(commands.Cog):
+class MessageEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
     @commands.Cog.listener()
     async def on_message(self, message: nextcord.Message):
+        if message.guild is None:
+            return
+
         gdb = GuildDateBases(message.guild.id)
 
         color = gdb.get('color')
@@ -50,4 +53,4 @@ class message_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(message_event(bot))
+    bot.add_cog(MessageEvent(bot))

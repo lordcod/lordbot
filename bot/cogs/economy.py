@@ -1,3 +1,4 @@
+
 import nextcord
 from nextcord.ext import commands
 
@@ -5,16 +6,19 @@ from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
-from bot.misc.utils import get_award
+from bot.resources.info import COUNT_ROLES_PAGE
+from bot.misc.utils import FissionIterator, get_award
 from nextcord.utils import escape_markdown
 
 import time
 from typing import Optional, Union, Literal
 
+from bot.views.economy_shop import EconomyShopView
+
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
 
 
-class economy(commands.Cog):
+class Economy(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
@@ -25,7 +29,7 @@ class economy(commands.Cog):
         es = gdb.get('economic_settings')
         operate = es.get('operate', False)
         if not operate:
-            raise NotActivateEconomy("Economy is not enabled on the server")
+            raise NotActivateEconomy("Economy is disabled on the server")
         return True
 
     async def handler_rewards(self, ctx: commands.Context):
@@ -164,13 +168,18 @@ class economy(commands.Cog):
             embed.add_field(
                 name=f"{award}. {member.display_name}",
                 value=(
-                    f"Cash: {balance}{currency_emoji} | In bank: {bank}{currency_emoji}\n"
+                    f"Cash: {balance}{currency_emoji} | Bank: {bank}{currency_emoji}\n"
                     f"Total balance: {total}{currency_emoji}"
                 ),
                 inline=False
             )
         await message.delete()
         await ctx.send(embed=embed, file=file_pedestal)
+
+    @commands.command()
+    async def shop(self, ctx: commands.Context):
+        view = EconomyShopView(ctx.guild)
+        await ctx.send(embed=view.embed, view=view)
 
     @commands.command(name="pay")
     async def pay(self, ctx: commands.Context, member: nextcord.Member, sum: int):
@@ -278,7 +287,7 @@ class economy(commands.Cog):
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
+            await ctx.send(f"The maximum amount for this server - {1_000_000 :,}{currency_emoji}")
             return
         if 0 >= sum:
             await ctx.send("The amount must be positive")
@@ -300,7 +309,7 @@ class economy(commands.Cog):
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
+            await ctx.send(f"The maximum amount for this server - {1_000_000 :,}{currency_emoji}")
             return
         if 0 >= sum:
             await ctx.send("The amount must be positive")
@@ -316,4 +325,4 @@ class economy(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(economy(bot))
+    bot.add_cog(Economy(bot))

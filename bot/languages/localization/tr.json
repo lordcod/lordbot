@@ -1,1 +1,289 @@
-{"bot-info":{"title":"{name} bu çok işlevli bir bottur","description":"Bot, sunucu yönetimini kolaylaştırmak için tasarlanmıştır ve çeşitli otomasyon araçlarıyla donatılmıştır.","info-server":"Sunucu hakkında bilgi","prefix-server":"> Sunucu öneki - `{prefix}`"},"translate":{"placeholder":"Uygun dili seçecektir:","failed":"Bu mesajın içeriği yok, bu yüzden çeviremeyeceğiz."},"captcha":{"congratulation":"Tebrikler captcha'yı geçtiniz!","enter":"Captcha'yı çözmek için 30 saniyeniz var!","failed":"Captcha başarısız oldu"},"activiti":{"failed":"Bu etkinlik kullanılamıyor veya çalışmıyor","embed":{"title":"Etkinlik başarıyla oluşturuldu!","description":"Ancak, yükseltme düzeyi etkinlik gereksinimlerini karşılamıyorsa bazı etkinlik türleri sunucunuz için kullanılamayabilir."},"fields":{"label":"Etkinlik adı","max-user":"Maksimum kullanıcı sayısı"}},"help":{"title":"Yardım Kitabı","arguments":"[İsteğe bağlı] | <Gerekli>","command-embed":{"title":"`{name}` komutuyla ilgili yardım.","info":"Bilgi","category":"Kategori: `{category_emoji}{category_name}`\n","aliases":"Takma adlar: {aliases}\n","disable_command":"Kapatabilir miyim? **{value}**\n","connection_disabled":{"0":"Hayır","1":"Evet"},"using_command":"Kullanılıyor: `{using}`\n","example":"Örnek №{number}"},"command-notfound":{"title":"Komut bulunamadı","description":"Komut ararken bulamadık, genel komut listesine tekrar bakın"},"command-invalid":{"title":"Komut geçersiz","description":"Büyük olasılıkla takımın adını yanlış girdiniz, belki de bazı garip karakterler içeriyor"}},"errors":{"MissingPermissions":"Yeterli haklarınız yok","MissingRole":"Komutu yürütmek için uygun bir rolünüz yok","MissingChannel":"Bu komutu bu kanalda çalıştıramazsınız","NotOwner":"Bu komut bot sahibine yöneliktir","CommandNotFound":"öyle bir komut yok","CheckFailure":"Tüm koşulları yerine getirmiyorsunuz","BadArgument":"Geçersiz bağımsız değişken girildi","DisabledCommand":"Bu komut sunucuda devre dışı bırakıldı","MissingRequiredArgument":"Gerekli bir argüman girmediniz","NotActivateEconomy":"Sunucuda ekonomi sistemi devre dışı bırakıldı","OnlyTeamError":"Bu komut yalnızca bot ekibi tarafından kullanılabilir","MemberNotFound":"Katılımcı bulunamadı","CommandOnCooldown":{"title":"Komut beklemede","description":"{delay} sonra tekrar deneyin."},"DisabledEconomy":"Sunucuda ekonomi sistemi devre dışı bırakıldı"},"music-selector":{"title":"İlgilendiğiniz parçayı seçin!","placeholder":"Bir parça seçin"},"ideas":{"globals":{"title":"Bir fikir önerdi","ideas-disabled":"**idea** modülü bu sunucuda devre dışı bırakıldı","embed-title":"Yeni fikir!"},"confirm-modal":{"reason-label":"Argüman:","embed":{"title":"Yeni fikir!","field":"Eski fikir!"},"idea":{"content":"{mention} Fikriniz onaylandı!","embed":{"title":"Fikir onaylandı!","field":"Fikrin özü:","reason":"Onay argümanı:"}},"approve":"Onaylandı | {name}","title":"Fikir onaylandı!","content":"{mention} Fikriniz onaylandı!","essence":"Fikrin özü:","reason":"Onay argümanı:"},"confirm-view":{"button":{"approve":"Onaylamak","deny":"Reddetmek"},"old-idea":"Modası geçmiş bir fikir!","idea":"Fikir:","refused":"Reddedildi | {name}","idea-content":"{mention} Fikriniz reddedildi!","title":"Fikir reddedildi!"},"idea-modal":{"label":"Bize fikrinizden bahsedin","placeholder":"Fikrinizi kullanım örnekleriyle mümkün olduğunca ayrıntılı olarak açıklayın.","embed-description":"Fikrin onaylanıp onaylanmaması size bağlıdır!","idea":"Fikir:","thread-name":"{name}'ın fikrinin tartışılması"},"idea-view":{"timeout-message":"Yalnızca 30 dakikada bir fikir önerebilirsiniz\nFikir göndermek için bir sonraki fırsat şu şekilde olacaktır: <t:{time}:R>"}},"settings":{"start":{"title":"Bot modüllerini yapılandırma.","choose":"Ayarları seçin...","description":"Sunucuyu yapılandırmak için seçim açılır menüsüyle etkileşim kurun.","request":"{name} tarafından talep edildi"},"module-name":{"economy":"Ekonomi","languages":"Diller","prefix":"Önek","music":"Müzik","color":"Sistem mesajlarının rengi","reactions":"Otomatik Reaksiyonlar","thread":"Bir başlıkta/gönderide otomatik mesaj","command-permission":"Komut Ayarları","ideas":"Fikirler","welcomer":"Yeni üyelere hoş geldiniz","auto-roles":"Otomatik roller"},"button":{"back":"Geri","edit":"Düzenlemek","reset":"Sıfırla","add":"Eklemek"},"prefix":{"title":"Önek","description":"Komutu çağırırken botun yanıt vereceği öneki ayarlama.","current":"Geçerli önek: {prefix}"},"languages":{"title":"Diller","description":"Bu ayar, botla çalışma dilini değiştirir.","choose":"Sunucunun dilini seçin:"},"color":{"not-valid":"Onaltılı kod formatı yanlış","title":"Sistem mesajlarının rengi","description":"Komutları kullandığınızda bot, varsayılan olarak görünmez bir renge sahip ekleri görüntüler.\n\nRenginizi topluluğunuzun temasına göre ayarlayabilirsiniz.","current":"Mevcut renk"},"auto-role":{"button":{"install":"Rolleri yükle","delete":"Rolleri sil"},"placeholder":"Yeni üyeler için otomatik olarak atanan rolleri seçin","embed":{"title":"Otomatik roller","description":"Otomatik roller için kontrol paneli.\nBu tür eylemleri panelden kurabilir, düzenleyebilir, silebilir ve görüntüleyebilirsiniz.\nOtomatik rolleri görmüyorsanız seçilmemişlerdir!","field":"Seçilen roller:"}},"welcomer":{"button":{"delete":"Mesajı sil","view":"Mesajı görüntüle","install":"Mesajı yükle"},"embed":{"title":"Mesaj tebrik","description":"Bir katılımcı sunucuda oturum açtığında mesajların otomatik olarak gönderilmesi\n\nKanalı değiştirmek istiyorsanız tekrar seçip mesajı ayarlamanız yeterlidir.\n\nBir mesajı değiştirmek için mevcut kanalı seçin ve bunun için yeni bir mesaj ayarlayın.","field":{"selected":"Seçilen tebrik kanalı: {channel}","failure":"Tüm veriler henüz toplanmadı."}},"dropdown-placeholder":"Karşılama kanalını seçin","modal":{"title":"Mesaj tebrik","label":"İleti","placeholder":"Ayrıca yerleştirme oluşturucuyu da kullanabilirsiniz"}},"thread":{"init":{"title":"Forumlarda/konularda otomatik mesajlar","brief":"Otomatik mesajlar","description":"Forumlara/konulara otomatik gönderilerinizi ekleyin veya değiştirin","placeholder":"Şubelerde/forumlarda otomatik mesaj ayarları:","channel":"Kanal: {channel}"},"addptional":{"button":{"install_mes":"Mesajı yükle","install-mes":"Mesajı yükle"},"channel-error":"Bu kanala otomatik mesajlar zaten yüklendi","placeholder":"Otomatik mesajlar için bir kanal seçin"},"thread":{"mes-not-found":"Mesaj bulunamadı","button":{"view":"Mesajı görüntüle","edit":"Mesajı düzenleme","delete":"Mesajı silme"}},"modal":{"label":"İleti:","title":"Otomatik mesajlar","placeholder":"Embed-builder'ı da kullanabilirsiniz"}},"reactions":{"init":{"title":"Otomatik reaksiyonlar","brief":"Otomatik reaksiyonlar","description":"Kanallara reaksiyonların otomatik eklenmesinin kontrolü","emoji":"Emoji","channel":"Kanal","placeholder":"Otomatik reaksiyon ayarları:"},"addres":{"channel-error":"Bu kanalda otomatik reaksiyonlar zaten yüklü","install_emoji":"Emojiyi yükle","placeholder":"Otomatik reaksiyonlar için bir kanal seçin"},"buttons":{"delete":"Tepkiyi sil","edit":"Tepkiyi düzenle"},"modal":{"title":"Otomatik reaksiyon","label":"Emoji:"},"button":{"delete":"Tepkiyi sil","edit":"Tepkiyi düzenle"}},"music":{"title":"Müzik","max-queue-size":{"name":"Maksimum Boyut","description":"Maksimum parça kuyruk uzunluğu.","value":"Maksimum kuyruk boyutu: {size}"},"default-volume":{"name":"Varsayılan ses","description":"Varsayılan müzik hacmi.","value":"Varsayılan cilt müzik: {volume}"},"dj-roles":{"failed":"{role} rolü atanamaz ve entegrasyon veya bir bot tarafından kullanılır.","name":"DJ Rolleri","description":"Müziği kontrol edebilen roller.","value":"DJ-Roles: {roles}"}}}}
+{
+    "bot-info": {
+        "title": "{name} bu çok işlevli bir bottur",
+        "description": "Bot, sunucu yönetimini kolaylaştırmak için tasarlanmıştır ve çeşitli otomasyon araçlarıyla donatılmıştır.",
+        "info-server": "Sunucu hakkında bilgi",
+        "prefix-server": "> Sunucu öneki - `{prefix}`"
+    },
+    "translate": {
+        "placeholder": "Uygun dili seçecektir:",
+        "failed": "Bu mesajın içeriği yok, bu yüzden çeviremeyeceğiz."
+    },
+    "captcha": {
+        "congratulation": "Tebrikler captcha'yı geçtiniz!",
+        "enter": "Captcha'yı çözmek için 30 saniyeniz var!",
+        "failed": "Captcha başarısız oldu"
+    },
+    "activiti": {
+        "failed": "Bu etkinlik kullanılamıyor veya çalışmıyor",
+        "embed": {
+            "title": "Etkinlik başarıyla oluşturuldu!",
+            "description": "Ancak, yükseltme düzeyi etkinlik gereksinimlerini karşılamıyorsa bazı etkinlik türleri sunucunuz için kullanılamayabilir."
+        },
+        "fields": {
+            "label": "Etkinlik adı",
+            "max-user": "Maksimum kullanıcı sayısı"
+        }
+    },
+    "help": {
+        "title": "Yardım Kitabı",
+        "arguments": "[İsteğe bağlı] | <Gerekli>",
+        "command-embed": {
+            "title": "`{name}` komutuyla ilgili yardım.",
+            "info": "Bilgi",
+            "category": "Kategori: `{category_emoji}{category_name}`\n",
+            "aliases": "Takma adlar: {aliases}\n",
+            "disable_command": "Kapatabilir miyim? **{value}**\n",
+            "connection_disabled": {
+                "0": "Hayır",
+                "1": "Evet"
+            },
+            "using_command": "Kullanılıyor: `{using}`\n",
+            "example": "Örnek №{number}"
+        },
+        "command-notfound": {
+            "title": "Komut bulunamadı",
+            "description": "Komut ararken bulamadık, genel komut listesine tekrar bakın"
+        },
+        "command-invalid": {
+            "title": "Komut geçersiz",
+            "description": "Büyük olasılıkla takımın adını yanlış girdiniz, belki de bazı garip karakterler içeriyor"
+        }
+    },
+    "errors": {
+        "MissingPermissions": "Yeterli haklarınız yok",
+        "MissingRole": "Komutu yürütmek için uygun bir rolünüz yok",
+        "MissingChannel": "Bu komutu bu kanalda çalıştıramazsınız",
+        "NotOwner": "Bu komut bot sahibine yöneliktir",
+        "CommandNotFound": "öyle bir komut yok",
+        "CheckFailure": "Tüm koşulları yerine getirmiyorsunuz",
+        "BadArgument": "Geçersiz bağımsız değişken girildi",
+        "DisabledCommand": "Bu komut sunucuda devre dışı bırakıldı",
+        "MissingRequiredArgument": "Gerekli bir argüman girmediniz",
+        "NotActivateEconomy": "Sunucuda ekonomi sistemi devre dışı bırakıldı",
+        "OnlyTeamError": "Bu komut yalnızca bot ekibi tarafından kullanılabilir",
+        "MemberNotFound": "Katılımcı bulunamadı",
+        "CommandOnCooldown": {
+            "title": "Komut beklemede",
+            "description": "{delay} sonra tekrar deneyin."
+        },
+        "DisabledEconomy": "Sunucuda ekonomi sistemi devre dışı bırakıldı"
+    },
+    "music-selector": {
+        "title": "İlgilendiğiniz parçayı seçin!",
+        "placeholder": "Bir parça seçin"
+    },
+    "ideas": {
+        "globals": {
+            "title": "Bir fikir önerdi",
+            "ideas-disabled": "**idea** modülü bu sunucuda devre dışı bırakıldı",
+            "embed-title": "Yeni fikir!"
+        },
+        "confirm-modal": {
+            "reason-label": "Argüman:",
+            "embed": {
+                "title": "Yeni fikir!",
+                "field": "Eski fikir!"
+            },
+            "idea": {
+                "content": "{mention} Fikriniz onaylandı!",
+                "embed": {
+                    "title": "Fikir onaylandı!",
+                    "field": "Fikrin özü:",
+                    "reason": "Onay argümanı:"
+                }
+            },
+            "approve": "Onaylandı | {name}",
+            "title": "Fikir onaylandı!",
+            "content": "{mention} Fikriniz onaylandı!",
+            "essence": "Fikrin özü:",
+            "reason": "Onay argümanı:"
+        },
+        "confirm-view": {
+            "button": {
+                "approve": "Onaylamak",
+                "deny": "Reddetmek"
+            },
+            "old-idea": "Modası geçmiş bir fikir!",
+            "idea": "Fikir:",
+            "refused": "Reddedildi | {name}",
+            "idea-content": "{mention} Fikriniz reddedildi!",
+            "title": "Fikir reddedildi!"
+        },
+        "idea-modal": {
+            "label": "Bize fikrinizden bahsedin",
+            "placeholder": "Fikrinizi kullanım örnekleriyle mümkün olduğunca ayrıntılı olarak açıklayın.",
+            "embed-description": "Fikrin onaylanıp onaylanmaması size bağlıdır!",
+            "idea": "Fikir:",
+            "thread-name": "{name}'ın fikrinin tartışılması"
+        },
+        "idea-view": {
+            "timeout-message": "Yalnızca 30 dakikada bir fikir önerebilirsiniz\nFikir göndermek için bir sonraki fırsat şu şekilde olacaktır: <t:{time}:R>"
+        }
+    },
+    "settings": {
+        "start": {
+            "title": "Bot modüllerini yapılandırma.",
+            "choose": "Ayarları seçin...",
+            "description": "Sunucuyu yapılandırmak için seçim açılır menüsüyle etkileşim kurun.",
+            "request": "{name} tarafından talep edildi"
+        },
+        "module-name": {
+            "economy": "Ekonomi",
+            "languages": "Diller",
+            "prefix": "Önek",
+            "music": "Müzik",
+            "color": "Sistem mesajlarının rengi",
+            "reactions": "Otomatik Reaksiyonlar",
+            "thread": "Bir başlıkta/gönderide otomatik mesaj",
+            "command-permission": "Komut Ayarları",
+            "ideas": "Fikirler",
+            "welcomer": "Yeni üyelere hoş geldiniz",
+            "auto-roles": "Otomatik roller"
+        },
+        "button": {
+            "back": "Geri",
+            "edit": "Düzenlemek",
+            "reset": "Sıfırla",
+            "add": "Eklemek"
+        },
+        "prefix": {
+            "title": "Önek",
+            "description": "Komutu çağırırken botun yanıt vereceği öneki ayarlama.",
+            "current": "Geçerli önek: {prefix}"
+        },
+        "languages": {
+            "title": "Diller",
+            "description": "Bu ayar, botla çalışma dilini değiştirir.",
+            "choose": "Sunucunun dilini seçin:"
+        },
+        "color": {
+            "not-valid": "Onaltılı kod formatı yanlış",
+            "title": "Sistem mesajlarının rengi",
+            "description": "Komutları kullandığınızda bot, varsayılan olarak görünmez bir renge sahip ekleri görüntüler.\n\nRenginizi topluluğunuzun temasına göre ayarlayabilirsiniz.",
+            "current": "Mevcut renk"
+        },
+        "auto-role": {
+            "button": {
+                "install": "Rolleri yükle",
+                "delete": "Rolleri sil"
+            },
+            "placeholder": "Yeni üyeler için otomatik olarak atanan rolleri seçin",
+            "embed": {
+                "title": "Otomatik roller",
+                "description": "Otomatik roller için kontrol paneli.\nBu tür eylemleri panelden kurabilir, düzenleyebilir, silebilir ve görüntüleyebilirsiniz.\nOtomatik rolleri görmüyorsanız seçilmemişlerdir!",
+                "field": "Seçilen roller:"
+            }
+        },
+        "welcomer": {
+            "button": {
+                "delete": "Mesajı sil",
+                "view": "Mesajı görüntüle",
+                "install": "Mesajı yükle"
+            },
+            "embed": {
+                "title": "Mesaj tebrik",
+                "description": "Bir katılımcı sunucuda oturum açtığında mesajların otomatik olarak gönderilmesi\n\nKanalı değiştirmek istiyorsanız tekrar seçip mesajı ayarlamanız yeterlidir.\n\nBir mesajı değiştirmek için mevcut kanalı seçin ve bunun için yeni bir mesaj ayarlayın.",
+                "field": {
+                    "selected": "Seçilen tebrik kanalı: {channel}",
+                    "failure": "Tüm veriler henüz toplanmadı."
+                }
+            },
+            "dropdown-placeholder": "Karşılama kanalını seçin",
+            "modal": {
+                "title": "Mesaj tebrik",
+                "label": "İleti",
+                "placeholder": "Ayrıca yerleştirme oluşturucuyu da kullanabilirsiniz"
+            }
+        },
+        "thread": {
+            "init": {
+                "title": "Forumlarda/konularda otomatik mesajlar",
+                "brief": "Otomatik mesajlar",
+                "description": "Forumlara/konulara otomatik gönderilerinizi ekleyin veya değiştirin",
+                "placeholder": "Şubelerde/forumlarda otomatik mesaj ayarları:",
+                "channel": "Kanal: {channel}"
+            },
+            "addptional": {
+                "button": {
+                    "install_mes": "Mesajı yükle",
+                    "install-mes": "Mesajı yükle"
+                },
+                "channel-error": "Bu kanala otomatik mesajlar zaten yüklendi",
+                "placeholder": "Otomatik mesajlar için bir kanal seçin"
+            },
+            "thread": {
+                "mes-not-found": "Mesaj bulunamadı",
+                "button": {
+                    "view": "Mesajı görüntüle",
+                    "edit": "Mesajı düzenleme",
+                    "delete": "Mesajı silme"
+                }
+            },
+            "modal": {
+                "label": "İleti:",
+                "title": "Otomatik mesajlar",
+                "placeholder": "Embed-builder'ı da kullanabilirsiniz"
+            }
+        },
+        "reactions": {
+            "init": {
+                "title": "Otomatik reaksiyonlar",
+                "brief": "Otomatik reaksiyonlar",
+                "description": "Kanallara reaksiyonların otomatik eklenmesinin kontrolü",
+                "emoji": "Emoji",
+                "channel": "Kanal",
+                "placeholder": "Otomatik reaksiyon ayarları:"
+            },
+            "addres": {
+                "channel-error": "Bu kanalda otomatik reaksiyonlar zaten yüklü",
+                "install_emoji": "Emojiyi yükle",
+                "placeholder": "Otomatik reaksiyonlar için bir kanal seçin"
+            },
+            "buttons": {
+                "delete": "Tepkiyi sil",
+                "edit": "Tepkiyi düzenle"
+            },
+            "modal": {
+                "title": "Otomatik reaksiyon",
+                "label": "Emoji:"
+            },
+            "button": {
+                "delete": "Tepkiyi sil",
+                "edit": "Tepkiyi düzenle"
+            }
+        },
+        "music": {
+            "title": "Müzik",
+            "max-queue-size": {
+                "name": "Maksimum Boyut",
+                "description": "Maksimum parça kuyruk uzunluğu.",
+                "value": "Maksimum kuyruk boyutu: {size}"
+            },
+            "default-volume": {
+                "name": "Varsayılan ses",
+                "description": "Varsayılan müzik hacmi.",
+                "value": "Varsayılan cilt müzik: {volume}"
+            },
+            "dj-roles": {
+                "failed": "{role} rolü atanamaz ve entegrasyon veya bir bot tarafından kullanılır.",
+                "name": "DJ Rolleri",
+                "description": "Müziği kontrol edebilen roller.",
+                "value": "DJ-Roles: {roles}"
+            }
+        }
+    },
+    "delcat": {
+        "issue": {
+            "title": "Emin misin?",
+            "description": "Bu, {category} kategorisini ve içindeki her kanalı kalıcı olarak silecektir."
+        },
+        "accept": {
+            "title": "#{category} kategori silindi",
+            "description": "Ve ayrıca kategorideki uzaktan {count} kanalları"
+        },
+        "cancel": {
+            "title": "Kategori silme iptal edildi"
+        }
+    }
+}
