@@ -36,3 +36,12 @@ IdeasPayload = TypedDict(
         "moderation-role-ids": List[int]
     }
 )
+
+
+class RoleShopPayload(TypedDict):
+    role_id: int
+    amount: int
+    limit: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    using_limit: Optional[int]

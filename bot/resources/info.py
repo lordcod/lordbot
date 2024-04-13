@@ -8,6 +8,8 @@ DEFAULT_LANGUAGE = 'en'
 DEFAULT_EMOJI = Emoji.diamod
 DEFAULT_ECONOMY_SETTINGS = orjson.dumps({'emoji': DEFAULT_EMOJI}).decode()
 
+COUNT_ROLES_PAGE = 5
+
 activities_list = [
     {
         'id': 880218394199220334,
