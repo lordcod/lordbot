@@ -15,7 +15,7 @@ def _load_file(filename: str) -> bytes:
         return f.read()
 
 
-def _parse_json(content: str) -> dict:
+def _parse_json(content: str) -> dict | list:
     return orjson.loads(content)
 
 
@@ -154,7 +154,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    # from_folder("./bot/languages/localization")
+    from_folder("./bot/languages/localization")
 
     # Translation dict
     # for lang in default_languages:
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     #         continue
     #     print(lang)
     #     trd = translate_dict(
-    #         "en", lang, resource_dict['en']["ideas"])
+    #         "en", lang, resource_dict['en']['ideas'])
     #     print(trd)
     #     parser(trd, lang, "ideas", loadable=False)
 
@@ -177,11 +177,11 @@ if __name__ == "__main__":
 
     # To any locales format
     # data = to_any_locales()
-    # with open("test_loc.json", "+wb") as file:
+    # with open("bot/languages/any_localization.json", "+wb") as file:
     #     jsondata = orjson.dumps(data)
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
+    # to_i18n_translation(_parse_json(_load_file("bot/languages/any_localization.json")))
 
-    to_folder("./bot/languages/localization")
+    # to_folder("./bot/languages/localization")
