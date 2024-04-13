@@ -17,9 +17,6 @@ class message_event(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: nextcord.Message):
-        if message.guild is None:
-            return
-
         gdb = GuildDateBases(message.guild.id)
 
         color = gdb.get('color')

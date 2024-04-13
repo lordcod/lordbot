@@ -118,7 +118,7 @@ class CallbackCommandError:
         color = self.gdb.get('color')
 
         cmd_data = get_command(self.ctx.command.name)
-        using = f"`{cmd_data.get('name')}{' '+' '.join([arg.get(self.locale) for arg in cmd_data.get('arguments')]) if cmd_data.get('arguments') else ''}`"
+        using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
 
         embed = nextcord.Embed(
             title=title,
