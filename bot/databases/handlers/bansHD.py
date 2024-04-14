@@ -71,7 +71,7 @@ class BanDateBases:
             (self.guild_id, self.member_id)
         )
 
-    async def remove_ban(self, _state: ConnectionState, reason="Temp-ban"):
+    async def remove_ban(self, _state: ConnectionState, reason: Optional[str] = None):
         self.delete()
         try:
             await _state.http.unban(self.member_id,

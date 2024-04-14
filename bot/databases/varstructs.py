@@ -6,6 +6,22 @@ from typing import (
 )
 
 
+class GiveawayData(TypedDict):
+    guild_id: int
+    channel_id: int
+    sponsor_id: int
+    prize: str
+    description: Optional[str]
+    quantity: int
+    date_end: int | float
+    types: List[int]
+    entries_ids: List[int]
+    completed: bool
+    winners: Optional[List[int]]
+    key: str
+    token: str
+
+
 class PartialIdeasPayload(TypedDict):
     enabled: bool
     channel_suggest_id: int
@@ -24,3 +40,12 @@ class IdeasPayload(PartialIdeasPayload, total=True):
     ban_users: Optional[List[Tuple[int, int, str]]]
     # User id, moderator_id, Timestamp, reason
     muted_users: Optional[List[Tuple[int, int, float, str]]]
+
+
+class RoleShopPayload(TypedDict):
+    role_id: int
+    amount: int
+    limit: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    using_limit: Optional[int]

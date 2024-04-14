@@ -15,7 +15,7 @@ def _load_file(filename: str) -> bytes:
         return f.read()
 
 
-def _parse_json(content: str) -> dict:
+def _parse_json(content: str) -> dict | list:
     return orjson.loads(content)
 
 
@@ -162,26 +162,27 @@ if __name__ == "__main__":
     #         continue
     #     print(lang)
     #     trd = translate_dict(
-    #         "en", lang, resource_dict['en']["ideas"])
+    #         "en", lang, resource_dict['en']['delcat'])
     #     print(trd)
-    #     parser(trd, lang, "ideas", loadable=False)
+    #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    # data = translation_with_languages(
-    #     "en", "Delete reaction", default_languages)
+    data = translation_with_languages(
+        "en", "<time>", default_languages)
+    print(data)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(
-    #     "ideas.confirm-modal.approve", translation_with_languages("en", "Approved | {mention}", default_languages))
+    #     "delcat.accept.title", translation_with_languages("en", " #{self.category.name} Category Deleted", default_languages))
 
     # To any locales format
     # data = to_any_locales()
-    # with open("test_loc.json", "+wb") as file:
+    # with open("bot/languages/any_localization.json", "+wb") as file:
     #     jsondata = orjson.dumps(data)
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
+    # to_i18n_translation(_parse_json(_load_file("bot/languages/any_localization.json")))
 
-    to_folder("./bot/languages/localization")
+    # to_folder("./bot/languages/localization")

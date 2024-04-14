@@ -456,7 +456,7 @@ class IdeaView(nextcord.ui.View):
             )
             return
 
-        if enabled is False:
+        if not enabled:
             await interaction.response.send_message(i18n.t(locale, 'ideas.globals.ideas-disabled'), ephemeral=True)
             return
 

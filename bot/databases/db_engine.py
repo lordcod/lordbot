@@ -49,7 +49,7 @@ class DataBase:
             Logger.critical(
                 'The database could not be loaded and the program is terminated because of this')
 
-            raise err
+            raise
         else:
             Logger.success("Successful connection")
             self = cls(connection)

@@ -30,13 +30,19 @@ class GuildsDB(Table):
                               default=info.DEFAULT_ECONOMY_SETTINGS)
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
+    invites = Colum(data_type=PostType.JSON, default="{}")
+    giveaways = Colum(data_type=PostType.JSON, default="{}")
     tickettool = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
     auto_translate = Colum(data_type=PostType.JSON, default="{}")
+    polls = Colum(data_type=PostType.JSON, default="{}")
     greeting_message = Colum(data_type=PostType.JSON, default="{}")
     command_permissions = Colum(data_type=PostType.JSON, default="{}")
     ideas = Colum(data_type=PostType.JSON, default="{}")
+    # message_state = Colum(data_type=PostType.JSON, default="{}")
+    # voice_time_state = Colum(data_type=PostType.JSON, default="{}")
+    # score_state = Colum(data_type=PostType.JSON, default="{}")
 
 
 class EconomicDB(Table):
@@ -75,17 +81,8 @@ class MongoDataBases(Table):
     values = Colum(data_type=PostType.JSON, default="{}")
 
 
-def db_forever():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_forever()
-    finally:
-        engine.connection.close()
-        loop.close()
-        exit()
-
-
-thread = threading.Thread(
-    target=db_forever, name='DataBase')
-thread.start()
+GuildsDB.create_table()
+EconomicDB.create_table()
+RolesDB.create_table()
+BansDB.create_table()
+MongoDataBases.create_table()
