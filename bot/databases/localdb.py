@@ -21,8 +21,10 @@ def get_table(table_name, default: Any = None):
 
 def get(table_name, key, *, default=None):
     table = get_table(table_name)
+    if key not in table:
+        return default
 
-    return table.get(key, default)
+    return table[key]
 
 
 def set(table_name, key, value):

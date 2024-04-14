@@ -48,7 +48,6 @@ class Basic(commands.Cog):
                 f"Discord latency: {discord_latency_ms}ms\n"
                 f"Databases latency: {databases_latency_ms}ms\n"
                 f"Command processing latency: {command_latency_ms}ms\n"
-                f"Shard ID: {((ctx.guild.id >> 22) % self.bot.shard_count) + 1}/{self.bot.shard_count}"
             ),
             color=color
         )

@@ -9,9 +9,10 @@ from bot.misc.utils import LordTimerHandler
 from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
-from typing import Coroutine, List, Optional, Dict, Any
+from typing import Coroutine, List, Optional
 
-from bot.resources.info import DEFAULT_PREFIX
+
+<< << << < HEAD
 
 
 def get_shard_list(shard_ids: str):
@@ -28,22 +29,27 @@ def get_shard_list(shard_ids: str):
 class LordBot(commands.AutoShardedBot):
     ya_requests: Any = None
     invites_data: Dict[int, List[nextcord.Invite]] = {}
-    timeouts = {}
-    guild_timer_handlers = {}
 
-    @staticmethod
-    async def get_command_prefixs(
+
+== == == =
+class LordBot(commands.Bot):
+
+
+>>>>>> > origin/master
+timeouts = {}
+ guild_timer_handlers = {}
+
+  @staticmethod
+   async def get_command_prefixs(
         bot: commands.Bot,
         msg: nextcord.Message
     ) -> List[str]:
         "Returns a list of prefixes that can be used when using bot commands"
-        if msg.guild is None:
-            return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
         gdb = GuildDateBases(msg.guild.id)
         prefix = gdb.get('prefix')
         return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
-    def set_event(self, coro: Coroutine, name: Optional[str] = None) -> None:
+    def add_event(self, coro: Coroutine, name: Optional[str] = None) -> None:
         """A decorator that registers an event to listen to.
 
         You can find more info about the events on the :ref:`documentation below <discord-api-events>`.
@@ -63,8 +69,8 @@ class LordBot(commands.AutoShardedBot):
             async def on_ready(): pass
             async def my_message(message): pass
 
-            bot.set_event(on_ready)
-            bot.set_event(my_message, 'on_message')
+            bot.add_event(on_ready)
+            bot.add_event(my_message, 'on_message')
         """
 
         if not asyncio.iscoroutinefunction(coro):

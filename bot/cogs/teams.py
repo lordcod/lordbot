@@ -4,6 +4,8 @@ from bot.misc.lordbot import LordBot
 
 from bot.resources import check
 
+import os
+
 
 class Teams(commands.Cog):
     def __init__(self, bot: LordBot):
@@ -13,7 +15,7 @@ class Teams(commands.Cog):
     @check.team_only()
     async def shutdown(self, ctx: commands.Context):
         await ctx.send("The bot has activated the completion process!")
-        await self.bot.close()
+        os._exit(1)
 
     @commands.command()
     @commands.guild_only()

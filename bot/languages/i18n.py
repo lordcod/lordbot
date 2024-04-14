@@ -15,7 +15,7 @@ def _load_file(filename: str) -> bytes:
         return f.read()
 
 
-def _parse_json(content: str) -> dict | list:
+def _parse_json(content: str) -> dict:
     return orjson.loads(content)
 
 
@@ -178,11 +178,11 @@ if __name__ == "__main__":
 
     # To any locales format
     # data = to_any_locales()
-    # with open("bot/languages/any_localization.json", "+wb") as file:
+    # with open("test_loc.json", "+wb") as file:
     #     jsondata = orjson.dumps(data)
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    # to_i18n_translation(_parse_json(_load_file("bot/languages/any_localization.json")))
+    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    # to_folder("./bot/languages/localization")
+    to_folder("./bot/languages/localization")

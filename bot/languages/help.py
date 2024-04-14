@@ -9,7 +9,7 @@ class CommandOption(TypedDict):
     name: str
     category: str
     aliases: List[str]
-    arguments: List[Dict[str, str]]
+    arguments: List[str]
     examples: Optional[List[List[str]]]
     descriptrion: Dict[str, str]
     brief_descriptrion: Dict[str, str]

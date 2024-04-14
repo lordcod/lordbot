@@ -1,5 +1,5 @@
-import asyncio
 import nextcord
+import asyncio
 from nextcord.ext import commands
 
 from bot.databases import GuildDateBases
@@ -9,7 +9,7 @@ from bot.misc.lordbot import LordBot
 class InteractionsEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-        bot.set_event(self.on_interaction)
+        bot.add_event(self.on_interaction)
         super().__init__()
 
     async def dis_interaction_failed(self, interaction: nextcord.Interaction):
@@ -31,7 +31,6 @@ class InteractionsEvent(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def on_interaction(self, interaction: nextcord.Interaction):
-        self.bot.loop.create_task(self.dis_interaction_failed(interaction))
         await self.bot.process_application_commands(interaction)
 
 
