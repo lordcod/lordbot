@@ -2,7 +2,7 @@ import nextcord
 from nextcord import ui
 
 
-class Main(ui.View):
+class Menus(ui.View):
 
     def __init__(self, value: list, timeout: float | None = None):
         super().__init__(timeout=timeout)

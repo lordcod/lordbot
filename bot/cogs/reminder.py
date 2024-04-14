@@ -25,7 +25,7 @@ class Reminder(commands.Cog):
         self.bot.lord_handler_timer.create_timer_handler(
             time_now-time.time(),
             self.process_reminder(time.time(), ctx.author, ctx.channel, text),
-            f"reminder:{ctx.guild.id}:{ctx.guild.id}:{time_now :.0f}:{randquan(17)}"
+            f"reminder:{ctx.guild.id}:{ctx.author.id}:{time_now :.0f}:{randquan(17)}"
         )
         await ctx.send(f"🛎️ OK, I'll mention you here on <t:{time_now :.0f}:f>(<t:{time_now :.0f}:R>)")
 

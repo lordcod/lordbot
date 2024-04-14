@@ -136,7 +136,7 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-class EconomyShopView(menus.Main):
+class EconomyShopView(menus.Menus):
     value: List[List[RoleShopPayload]]
 
     def __init__(

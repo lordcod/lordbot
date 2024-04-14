@@ -16,6 +16,7 @@ SCORE_STATE_DB = localdb.get_table('score')
 MESSAGE_STATE_DB = localdb.get_table('messages')
 VOICE_STATE_DB = localdb.get_table('voice_state')
 
+
 def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
     for (member_id, balance, bank, total) in leaderboard.copy():
         member = guild._state.get_user(member_id)
@@ -26,8 +27,10 @@ def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
             except ValueError:
                 pass
 
+
 def get_item_param(item: Tuple[int, T]) -> T:
     return item[1]
+
 
 def register_key(key: int) -> None:
     def wrapped(func):
@@ -35,7 +38,8 @@ def register_key(key: int) -> None:
         return func
     return wrapped
 
-class EconomyLeaderboardView(menus.Main):
+
+class EconomyLeaderboardView(menus.Menus):
     def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]):
         self.guild = guild
         self.gdb = GuildDateBases(guild.id)
@@ -50,7 +54,7 @@ class EconomyLeaderboardView(menus.Main):
 
         self.remove_item(self.button_previous)
         self.remove_item(self.button_next)
-        
+
         self.add_item(LeaderboardDropDown(guild.id))
 
     @property
@@ -74,6 +78,7 @@ class EconomyLeaderboardView(menus.Main):
     async def callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await interaction.response.edit_message(embed=self.embed, view=self)
 
+
 class LeaderboardDropDown(nextcord.ui.StringSelect):
     def __init__(self, guild_id: int) -> None:
         super().__init__(
@@ -84,14 +89,16 @@ class LeaderboardDropDown(nextcord.ui.StringSelect):
                 nextcord.SelectOption(label="Score", value="3")
             ]
         )
-    
+
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await LeaderboardTypes.set_as_key(int(self.values[0]), interaction.user, interaction.guild, interaction.message)
+
 
 class AddtionallyViewLeaderboardView(nextcord.ui.View):
     def __init__(self, guild_id: int) -> None:
         super().__init__()
         self.add_item(LeaderboardDropDown(guild_id))
+
 
 class LeaderboardTypes:
     @staticmethod
@@ -132,7 +139,8 @@ class LeaderboardTypes:
         gdb = GuildDateBases(guild.id)
         color = gdb.get("color")
         locale = gdb.get('language')
-        leaderboard = sorted(VOICE_STATE_DB.items(), key=get_item_param, reverse=True)
+        leaderboard = sorted(VOICE_STATE_DB.items(),
+                             key=get_item_param, reverse=True)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
 
         try:
@@ -170,7 +178,8 @@ class LeaderboardTypes:
         gdb = GuildDateBases(guild.id)
         color = gdb.get("color")
         locale = gdb.get('language')
-        leaderboard = sorted(MESSAGE_STATE_DB.items(), key=get_item_param, reverse=True)
+        leaderboard = sorted(MESSAGE_STATE_DB.items(),
+                             key=get_item_param, reverse=True)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
 
         try:
@@ -208,7 +217,8 @@ class LeaderboardTypes:
         gdb = GuildDateBases(guild.id)
         color = gdb.get("color")
         locale = gdb.get('language')
-        leaderboard = sorted(SCORE_STATE_DB.items(), key=get_item_param, reverse=True)
+        leaderboard = sorted(SCORE_STATE_DB.items(),
+                             key=get_item_param, reverse=True)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
 
         try:
@@ -243,10 +253,11 @@ class LeaderboardTypes:
     @classmethod
     async def set_as_key(cls, key: int, member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
         for _, item in inspect.getmembers(cls):
-            if not (hasattr(item, "__leaderboard_key__") 
+            if not (hasattr(item, "__leaderboard_key__")
                     and item.__leaderboard_key__ == key):
                 continue
             await item(member, guild, message)
+
 
 class Leaderboards(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
@@ -256,7 +267,6 @@ class Leaderboards(commands.Cog):
     async def leaderboard(self, ctx: commands.Context):
         message = await ctx.send("Uploading data...")
         await LeaderboardTypes.set_score_lb(ctx.author, ctx.guild, message)
-
 
 
 def setup(bot):
