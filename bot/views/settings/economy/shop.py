@@ -19,7 +19,7 @@ def update_role_data(
     roles: List[RoleShopPayload]
 ) -> List[RoleShopPayload]:
     new_roles = deepcopy(roles) or []
-    for index, rd in enumerate(roles):
+    for index, rd in enumerate(roles or []):
         if rd.get('role_id') != role_data.get('role_id'):
             continue
         new_roles[index] = role_data
