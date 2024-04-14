@@ -11,7 +11,7 @@ from bot.misc.lordbot import LordBot
 translator = googletrans.Translator()
 
 
-class thread_event(commands.Cog):
+class ThreadEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -30,4 +30,4 @@ class thread_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(thread_event(bot))
+    bot.add_cog(ThreadEvent(bot))

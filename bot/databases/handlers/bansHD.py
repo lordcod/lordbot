@@ -3,7 +3,7 @@ from typing import Optional
 import nextcord
 from nextcord.state import ConnectionState
 from ..db_engine import DataBase
-from ..misc.utils import Json
+from ..misc.adapter_dict import Json
 from ..misc.error_handler import on_error
 
 engine: DataBase = None
@@ -71,7 +71,7 @@ class BanDateBases:
             (self.guild_id, self.member_id)
         )
 
-    async def remove_ban(self, _state: ConnectionState, reason="Temp-ban"):
+    async def remove_ban(self, _state: ConnectionState, reason: Optional[str] = None):
         self.delete()
         try:
             await _state.http.unban(self.member_id,

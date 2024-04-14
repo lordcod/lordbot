@@ -1,1 +1,289 @@
-{"bot-info":{"title":"{name} este es un bot multifuncional","description":"El bot está diseñado para facilitar la gestión del servidor y está equipado con varias herramientas de automatización.","info-server":"Información sobre el servidor","prefix-server":"> Prefijo del servidor - `{prefix}`"},"translate":{"placeholder":"Elegirá el idioma apropiado:","failed":"Este mensaje no tiene contenido, por lo que no podremos traducirlo."},"captcha":{"congratulation":"¡Felicitaciones, has pasado el captcha!","enter":"¡Tienes 30 segundos para resolver el captcha!","failed":"Código de imagen erroneo"},"activiti":{"failed":"Esta actividad no está disponible o no funciona","embed":{"title":"¡La actividad ha sido creada exitosamente!","description":"Sin embargo, es posible que algunos tipos de actividades no estén disponibles para su servidor si el nivel de impulso no cumple con los requisitos de actividad."},"fields":{"label":"Nombre de la actividad","max-user":"Número máximo de usuarios"}},"help":{"title":"Libro de ayuda","arguments":"[Opcional] | <Obligatorio>","command-embed":{"title":"Ayuda sobre el comando `{name}`.","info":"Información","category":"Categoría: `{category_emoji}{category_name}`\n","aliases":"Alias: {aliases}\n","disable_command":"¿Puedo apagarlo? **{value}**\n","connection_disabled":{"0":"No","1":"Sí"},"using_command":"Usando: `{using}`\n","example":"Ejemplo №{number}"},"command-notfound":{"title":"Comando no encontrado","description":"Al buscar comando no lo encontramos, búsquelo nuevamente en la lista general de comandos"},"command-invalid":{"title":"El comando no es válido","description":"Lo más probable es que hayas ingresado mal el nombre del equipo, quizás contenga algunos caracteres extraños."}},"errors":{"MissingPermissions":"No tienes suficientes derechos","MissingRole":"No tienes un rol adecuado para ejecutar el comando.","MissingChannel":"No puedes ejecutar este comando en este canal.","NotOwner":"Este comando está destinado al propietario del bot.","CommandNotFound":"No existe tal comando","CheckFailure":"No cumples todas las condiciones","BadArgument":"Argumento no válido ingresado","DisabledCommand":"Este comando está deshabilitado en el servidor.","MissingRequiredArgument":"No ingresaste un argumento requerido","NotActivateEconomy":"El sistema económico está deshabilitado en el servidor.","OnlyTeamError":"Este comando solo puede ser utilizado por el equipo bot.","MemberNotFound":"No se pudo encontrar al participante.","CommandOnCooldown":{"title":"El comando está en espera","description":"Inténtalo de nuevo después de {delay}."},"DisabledEconomy":"El sistema económico está deshabilitado en el servidor."},"music-selector":{"title":"¡Elige la pista que te interesa!","placeholder":"Selecciona una pista"},"ideas":{"globals":{"title":"sugirió una idea","ideas-disabled":"El módulo **idea** está deshabilitado en este servidor","embed-title":"¡Idea Nueva!"},"confirm-modal":{"reason-label":"Argumento:","embed":{"title":"¡Idea Nueva!","field":"¡Vieja idea!"},"idea":{"content":"{mention} ¡Tu idea está aprobada!","embed":{"title":"¡La idea está aprobada!","field":"La esencia de la idea:","reason":"Argumento de confirmación:"}},"approve":"Aprobado | {name}","title":"¡La idea está aprobada!","content":"{mention} ¡Tu idea está aprobada!","essence":"La esencia de la idea:","reason":"Argumento de confirmación:"},"confirm-view":{"button":{"approve":"Aprobar","deny":"Denegar"},"old-idea":"¡Una idea obsoleta!","idea":"Idea:","refused":"Rechazado | {name}","idea-content":"{mention} ¡Tu idea ha sido rechazada!","title":"¡La idea es rechazada!"},"idea-modal":{"label":"Cuéntanos tu idea","placeholder":"Describe tu idea con el mayor detalle posible con ejemplos de uso.","embed-description":"¡Que la idea sea aprobada o no depende de ti!","idea":"Idea:","thread-name":"Discusión de la idea de {nombre}"},"idea-view":{"timeout-message":"Sólo puedes proponer una idea una vez cada 30 minutos.\nLa próxima oportunidad para enviar una idea será a través de: <t:{time}:R>"}},"settings":{"start":{"title":"Configurando los módulos del bot.","choose":"Elige la configuración...","description":"Interactúe con el menú desplegable de selección para configurar el servidor.","request":"Solicitud de {name}"},"module-name":{"economy":"Economía","languages":"Idiomas","prefix":"Prefijo","music":"Música","color":"Color de los mensajes del sistema.","reactions":"Reacciones automáticas","thread":"Mensaje automático en un hilo/publicación","command-permission":"Configuración de comando","ideas":"Ideas","welcomer":"Bienvenidos nuevos miembros","auto-roles":"Roles automáticos"},"button":{"back":"Atrás","edit":"Editar","reset":"Reiniciar","add":"Agregar"},"prefix":{"title":"Prefijo","description":"Establecer el prefijo al que responderá el bot al llamar al comando.","current":"El prefijo actual es {prefix}"},"languages":{"title":"Idiomas","description":"Esta configuración cambia el idioma para trabajar con el bot.","choose":"Seleccione el idioma del servidor:"},"color":{"not-valid":"El formato del código hexadecimal es incorrecto.","title":"Color de los mensajes del sistema.","description":"Cuando usas comandos, el bot muestra inserciones que tienen un color invisible de forma predeterminada.\n\nPuedes configurar tu color según el tema de tu comunidad.","current":"Color actual"},"auto-role":{"button":{"install":"Instalar roles","delete":"Eliminar roles"},"placeholder":"Seleccionar roles asignados automáticamente para nuevos miembros","embed":{"title":"Roles automáticos","description":"El panel de control para roles automáticos.\nPuede instalar, editar, eliminar y ver dichas acciones desde el panel.\nSi no ve los roles automáticos, ¡no están seleccionados!","field":"Roles seleccionados:"}},"welcomer":{"button":{"delete":"Borrar mensaje","view":"Ver mensaje","install":"Instalar mensaje"},"embed":{"title":"mensaje de saludo","description":"Envío automático de mensajes cuando un participante inicia sesión en el servidor\n\nSi desea cambiar el canal, simplemente selecciónelo nuevamente y configure el mensaje\n\nPara cambiar un mensaje, seleccione el canal actual y establezca un nuevo mensaje para él","field":{"selected":"Canal de saludo seleccionado: {channel}","failure":"Aún no se han recopilado todos los datos."}},"dropdown-placeholder":"Selecciona el canal de bienvenida","modal":{"title":"mensaje de saludo","label":"Mensaje","placeholder":"También puedes usar el generador de incrustaciones."}},"thread":{"init":{"title":"Mensajes automáticos en foros/hilos","brief":"Mensajes automáticos","description":"Agregue o cambie sus publicaciones automáticas en foros/hilos","placeholder":"Configuración de mensajes automáticos en sucursales/foros:","channel":"Canal: {channel}"},"addptional":{"button":{"install_mes":"Instalar mensaje","install-mes":"Instalar mensaje"},"channel-error":"Los mensajes automáticos ya se han instalado en este canal.","placeholder":"Seleccione un canal para mensajes automáticos"},"thread":{"mes-not-found":"No se encontró ningún mensaje","button":{"view":"Ver el mensaje","edit":"Editar un mensaje","delete":"Eliminar un mensaje"}},"modal":{"label":"Mensaje:","title":"Mensajes automáticos","placeholder":"También puedes usar el constructor de incrustaciones."}},"reactions":{"init":{"title":"Reacciones automáticas","brief":"Reacciones automáticas","description":"Control de adición automática de reacciones en canales.","emoji":"emojis","channel":"Canal","placeholder":"Configuración de reacción automática:"},"addres":{"channel-error":"Las reacciones automáticas ya se han instalado en este canal.","install_emoji":"Instalar emojis","placeholder":"Seleccione un canal para reacciones automáticas"},"buttons":{"delete":"Eliminar reacción","edit":"Editar reacción"},"modal":{"title":"Reacción automática","label":"emojis:"},"button":{"delete":"Eliminar reacción","edit":"Editar reacción"}},"music":{"title":"Música","max-queue-size":{"name":"tamaño máximo","description":"Longitud máxima de la cola de pista.","value":"Tamaño máximo de la cola: {size}"},"default-volume":{"name":"Volumen predeterminado","description":"El volumen de música predeterminado.","value":"Música de volumen predeterminada: {volume}"},"dj-roles":{"failed":"El rol {role} no se puede asignar y se usa para la integración o por un bot.","name":"Roles de DJ","description":"Roles que pueden controlar la música.","value":"DJ-Roles: {roles}"}}}}
+{
+    "bot-info": {
+        "title": "{name} este es un bot multifuncional",
+        "description": "El bot está diseñado para facilitar la gestión del servidor y está equipado con varias herramientas de automatización.",
+        "info-server": "Información sobre el servidor",
+        "prefix-server": "> Prefijo del servidor - `{prefix}`"
+    },
+    "translate": {
+        "placeholder": "Elegirá el idioma apropiado:",
+        "failed": "Este mensaje no tiene contenido, por lo que no podremos traducirlo."
+    },
+    "captcha": {
+        "congratulation": "¡Felicitaciones, has pasado el captcha!",
+        "enter": "¡Tienes 30 segundos para resolver el captcha!",
+        "failed": "Código de imagen erroneo"
+    },
+    "activiti": {
+        "failed": "Esta actividad no está disponible o no funciona",
+        "embed": {
+            "title": "¡La actividad ha sido creada exitosamente!",
+            "description": "Sin embargo, es posible que algunos tipos de actividades no estén disponibles para su servidor si el nivel de impulso no cumple con los requisitos de actividad."
+        },
+        "fields": {
+            "label": "Nombre de la actividad",
+            "max-user": "Número máximo de usuarios"
+        }
+    },
+    "help": {
+        "title": "Libro de ayuda",
+        "arguments": "[Opcional] | <Obligatorio>",
+        "command-embed": {
+            "title": "Ayuda sobre el comando `{name}`.",
+            "info": "Información",
+            "category": "Categoría: `{category_emoji}{category_name}`\n",
+            "aliases": "Alias: {aliases}\n",
+            "disable_command": "¿Puedo apagarlo? **{value}**\n",
+            "connection_disabled": {
+                "0": "No",
+                "1": "Sí"
+            },
+            "using_command": "Usando: `{using}`\n",
+            "example": "Ejemplo №{number}"
+        },
+        "command-notfound": {
+            "title": "Comando no encontrado",
+            "description": "Al buscar comando no lo encontramos, búsquelo nuevamente en la lista general de comandos"
+        },
+        "command-invalid": {
+            "title": "El comando no es válido",
+            "description": "Lo más probable es que hayas ingresado mal el nombre del equipo, quizás contenga algunos caracteres extraños."
+        }
+    },
+    "errors": {
+        "MissingPermissions": "No tienes suficientes derechos",
+        "MissingRole": "No tienes un rol adecuado para ejecutar el comando.",
+        "MissingChannel": "No puedes ejecutar este comando en este canal.",
+        "NotOwner": "Este comando está destinado al propietario del bot.",
+        "CommandNotFound": "No existe tal comando",
+        "CheckFailure": "No cumples todas las condiciones",
+        "BadArgument": "Argumento no válido ingresado",
+        "DisabledCommand": "Este comando está deshabilitado en el servidor.",
+        "MissingRequiredArgument": "No ingresaste un argumento requerido",
+        "NotActivateEconomy": "El sistema económico está deshabilitado en el servidor.",
+        "OnlyTeamError": "Este comando solo puede ser utilizado por el equipo bot.",
+        "MemberNotFound": "No se pudo encontrar al participante.",
+        "CommandOnCooldown": {
+            "title": "El comando está en espera",
+            "description": "Inténtalo de nuevo después de {delay}."
+        },
+        "DisabledEconomy": "El sistema económico está deshabilitado en el servidor."
+    },
+    "music-selector": {
+        "title": "¡Elige la pista que te interesa!",
+        "placeholder": "Selecciona una pista"
+    },
+    "ideas": {
+        "globals": {
+            "title": "sugirió una idea",
+            "ideas-disabled": "El módulo **idea** está deshabilitado en este servidor",
+            "embed-title": "¡Idea Nueva!"
+        },
+        "confirm-modal": {
+            "reason-label": "Argumento:",
+            "embed": {
+                "title": "¡Idea Nueva!",
+                "field": "¡Vieja idea!"
+            },
+            "idea": {
+                "content": "{mention} ¡Tu idea está aprobada!",
+                "embed": {
+                    "title": "¡La idea está aprobada!",
+                    "field": "La esencia de la idea:",
+                    "reason": "Argumento de confirmación:"
+                }
+            },
+            "approve": "Aprobado | {name}",
+            "title": "¡La idea está aprobada!",
+            "content": "{mention} ¡Tu idea está aprobada!",
+            "essence": "La esencia de la idea:",
+            "reason": "Argumento de confirmación:"
+        },
+        "confirm-view": {
+            "button": {
+                "approve": "Aprobar",
+                "deny": "Denegar"
+            },
+            "old-idea": "¡Una idea obsoleta!",
+            "idea": "Idea:",
+            "refused": "Rechazado | {name}",
+            "idea-content": "{mention} ¡Tu idea ha sido rechazada!",
+            "title": "¡La idea es rechazada!"
+        },
+        "idea-modal": {
+            "label": "Cuéntanos tu idea",
+            "placeholder": "Describe tu idea con el mayor detalle posible con ejemplos de uso.",
+            "embed-description": "¡Que la idea sea aprobada o no depende de ti!",
+            "idea": "Idea:",
+            "thread-name": "Discusión de la idea de {nombre}"
+        },
+        "idea-view": {
+            "timeout-message": "Sólo puedes proponer una idea una vez cada 30 minutos.\nLa próxima oportunidad para enviar una idea será a través de: <t:{time}:R>"
+        }
+    },
+    "settings": {
+        "start": {
+            "title": "Configurando los módulos del bot.",
+            "choose": "Elige la configuración...",
+            "description": "Interactúe con el menú desplegable de selección para configurar el servidor.",
+            "request": "Solicitud de {name}"
+        },
+        "module-name": {
+            "economy": "Economía",
+            "languages": "Idiomas",
+            "prefix": "Prefijo",
+            "music": "Música",
+            "color": "Color de los mensajes del sistema.",
+            "reactions": "Reacciones automáticas",
+            "thread": "Mensaje automático en un hilo/publicación",
+            "command-permission": "Configuración de comando",
+            "ideas": "Ideas",
+            "welcomer": "Bienvenidos nuevos miembros",
+            "auto-roles": "Roles automáticos"
+        },
+        "button": {
+            "back": "Atrás",
+            "edit": "Editar",
+            "reset": "Reiniciar",
+            "add": "Agregar"
+        },
+        "prefix": {
+            "title": "Prefijo",
+            "description": "Establecer el prefijo al que responderá el bot al llamar al comando.",
+            "current": "El prefijo actual es {prefix}"
+        },
+        "languages": {
+            "title": "Idiomas",
+            "description": "Esta configuración cambia el idioma para trabajar con el bot.",
+            "choose": "Seleccione el idioma del servidor:"
+        },
+        "color": {
+            "not-valid": "El formato del código hexadecimal es incorrecto.",
+            "title": "Color de los mensajes del sistema.",
+            "description": "Cuando usas comandos, el bot muestra inserciones que tienen un color invisible de forma predeterminada.\n\nPuedes configurar tu color según el tema de tu comunidad.",
+            "current": "Color actual"
+        },
+        "auto-role": {
+            "button": {
+                "install": "Instalar roles",
+                "delete": "Eliminar roles"
+            },
+            "placeholder": "Seleccionar roles asignados automáticamente para nuevos miembros",
+            "embed": {
+                "title": "Roles automáticos",
+                "description": "El panel de control para roles automáticos.\nPuede instalar, editar, eliminar y ver dichas acciones desde el panel.\nSi no ve los roles automáticos, ¡no están seleccionados!",
+                "field": "Roles seleccionados:"
+            }
+        },
+        "welcomer": {
+            "button": {
+                "delete": "Borrar mensaje",
+                "view": "Ver mensaje",
+                "install": "Instalar mensaje"
+            },
+            "embed": {
+                "title": "mensaje de saludo",
+                "description": "Envío automático de mensajes cuando un participante inicia sesión en el servidor\n\nSi desea cambiar el canal, simplemente selecciónelo nuevamente y configure el mensaje\n\nPara cambiar un mensaje, seleccione el canal actual y establezca un nuevo mensaje para él",
+                "field": {
+                    "selected": "Canal de saludo seleccionado: {channel}",
+                    "failure": "Aún no se han recopilado todos los datos."
+                }
+            },
+            "dropdown-placeholder": "Selecciona el canal de bienvenida",
+            "modal": {
+                "title": "mensaje de saludo",
+                "label": "Mensaje",
+                "placeholder": "También puedes usar el generador de incrustaciones."
+            }
+        },
+        "thread": {
+            "init": {
+                "title": "Mensajes automáticos en foros/hilos",
+                "brief": "Mensajes automáticos",
+                "description": "Agregue o cambie sus publicaciones automáticas en foros/hilos",
+                "placeholder": "Configuración de mensajes automáticos en sucursales/foros:",
+                "channel": "Canal: {channel}"
+            },
+            "addptional": {
+                "button": {
+                    "install_mes": "Instalar mensaje",
+                    "install-mes": "Instalar mensaje"
+                },
+                "channel-error": "Los mensajes automáticos ya se han instalado en este canal.",
+                "placeholder": "Seleccione un canal para mensajes automáticos"
+            },
+            "thread": {
+                "mes-not-found": "No se encontró ningún mensaje",
+                "button": {
+                    "view": "Ver el mensaje",
+                    "edit": "Editar un mensaje",
+                    "delete": "Eliminar un mensaje"
+                }
+            },
+            "modal": {
+                "label": "Mensaje:",
+                "title": "Mensajes automáticos",
+                "placeholder": "También puedes usar el constructor de incrustaciones."
+            }
+        },
+        "reactions": {
+            "init": {
+                "title": "Reacciones automáticas",
+                "brief": "Reacciones automáticas",
+                "description": "Control de adición automática de reacciones en canales.",
+                "emoji": "emojis",
+                "channel": "Canal",
+                "placeholder": "Configuración de reacción automática:"
+            },
+            "addres": {
+                "channel-error": "Las reacciones automáticas ya se han instalado en este canal.",
+                "install_emoji": "Instalar emojis",
+                "placeholder": "Seleccione un canal para reacciones automáticas"
+            },
+            "buttons": {
+                "delete": "Eliminar reacción",
+                "edit": "Editar reacción"
+            },
+            "modal": {
+                "title": "Reacción automática",
+                "label": "emojis:"
+            },
+            "button": {
+                "delete": "Eliminar reacción",
+                "edit": "Editar reacción"
+            }
+        },
+        "music": {
+            "title": "Música",
+            "max-queue-size": {
+                "name": "tamaño máximo",
+                "description": "Longitud máxima de la cola de pista.",
+                "value": "Tamaño máximo de la cola: {size}"
+            },
+            "default-volume": {
+                "name": "Volumen predeterminado",
+                "description": "El volumen de música predeterminado.",
+                "value": "Música de volumen predeterminada: {volume}"
+            },
+            "dj-roles": {
+                "failed": "El rol {role} no se puede asignar y se usa para la integración o por un bot.",
+                "name": "Roles de DJ",
+                "description": "Roles que pueden controlar la música.",
+                "value": "DJ-Roles: {roles}"
+            }
+        }
+    },
+    "delcat": {
+        "issue": {
+            "title": "¿Está seguro?",
+            "description": "Esto eliminará permanentemente la categoría {category} y cada canal dentro de ella."
+        },
+        "accept": {
+            "title": "#{category} Categoría eliminada",
+            "description": "Y también de forma remota {count} canales que estaban en la categoría"
+        },
+        "cancel": {
+            "title": "Eliminación de categoría cancelada"
+        }
+    }
+}

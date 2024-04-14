@@ -1,21 +1,51 @@
 from typing import (
     Optional,
     List,
+    Tuple,
     TypedDict
 )
 
-IdeasPayload = TypedDict(
-    'IdeasPayload',
-    {
-        "enabled": Optional[bool],
-        "cooldown": Optional[int],
 
-        "channel-suggest-id": int,
-        "message-suggest-id": int,
+class GiveawayData(TypedDict):
+    guild_id: int
+    channel_id: int
+    sponsor_id: int
+    prize: str
+    description: Optional[str]
+    quantity: int
+    date_end: int | float
+    types: List[int]
+    entries_ids: List[int]
+    completed: bool
+    winners: Optional[List[int]]
+    key: str
+    token: str
 
-        "channel-offers-id": int,
-        "channel-approved-id": int,
 
-        "moderation-role-ids": List[int]
-    }
-)
+class PartialIdeasPayload(TypedDict):
+    enabled: bool
+    channel_suggest_id: int
+    message_suggest_id: int
+    channel_offers_id: int
+
+
+class IdeasPayload(PartialIdeasPayload, total=True):
+    cooldown: Optional[int]
+    channel_approved_id: Optional[int]
+    moderation_role_ids: Optional[List[int]]
+    reaction_system: Optional[int]
+    thread_delete: Optional[bool]
+    allow_image: Optional[bool]
+    # User id,  moderator_id, reason
+    ban_users: Optional[List[Tuple[int, int, str]]]
+    # User id, moderator_id, Timestamp, reason
+    muted_users: Optional[List[Tuple[int, int, float, str]]]
+
+
+class RoleShopPayload(TypedDict):
+    role_id: int
+    amount: int
+    limit: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    using_limit: Optional[int]

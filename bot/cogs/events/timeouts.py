@@ -7,7 +7,7 @@ from typing import Optional
 from bot.misc.lordbot import LordBot
 
 
-class members_event_timeouts(commands.Cog):
+class MemberTimeoutEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -62,4 +62,4 @@ class members_event_timeouts(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(members_event_timeouts(bot))
+    bot.add_cog(MemberTimeoutEvent(bot))

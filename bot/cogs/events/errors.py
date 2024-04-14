@@ -103,15 +103,15 @@ class PermissionChecker:
     }
 
 
-class command_event(commands.Cog):
+class CommandEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
-        # bot.add_event(self.on_error)
-        bot.add_event(self.on_command_error)
-        bot.add_event(self.on_application_error)
+        bot.set_event(self.on_error)
+        bot.set_event(self.on_command_error)
+        bot.set_event(self.on_application_error)
 
         bot.add_check(self.permission_check)
 
@@ -138,4 +138,4 @@ class command_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(command_event(bot))
+    bot.add_cog(CommandEvent(bot))

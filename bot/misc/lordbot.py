@@ -2,20 +2,45 @@ from __future__ import annotations
 import asyncio
 import aiohttp
 import nextcord
+import regex
 from nextcord.ext import commands
 
 from bot.misc.utils import LordTimerHandler
+from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
 from typing import Coroutine, List, Optional
 
 
-class LordBot(commands.Bot):
-    timeouts = {}
-    guild_timer_handlers = {}
+<< << << < HEAD
 
-    @staticmethod
-    async def get_command_prefixs(
+
+def get_shard_list(shard_ids: str):
+    res = []
+    for shard in shard_ids.split(","):
+        if data := regex.fullmatch(r"(\d+)-(\d+)", shard):
+            res.extend(range(int(data.group(1)),
+                             int(data.group(2))))
+        else:
+            res.append(int(shard))
+    return res
+
+
+class LordBot(commands.AutoShardedBot):
+    ya_requests: Any = None
+    invites_data: Dict[int, List[nextcord.Invite]] = {}
+
+
+== == == =
+class LordBot(commands.Bot):
+
+
+>>>>>> > origin/master
+timeouts = {}
+ guild_timer_handlers = {}
+
+  @staticmethod
+   async def get_command_prefixs(
         bot: commands.Bot,
         msg: nextcord.Message
     ) -> List[str]:
@@ -56,10 +81,19 @@ class LordBot(commands.Bot):
         setattr(self, name, coro)
 
     def __init__(self) -> None:
-        super().__init__(command_prefix=self.get_command_prefixs,
-                         intents=nextcord.Intents.all(),
-                         help_command=None)
+        shard_ids, shard_count = input("Shared info: ").split("/")
+        shard_count = int(shard_count)
+        shard_ids = get_shard_list(shard_ids)
+
+        super().__init__(
+            command_prefix=self.get_command_prefixs,
+            intents=nextcord.Intents.all(),
+            help_command=None,
+            shard_ids=shard_ids,
+            shard_count=shard_count
+        )
         i18n.from_folder("./bot/languages/localization")
         i18n.config['locale'] = 'en'
         self.session = aiohttp.ClientSession()
         self.lord_handler_timer = LordTimerHandler(self.loop)
+        misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)
