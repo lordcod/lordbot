@@ -6,6 +6,30 @@
 14.04.2024
 
 ### What's Changed
+1. Added settings for the server store
+2. Fixed music playback
+3. Added localization for the `/delete-category` command
+4. The execution time for deleting channels in `/delete-category` has been accelerated
+5. New logic for buying roles
+6. New time entry system
+7. Added distribution settings
+8. A new kind of invites team
+9. Added 3 new leaderboards time in voice, points and number of messages 
+10. The avatar command has been added
+11. Added special features in ideas
+ - Ban
+ - Mute
+ - Image ban
+ - Auto-delete branches upon approval/refusal
+ - Own delay on ideas
+12. Added score, voice time and messages
+13. Added a polling system, the command `/poll` and `Finish poll`
+14. Added a server item store
+15. Added an error handler **interaction failed**, instead of it there will be a suggestion to repeat the action
+16. Added tracking of invitations and the `/invites' command
+17. Added translation for arguments in the `/help` command
+18. Fixed approval/rejecting an idea in the ideas module
+19. Added emoji verification
 
 
 ## Alpha/v0.2.2
