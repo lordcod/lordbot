@@ -9,7 +9,7 @@ from bot.misc.lordbot import LordBot
 class InteractionsEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-        bot.add_event(self.on_interaction)
+        bot.set_event(self.on_interaction)
         super().__init__()
 
     async def dis_interaction_failed(self, interaction: nextcord.Interaction):
