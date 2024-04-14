@@ -1,7 +1,7 @@
 # 📑 Change Log
 
 
-## Alpha/v0.3.1
+## v0.0.1-beta
 
 14.04.2024
 

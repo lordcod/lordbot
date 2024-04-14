@@ -5,7 +5,7 @@ import aiohttp
 import asyncio
 import enum
 
-pintable = True
+pintable = False
 loop = asyncio.get_event_loop()
 session = aiohttp.ClientSession()
 
