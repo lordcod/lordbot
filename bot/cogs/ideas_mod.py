@@ -7,7 +7,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
-from bot.misc.utils import calculate_time
+from bot.misc.utils import TimeCalculator
 
 
 class ideas_mod(commands.Cog):
@@ -101,7 +101,7 @@ class ideas_mod(commands.Cog):
         await ctx.send(embed=embed)
 
     @ideas.command()
-    async def mute(self, ctx: commands.Context, member: nextcord.Member, timestamp: calculate_time, *, reason: Optional[str]) -> None:
+    async def mute(self, ctx: commands.Context, member: nextcord.Member, timestamp: TimeCalculator, *, reason: Optional[str]) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         ideas: IdeasPayload = gdb.get('ideas')
