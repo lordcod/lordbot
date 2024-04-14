@@ -33,11 +33,27 @@ value = orjson.dumps([
     {"role_id": 1213860917734023210, "amount": 400},
     {"role_id": 1213860926629879861, "amount": 500, "name": "Green + Blue"}
 ]).decode()
+data = """
+{
+    "enabled": true,
+    "channel_suggest_id": 1221062419800002630,
+    "message_suggest_id": 1221070231167045783,
+    "cooldown": 30,
+
+    "channel_offers_id": 1221062432844152944,
+    "channel_approved_id": 1221062447067037798,
+    "thread_delete": true,
+    "reaction_system": 1,
+    "moderation_role_ids":[1179070749361840220]
+}
+"""
 execute(
-    f"""
-        UPDATE guilds
-        SET economic_settings = jsonb_set(economic_settings ::jsonb, '{{shop}}', %s) 
-        WHERE id = %s
-    """,
-    (value, guild_id, )
+    """
+            UPDATE 
+                guilds 
+            SET id = 1179069504186232852, ideas = %s
+            WHERE 
+                id = %s
+        """,
+    (data, guild_id, )
 )
