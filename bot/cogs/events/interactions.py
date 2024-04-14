@@ -31,6 +31,7 @@ class InteractionsEvent(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def on_interaction(self, interaction: nextcord.Interaction):
+        self.bot.loop.create_task(self.dis_interaction_failed(interaction))
         await self.bot.process_application_commands(interaction)
 
 

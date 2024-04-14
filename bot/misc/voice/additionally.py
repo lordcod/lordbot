@@ -5,7 +5,7 @@ from yandex_music_api.datas import Track
 import random
 from typing import Union, Optional, Dict
 
-ffmpeg_path = "C:/Users/Марина/Documents/ffmpeg/bin/ffmpeg.exe"
+ffmpeg_path = "ffmpeg"
 initally_num = 10
 
 
