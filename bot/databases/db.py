@@ -79,10 +79,3 @@ class MongoDataBases(Table):
 
     name = Colum(data_type=PostType.TEXT, primary_key=True)
     values = Colum(data_type=PostType.JSON, default="{}")
-
-
-GuildsDB.create_table()
-EconomicDB.create_table()
-RolesDB.create_table()
-BansDB.create_table()
-MongoDataBases.create_table()
