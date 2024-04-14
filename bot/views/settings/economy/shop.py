@@ -18,7 +18,7 @@ def update_role_data(
     role_data: RoleShopPayload,
     roles: List[RoleShopPayload]
 ) -> List[RoleShopPayload]:
-    new_roles = deepcopy(roles or [])
+    new_roles = deepcopy(roles) or []
     for index, rd in enumerate(roles):
         if rd.get('role_id') != role_data.get('role_id'):
             continue
