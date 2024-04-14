@@ -29,7 +29,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
         else:
             await interaction.response.defer()
             idea_datas = self.gdb.get('ideas')
-            idea_datas['moderation-role-ids'] = self.values.ids
+            idea_datas['moderation_role_ids'] = self.values.ids
 
             self.gdb.set('ideas', idea_datas)
 
@@ -44,7 +44,7 @@ class ModerationRolesView(DefaultSettingsView):
     def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
         self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
-        mod_role_ids = self.idea_datas.get('moderation-role-ids')
+        mod_role_ids = self.idea_datas.get('moderation_role_ids')
 
         super().__init__()
 
@@ -62,7 +62,7 @@ class ModerationRolesView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        self.idea_datas['moderation-role-ids'] = []
+        self.idea_datas['moderation_role_ids'] = []
 
         self.gdb.set('ideas', self.idea_datas)
 

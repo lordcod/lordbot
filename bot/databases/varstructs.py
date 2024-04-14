@@ -1,6 +1,7 @@
 from typing import (
     Optional,
     List,
+    Tuple,
     TypedDict
 )
 
@@ -21,21 +22,24 @@ class GiveawayData(TypedDict):
     token: str
 
 
-IdeasPayload = TypedDict(
-    'IdeasPayload',
-    {
-        "enabled": Optional[bool],
-        "cooldown": Optional[int],
+class PartialIdeasPayload(TypedDict):
+    enabled: bool
+    channel_suggest_id: int
+    message_suggest_id: int
+    channel_offers_id: int
 
-        "channel-suggest-id": int,
-        "message-suggest-id": int,
 
-        "channel-offers-id": int,
-        "channel-approved-id": int,
-
-        "moderation-role-ids": List[int]
-    }
-)
+class IdeasPayload(PartialIdeasPayload, total=True):
+    cooldown: Optional[int]
+    channel_approved_id: Optional[int]
+    moderation_role_ids: Optional[List[int]]
+    reaction_system: Optional[int]
+    thread_delete: Optional[bool]
+    allow_image: Optional[bool]
+    # User id,  moderator_id, reason
+    ban_users: Optional[List[Tuple[int, int, str]]]
+    # User id, moderator_id, Timestamp, reason
+    muted_users: Optional[List[Tuple[int, int, float, str]]]
 
 
 class RoleShopPayload(TypedDict):

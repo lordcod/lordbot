@@ -6,6 +6,7 @@ from nextcord.utils import oauth_url
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
+from bot.misc.utils import TimeCalculator, translate_flags
 from bot.views.giveaway import GiveawaySettingsView
 from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases

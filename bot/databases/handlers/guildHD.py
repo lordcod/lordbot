@@ -1,12 +1,13 @@
 from __future__ import annotations
-from typing import Union
+from typing import Any, Union, TypeVar
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
-from ..misc.utils import Json, Formating
+from ..misc.adapter_dict import Json, NumberFormating
 
 engine: DataBase = None
 
 reserved: list = []
+T = TypeVar("T")
 
 
 class GuildDateBases:
@@ -27,8 +28,8 @@ class GuildDateBases:
 
     @on_error()
     def _get_service(self, guild_id, arg):
-        value = engine.fetchone(
-            f'SELECT {arg} FROM guilds WHERE id = %s', (guild_id,))
+        value = engine.fetchvalue(
+            'SELECT ' + arg + ' FROM guilds WHERE id = %s', (guild_id,))
 
         return value
 
@@ -39,24 +40,22 @@ class GuildDateBases:
     @on_error()
     def _update(self, guild_id, arg, value):
         engine.execute(
-            f'UPDATE guilds SET {arg} = %s WHERE id = %s', (value,
-                                                            guild_id))
+            'UPDATE guilds SET ' + arg + ' = %s WHERE id = %s', (value,
+                                                                 guild_id))
 
     @on_error()
-    def get(self, service: str, default: any = None) -> Union[dict, list, int, str]:
+    def get(self, service: str, default: T = None) -> Union[Any, T]:
         data = self._get_service(self.guild_id, service)
-        data = data[0]
         data = Json.loads(data)
-        data = Formating.loads(data)
+        data = NumberFormating.loads(data)
 
         if data is None:
             return default
+
         return data
 
     @on_error()
     def set(self, service, value):
-        value = Formating.dumps(value)
-        value = Json.dumps(value)
         self._update(self.guild_id, service, value)
 
     @on_error()

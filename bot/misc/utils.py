@@ -153,6 +153,16 @@ def lord_format(
     return __LordFormatingTemplate(__value).format(__mapping)
 
 
+def translate_flags(text: str) -> dict:
+    return dict(map(
+        lambda item: (item[0], item[1]) if item[1] else (item[0], True),
+        regex.findall(
+            r"\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-]+)?(\s|$)",
+            text
+        )
+    ))
+
+
 async def clone_message(message: nextcord.Message) -> dict:
     content = message.content
     embeds = message.embeds

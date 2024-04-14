@@ -5,7 +5,7 @@ from bot.misc.logger import Logger
 from bot.databases import RoleDateBases, BanDateBases
 from bot.languages.help import get_command
 from bot.misc.lordbot import LordBot
-from bot.views.ideas import ConfirmView, IdeaView
+from bot.views.ideas import ConfirmView, ReactionConfirmView, IdeaView
 
 import time
 
@@ -19,10 +19,12 @@ class ReadyEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+
         await self.process_temp_roles()
         await self.process_temp_bans()
 
         self.bot.add_view(ConfirmView())
+        self.bot.add_view(ReactionConfirmView())
         self.bot.add_view(IdeaView())
 
         await self.bot.change_presence(activity=nextcord.Game(name=f"Alpha test bot"))
