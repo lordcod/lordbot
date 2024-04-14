@@ -7,7 +7,9 @@ from nextcord.ext import commands
 
 from bot.databases import GuildDateBases, localdb
 from bot.misc.lordbot import LordBot
+from bot.misc.utils import is_emoji
 from bot.languages import i18n
+from bot.views.translate import AutoTranslateView
 
 import googletrans
 
@@ -32,14 +34,47 @@ class MessageEvent(commands.Cog):
             self.add_reactions(message),
             self.process_mention(message),
             self.give_score(message),
-            self.give_message_score(message)
+            self.give_message_score(message),
+            self.process_auto_translation(message)
         )
+
+    async def process_auto_translation(self, message: nextcord.Message) -> None:
+        gdb = GuildDateBases(message.guild.id)
+        auto_translation = gdb.get('auto_translate')
+
+        if not (message.channel.id in auto_translation
+                and message.content) or message.author.bot:
+            return
+
+        webhooks = await message.channel.webhooks()
+        for wh in webhooks:
+            if wh.user != self.bot.user:
+                continue
+            bot_wh = wh
+            break
+        else:
+            bot_wh = await message.channel.create_webhook(name=self.bot.user.display_name,
+                                                          avatar=self.bot.user.display_avatar)
+
+        view = AutoTranslateView()
+        files = [await attach.to_file(use_cached=True, spoiler=attach.is_spoiler()) for attach in message.attachments]
+        await bot_wh.send(
+            content=message.content,
+            files=files,
+            view=view,
+            username=message.author.display_name,
+            avatar_url=message.author.display_avatar.url
+        )
+        await message.delete()
 
     async def add_reactions(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
 
-        if (reactions := gdb.get('reactions')) and (data_reactions := reactions.get(message.channel.id)):
+        if (reactions := gdb.get('reactions')) and (
+                data_reactions := reactions.get(message.channel.id)):
             for reat in data_reactions:
+                if not is_emoji(reat):
+                    continue
                 try:
                     asyncio.create_task(message.add_reaction(reat))
                 except nextcord.HTTPException:
