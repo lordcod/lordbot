@@ -89,18 +89,25 @@ class IdeasView(DefaultSettingsView):
 
         if moderation_role_ids := ideas.get("moderation_role_ids"):
             moderation_roles = filter(lambda item: item is not None,
-                                      [guild.get_role(role_id)
-                                       for role_id in moderation_role_ids])
+                                      map(guild.get_role,
+                                          moderation_role_ids))
             if moderation_roles:
                 self.embed.description += (
                     "Moderation roles: "
                     f"{', '.join([role.mention for role in moderation_roles])}"
                 )
 
+        self.allow_image.style = nextcord.ButtonStyle.green if ideas.get(
+            'allow_image', True) else nextcord.ButtonStyle.red
+        self.thread_delete.style = nextcord.ButtonStyle.green if ideas.get(
+            'thread_delete', True) else nextcord.ButtonStyle.red
+
         if enabled:
             self.remove_item(self.enabled)
         else:
             self.remove_item(self.disabled)
+            self.allow_image.disabled = True
+            self.thread_delete.disabled = True
 
         self.add_item(DropDown(guild.id))
 
@@ -179,6 +186,30 @@ class IdeasView(DefaultSettingsView):
 
         ideas['enabled'] = False
 
+        gdb.set('ideas', ideas)
+
+        view = self.__class__(interaction.guild)
+        await interaction.message.edit(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label="Allow image")
+    async def allow_image(self,
+                          button: nextcord.ui.Button,
+                          interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas: IdeasPayload = gdb.get('ideas')
+        ideas['allow_image'] = not ideas.get('allow_image', True)
+        gdb.set('ideas', ideas)
+
+        view = self.__class__(interaction.guild)
+        await interaction.message.edit(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label="Thread delete")
+    async def thread_delete(self,
+                            button: nextcord.ui.Button,
+                            interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas: IdeasPayload = gdb.get('ideas')
+        ideas['thread_delete'] = not ideas.get('thread_delete', False)
         gdb.set('ideas', ideas)
 
         view = self.__class__(interaction.guild)

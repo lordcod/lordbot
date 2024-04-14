@@ -382,7 +382,8 @@ class IdeaModal(nextcord.ui.Modal):
         idea = self.idea.value
         image = self.image.value
 
-        if not REGEXP_URL.fullmatch(image):
+        if not (image
+                and REGEXP_URL.fullmatch(image)):
             image = None
 
         embed = nextcord.Embed(
