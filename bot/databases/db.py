@@ -3,7 +3,7 @@ import asyncio
 from psycopg2.extensions import register_adapter
 
 from .handlers import establish_connection
-from .misc.adapter_dict import adapt_dict
+from .misc.adapter_dict import adapt_dict, adapt_list
 from .settings import Table, Colum, PostType, set_connection
 from .db_engine import DataBase
 from .config import (host, port, user, password, db_name)
@@ -15,6 +15,7 @@ engine = DataBase.create_engine(host, port, user, password, db_name)
 establish_connection(engine)
 set_connection(engine)
 register_adapter(dict, adapt_dict)
+register_adapter(list, adapt_list)
 
 
 class GuildsDB(Table):

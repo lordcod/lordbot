@@ -8,4 +8,4 @@ class Tokens:
     token_lord_cord = environ.get("lordcord_token")
     token_lord_kind = environ.get("lordkind_token")
     token_lord_classic = environ.get("lordclassic_token")
-    token = token_lord_cord
+    token = token_lord_kind

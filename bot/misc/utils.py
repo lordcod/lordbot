@@ -561,7 +561,7 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
 
     profile_image = await load_image_async(
         member.display_avatar.with_size(128).url)
-    profile = Editor(profile_image).resize((150, 150)).circle_image()\
+    profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     nunito = Font("assets/Nunito-ExtraBold.ttf", 40)
     nunito_small = Font("assets/Nunito-Black.ttf", 25)
@@ -581,7 +581,7 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
     background.text(
         (400, 320),
         member.display_name,
-        color=0xff0000,
+        color="#ff00a6",
         font=nunito_small,
         align="center"
     )
