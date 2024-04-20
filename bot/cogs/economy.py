@@ -245,7 +245,7 @@ class Economy(commands.Cog):
 
         account["balance"] += sum
 
-        await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji}")
+        await ctx.send(f"You have transferred the amount of **{sum}**{currency_emoji} to {member.display_name}")
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
@@ -265,13 +265,13 @@ class Economy(commands.Cog):
             await ctx.send("The amount must be positive")
             return
 
-        if 0 > (account.get('balance')-sum):
+        if account.get('balance') >= sum:
             await ctx.send('The operation cannot be performed because the balance will become negative during it')
             return
 
         account["balance"] -= sum
 
-        await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
+        await ctx.send(f"You have withdrawn an amount of **{sum}**{currency_emoji} from {member.display_name}")
 
 
 def setup(bot):
