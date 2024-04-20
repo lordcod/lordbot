@@ -119,7 +119,10 @@ class LeaderboardTypes:
         clear_empty_leaderboard(guild, leaderboard)
         fission_leaderboards = FissionIterator(leaderboard, 6).to_list()
         leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
-        user_index = leaderboard_indexs.index(member.id)+1
+        try:
+            user_index = leaderboard_indexs.index(member.id)+1
+        except ValueError:
+            user_index = len(leaderboard_indexs) + 1
 
         file_pedestal = nextcord.File(
             "assets/pedestal.png", filename="pedestal.png")
