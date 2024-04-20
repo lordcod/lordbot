@@ -1,3 +1,4 @@
+import re
 import nextcord
 from nextcord.ext import commands
 from bot.misc.lordbot import LordBot
@@ -11,11 +12,11 @@ class Teams(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
-    @commands.command(name="shutdown")
+    @commands.command()
     @check.team_only()
     async def shutdown(self, ctx: commands.Context):
         await ctx.send("The bot has activated the completion process!")
-        os._exit(1)
+        await self.bot.close()
 
     @commands.command()
     @commands.guild_only()
@@ -64,6 +65,14 @@ class Teams(commands.Cog):
         name_exts = [ext.__name__ for ext in exts.values()]
         string = "\n".join(name_exts)
         await ctx.send(string)
+
+    @commands.command(name="eval")
+    @check.team_only()
+    async def _eval(self, ctx: commands.Context, code: str):
+        if mt := re.fullmatch(r"(```)(py)?(.+)(```)", code):
+            code = mt.group(3)
+        result = eval(code)
+        await ctx.send(f"`{result}`")
 
 
 def setup(bot):

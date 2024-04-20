@@ -48,7 +48,7 @@ class EconomyLeaderboardView(menus.Menus):
         self.leaderboard_indexs = leaderboard_indexs
         self._embed = embed
 
-        super().__init__(leaderboards)
+        super().__init__(leaderboards, timeout=600)
 
         self.handler_disable()
 

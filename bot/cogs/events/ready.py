@@ -17,7 +17,6 @@ class ReadyEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-
         await self.process_temp_roles()
         await self.process_temp_bans()
 

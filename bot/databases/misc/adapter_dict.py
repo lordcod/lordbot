@@ -30,7 +30,7 @@ class NumberFormating:
         return f"__CONVERT_NUMBER__ {number}"
 
     @staticmethod
-    def decode_number(value: Any) -> Any:
+    def decode_number(value: str) -> Union[int, float]:
         if not (isinstance(value, str) and
                 value.startswith("__CONVERT_NUMBER__ ")):
             return value

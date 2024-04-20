@@ -149,7 +149,7 @@ class ideas_mod(commands.Cog):
 
         if not data_mute:
             embed = nextcord.Embed(
-                title="Unban in ideas",
+                title="Unmute in ideas",
                 description=f"The {member.mention} user is not muted!",
                 color=color
             )
