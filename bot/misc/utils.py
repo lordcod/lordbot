@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 from collections import namedtuple
+import functools
 import time
 from typing import Any, TypeVar, overload
 import emoji
