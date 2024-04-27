@@ -1,11 +1,13 @@
 from __future__ import annotations
 import asyncio
 from collections import namedtuple
+from curses import beep
 import functools
 import time
 from typing import Any, TypeVar, overload
 import emoji
 
+from flask import session
 import nextcord
 from nextcord.ext import commands
 
@@ -259,7 +261,7 @@ def decrypt_token(key: str, token: str) -> int:
     return int.from_bytes(res)
 
 
-async def getRandomQuote(lang: str = 'en'):
+async def get_random_quote(lang: str = 'en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
     async with aiohttp.ClientSession() as session:
         async with session.post(url) as responce:
@@ -307,11 +309,15 @@ class TimeCalculator:
     def convert(self, *args) -> T | Coroutine[Any, Any, T]:
         try:
             return self.async_convert(*args)
+        except KeyboardInterrupt:
+            raise
         except Exception:
             pass
 
         try:
             return self.basic_convert(*args)
+        except KeyboardInterrupt:
+            raise
         except Exception:
             pass
 
@@ -557,7 +563,7 @@ def add_gradient(
 
 
 async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
-    background_image = await load_image_async(background_link)
+    background_image = await load_image_async(background_link, session=member._state.http.__session)
     background = Editor(background_image).resize((800, 450))
 
     profile_image = await load_image_async(

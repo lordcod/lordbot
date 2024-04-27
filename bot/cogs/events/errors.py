@@ -130,8 +130,8 @@ class CommandEvent(commands.Cog):
         return answer
 
     async def after_invoke(self, ctx: commands.Context) -> None:
-        if hasattr(ctx, 'cooldown'):
-            ctx.cooldown.add()
+        if cooldown := getattr(ctx, 'cooldown', None):
+            cooldown.add()
 
 
 def setup(bot):
