@@ -34,7 +34,7 @@ class ChannelDropDown(nextcord.ui.ChannelSelect):
 
         view.install.disabled = False
 
-        await interaction.message.edit(view=view)
+        await interaction.response.edit_message(view=view)
 
 
 class InstallThreadView(DefaultSettingsView):
@@ -60,7 +60,7 @@ class InstallThreadView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = thread_message.AutoThreadMessage(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Install message',
                         style=nextcord.ButtonStyle.blurple,

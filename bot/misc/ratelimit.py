@@ -183,8 +183,8 @@ class Cooldown:
                 command_data,
                 message.guild.id
             )
-        raise ValueError
+        raise ValueError("cooltype %s was not found" % cooltype)
 
 
 def reset_cooldown(guild_id: int, command_name: str) -> None:
-    data.get(guild_id, {}).pop(command_name)
+    data.get(guild_id, {}).pop(command_name, None)

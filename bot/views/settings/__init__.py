@@ -1,3 +1,4 @@
+from bot.views.settings.role_reaction import RoleReactionView
 from .music import MusicView
 from .ideas import IdeasView
 from .welcomer import WelcomerView
@@ -16,11 +17,12 @@ moduls = {
     'Color': Color,
     'Languages': Languages,
     'Prefix': Prefix,
-    'CommandPermission':   CommandsDataView,
+    'CommandPermission': CommandsDataView,
+    'RoleReactions': RoleReactionView,
     'Music': MusicView,
     'Welcomer': WelcomerView,
     'AutoRoles': AutoRoleView,
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
-    'Ideas': IdeasView,
+    'Ideas': IdeasView
 }

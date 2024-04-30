@@ -63,8 +63,8 @@ class DropDown(nextcord.ui.StringSelect):
             color=color
         )
 
-        await interaction.message.edit(embed=embed,
-                                       view=ReactData(channel, channel_data))
+        await interaction.response.edit_message(embed=embed,
+                                                view=ReactData(channel, channel_data))
 
 
 class AutoReactions(DefaultSettingsView):
@@ -97,7 +97,7 @@ class AutoReactions(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
     async def addtion(self,
@@ -105,4 +105,4 @@ class AutoReactions(DefaultSettingsView):
                       interaction: nextcord.Interaction):
         view = InstallEmojiView(interaction.guild_id)
 
-        await interaction.message.edit(embed=None, view=view)
+        await interaction.response.edit_message(embed=None, view=view)

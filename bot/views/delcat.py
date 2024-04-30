@@ -51,7 +51,7 @@ class DelCatView(nextcord.ui.View):
             asyncio.create_task(channel.delete())
         await self.category.delete()
 
-        await interaction.message.edit(embed=embed, view=None)
+        await interaction.response.edit_message(embed=embed, view=None)
 
     @ nextcord.ui.button(label="Cancel", style=nextcord.ButtonStyle.red)
     async def cancel(
@@ -65,7 +65,7 @@ class DelCatView(nextcord.ui.View):
             color=0x57F287
         )
 
-        await interaction.message.edit(embed=embed, view=None)
+        await interaction.response.edit_message(embed=embed, view=None)
 
     async def interaction_check(
         self,

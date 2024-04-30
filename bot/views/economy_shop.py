@@ -82,7 +82,7 @@ class ShopAcceptView(nextcord.ui.View):
                                                 ephemeral=True)
 
         view = EconomyShopView(interaction.guild, self.role_index)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class EconomyShopDropdown(nextcord.ui.StringSelect):

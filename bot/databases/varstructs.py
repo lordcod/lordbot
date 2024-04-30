@@ -2,7 +2,8 @@ from typing import (
     Optional,
     List,
     Tuple,
-    TypedDict
+    TypedDict,
+    Dict
 )
 
 
@@ -49,3 +50,11 @@ class RoleShopPayload(TypedDict):
     name: Optional[str]
     description: Optional[str]
     using_limit: Optional[int]
+
+
+class ReactionRoleItemPayload(TypedDict):
+    reactions: Dict[str, int]
+    channel_id: int
+
+
+ReactionRolePayload = Dict[int, ReactionRoleItemPayload]

@@ -1,7 +1,13 @@
 
+from enum import StrEnum
 from psycopg2.extensions import AsIs
 import orjson
 from typing import Any, Dict, Union
+
+
+class NumberFormatType(StrEnum):
+    FLOAT = 'FLOAT'
+    INT = 'INTEGER'
 
 
 class Json:
@@ -27,24 +33,28 @@ class Json:
 class NumberFormating:
     @staticmethod
     def encode_number(number: Union[int, float]) -> str:
-        return f"__CONVERT_NUMBER__ {number}"
+        if isinstance(number, float):
+            return f"__CONVERT_NUMBER__ FLOAT {number}"
+        elif isinstance(number, int):
+            return f"__CONVERT_NUMBER__ INTEGER {number}"
+        return number
 
     @staticmethod
     def decode_number(value: str) -> Union[int, float]:
         if not (isinstance(value, str) and
                 value.startswith("__CONVERT_NUMBER__ ")):
             return value
+        numtype = value.split()[1]
 
-        try:
-            return float(value.removeprefix("__CONVERT_NUMBER__ "))
-        except ValueError:
-            pass
-        try:
-            return int(value.removeprefix("__CONVERT_NUMBER__ "))
-        except ValueError:
-            pass
-
-        return value
+        if numtype == NumberFormatType.FLOAT:
+            return float(value.removeprefix("__CONVERT_NUMBER__ FLOAT "))
+        elif numtype == NumberFormatType.INT:
+            return int(value.removeprefix("__CONVERT_NUMBER__ INTEGER "))
+        else:
+            try:
+                return int(value.removeprefix("__CONVERT_NUMBER__ "))
+            except ValueError:
+                return value
 
     @staticmethod
     def loads(data: Dict[str, Any]):
@@ -52,7 +62,8 @@ class NumberFormating:
             return data
         new_data = {}
         for key, value in data.items():
-            new_data[NumberFormating.decode_number(key)] = value
+            new_data[NumberFormating.decode_number(
+                key)] = NumberFormating.loads(value)
         return new_data
 
     @staticmethod
@@ -60,11 +71,9 @@ class NumberFormating:
         if not isinstance(data, dict):
             return data
         new_data = {}
-        for key in data:
-            if isinstance(key, (int, float)):
-                new_data[NumberFormating.encode_number(key)] = data[key]
-            else:
-                new_data[key] = data[key]
+        for key, value in data.items():
+            new_data[NumberFormating.encode_number(
+                key)] = NumberFormating.dumps(value)
         return new_data
 
 

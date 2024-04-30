@@ -235,9 +235,20 @@ def clamp(val: Union[int, float],
     return min(maxv, max(minv, val))
 
 
-def is_emoji(text: str) -> bool:
+def is_default_emoji(text: str) -> bool:
     text = text.strip()
-    return any((regex.fullmatch(r'<a?:.+?:\d{18,}>', text), text in emoji.EMOJI_DATA))
+    return text in emoji.EMOJI_DATA
+
+
+def is_custom_emoji(text: str) -> bool:
+    text = text.strip()
+    if regex.fullmatch(r'<a?:.+?:\d{18,}>', text):
+        return True
+    return False
+
+
+def is_emoji(text: str) -> bool:
+    return is_default_emoji(text) or is_custom_emoji(text)
 
 
 def randquan(quan: int) -> int:

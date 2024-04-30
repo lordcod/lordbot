@@ -120,7 +120,7 @@ class ConfirmModal(nextcord.ui.Modal):
             view.demote.disabled = True
         view.approve.disabled = True
 
-        await interaction.message.edit(content=content, embed=embed, view=view)
+        await interaction.response.edit_message(content=content, embed=embed, view=view)
 
         if ideas_data.get('thread_delete') and (thread := interaction.message.thread):
             await thread.delete()
@@ -206,7 +206,7 @@ class DenyModal(nextcord.ui.Modal):
         if ideas_settings.get('thread_delete') and (thread := interaction.message.thread):
             await thread.delete()
 
-        await interaction.message.edit(content=content, embed=embed, view=view)
+        await interaction.response.edit_message(content=content, embed=embed, view=view)
 
 
 class ConfirmView(nextcord.ui.View):

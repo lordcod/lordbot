@@ -35,7 +35,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
 
         view = DjRolesView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class DjRolesView(DefaultSettingsView):
@@ -66,7 +66,7 @@ class DjRolesView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = music.MusicView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Enabled', style=nextcord.ButtonStyle.green)
     async def enabled(self,
@@ -78,7 +78,7 @@ class DjRolesView(DefaultSettingsView):
         self.gdb.set("music_settings", music_settings)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Disabled', style=nextcord.ButtonStyle.red)
     async def disabled(self,
@@ -90,4 +90,4 @@ class DjRolesView(DefaultSettingsView):
         self.gdb.set("music_settings", music_settings)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

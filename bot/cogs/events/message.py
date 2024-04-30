@@ -35,7 +35,7 @@ class MessageEvent(commands.Cog):
             self.process_mention(message),
             self.give_score(message),
             self.give_message_score(message),
-            self.process_auto_translation(message)
+            # self.process_auto_translation(message)
         )
 
     async def process_auto_translation(self, message: nextcord.Message) -> None:
