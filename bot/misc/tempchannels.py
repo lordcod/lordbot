@@ -3,12 +3,8 @@ import nextcord
 import jmespath
 
 
-class _TempChannelData(NamedTuple):
-    guild_id: int
-    owner_id: int
 
-
-_db_data = []
+_db_data = {}
 _guild_data = {
     'category_id': 1216365743671873678,
     'trigger_channel_id': 0,  # 1216365803042246756,
@@ -18,51 +14,12 @@ _guild_data = {
 }
 
 
-class TempChannelsDataBases:
-    @staticmethod
-    def create(guild_id: int, owner_id: int, channel_id: int):
-        _db_data.append({
-            'guild_id': guild_id,
-            'owner_id': owner_id,
-            'channel_id': channel_id
-        })
-
-    @staticmethod
-    def get(guild_id: int, owner_id: int) -> Optional[int]:
-        return jmespath.search(f"[?guild_id==`{guild_id}`&&owner_id==`{owner_id}`]|[0].channel_id", _db_data)
-
-    @staticmethod
-    def get_as_channel(channel_id: int) -> Optional[_TempChannelData]:
-        data = jmespath.search(
-            f"[?channel_id==`{channel_id}`]|[0].[guild_id, owner_id]", _db_data)
-        if data is None:
-            return None
-        return _TempChannelData(*data)
-
-    @staticmethod
-    def get_count(guild_id: int) -> int:
-        return jmespath.search(f"length([?guild_id==`{guild_id}`])", _db_data)+1
-
-    @staticmethod
-    def delete(guild_id: int, owner_id: int):
-        data = jmespath.search(
-            f"[?guild_id==`{guild_id}`&&owner_id==`{owner_id}`]|[0]", _db_data)
-        if data is None:
-            return
-        _db_data.remove(data)
-
-    @staticmethod
-    def delete_as_channel(channel_id: int):
-        data = jmespath.search(
-            f"[?channel_id==`{channel_id}`]|[0]", _db_data)
-        if data is None:
-            return
-        _db_data.remove(data)
-
 
 class TempChannels:
     def __init__(self, channel: nextcord.VoiceChannel) -> None:
         self.channel = channel
+        self.owner_id = _db_data[channel.id]
+        self.owner = channel.guild.get_member(self.owner_id)
 
     @classmethod
     async def create(cls, guild: nextcord.Guild, member: nextcord.Member) -> 'TempChannels':
@@ -72,7 +29,7 @@ class TempChannels:
             'everyone_permission')
         channel = await guild.create_voice_channel(
             name=_guild_data.get('channel_name').format(
-                count=TempChannelsDataBases.get_count(guild.id),
+                count=1,
                 name=member.display_name
             ),
             category=guild.get_channel(_guild_data.get('category_id')),
@@ -83,13 +40,98 @@ class TempChannels:
                     everyone_permission_allow), nextcord.Permissions(everyone_permission_deny))
             }
         )
-        TempChannelsDataBases.create(guild.id, member.id, channel.id)
+        _db_data[channel.id] = (guild.id, member.id)
         await member.move_to(channel)
         return cls(channel)
 
     async def delete(self) -> None:
-        tcdb = TempChannelsDataBases.get_as_channel(self.channel.id)
+        tcdb = _db_data.get(self.channel.id)
         if tcdb is None:
             return
-        TempChannelsDataBases.delete_as_channel(self.channel.id)
+        _db_data.pop(self.channel.id)
         await self.channel.delete()
+    
+    async def edit_name(self, member: nextcord.Member, name: str) -> None:
+        if member != self.owner:
+            return
+        await self.channel.edit(name=name)
+    
+    async def edit_limit(self, member: nextcord.Member, limit: int) -> None:
+        if member != self.owner:
+            return
+        await self.channel.edit(user_limit=limit)
+    
+    async def edit_region(self, member: nextcord.Member, region: nextcord.VoiceRegion) -> None:
+        if member != self.owner:
+            return
+        self.channel.edit(rtc_region=region)
+    
+    async def edit_privacy_hiden(self, member: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        await self.channel.edit(overwrites={
+            member.guild.default_role: nextcord.PermissionOverwrite(view_channel=False, connect=False)
+        })
+
+    async def edit_privacy_shown(self, member: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        await self.channel.edit(overwrites={
+            member.guild.default_role: nextcord.PermissionOverwrite(view_channel=True, connect=True)
+        })
+    
+    async def add_trust(self, member: nextcord.Member, trust: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        await self.channel.edit(overwrites={
+            trust: nextcord.PermissionOverwrite(view_channel=True, connect=True)
+        })
+
+    async def remove_trust(self, member: nextcord.Member, trust: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        await self.channel.edit(overwrites={
+            trust: nextcord.PermissionOverwrite(view_channel=False, connect=False)
+        })
+    
+    async def invite(self, member: nextcord.Member, trust: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        invite = await self.channel.create_invite(max_uses=1)
+        await trust.send(invite.url)
+
+    async def kick(self, member: nextcord.Member, trust: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        if trust not in self.channel.members:
+            return
+        await trust.disconnect()
+    
+    async def block(self, member: nextcord.Member, trust: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        if trust not in self.channel.members:
+            await trust.disconnect()
+        await self.channel.edit(overwrites={
+            trust: nextcord.PermissionOverwrite(speak=False, view_channel=False, connect=False)
+        })
+    
+    async def unblock(self, member: nextcord.Member, trust: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        if trust not in self.channel.members:
+            await trust.disconnect()
+        await self.channel.edit(overwrites={
+            trust: nextcord.PermissionOverwrite(speak=True, view_channel=True, connect=True)
+        })
+    
+    async def transfer(self, member: nextcord.Member, new_owner: nextcord.Member) -> None:
+        if member != self.owner:
+            return
+        owner_permission_allow, owner_permission_deny = _guild_data.get(
+            'owner_permission')
+        await self.channel.edit(overwrites={
+                new_owner: nextcord.PermissionOverwrite.from_pair(nextcord.Permissions(
+                    owner_permission_allow), nextcord.Permissions(owner_permission_deny)),
+                member: None
+            })
