@@ -113,7 +113,7 @@ class command_event(commands.Cog):
         bot.add_event(self.on_command_error)
         bot.add_event(self.on_application_error)
 
-        bot.add_check(self.permission_check)
+        # bot.add_check(self.permission_check)
 
     async def on_application_error(
             self, interaction: nextcord.Interaction, error: Exception):

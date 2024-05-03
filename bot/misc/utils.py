@@ -113,8 +113,8 @@ _blackjack_games = {}
 
 
 class BlackjackGame:
-    cards = {'2 S': 2, '2 C': 2, '2 D': 2, '2 G': 2, '3 S': 3, '3 C': 3, '3 D': 3, '3 G': 3, '4 S': 4, '4 C': 4, '4 D': 4, '4 G': 4, '5 S': 5, '5 C': 5, '5 D': 5, '5 G': 5, '6 S': 6, '6 C': 6, '6 D': 6, '6 G': 6, '7 S': 7, '7 C': 7, '7 D': 7, '7 G': 7, '8 S': 8, '8 C': 8, '8 D': 8,
-             '8 G': 8, '9 S': 9, '9 C': 9, '9 D': 9, '9 G': 9, '10 S': 10, '10 C': 10, '10 D': 10, '10 G': 10, 'J S': 10, 'J C': 10, 'J D': 10, 'J G': 10, 'Q S': 10, 'Q C': 10, 'Q D': 10, 'Q G': 10, 'K S': 10, 'K C': 10, 'K D': 10, 'K G': 10, 'A S': None, 'A C': None, 'A D': None, 'A G': None}
+    cards = {'2S': 2, '2C': 2, '2D': 2, '2G': 2, '3S': 3, '3C': 3, '3D': 3, '3G': 3, '4S': 4, '4C': 4, '4D': 4, '4G': 4, '5S': 5, '5C': 5, '5D': 5, '5G': 5, '6S': 6, '6C': 6, '6D': 6, '6G': 6, '7S': 7, '7C': 7, '7D': 7, '7G': 7, '8S': 8, '8C': 8, '8D': 8,
+             '8G': 8, '9S': 9, '9C': 9, '9D': 9, '9G': 9, '10S': 10, '10C': 10, '10D': 10, '10G': 10, 'JS': 10, 'JC': 10, 'JD': 10, 'JG': 10, 'QS': 10, 'QC': 10, 'QD': 10, 'QG': 10, 'KS': 10, 'KC': 10, 'KD': 10, 'KG': 10, 'AS': None, 'AC': None, 'AD': None, 'AG': None}
 
     def __init__(self, member: nextcord.Member, amount: int) -> None:
         if _blackjack_games.get(f'{member.guild.id}:{member.id}'):
