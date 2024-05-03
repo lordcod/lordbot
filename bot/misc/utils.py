@@ -12,13 +12,15 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Dict,  Optional,  Tuple, Union, Mapping
+from typing import Coroutine, Dict, List,  Optional,  Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 from functools import lru_cache
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
+
+from bot.databases.handlers.guildHD import GuildDateBases
 
 
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
@@ -105,6 +107,166 @@ class __LordFormatingTemplate(string.Template):
 
     def format(self, __mapping: Mapping[str, object]):
         return self.safe_substitute(__mapping)
+
+
+_blackjack_games = {}
+
+
+class BlackjackGame:
+    cards = {'2 S': 2, '2 C': 2, '2 D': 2, '2 G': 2, '3 S': 3, '3 C': 3, '3 D': 3, '3 G': 3, '4 S': 4, '4 C': 4, '4 D': 4, '4 G': 4, '5 S': 5, '5 C': 5, '5 D': 5, '5 G': 5, '6 S': 6, '6 C': 6, '6 D': 6, '6 G': 6, '7 S': 7, '7 C': 7, '7 D': 7, '7 G': 7, '8 S': 8, '8 C': 8, '8 D': 8,
+             '8 G': 8, '9 S': 9, '9 C': 9, '9 D': 9, '9 G': 9, '10 S': 10, '10 C': 10, '10 D': 10, '10 G': 10, 'J S': 10, 'J C': 10, 'J D': 10, 'J G': 10, 'Q S': 10, 'Q C': 10, 'Q D': 10, 'Q G': 10, 'K S': 10, 'K C': 10, 'K D': 10, 'K G': 10, 'A S': None, 'A C': None, 'A D': None, 'A G': None}
+
+    def __init__(self, member: nextcord.Member, amount: int) -> None:
+        if _blackjack_games.get(f'{member.guild.id}:{member.id}'):
+            raise TypeError
+
+        _blackjack_games[f'{member.guild.id}:{member.id}'] = self
+        self.member = member
+        self.amount = amount
+
+        self.cards = self.cards.copy()
+        self.your_cards = [self.get_random_cart() for _ in range(2)]
+        self.dealer_cards = [self.get_random_cart() for _ in range(2)]
+
+    @property
+    def your_value(self) -> int:
+        return self.calculate_result(self.your_cards)
+
+    @property
+    def dealer_value(self) -> int:
+        return self.calculate_result(self.dealer_cards)
+
+    @property
+    def completed_embed(self) -> nextcord.Embed:
+        gdb = GuildDateBases(self.member.guild.id)
+        color = gdb.get('color')
+
+        embed = nextcord.Embed(
+            title="Blackjack",
+            description=f"Result: {self.get_winner_title()}",
+            color=color
+        )
+        embed.add_field(
+            name="Your Hand",
+            value=(
+                f"{' '.join(self.your_cards)}\n\n"
+                f"Value: {self.your_value}"
+            )
+        )
+        embed.add_field(
+            name="Dealer Hand",
+            value=(
+                f"{' '.join(self.dealer_cards)}\n\n"
+                f"Value: {self.dealer_value}"
+            )
+        )
+        return embed
+
+    @property
+    def embed(self) -> nextcord.Embed:
+        gdb = GuildDateBases(self.member.guild.id)
+        color = gdb.get('color')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+
+        embed = nextcord.Embed(
+            title="Blackjack",
+            description=f"Bet: {self.amount}{currency_emoji}",
+            color=color
+        )
+        embed.add_field(
+            name="Your Hand",
+            value=(
+                f"{' '.join(self.your_cards)}\n\n"
+                f"Value: {self.your_value}"
+            )
+        )
+        embed.add_field(
+            name="Dealer Hand",
+            value=(
+                f"{self.dealer_cards[0]} <:test_carts:1235931588273897492>\n\n"
+                f"Value: {self.calculate_result(self.dealer_cards[0:1])}"
+            )
+        )
+        return embed
+
+    def is_avid_winner(self) -> Optional[int]:
+        if (self.your_value == 21
+                and self.dealer_value == 21
+                and 2 == len(self.your_cards)
+                and 2 == len(self.dealer_cards)):
+            return 2
+        elif self.your_value == 21 and 2 == len(self.your_cards):
+            return 1
+        elif self.dealer_value == 21 and 2 == len(self.dealer_cards):
+            return 0
+        return None
+
+    def is_winner(self) -> int:
+        if self.is_exceeds_dealer():
+            return 1
+        if self.is_exceeds_your():
+            return 0
+
+        if self.your_value == self.dealer_value:
+            return 2
+        if self.your_value > self.dealer_value:
+            return 1
+        if self.dealer_value > self.your_value:
+            return 0
+
+    def get_winner_title(self) -> int:
+        gdb = GuildDateBases(self.member.guild.id)
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+
+        match self.is_winner():
+            case 2:
+                return f"Draw {self.amount}{currency_emoji}"
+            case 1:
+                return f"Won {int(1.5*self.amount)}{currency_emoji}" if self.is_avid_winner() == 1 else f"Won {self.amount}{currency_emoji}"
+            case 0:
+                return f"Loss -{self.amount}{currency_emoji}"
+
+    def is_exceeds_your(self) -> int:
+        return self.your_value > 21
+
+    def is_exceeds_dealer(self) -> int:
+        return self.dealer_value > 21
+
+    def go_dealer(self) -> int:
+        while 18 > self.dealer_value:
+            self.add_dealer_card()
+
+    def add_dealer_card(self) -> None:
+        self.dealer_cards.append(self.get_random_cart())
+
+    def add_your_card(self) -> None:
+        self.your_cards.append(self.get_random_cart())
+
+    def complete(self) -> None:
+        _blackjack_games.pop(f'{self.member.guild.id}:{self.member.id}', None)
+
+    @staticmethod
+    def calculate_result(_cards: List[Optional[int]]) -> int:
+        result = 0
+        count_of_none = 0
+        for val in map(BlackjackGame.cards.__getitem__, _cards):
+            if val is None:
+                count_of_none += 1
+            else:
+                result += val
+        for _ in range(count_of_none):
+            if result+11 > 21:
+                result += 1
+            else:
+                result += 11
+        return result
+
+    def get_random_cart(self) -> str:
+        val = random.choice(list(self.cards))
+        self.cards.pop(val)
+        return val
 
 
 def lord_format(

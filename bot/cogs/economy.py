@@ -5,28 +5,36 @@ from nextcord.ext import commands
 
 
 import time
-from typing import Callable, Dict, List, Optional, Tuple, Union, Literal
-from itertools import product
+from typing import Callable, Dict, List, Optional, Tuple, TypedDict, Union, Literal
 
 from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
-from bot.misc.utils import get_award
+from bot.misc.utils import BlackjackGame, get_award
 from nextcord.utils import escape_markdown
 
+from bot.views.blackjack import BlackjackView
 
+
+class ArgumntRouletteItem(TypedDict):
+    input_data_condition: Callable[[str], bool]
+    random_condition: Callable[[str, int], bool]
+    multiplier: int
+
+
+timeout_rewards: Dict[str, int] = {
+    "daily": 86400, "weekly": 604800, "monthly": 2592000}
 roulette_games: Dict[int,
                      Tuple[
                          Callable[[], None],
                          List[Tuple[nextcord.Member, int, str]],
                          nextcord.Message]
                      ] = {}
-timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
-arguments_roulette = [
+arguments_roulette: List[ArgumntRouletteItem] = [
     {
-        "input_data_condition": lambda val: val.isdigit() and 0 <= val <= 36,
-        "random_condition": lambda val, ran: ran == val,
+        "input_data_condition": lambda val: val.isdigit() and 0 <= int(val) <= 36,
+        "random_condition": lambda val, ran: ran == int(val),
         "multiplier": 35,
     },
     {
@@ -105,7 +113,7 @@ def create_roulette_task():
 
 
 def is_valid_roulette_argument(val: str) -> bool:
-    return any((data['input_data_condition'](val) for data in arguments_roulette))
+    return any(data['input_data_condition'](val) for data in arguments_roulette)
 
 
 class economy(commands.Cog):
@@ -127,9 +135,9 @@ class economy(commands.Cog):
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
-        award = eco_sets.get(ctx.command.name, 0)
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+        award = economic_settings.get(ctx.command.name, 0)
         if award <= 0:
             await ctx.send("Unfortunately this reward is not available if you are the server administrator change the reward")
             return
@@ -173,8 +181,8 @@ class economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         prefix = escape_markdown(gdb.get('prefix'))
         color = gdb.get('color')
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
 
         account = EconomyMemberDB(ctx.guild.id, member.id)
         balance = account.get('balance', 0)
@@ -301,8 +309,8 @@ class economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         prefix = gdb.get('prefix')
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         balance = account.get('balance', 0)
 
@@ -333,8 +341,8 @@ class economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         prefix = gdb.get('prefix')
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         bank = account.get('bank', 0)
 
@@ -367,8 +375,8 @@ class economy(commands.Cog):
             member = ctx.author
 
         gdb = GuildDateBases(ctx.guild.id)
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if amount > 1_000_000:
@@ -389,8 +397,8 @@ class economy(commands.Cog):
             member = ctx.author
 
         gdb = GuildDateBases(ctx.guild.id)
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if amount > 1_000_000:
@@ -413,6 +421,8 @@ class economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         prefix = gdb.get('prefix')
         color = gdb.get('color')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         val = val.lower()
 
@@ -435,7 +445,7 @@ class economy(commands.Cog):
             embed = nextcord.Embed(
                 title="New roulette game started!",
                 description='\n'.join(
-                    [f"{member.mention} have placed a bet of {amount} on {val}" for member, amount, val in listener]),
+                    [f"{member.mention} have placed a bet of {amount}{currency_emoji} on {val}" for member, amount, val in listener]),
                 color=color
             )
             embed.set_author(name=ctx.guild.name,
@@ -452,7 +462,7 @@ class economy(commands.Cog):
         else:
             embed = nextcord.Embed(
                 title="New roulette game started!",
-                description=f"{ctx.author.mention} have placed a bet of {amount} on {val}",
+                description=f"{ctx.author.mention} have placed a bet of {amount}{currency_emoji} on {val}",
                 color=color
             )
             embed.set_author(name=ctx.guild.name,
@@ -482,9 +492,10 @@ class economy(commands.Cog):
                         account["balance"] += _amount * \
                             roulette_item["multiplier"]
                         results.append(
-                            f"{_member.mention} won **{_amount * roulette_item['multiplier']}**")
+                            f"{_member.mention} won **{_amount * roulette_item['multiplier']}**{currency_emoji}")
                     else:
-                        results.append(f"{_member.mention} lost **{_amount}**")
+                        results.append(
+                            f"{_member.mention} lost **{_amount}**{currency_emoji}")
                     break
         win_color = 'red' if arguments_roulette[6]["random_condition"](
             0, ran) else 'black'
@@ -496,6 +507,41 @@ class economy(commands.Cog):
         embed.set_author(name=ctx.guild.name,
                          icon_url=ctx.guild.icon)
         await mes.edit(embed=embed)
+
+    @commands.command(name="blackjack", aliases=["bj"])
+    async def blackjack(self, ctx: commands.Context, amount: int):
+        gdb = GuildDateBases(ctx.guild.id)
+        prefix = gdb.get('prefix')
+        account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
+
+        if amount <= 0:
+            await ctx.send(content="Specify the amount more `0`")
+            raise TypeError('Planned error')
+        if amount > account['balance']:
+            await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
+            raise TypeError('Planned error')
+
+        account["balance"] -= amount
+        bjg = BlackjackGame(ctx.author, amount)
+
+        match bjg.is_avid_winner():
+            case 2:
+                await ctx.send(embed=bjg.completed_embed)
+                bjg.complete()
+                account["balance"] += amount
+                return
+            case 1:
+                await ctx.send(embed=bjg.completed_embed)
+                bjg.complete()
+                account["balance"] += 3.5*amount
+                return
+            case 0:
+                await ctx.send(embed=bjg.completed_embed)
+                bjg.complete()
+                return
+
+        view = BlackjackView(bjg)
+        await ctx.send(embed=bjg.embed, view=view)
 
 
 def setup(bot):

@@ -1,0 +1,44 @@
+from typing import Coroutine, Any
+import nextcord
+
+from bot.databases.handlers.economyHD import EconomyMemberDB
+from bot.misc.utils import BlackjackGame
+
+
+class BlackjackView(nextcord.ui.View):
+    embed: nextcord.Embed
+
+    def __init__(self, bjg: BlackjackGame) -> None:
+        self.account = EconomyMemberDB(bjg.member.guild.id, bjg.member.id)
+        self.bjg = bjg
+        super().__init__()
+
+    def complete(self) -> None:
+        pass
+
+    async def on_timeout(self) -> None:
+        self.bjg.complete()
+
+    @nextcord.ui.button(label="Hit", style=nextcord.ButtonStyle.blurple)
+    async def hit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        self.bjg.add_your_card()
+
+        if self.bjg.is_exceeds_your():
+            await interaction.response.edit_message(embed=self.bjg.completed_embed, view=None)
+            self.bjg.complete()
+        else:
+            await interaction.response.edit_message(embed=self.bjg.embed, view=self)
+
+    @nextcord.ui.button(label="Stand", style=nextcord.ButtonStyle.green)
+    async def stand(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        self.bjg.go_dealer()
+
+        await interaction.response.edit_message(embed=self.bjg.completed_embed, view=None)
+
+        match self.bjg.is_winner():
+            case 2:
+                self.account["balance"] += self.bjg.amount
+            case 1:
+                self.account["balance"] += 2*self.bjg.amount
+
+        self.bjg.complete()
