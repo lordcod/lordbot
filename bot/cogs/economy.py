@@ -1,17 +1,23 @@
 
+import random
 import nextcord
 from nextcord.ext import commands
-
-from bot.databases import EconomyMemberDB, GuildDateBases
-from bot.misc.lordbot import LordBot
-from bot.resources.errors import NotActivateEconomy
-from bot.resources.ether import Emoji
 from nextcord.utils import escape_markdown
 
 import time
+import orjson
 from typing import Optional, Union, Literal
 
+
+from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.views.economy_shop import EconomyShopView
+from bot.misc.lordbot import LordBot
+from bot.resources.errors import NotActivateEconomy
+from bot.resources.ether import Emoji
+
+
+with open("bot/languages/works.json", "rb") as file:
+    list_of_works = orjson.loads(file.read())
 
 timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
 
@@ -19,7 +25,6 @@ timeout_rewards = {"daily": 86400, "weekly": 604800, "monthly": 2592000}
 class Economy(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-
         super().__init__()
 
     def cog_check(self, ctx: commands.Context):
@@ -30,7 +35,7 @@ class Economy(commands.Cog):
             raise NotActivateEconomy("Economy is disabled on the server")
         return True
 
-    async def handler_rewards(self, ctx: commands.Context):
+    async def handle_rewards(self, ctx: commands.Context):
         loctime = time.time()
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
@@ -61,15 +66,49 @@ class Economy(commands.Cog):
 
     @commands.command(name='daily')
     async def daily(self, ctx: commands.Context):
-        await self.handler_rewards(ctx)
+        await self.handle_rewards(ctx)
 
     @commands.command(name='weekly')
     async def weekly(self, ctx: commands.Context):
-        await self.handler_rewards(ctx)
+        await self.handle_rewards(ctx)
 
     @commands.command(name='monthly')
     async def monthly(self, ctx: commands.Context):
-        await self.handler_rewards(ctx)
+        await self.handle_rewards(ctx)
+
+    @commands.command(name='work')
+    async def work(self, ctx: commands.Context):
+        loctime = time.time()
+        account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = gdb.get('language')
+        color = gdb.get('color')
+        eco_sets: dict = gdb.get('economic_settings')
+        currency_emoji = eco_sets.get('emoji')
+        work_info = eco_sets.get('work')
+
+        if loctime > account.get('work', 0)+work_info['cooldown']:
+            amount = random.randint(work_info['min'], work_info['max'])
+
+            embed = nextcord.Embed(
+                title="Time to work",
+                description=random.choice(
+                    list_of_works.get(locale, list_of_works['en'])).format(amount=amount, emoji=currency_emoji),
+                color=color
+            )
+            embed.add_field(
+                name="",
+                value=f"Come to work through <t:{loctime+work_info['cooldown'] :.0f}:R>"
+            )
+            account['work'] = loctime
+            account['balance'] += amount
+        else:
+            embed = nextcord.Embed(
+                title="It's too early to work",
+                description=f"Try again after <t:{account.get(ctx.command.name)+work_info['cooldown'] :.0f}:R>",
+                color=color
+            )
+        await ctx.send(embed=embed)
 
     @commands.command(name="balance", aliases=["bal"])
     async def balance(self,

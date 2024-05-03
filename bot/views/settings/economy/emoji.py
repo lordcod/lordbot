@@ -1,3 +1,4 @@
+
 import nextcord
 
 from bot.databases import GuildDateBases
@@ -9,13 +10,15 @@ from .._view import DefaultSettingsView
 
 
 class Modal(nextcord.ui.Modal):
-    def __init__(self, guild_id, present) -> None:
+    def __init__(self, guild_id) -> None:
+        gdb = GuildDateBases(guild_id)
+        economy_settings: dict = gdb.get('economic_settings')
+        emoji = economy_settings.get("emoji")
         super().__init__("Emoji", timeout=300)
 
-        self.present = present
         self.emoji = nextcord.ui.TextInput(
             label="Custom Emoji",
-            placeholder=present,
+            placeholder=emoji,
             max_length=250
         )
         self.add_item(self.emoji)
@@ -39,13 +42,24 @@ class Modal(nextcord.ui.Modal):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
+class SelectedEmojiDropDown(nextcord.ui.StringSelect):
+    def __init__(self, guild: nextcord.Guild, emoji: str) -> None:
+        super().__init__(options=[
+            nextcord.SelectOption(
+                label="The current emoji",
+                emoji=emoji,
+                default=True
+            )
+        ])
+
+
 class EmojiView(DefaultSettingsView):
     embed: nextcord.Embed
 
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         economy_settings: dict = gdb.get('economic_settings')
-        self.emoji = economy_settings.get("emoji")
+        emoji = economy_settings.get("emoji")
 
         color = gdb.get('color', 1974050)
         self.embed = nextcord.Embed(
@@ -56,12 +70,9 @@ class EmojiView(DefaultSettingsView):
             ),
             color=color
         )
-        self.embed.add_field(
-            name=f'The current emoji: {self.emoji}',
-            value=""
-        )
 
         super().__init__()
+        self.add_item(SelectedEmojiDropDown(guild, emoji))
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -75,10 +86,7 @@ class EmojiView(DefaultSettingsView):
     async def install(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        modal = Modal(
-            guild_id=interaction.guild_id,
-            present=self.emoji
-        )
+        modal = Modal(guild_id=interaction.guild_id)
 
         await interaction.response.send_modal(modal)
 

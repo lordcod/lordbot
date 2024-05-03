@@ -27,7 +27,7 @@ class GuildsDB(Table):
                    default=info.DEFAULT_PREFIX)
     color = Colum(data_type=PostType.BIGINT, default=info.DEFAULT_COLOR)
     economic_settings = Colum(data_type=PostType.JSON,
-                              default=info.DEFAULT_ECONOMY_SETTINGS)
+                              default=info.DEFAULT_ECONOMY_SETTINGS_JSON)
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
     invites = Colum(data_type=PostType.JSON, default="{}")
@@ -55,6 +55,7 @@ class EconomicDB(Table):
     daily = Colum(data_type=PostType.BIGINT, default="0")
     weekly = Colum(data_type=PostType.BIGINT, default="0")
     monthly = Colum(data_type=PostType.BIGINT, default="0")
+    work = Colum(data_type=PostType.BIGINT, default="0")
 
 
 class RolesDB(Table):
