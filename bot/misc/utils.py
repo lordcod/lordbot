@@ -1,13 +1,10 @@
 from __future__ import annotations
 import asyncio
 from collections import namedtuple
-from curses import beep
-import functools
 import time
 from typing import Any, TypeVar, overload
 import emoji
 
-from flask import session
 import nextcord
 from nextcord.ext import commands
 

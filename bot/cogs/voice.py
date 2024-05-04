@@ -181,4 +181,6 @@ class Voice(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Voice(bot))
+    # TODO
+    # bot.add_cog(Voice(bot))
+    pass
