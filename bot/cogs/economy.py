@@ -193,9 +193,9 @@ class Economy(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         locale = gdb.get('language')
         color = gdb.get('color')
-        eco_sets: dict = gdb.get('economic_settings')
-        currency_emoji = eco_sets.get('emoji')
-        work_info = eco_sets.get('work')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+        work_info = economic_settings.get('work')
 
         if loctime > account.get('work', 0)+work_info['cooldown']:
             amount = random.randint(work_info['min'], work_info['max'])
@@ -430,6 +430,9 @@ class Economy(commands.Cog):
         color = gdb.get('color')
         economic_settings: dict = gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
+        bet_info = economic_settings.get('bet')
+        _min_bet = bet_info.get('min')
+        _max_bet = bet_info.get('max')
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         val = val.lower()
 
@@ -441,6 +444,9 @@ class Economy(commands.Cog):
             raise TypeError('Planned error')
         if amount > account['balance']:
             await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
+            raise TypeError('Planned error')
+        if not (_max_bet >= amount >= _min_bet):
+            await ctx.send(content=f"The maximum bid: {_max_bet}{currency_emoji}\nThe minimum bid: {_min_bet}{currency_emoji}\nYour bid: {amount}{currency_emoji}")
             raise TypeError('Planned error')
 
         account["balance"] -= amount
@@ -518,34 +524,38 @@ class Economy(commands.Cog):
     @commands.command(name="blackjack", aliases=["bj"])
     async def blackjack(self, ctx: commands.Context, amount: int):
         gdb = GuildDateBases(ctx.guild.id)
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+        bet_info = economic_settings.get('bet')
+        _min_bet = bet_info.get('min')
+        _max_bet = bet_info.get('max')
         prefix = gdb.get('prefix')
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
 
         if amount <= 0:
-            await ctx.send(content="Specify the amount more `0`")
+            await ctx.send("Specify the amount more `0`")
             raise TypeError('Planned error')
         if amount > account['balance']:
-            await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
+            await ctx.send(f"Not enough funds to check your balance use `{prefix}balance`")
+            raise TypeError('Planned error')
+        if not (_max_bet >= amount >= _min_bet):
+            await ctx.send(f"The maximum bid: {_max_bet}{currency_emoji}\n"
+                           f"The minimum bid: {_min_bet}{currency_emoji}\n"
+                           f"Your bid: {amount}{currency_emoji}")
             raise TypeError('Planned error')
 
         account["balance"] -= amount
         bjg = BlackjackGame(ctx.author, amount)
 
-        match bjg.is_avid_winner():
-            case 2:
-                await ctx.send(embed=bjg.completed_embed)
-                bjg.complete()
-                account["balance"] += amount
-                return
-            case 1:
-                await ctx.send(embed=bjg.completed_embed)
-                bjg.complete()
-                account["balance"] += 3.5*amount
-                return
-            case 0:
-                await ctx.send(embed=bjg.completed_embed)
-                bjg.complete()
-                return
+        if bjg.is_avid_winner() is not None:
+            await ctx.send(embed=bjg.completed_embed)
+            match bjg.is_avid_winner():
+                case 2:
+                    account["balance"] += amount
+                case 1:
+                    account["balance"] += 3.5*amount
+            bjg.complete()
+            return
 
         view = BlackjackView(bjg)
         await ctx.send(embed=bjg.embed, view=view)
