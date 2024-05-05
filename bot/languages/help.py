@@ -1,5 +1,4 @@
-
-from typing import List, Dict, Optional, TypedDict
+from typing import List, Dict, Optional, Tuple, TypedDict, Union
 import googletrans
 import jmespath
 import orjson
@@ -9,11 +8,12 @@ class CommandOption(TypedDict):
     name: str
     category: str
     aliases: List[str]
-    arguments: List[str]
-    examples: Optional[List[List[str]]]
+    arguments: List[Union[Dict[str, str], str]]
+    examples: Optional[List[Tuple[str, Dict[str, str]]]]
     descriptrion: Dict[str, str]
     brief_descriptrion: Dict[str, str]
     allowed_disabled: bool
+    reactions: Optional[Dict[str, Dict[str, str]]]
 
 
 categories_emoji: Dict[str, str] = {
@@ -21,6 +21,7 @@ categories_emoji: Dict[str, str] = {
     "major": "👑",
     "voice": "🎤",
     "moderation": "⚠",
+    "reactions": "🎭"
 }
 
 categories_name:  Dict[str, Dict[str, str]] = {
@@ -68,6 +69,17 @@ categories_name:  Dict[str, Dict[str, str]] = {
         "pl": "Moderacja",
         "tr": "Ilımlılık"
     },
+    "reactions": {
+        "da": "Reaktioner",
+        "de": "Reaktionen",
+        "en": "Reactions",
+        "es": "Reacciones",
+        "fr": "Réactions",
+        "id": "Reaksi",
+        "pl": "Reakcje",
+        "ru": "Реакции",
+        "tr": "Reaksiyonlar"
+    }
 }
 
 categories: Dict[str, List[CommandOption]] = {}
@@ -75,8 +87,13 @@ categories: Dict[str, List[CommandOption]] = {}
 
 commands: List[CommandOption] = []
 
+all_reactions_command = ["airkiss", "angrystare", "bite", "bleh", "blush", "brofist", "celebrate", "cheers", "clap", "confused", "cool", "cry", "cuddle", "dance", "drool", "evillaugh", "facepalm", "handhold", "happy", "headbang", "hug", "kiss", "laugh", "lick", "love", "mad", "nervous", "no", "nom", "nosebleed", "nuzzle",
+                         "nyah", "pat", "peek", "pinch", "poke", "pout", "punch", "roll", "run", "sad", "scared", "shout", "shrug", "shy", "sigh", "sip", "slap", "sleep", "slowclap", "smack", "smile", "smug", "sneeze", "sorry", "stare", "stop", "surprised", "sweat", "thumbsup", "tickle", "tired", "wave", "wink", "woah", "yawn", "yay", "yes"]
+
 
 def get_command(name: str) -> CommandOption:
+    if name in all_reactions_command:
+        name = 'reactions'
     expression = f"[?name == '{name}'||contains(aliases, '{name}')]|[0]"
     result = jmespath.search(expression, commands)
     return result

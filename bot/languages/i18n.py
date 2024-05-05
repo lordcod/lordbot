@@ -4,10 +4,12 @@ import googletrans
 from typing import Optional, Dict, List
 
 
-config = {}
-default_languages = ["da", "de", "en", "es", "fr", "id", "pl", "ru", "tr"]
-memoization_dict = {}
-resource_dict = {}
+translator = googletrans.Translator()
+config: dict = {}
+default_languages: list = ["da", "de", "en",
+                           "es", "fr", "id", "pl", "ru", "tr"]
+memoization_dict: Dict[str, str] = {}
+resource_dict: dict = {}
 
 
 def _load_file(filename: str) -> bytes:
@@ -48,7 +50,6 @@ def add_dict_translations(path: str, data: Dict[str, str]):
 
 
 def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
-    translator = googletrans.Translator()
     dest_dict = {}
     for key, value in src_dict.items():
         if isinstance(value, dict):
@@ -69,8 +70,6 @@ def translation_with_languages(locale: str, text: str, languages: List[str]) -> 
 
     if locale in languages:
         languages.remove(locale)
-
-    translator = googletrans.Translator()
 
     for dest in languages:
         tran_text = translator.translate(text, dest, locale).text
@@ -142,7 +141,7 @@ def parser(
             )
 
 
-def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
+def t(locale: Optional[str] = None, path: Optional[str] = None, **kwargs) -> str:
     if locale not in memoization_dict:
         locale = config.get("locale")
     if path not in memoization_dict[locale]:
@@ -154,7 +153,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    # from_folder("./bot/languages/localization")
+    from_folder("./bot/languages/localization")
 
     # Translation dict
     # for lang in default_languages:
@@ -168,7 +167,7 @@ if __name__ == "__main__":
 
     # Translate to default languages
     data = translation_with_languages(
-        "en", "<time>", default_languages)
+        "en", "It will show that you are blushing", default_languages)
     print(data)
     # print(orjson.dumps(data).decode())
 
@@ -183,6 +182,6 @@ if __name__ == "__main__":
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
+    # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    to_folder("./bot/languages/localization")
+    # to_folder("./bot/languages/localization")
