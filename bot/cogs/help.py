@@ -33,7 +33,7 @@ def get_using(
     return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(command.get('arguments')) if command.get('arguments') else ''}")
 
 
-class help(commands.Cog):
+class Help(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
@@ -141,4 +141,4 @@ class help(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(help(bot))
+    bot.add_cog(Help(bot))

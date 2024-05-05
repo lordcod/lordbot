@@ -3,7 +3,7 @@ import nextcord
 from typing import Optional
 from ..db_engine import DataBase
 
-from ..misc.utils import Json
+from ..misc.adapter_dict import Json
 from ..misc.error_handler import on_error
 
 engine: DataBase = None

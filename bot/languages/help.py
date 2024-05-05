@@ -86,8 +86,7 @@ with open("bot/languages/commands_data.json", "rb") as file:
     content = file.read()
     commands = orjson.loads(content)
     for cmd in commands:
-        if cmd.get('category') not in categories:
-            categories[cmd.get('category')] = []
+        categories.setdefault(cmd.get('category'), [])
         categories[cmd.get('category')].append(cmd)
 
 translator = googletrans.Translator()

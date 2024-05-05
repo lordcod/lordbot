@@ -1,7 +1,7 @@
 from __future__ import annotations
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
-from ..misc.utils import Json
+from ..misc.adapter_dict import Json
 
 engine: DataBase = None
 

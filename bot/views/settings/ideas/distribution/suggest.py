@@ -33,7 +33,7 @@ class SuggestView(DefaultSettingsView):
     def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
         self.idea_datas: IdeasPayload | None = self.gdb.get('ideas')
-        channel_approved_id = self.idea_datas.get('channel-suggest-id')
+        channel_approved_id = self.idea_datas.get('channel_suggest_id')
 
         super().__init__()
 
@@ -53,7 +53,7 @@ class SuggestView(DefaultSettingsView):
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         idea_datas = self.idea_datas
-        idea_datas['channel-suggest-id'] = self.channel.id
+        idea_datas['channel_suggest_id'] = self.channel.id
 
         self.gdb.set('ideas', idea_datas)
 

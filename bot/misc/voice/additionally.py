@@ -3,9 +3,9 @@ import nextcord
 from yandex_music_api.datas import Track
 
 import random
-import asyncio
-from typing import Union, Optional
+from typing import Union, Optional, Dict
 
+ffmpeg_path = "ffmpeg"
 initally_num = 10
 
 
@@ -28,13 +28,12 @@ class Queue:
     def __init__(self) -> None:
         self.data = {}
 
-    def token_generator(self) -> int:
+    def token_generate(self) -> int:
         val = random.randint(1000000, 9999999)
         return val
 
     def register_guild(self, guild_id):
-        if guild_id not in self.data:
-            self.data[guild_id] = []
+        self.data.setdefault(guild_id, [])
 
     def get_all(self, guild_id):
         self.register_guild(guild_id)
@@ -65,6 +64,17 @@ class Queue:
         except IndexError:
             return None
 
+    def index(self, guild_id, index) -> Optional[Track]:
+        self.register_guild(guild_id)
+        try:
+            return self.data[guild_id][index]
+        except IndexError:
+            return None
+
+    def set(self, guild_id, tracks) -> None:
+        self.register_guild(guild_id)
+        self.data[guild_id] = tracks
+
 
 class MusicPlayer:
     def __init__(self,
@@ -80,8 +90,8 @@ class MusicPlayer:
 
         if self.data is None:
             await self.message.edit(
-                content=("I didn't find any tracks in the queue, "
-                         "so I finished the job!"),
+                content="I didn't find any tracks in the queue, "
+                        "so I finished the job!",
                 embed=None,
                 view=None
             )
@@ -119,6 +129,15 @@ class MusicPlayer:
         player = self.__class__(self.voice, self.message, self.guild_id)
         await player.process()
 
+    async def move_to(self, index: int) -> None:
+        track = queue.index(self.guild_id, index)
+        if track is None:
+            raise IndexError("Track at index %s was not found." % index)
+        tracks = queue.data[self.guild_id][index:]
+        tracks.insert(0, self.data)
+        queue.set(self.guild_id, tracks)
+        self.voice.stop()
+
     async def skip(self):
         self.voice.stop()
 
@@ -132,11 +151,11 @@ class MusicPlayer:
 
         music_url = await self.data.download_link()
         source = nextcord.FFmpegPCMAudio(
-            music_url, pipe=False)
+            music_url, executable=ffmpeg_path, pipe=False)
         source = nextcord.PCMVolumeTransformer(source, volume=0.5)
 
         self.voice.play(source, after=self.callback)
 
 
-current_players = {}
+current_players: Dict[int, MusicPlayer] = {}
 queue = Queue()

@@ -56,7 +56,8 @@ def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
         elif isinstance(value, list):
             for num, text in enumerate(value):
                 dest_dict.setdefault(key, [])
-                dest_dict[key][num] = translator.translate(text, dest, src).text
+                dest_dict[key][num] = translator.translate(
+                    text, dest, src).text
         else:
             dest_dict[key] = translator.translate(value, dest, src).text
     return dest_dict
@@ -153,7 +154,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    from_folder("./bot/languages/localization")
+    # from_folder("./bot/languages/localization")
 
     # Translation dict
     # for lang in default_languages:
@@ -161,18 +162,19 @@ if __name__ == "__main__":
     #         continue
     #     print(lang)
     #     trd = translate_dict(
-    #         "en", lang, resource_dict['en']["settings"]['music'])
+    #         "en", lang, resource_dict['en']['delcat'])
     #     print(trd)
-    #     parser(trd, lang, "settings.music", loadable=False)
+    #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    # data = translation_with_languages(
-    #     "en", "Issues a sheet with all temporary bans that were issued by the bot", default_languages)
+    data = translation_with_languages(
+        "en", "<time>", default_languages)
+    print(data)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(
-    #     "help.record", translation_with_languages("en", "Record", default_languages))
+    #     "delcat.accept.title", translation_with_languages("en", " #{self.category.name} Category Deleted", default_languages))
 
     # To any locales format
     # data = to_any_locales()
@@ -181,21 +183,6 @@ if __name__ == "__main__":
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    # to_i18n_translation(
-    #     {
-    #         "failed": {
-    #             "da": "Rollen {role} kan ikke tildeles og bruges til integration eller af en bot.",
-    #             "de": "Die Rolle {role} kann nicht zugewiesen werden und wird zur Integration oder von einem Bot verwendet.",
-    #             "en": "The {role} role cannot be assigned and is used for integration or by a bot.",
-    #             "es": "El rol {role} no se puede asignar y se usa para la integración o por un bot.",
-    #             "fr": "Le rôle {role} ne peut pas être attribué et est utilisé pour l'intégration ou par un bot.",
-    #             "id": "Peran {role} tidak dapat ditetapkan dan digunakan untuk integrasi atau dengan bot.",
-    #             "pl": "Rola {role} nie można przypisać i służy do integracji lub przez bot.",
-    #             "ru": "Роль {role} не может быть назначена, потому что используется для интеграции или бота.",
-    #             "tr": "{role} rolü atanamaz ve entegrasyon veya bir bot tarafından kullanılır.",
-    #         }
-    #     }
-    # )
-    # print(resource_dict)
+    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    # to_folder("./bot/languages/localization")
+    to_folder("./bot/languages/localization")

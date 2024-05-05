@@ -1,11 +1,30 @@
 import orjson
+from bot.resources.ether import Emoji
 
 
 DEFAULT_PREFIX = 'l.'
 DEFAULT_COLOR = 2829617
 DEFAULT_LANGUAGE = 'en'
-DEFAULT_EMOJI = '<:diamond:1183363436780978186>'
-DEFAULT_ECONOMY_SETTINGS = orjson.dumps({'emoji': DEFAULT_EMOJI}).decode()
+DEFAULT_EMOJI = Emoji.diamod
+DEFAULT_ECONOMY_SETTINGS = {
+    'emoji': DEFAULT_EMOJI,
+    "daily": 10,
+    "weekly": 50,
+    "monthly": 200,
+    'work': {
+        'min': 5,
+        'max': 30,
+        'cooldown': 60 * 60 * 6
+    },
+    'bet': {
+        'min': 10,
+        'max': 1000
+    }
+}
+DEFAULT_ECONOMY_SETTINGS_JSON = orjson.dumps(DEFAULT_ECONOMY_SETTINGS).decode()
+
+
+COUNT_ROLES_PAGE = 5
 
 activities_list = [
     {

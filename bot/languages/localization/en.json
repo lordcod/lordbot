@@ -66,7 +66,8 @@
         "CommandOnCooldown": {
             "title": "The command is on hold",
             "description": "Try again after {delay}."
-        }
+        },
+        "DisabledEconomy": "The economy system is disabled on the server"
     },
     "music-selector": {
         "title": "Choose the track you are interested in!",
@@ -74,34 +75,26 @@
     },
     "ideas": {
         "globals": {
-            "title": "Suggest an idea",
+            "title": "Suggested an idea",
             "ideas-disabled": "The **idea** module is disabled on this server",
             "embed-title": "New idea!"
         },
         "confirm-modal": {
-            "reason-label": "Argument:",
-            "embed": {
-                "title": "New idea!",
-                "field": "Old idea!"
-            },
-            "idea": {
-                "content": "{mention} Your idea is approved!",
-                "embed": {
-                    "title": "The idea is approved!",
-                    "field": "The essence of the idea:",
-                    "reason": "Confirmation argument:"
-                }
-            }
+            "approve": "Approved | {name}",
+            "title": "The idea is approved!",
+            "content": "{mention} Your idea is approved!",
+            "essence": "The essence of the idea:",
+            "reason": "Confirmation argument:"
         },
         "confirm-view": {
             "button": {
                 "approve": "Approve",
                 "deny": "Deny"
             },
-            "old-idea": "An outdated idea!",
             "idea": "Idea:",
             "refused": "Refused | {name}",
-            "idea-content": "{mention} Your idea has been rejected!"
+            "idea-content": "{mention} Your idea has been rejected!",
+            "title": "The idea is refused!"
         },
         "idea-modal": {
             "label": "Tell us about your idea",
@@ -110,7 +103,22 @@
             "idea": "Idea:",
             "thread-name": "Discussion of the idea from {name}"
         },
-        "idea-view.timeout-message": "You can only propose an idea once every 30 minutes\nThe next opportunity to submit an idea will be through: <t:{time}:R>"
+        "idea-view": {
+            "timeout-message": "You can only propose an idea once every 30 minutes\nThe next opportunity to submit an idea will be through: <t:{time}:R>"
+        }
+    },
+    "delcat": {
+        "issue": {
+            "title": "Are you sure?",
+            "description": "This will permanently delete the {category} category and every channel inside of it."
+        },
+        "accept": {
+            "title": "#{category} Category Deleted",
+            "description": "And also remotely {count} channels that were in the category"
+        },
+        "cancel": {
+            "title": "Category Deletion Canceled"
+        }
     },
     "settings": {
         "start": {
@@ -196,7 +204,9 @@
                 "channel": "Channel: {channel}"
             },
             "addptional": {
-                "button.install-mes": "Install message",
+                "button": {
+                    "install-mes": "Install message"
+                },
                 "channel-error": "Auto-messages have already been installed on this channel",
                 "placeholder": "Select a channel for auto-messages"
             },
@@ -219,21 +229,21 @@
                 "title": "Automatic reactions",
                 "brief": "Auto-reactions",
                 "description": "Control of automatic addition of reactions in channels",
-                "dddesc": "Channel: {channel}\nEmoji: {emojis}",
-                "placeholder": "Auto-reaction settings:"
+                "placeholder": "Auto-reaction settings:",
+                "dddesc": "Channel: {channel}\nEmoji: {emojis}"
             },
             "addres": {
                 "channel-error": "Auto-reactions have already been installed on this channel",
-                "install-emoji": "Install emoji",
-                "placeholder": "Select a channel for auto-reactions"
-            },
-            "button": {
-                "delete": "Delete reaction",
-                "edit": "Edit reaction"
+                "placeholder": "Select a channel for auto-reactions",
+                "install-emoji": "Install emoji"
             },
             "modal": {
                 "title": "Auto-reaction",
                 "label": "Emoji:"
+            },
+            "button": {
+                "delete": "Delete reaction",
+                "edit": "Edit reaction"
             }
         },
         "music": {

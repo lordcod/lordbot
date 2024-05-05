@@ -1,8 +1,16 @@
+from __future__ import annotations
 import asyncio
 from collections import namedtuple
+from curses import beep
+import functools
+import time
+from typing import Any, TypeVar, overload
 import emoji
 
+from flask import session
 import nextcord
+from nextcord.ext import commands
+
 
 import inspect
 import regex
@@ -12,7 +20,8 @@ import aiohttp
 import orjson
 
 from asyncio import TimerHandle
-from typing import Coroutine, Dict, List,  Optional,  Tuple, Union, Mapping
+from typing import (Coroutine, Dict,  Optional,  Tuple, Union,
+                    Mapping, Any, Iterable, SupportsIndex, Self)
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -21,8 +30,10 @@ from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
 
 from bot.databases.handlers.guildHD import GuildDateBases
+from cryptography.fernet import Fernet
 
 
+T = TypeVar('T')
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
@@ -107,6 +118,20 @@ class __LordFormatingTemplate(string.Template):
 
     def format(self, __mapping: Mapping[str, object]):
         return self.safe_substitute(__mapping)
+
+
+class Tokenizer:
+    @staticmethod
+    def encrypt(message: bytes, key: bytes) -> bytes:
+        return Fernet(key).encrypt(message)
+
+    @staticmethod
+    def decrypt(token: bytes, key: bytes) -> bytes:
+        return Fernet(key).decrypt(token)
+
+    @staticmethod
+    def generate_key() -> bytes:
+        return Fernet.generate_key()
 
 
 _blackjack_games = {}
@@ -280,6 +305,16 @@ def lord_format(
     return __LordFormatingTemplate(__value).format(__mapping)
 
 
+def translate_flags(text: str) -> dict:
+    return dict(map(
+        lambda item: (item[0], item[1]) if item[1] else (item[0], True),
+        regex.findall(
+            r"\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-]+)?(\s|$)",
+            text
+        )
+    ))
+
+
 async def clone_message(message: nextcord.Message) -> dict:
     content = message.content
     embeds = message.embeds
@@ -313,20 +348,53 @@ class LordTimerHandler:
     ):
         th = self.loop.call_later(delay,  self.loop.create_task, coro)
         if key is not None:
+            print(f"Create new timer handle {coro.__name__}(ID:{key})")
             self.data[key] = th
 
     def close_as_key(self, key: Union[str, int]):
         th = self.data.get(key)
         if th is None:
             return
-        coro: Coroutine = th._args[0]
-        coro.close()
+        arg = th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
         th.cancel()
 
-    def close_as_th(th: TimerHandle):
-        coro: Coroutine = th._args[0]
-        coro.close()
+    def close_as_th(self, th: TimerHandle):
+        arg = th._args and th._args[0]
+        if asyncio.iscoroutine(arg):
+            arg.close()
         th.cancel()
+
+
+class FissionIterator:
+    def __init__(self, iterable: Iterable[Any], count: int) -> None:
+        self.iterable = list(iterable)
+        self.count = count
+        self.value = 0
+        self.max_value = False
+
+    def __iter__(self) -> Self:
+        return self
+
+    def __next__(self) -> Any:
+        if self.max_value:
+            raise StopIteration
+        items = []
+        stop = self.value+self.count
+        if stop >= len(self.iterable):
+            stop = len(self.iterable)
+            self.max_value = True
+        for item in self.iterable[self.value:stop]:
+            items.append(item)
+        self.value = stop
+        return items
+
+    def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
+        return list(iter(self))[__value]
+
+    def to_list(self):
+        return list(iter(self))
 
 
 def clamp(val: Union[int, float],
@@ -337,14 +405,28 @@ def clamp(val: Union[int, float],
 
 def is_emoji(text: str) -> bool:
     text = text.strip()
-    if regex.fullmatch(r'<a?:.+?:\d{18}>', text):
-        return True
-    if text in emoji.EMOJI_DATA:
-        return True
-    return False
+    return any((regex.fullmatch(r'<a?:.+?:\d{18,}>', text), text in emoji.EMOJI_DATA))
 
 
-async def getRandomQuote(lang: str = 'en'):
+def randquan(quan: int) -> int:
+    if 0 >= quan:
+        raise ValueError
+    return random.randint(10**(quan-1), int('9'*quan))
+
+
+def generate_random_token() -> Tuple[str, str]:
+    message = randquan(100).to_bytes(100)
+    key = Fernet.generate_key()
+    token = Tokenizer.encrypt(message, key)
+    return key.decode(), token.decode()
+
+
+def decrypt_token(key: str, token: str) -> int:
+    res = Tokenizer.decrypt(token.encode(), key.encode())
+    return int.from_bytes(res)
+
+
+async def get_random_quote(lang: str = 'en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
     async with aiohttp.ClientSession() as session:
         async with session.post(url) as responce:
@@ -352,26 +434,167 @@ async def getRandomQuote(lang: str = 'en'):
             return json
 
 
-def calculate_time(string: str) -> int:
-    coefficients = {
-        's': 1,
-        'm': 60,
-        'h': 3600,
-        'd': 86400
-    }
-    timedate = regex.findall(r'(\d+)([a-zA-Z]+)', string)
-    ftime = 0
+class TimeCalculator:
+    def __init__(
+        self,
+        default_coefficient: int = 60,
+        refundable: T = int,
+        coefficients: Optional[dict] = None,
+        operatable_time: bool = False
+    ) -> None:
+        self.default_coefficient = default_coefficient
+        self.refundable = refundable
+        self.operatable_time = operatable_time
 
-    for number, word in timedate:
-        if word not in coefficients:
+        if coefficients is None:
+            self.coefficients = {
+                's': 1,
+                'm': 60,
+                'h': 3600,
+                'd': 86400
+            }
+        else:
+            self.coefficients = coefficients
+
+    @overload
+    def convert(
+        self,
+        argument: str
+    ) -> T:
+        pass
+
+    @overload
+    def convert(
+        self,
+        ctx: commands.Context,
+        argument: str
+    ) -> Coroutine[Any, Any, T]:
+        pass
+
+    def convert(self, *args) -> T | Coroutine[Any, Any, T]:
+        try:
+            return self.async_convert(*args)
+        except KeyboardInterrupt:
+            raise
+        except Exception:
+            pass
+
+        try:
+            return self.basic_convert(*args)
+        except KeyboardInterrupt:
+            raise
+        except Exception:
+            pass
+
+        raise TypeError
+
+    def basic_convert(
+        self,
+        argument: Any
+    ) -> T:
+        if not (isinstance(argument, str)
+                and regex.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
             raise TypeError('Format time is not valid!')
 
-        number = int(number)
-        multiplier = coefficients[word]
+        timedate: list[tuple[str, str]] = regex.findall(
+            r'(\d+)([a-zA-Z\s]+)', argument)
+        ftime = 0
 
-        ftime += number*multiplier
+        for number, word in timedate:
+            if word.strip() not in self.coefficients:
+                raise TypeError('Format time is not valid!')
 
-    return ftime
+            multiplier = self.coefficients[word.strip()]
+            ftime += int(number)*multiplier
+
+        if not ftime:
+            raise TypeError('Format time is not valid!')
+        if self.operatable_time:
+            ftime += time.time()
+
+        return self.refundable(ftime)
+
+    async def async_convert(
+        self,
+        ctx: commands.Context,
+        argument: Any
+    ) -> T:
+        return self.basic_convert(argument)
+
+
+def translate_to_timestamp(arg: str) -> int | None:
+    try:
+        tdt = datetime.strptime(arg, '%H:%M')
+        return datetime(
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            hour=tdt.hour,
+            minute=tdt.minute
+        ).timestamp()
+    except ValueError:
+        pass
+    try:
+        tdt = datetime.strptime(arg, '%H:%M:%S')
+        return datetime(
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            hour=tdt.hour,
+            minute=tdt.minute,
+            second=tdt.second
+        ).timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y %H:%M').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%d.%m.%Y %H:%M:%S').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M %d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M:%S %d.%m.%Y').timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M %Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%H:%M:%S %Y-%m-%d').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d %H:%M').timestamp()
+    except ValueError:
+        pass
+    try:
+        return datetime.strptime(arg, '%Y-%m-%d %H:%M:%S').timestamp()
+    except ValueError:
+        pass
+
+    try:
+        return TimeCalculator(operatable_time=True).convert(arg)
+    except ValueError:
+        pass
+
+    return None
 
 
 @lru_cache()
@@ -505,7 +728,7 @@ def add_gradient(
 
 
 async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
-    background_image = await load_image_async(background_link)
+    background_image = await load_image_async(background_link, session=member._state.http.__session)
     background = Editor(background_image).resize((800, 450))
 
     profile_image = await load_image_async(
