@@ -1,13 +1,10 @@
 from __future__ import annotations
 import asyncio
 from collections import namedtuple
-from curses import beep
-import functools
 import time
 from typing import Any, TypeVar, overload
 import emoji
 
-from flask import session
 import nextcord
 from nextcord.ext import commands
 
@@ -441,6 +438,10 @@ def get_award(number):
     }
     award = awards.get(number, number)
     return award
+
+
+def randfloat(a: float | int, b: float | int, scope: int = 14) -> float:
+    return random.randint(int(a*10**scope), int(b*10**scope)) / 10**scope
 
 
 async def generate_message(content: str) -> dict:

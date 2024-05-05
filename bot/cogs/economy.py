@@ -1,9 +1,12 @@
 
+import random
 import nextcord
 from nextcord.ext import commands
+from sqlalchemy import desc
 
 from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.misc.lordbot import LordBot
+from bot.misc.utils import clamp, randfloat
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
 from nextcord.utils import escape_markdown
@@ -272,6 +275,60 @@ class Economy(commands.Cog):
         account["balance"] -= sum
 
         await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
+
+    @commands.command()
+    async def rob(self, ctx: commands.Context, member: nextcord.Member):
+        gdb = GuildDateBases(ctx.guild.id)
+        color = gdb.get('color')
+        economic_settings: dict = gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+        thief_account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
+        victim_account = EconomyMemberDB(ctx.guild.id, member.id)
+        total_balance = thief_account.get('balance')+thief_account.get('bank')
+
+        win_chance = clamp(
+            0.1, total_balance/(victim_account['balance']+total_balance), 0.75)
+        if member.status != nextcord.Status.offline:
+            win_chance -= 0.05
+        chance = random.random()
+        if win_chance > chance:
+            debt = win_chance * \
+                victim_account['balance'] * 1/2
+            if debt >= thief_account['balance']:
+                calculated_debt = (
+                    thief_account['balance'] * .6
+                                             * debt * .2
+                                             * randfloat(.8, 1.2)
+                )
+                thief_account['balance'] += calculated_debt
+                victim_account['balance'] -= debt
+                embed = nextcord.Embed(
+                    title="Robbery",
+                    description=f"{ctx.author.mention}, you were able to steal an {calculated_debt: ,.0f}{currency_emoji}, but the victim lost the {debt: ,.0f}{currency_emoji}.",
+                    color=color
+                )
+            else:
+                thief_account['balance'] += debt
+                victim_account['balance'] -= debt
+                embed = nextcord.Embed(
+                    title="Robbery",
+                    description=f"{ctx.author.mention}, you were able to steal an {debt: ,.0f}{currency_emoji}.",
+                    color=color
+                )
+        else:
+            debt = (1-win_chance) * total_balance * 1/2
+            if debt > thief_account['balance']:
+                debt -= thief_account['balance']
+                thief_account['balance'] = 0
+                thief_account['bank'] -= debt
+            else:
+                thief_account['balance'] -= debt
+            embed = nextcord.Embed(
+                title="Robbery",
+                description=f"{ctx.author.mention}, you couldn't steal anything during the robbery, but you lost {debt: ,.0f}{currency_emoji}.",
+                color=color
+            )
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
