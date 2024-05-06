@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 from collections import namedtuple
+from re import L
 import time
 from typing import Any, TypeVar, overload
 import emoji
@@ -138,6 +139,10 @@ def lord_format(
 
 
 def translate_flags(text: str) -> dict:
+    if not text:
+        return {}
+    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-\s]+)?(\s|$)){1,}", text):
+        raise TypeError("Not a flag.")
     return dict(map(
         lambda item: (item[0], item[1]) if item[1] else (item[0], True),
         regex.findall(

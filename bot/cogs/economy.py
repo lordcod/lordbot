@@ -6,7 +6,7 @@ from sqlalchemy import desc
 
 from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import clamp, randfloat
+from bot.misc.utils import clamp, randfloat, translate_flags
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
 from nextcord.utils import escape_markdown
@@ -112,17 +112,17 @@ class Economy(commands.Cog):
 
         embed.add_field(
             name=f"{Emoji.money} Cash:",
-            value=f'{balance}{currency_emoji}',
+            value=f'{balance :,}{currency_emoji}',
             inline=True
         )
         embed.add_field(
             name=f"{Emoji.bank} In bank:",
-            value=f'{bank}{currency_emoji}',
+            value=f'{bank :,}{currency_emoji}',
             inline=True
         )
         embed.add_field(
             name=f"{Emoji.bagmoney} Total balance:",
-            value=f'{balance+bank}{currency_emoji}',
+            value=f'{balance+bank :,}{currency_emoji}',
             inline=False
         )
 
@@ -230,7 +230,7 @@ class Economy(commands.Cog):
 
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
-    async def gift(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+    async def gift(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: int, *, flags: translate_flags = {}):
         if not member:
             member = ctx.author
 
@@ -239,20 +239,20 @@ class Economy(commands.Cog):
         currency_emoji = eco_sets.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
-        if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000 :,}{currency_emoji}")
-            return
-        if 0 >= sum:
+        if sum != 'all' and 0 >= sum:
             await ctx.send("The amount must be positive")
             return
 
-        account["balance"] += sum
+        if flags.get('bank'):
+            account["bank"] += sum
+        else:
+            account["balance"] += sum
 
         await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji}")
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
-    async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: int):
+    async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: Union[Literal['all'], int], *, flags: translate_flags = {}):
         if not member:
             member = ctx.author
 
@@ -261,18 +261,25 @@ class Economy(commands.Cog):
         currency_emoji = eco_sets.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
-        if sum > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000 :,}{currency_emoji}")
-            return
-        if 0 >= sum:
+        if sum != 'all' and 0 >= sum:
             await ctx.send("The amount must be positive")
             return
+        if flags.get('bank'):
+            if sum == 'all':
+                sum = account['bank']
+            if sum > account['bank']:
+                await ctx.send('The operation cannot be performed because the bank balance will become negative during it')
+                return
 
-        if 0 > (account.get('balance')-sum):
-            await ctx.send('The operation cannot be performed because the balance will become negative during it')
-            return
+            account['bank'] -= sum
+        else:
+            if sum == 'all':
+                sum = account['balance']
+            if sum > account['balance']:
+                await ctx.send('The operation cannot be performed because the balance will become negative during it')
+                return
 
-        account["balance"] -= sum
+            account["balance"] -= sum
 
         await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
 
@@ -284,13 +291,14 @@ class Economy(commands.Cog):
         currency_emoji = economic_settings.get('emoji')
         thief_account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         victim_account = EconomyMemberDB(ctx.guild.id, member.id)
-        total_balance = thief_account.get('balance')+thief_account.get('bank')
 
         win_chance = clamp(
-            0.1, total_balance/(victim_account['balance']+total_balance), 0.75)
+            0.1, thief_account['balance']/(victim_account['balance']+thief_account['balance']), 0.75)
         if member.status != nextcord.Status.offline:
             win_chance -= 0.05
         chance = random.random()
+        print()
+        print(win_chance, chance)
         if win_chance > chance:
             debt = win_chance * \
                 victim_account['balance'] * 1/2
@@ -316,13 +324,8 @@ class Economy(commands.Cog):
                     color=color
                 )
         else:
-            debt = (1-win_chance) * total_balance * 1/2
-            if debt > thief_account['balance']:
-                debt -= thief_account['balance']
-                thief_account['balance'] = 0
-                thief_account['bank'] -= debt
-            else:
-                thief_account['balance'] -= debt
+            debt = (1-win_chance) * thief_account['balance'] * 1/2
+            thief_account['balance'] -= debt
             embed = nextcord.Embed(
                 title="Robbery",
                 description=f"{ctx.author.mention}, you couldn't steal anything during the robbery, but you lost {debt: ,.0f}{currency_emoji}.",
