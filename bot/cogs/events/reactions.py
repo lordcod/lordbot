@@ -1,4 +1,5 @@
 
+import emoji
 import nextcord
 from nextcord.ext import commands
 import nextcord.types
@@ -6,7 +7,6 @@ import nextcord.types.raw_models
 
 from bot.databases import GuildDateBases
 
-from bot.databases.handlers import guildHD
 from bot.misc.lordbot import LordBot
 
 
@@ -58,8 +58,9 @@ class ReactionsEvent(commands.Cog):
         role_reaction = gdb.get('role_reactions')
 
         try:
+            emoji = self.bot._connection._emojis[payload.emoji.id]
             role_id = role_reaction[payload.message_id]['reactions'][str(
-                payload.emoji)]
+                emoji)]
         except KeyError:
             return
 

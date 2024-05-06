@@ -217,7 +217,7 @@ class RoleReactionItemView(DefaultSettingsView):
             await message.edit("Unfortunately I can't use this emoji check that I am on the server where this emoji is located", view=None)
             return
 
-        for _emoji, _role_id in self.role_reaction['reactions'].items():
+        for _emoji, _role_id in list(self.role_reaction['reactions'].items()):
             if _role_id == self.selected_role.id:
                 self.role_reaction['reactions'].pop(_emoji)
         self.role_reaction['reactions'][value] = self.selected_role.id
@@ -231,7 +231,7 @@ class RoleReactionItemView(DefaultSettingsView):
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction
                      ):
-        for _emoji, _role_id in self.role_reaction['reactions'].items():
+        for _emoji, _role_id in list(self.role_reaction['reactions'].items()):
             if _role_id == self.selected_role.id:
                 self.role_reaction['reactions'].pop(_emoji)
 
