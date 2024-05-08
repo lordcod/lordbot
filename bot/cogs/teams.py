@@ -1,11 +1,10 @@
-import re
 import nextcord
 from nextcord.ext import commands
+
 from bot.misc.lordbot import LordBot
-
+from bot.databases.db import engine
 from bot.resources import check
-
-import os
+from bot.resources.ether import Emoji
 
 
 class Teams(commands.Cog):
@@ -66,13 +65,16 @@ class Teams(commands.Cog):
         string = "\n".join(name_exts)
         await ctx.send(string)
 
-    @commands.command(name="eval")
+    @commands.command()
     @check.team_only()
-    async def _eval(self, ctx: commands.Context, code: str):
-        if mt := re.fullmatch(r"(```)(py)?(.+)(```)", code):
-            code = mt.group(3)
-        result = eval(code)
-        await ctx.send(f"`{result}`")
+    async def sql_execute(
+        self,
+        ctx: commands.Context,
+        *,
+        query: str
+    ):
+        engine.execute(query)
+        await ctx.message.add_reaction(Emoji.success)
 
 
 def setup(bot):

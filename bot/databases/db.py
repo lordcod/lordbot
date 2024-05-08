@@ -1,5 +1,3 @@
-import threading
-import asyncio
 from psycopg2.extensions import register_adapter
 
 from .handlers import establish_connection
@@ -55,6 +53,8 @@ class EconomicDB(Table):
     daily = Colum(data_type=PostType.BIGINT, default="0")
     weekly = Colum(data_type=PostType.BIGINT, default="0")
     monthly = Colum(data_type=PostType.BIGINT, default="0")
+    rob = Colum(data_type=PostType.BIGINT, default="0")
+    conclusion = Colum(data_type=PostType.BIGINT, default="0")
 
 
 class RolesDB(Table):

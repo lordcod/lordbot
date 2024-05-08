@@ -1,7 +1,6 @@
 from __future__ import annotations
 import asyncio
 from collections import namedtuple
-from re import L
 import time
 from typing import Any, TypeVar, overload
 import emoji
@@ -155,15 +154,8 @@ def translate_flags(text: str) -> dict:
 async def clone_message(message: nextcord.Message) -> dict:
     content = message.content
     embeds = message.embeds
-    files = []
-    for attach in message.attachments:
-        filebytes = await attach.read()
-        files.append(nextcord.File(
-            fp=filebytes,
-            filename=attach.filename,
-            description=attach.description,
-            spoiler=attach.is_spoiler()
-        ))
+    files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
+                                   for attach in message.attachments])
 
     return {
         "content": content,
