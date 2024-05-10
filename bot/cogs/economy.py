@@ -2,6 +2,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases import EconomyMemberDB, GuildDateBases
+from bot.misc import logstool
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
@@ -49,6 +50,7 @@ class economy(commands.Cog):
             )
             account[ctx.command.name] = wait_long
             account['balance'] += award
+            await logstool.Logs(ctx.guild).add_currency(ctx.author, award, reason=f'{ctx.command.name} reward')
         else:
             embed = nextcord.Embed(
                 title="The reward is not available",
@@ -201,6 +203,8 @@ class economy(commands.Cog):
 
         from_account["balance"] -= sum
         to_account["balance"] += sum
+        await logstool.Logs(ctx.guild).add_currency(member, sum, reason=f'received from a {ctx.author.name} member')
+        await logstool.Logs(ctx.guild).remove_currency(ctx.author, sum, reason=f'passed to the {member.name} participant')
 
     @commands.command(name="deposit", aliases=["dep"])
     async def deposit(self, ctx: commands.Context, sum: Union[Literal['all'], int]):
@@ -287,6 +291,7 @@ class economy(commands.Cog):
         account["balance"] += sum
 
         await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji}")
+        await logstool.Logs(ctx.guild).add_currency(member, sum, moderator=ctx.author)
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
@@ -313,6 +318,7 @@ class economy(commands.Cog):
         account["balance"] -= sum
 
         await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
+        await logstool.Logs(ctx.guild).remove_currency(member, sum, moderator=ctx.author)
 
 
 def setup(bot):

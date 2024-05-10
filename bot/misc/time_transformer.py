@@ -60,11 +60,11 @@ distributing = {
 
 def time_convert(timestamp: (int | float)) -> dict[str, int]:
     return {
-        "months": round(timestamp / 2_631_600 % 12),
-        "days": round(timestamp / 86_400 % 30),
-        "hours": round(timestamp / 3_600 % 24),
-        "minutes": round(timestamp / 60 % 60),
-        "seconds": round(timestamp % 60)
+        "months": int(timestamp / 2_631_600 % 12),
+        "days": int(timestamp / 86_400 % 30),
+        "hours": int(timestamp / 3_600 % 24),
+        "minutes": int(timestamp / 60 % 60),
+        "seconds": int(timestamp % 60)
     }
 
 
