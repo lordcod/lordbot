@@ -33,28 +33,36 @@ class Confessions(commands.Cog):
         color = gdb.get('color')
         channel_id = GUILD_CONFESSIONS_DATA['channel_id']
         channel = interaction.guild.get_channel(channel_id)
+        data = {
+            'author_id': interaction.user.id,
+            'confession': confession
+        }
 
         if user is None:
-            content = 'A new anonymous message has been received'
+            content = 'A new confession has been received'
         else:
-            content = f'A new anonymous message sent to the {user.mention} has been received'
+            content = f'A new confession sent to the {user.mention} has been received'
+            data['user_id'] = user.id
 
         embed = nextcord.Embed(
             title='Confession',
             description=confession,
             color=color
         )
+        embed.add_field(
+            name='Reporting',
+            value=('If this message violates '
+                   'the rules or contains '
+                   'hateful content, you '
+                   'can report it using '
+                   f'the following command: {self.confessions_report.get_mention(interaction.guild)}'))
         if attachment:
+            data['attachment_url'] = attachment.url
             embed.set_image(attachment.url)
 
         message = await channel.send(content, embed=embed)
 
-        CONFESSIONS_STATE_DB[message.id] = {
-            'author_id': interaction.user.id,
-            'confession': confession,
-            'user_id': user.id,
-            'attachment_url': attachment.url
-        }
+        CONFESSIONS_STATE_DB[message.id] = data
 
     @confessions.subcommand(name='report')
     async def confessions_report(
@@ -72,6 +80,7 @@ class Confessions(commands.Cog):
     @confessions.subcommand(name='block')
     async def confessions_block(self, interaction: nextcord.Interaction):
         # TODO LOGS CONFESSIONS
+        pass
 
 
 def setup(bot):
