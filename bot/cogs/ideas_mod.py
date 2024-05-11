@@ -33,7 +33,7 @@ class ideas_mod(commands.Cog):
         return data_mute
 
     @ideas.command()
-    async def ban(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str]) -> None:
+    async def ban(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         ideas: IdeasPayload = gdb.get('ideas')
@@ -46,7 +46,7 @@ class ideas_mod(commands.Cog):
                 description=(
                     f"The {member.mention}({member.id}) user is already banned\n"
                     f"The moderator who issued the ban: {moderator.mention}({moderator.id})\n"
-                    f"Reason: `{data_ban[2]}`"
+                    f"{f'Reason: `{data_ban[2]}`' if data_ban[2] else ''}"
                 ),
                 color=color
             )
@@ -62,14 +62,14 @@ class ideas_mod(commands.Cog):
             description=(
                 f"The blocked user: {member.mention}({member.id})\n"
                 f"The moderator who issued the ban: {ctx.author.mention}({ctx.author.id})\n"
-                f"Reason: `{reason}`"
+                f"{f'Reason: `{reason}`' if reason else ''}"
             ),
             color=color
         )
         await ctx.send(embed=embed)
 
     @ideas.command()
-    async def unban(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str]) -> None:
+    async def unban(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         ideas: IdeasPayload = gdb.get('ideas')
@@ -94,14 +94,14 @@ class ideas_mod(commands.Cog):
             description=(
                 f"An unblocked user: {member.mention}({member.id})\n"
                 f"The moderator who issued the unban: {ctx.author.mention}({ctx.author.id})\n"
-                f"Reason: `{reason}`"
+                f"{f'Reason: `{reason}`' if reason else ''}"
             ),
             color=color
         )
         await ctx.send(embed=embed)
 
     @ideas.command()
-    async def mute(self, ctx: commands.Context, member: nextcord.Member, timestamp: TimeCalculator, *, reason: Optional[str]) -> None:
+    async def mute(self, ctx: commands.Context, member: nextcord.Member, timestamp: TimeCalculator, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         ideas: IdeasPayload = gdb.get('ideas')
@@ -115,7 +115,7 @@ class ideas_mod(commands.Cog):
                     f"The {member.mention}({member.id}) user is already banned\n"
                     f"The moderator who issued the ban: {moderator.mention}({moderator.id})\n"
                     f"Time of action: <t:{data_mute[2] :.0f}:f>({display_time(data_mute[2]-time.time())})\n"
-                    f"Reason: `{data_mute[3]}`"
+                    f"{f'Reason: `{data_mute[2]}`' if data_mute[3] else ''}"
                 ),
                 color=color
             )
@@ -133,14 +133,14 @@ class ideas_mod(commands.Cog):
                 f"The muted user: {member.mention}({member.id})\n"
                 f"The moderator who issued the mute: {ctx.author.mention}({ctx.author.id})\n"
                 f"Time of action: <t:{timestamp + time.time() :.0f}:f>({display_time(timestamp)})\n"
-                f"Reason: `{reason}`"
+                f"{f'Reason: `{reason}`' if reason else ''}"
             ),
             color=color
         )
         await ctx.send(embed=embed)
 
     @ideas.command()
-    async def unmute(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str]) -> None:
+    async def unmute(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
         ideas: IdeasPayload = gdb.get('ideas')
@@ -165,7 +165,7 @@ class ideas_mod(commands.Cog):
             description=(
                 f"An unmuted user: {member.mention}({member.id})\n"
                 f"The moderator who issued the unmmute: {ctx.author.mention}({ctx.author.id})\n"
-                f"Reason: `{reason}`"
+                f"{f'Reason: `{reason}`' if reason else ''}"
             ),
             color=color
         )
