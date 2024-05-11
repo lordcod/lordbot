@@ -57,21 +57,24 @@ class Logs:
         self.guild_data = {0: 1229044270996918272,
                            1: 1229044270996918272,
                            2: 1229044270996918272,
-                           3: 1229044270996918272}
+                           3: 1229044270996918272,
+                           4: 1229044270996918272,
+                           5: 1229044270996918272}
 
     @staticmethod
     def on_logs(log_type: int):
         def predicte(coro):
-            @functools.wraps(coro,
-                             assigned=("__module__", "__name__",
-                                       "__qualname__", "__doc__"),
-                             updated=("__dict__", "__annotations__"))
+            @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
                 if log_type not in self.guild_data:
                     return
+
                 channel_id = self.guild_data[log_type]
                 channel = self.guild.get_channel(channel_id)
+
                 mes: Message = await coro(self, *args, **kwargs)
+                if mes is None:
+                    return
                 await channel.send(content=mes.content, embed=mes.embed, files=mes.files)
 
             return wrapped
@@ -79,6 +82,8 @@ class Logs:
 
     @on_logs(0)
     async def delete_message(self, message: nextcord.Message, moderator: Optional[nextcord.Member] = None):
+        if message.author.bot:
+            return
         embed = nextcord.Embed(
             title="Message deleted",
             color=nextcord.Colour.red(),
@@ -95,12 +100,6 @@ class Logs:
                 name="Message",
                 value=message.content
             )
-        if message.embeds:
-            for num, emb in enumerate(message.embeds):
-                embed.add_field(
-                    name=f"Embed #{num}",
-                    value=embed_to_text(emb)
-                )
         if moderator:
             embed.set_footer(text=moderator,
                              icon_url=moderator.display_avatar)
@@ -113,8 +112,10 @@ class Logs:
             files = None
         return Message(embed=embed, files=files)
 
-    @on_logs(100)
+    @on_logs(1)
     async def edit_message(self, before: nextcord.Message, after: nextcord.Message):
+        if after.author.bot:
+            return
         embed = nextcord.Embed(
             title="Message edited",
             color=nextcord.Colour.orange(),
@@ -126,19 +127,13 @@ class Logs:
             ),
             timestamp=datetime.datetime.today()
         )
-        before_content = f'{before.content}\n' if before.content else ''
-        if before.embeds:
-            before_content += embed_to_text(before.embeds[0])
-        after_content = f'{after.content}\n' if after.content else ''
-        if after.embeds:
-            after_content += embed_to_text(after.embeds[0])
         embed.add_field(
             name="Before",
-            value=before_content
+            value=before.content
         )
         embed.add_field(
             name="After",
-            value=after_content
+            value=after.content
         )
         return Message(embed=embed)
 
@@ -267,9 +262,44 @@ class Logs:
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
-    @on_logs()
-    async def create_idea():
-        pass
+    @on_logs(4)
+    async def create_idea(self, member: nextcord.Member, idea: str, image: Optional[str] = None):
+        embed = nextcord.Embed(
+            title='Created new idea',
+            description=idea,
+            color=nextcord.Colour.orange()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        embed.set_image(image)
+        return Message(embed=embed)
+
+    @on_logs(4)
+    async def approve_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, image: Optional[str] = None):
+        embed = nextcord.Embed(
+            title='Approved idea',
+            description=idea,
+            color=nextcord.Colour.brand_green()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        if image:
+            embed.set_image(image)
+        embed.set_footer(text=str(moderator),
+                         icon_url=moderator.display_avatar)
+        return Message(embed=embed)
+
+    @on_logs(4)
+    async def deny_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, image: Optional[str] = None):
+        embed = nextcord.Embed(
+            title='Denied idea',
+            description=idea,
+            color=nextcord.Colour.red()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        if image:
+            embed.set_image(image)
+        embed.set_footer(text=str(moderator),
+                         icon_url=moderator.display_avatar)
+        return Message(embed=embed)
 
     @on_logs
     async def add_role(self, member: nextcord.Member, role: nextcord.Role): ...

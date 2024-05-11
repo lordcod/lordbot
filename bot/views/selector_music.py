@@ -2,14 +2,13 @@ import nextcord
 from nextcord import utils
 
 from bot.databases import GuildDateBases
-from yandex_music_api.datas import Track
 from bot.languages import i18n
 
 from typing import List
 
 
 class MusicDropDown(nextcord.ui.Select):
-    def __init__(self, guild_id, queue, player, tracks: List[Track]) -> None:
+    def __init__(self, guild_id, queue, player, tracks) -> None:
         gdb = GuildDateBases(guild_id)
         locale = gdb.get('language')
         self.tracks = tracks
@@ -43,7 +42,7 @@ class MusicDropDown(nextcord.ui.Select):
 class MusicView(nextcord.ui.View):
     embed: nextcord.Embed
 
-    def __init__(self, guild_id, queue, player, tracks: List[Track]) -> None:
+    def __init__(self, guild_id, queue, player, tracks) -> None:
         gdb = GuildDateBases(guild_id)
         color = gdb.get('color')
         locale = gdb.get('language')

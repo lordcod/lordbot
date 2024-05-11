@@ -5,6 +5,7 @@ import time
 from typing import Optional
 
 import re
+from bot.misc import logstool
 from bot.resources.ether import Emoji
 from bot.databases.varstructs import IdeasPayload
 from bot.databases import MongoDB, GuildDateBases
@@ -107,6 +108,7 @@ class ConfirmModal(nextcord.ui.Modal):
         )
 
         await approved_channel.send(embed=embed)
+        await logstool.Logs(interaction.guild).approve_idea(interaction.user, idea_author, idea_content, idea_image)
 
 
 class ConfirmView(nextcord.ui.View):
@@ -197,6 +199,7 @@ class ConfirmView(nextcord.ui.View):
         self.deny.disabled = True
 
         await interaction.message.edit(content=content, embed=embed, view=self)
+        await logstool.Logs(interaction.guild).deny_idea(interaction.user, idea_author, idea_content, idea_image)
 
 
 class IdeaModal(nextcord.ui.Modal):
@@ -264,13 +267,14 @@ class IdeaModal(nextcord.ui.Modal):
         idea_data = {
             'user_id': interaction.user.id,
             'idea': idea,
-            'image': self.image.value
+            'image': image
         }
         mdb = MongoDB('ideas')
         mdb.set(mes.id, idea_data)
 
         Timeout.set(interaction.guild_id,
                     interaction.user.id, time.time()+cooldown)
+        await logstool.Logs(interaction.guild).create_idea(interaction.user, idea, image)
 
 
 class IdeaView(nextcord.ui.View):

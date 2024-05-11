@@ -3,8 +3,6 @@ import yt_dlp
 import re
 import nextcord
 from nextcord.ext import commands
-from yandex_music_api import Client as YaClient
-from yandex_music_api.coonector import Requsts as YaRequsts
 from bot.misc.lordbot import LordBot
 
 from bot.views.selector_music import MusicView
@@ -173,4 +171,5 @@ class Voice(commands.Cog):
 
 
 def setup(bot):
+    return
     bot.add_cog(Voice(bot))
