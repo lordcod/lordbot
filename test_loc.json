@@ -651,7 +651,7 @@
                 "fr": "Approuvé | {name}",
                 "id": "Disetujui | {name}",
                 "pl": "Zatwierdzone | {name}",
-                "ru": "Одобрено | {имя}",
+                "ru": "Одобрено | {name}",
                 "tr": "Onaylandı | {name}"
             },
             "title": {

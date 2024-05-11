@@ -108,7 +108,7 @@ class ConfirmModal(nextcord.ui.Modal):
         )
 
         await approved_channel.send(embed=embed)
-        await logstool.Logs(interaction.guild).approve_idea(interaction.user, idea_author, idea_content, idea_image)
+        await logstool.Logs(interaction.guild).approve_idea(interaction.user, idea_author, idea_content, reason, idea_image)
 
 
 class ConfirmView(nextcord.ui.View):
