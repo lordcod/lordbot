@@ -3,7 +3,8 @@
         "economy": "💎",
         "major": "👑",
         "voice": "🎤",
-        "moderation": "⚠"
+        "moderation": "⚠",
+        "reactions": "🎭"
     },
     "categories_name": {
         "economy": {
@@ -49,6 +50,17 @@
             "fr": "Modération",
             "pl": "Moderacja",
             "tr": "Ilımlılık"
+        },
+        "reactions": {
+            "da": "Reaktioner",
+            "de": "Reaktionen",
+            "en": "Reactions",
+            "es": "Reacciones",
+            "fr": "Réactions",
+            "id": "Reaksi",
+            "pl": "Reakcje",
+            "ru": "Реакции",
+            "tr": "Reaksiyonlar"
         }
     },
     "commands": [
