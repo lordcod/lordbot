@@ -1,10 +1,4 @@
 from __future__ import annotations
-import asyncio
-from collections import namedtuple
-import time
-from typing import Any, TypeVar, overload
-import emoji
-
 import nextcord
 from nextcord.ext import commands
 
@@ -14,12 +8,16 @@ import regex
 import string
 import random
 import aiohttp
+import asyncio
+import time
+import emoji
 import orjson
 
 from asyncio import TimerHandle
+from collections import namedtuple
 from typing import (Coroutine, Dict,  Optional,  Tuple, Union,
-                    Mapping, Any, Iterable, SupportsIndex, Self)
-from typing import Any, Coroutine, Dict, Iterable,  Optional, Self, SupportsIndex,  Tuple, Union, Mapping
+                    Mapping, Any, Iterable, SupportsIndex, Self,
+                    TypeVar, overload)
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -34,7 +32,7 @@ wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
     "None": wel_mes("None", None, None),
-    "my-image": wel_mes("My image", "Nope", "You will be able to enter a link to an image."),
+    "my-image": wel_mes("My image", ..., "You will be able to enter a link to an image."),
     "view-from-mountain": wel_mes("View from mountain", "https://i.postimg.cc/Hnpz0ycb/view-from-mountain.jpg", "Summer vibes, mountain views, sunset - all adds charm."),
     "autumn-street": wel_mes("Autumn street", "https://i.postimg.cc/sXnQ8QHY/autumn-street.jpg", "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn."),
     "winter-day": wel_mes("Winter day", "https://i.postimg.cc/qBhyYQ0g/winter-day.jpg", "Dazzling winter day, majestic mountain, small buildings, sparkling highway, snow-white covers."),
