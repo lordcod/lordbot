@@ -1,8 +1,9 @@
 from __future__ import annotations
+from typing import Optional, TypeVar, overload
 from ..db_engine import DataBase
-from ..misc.error_handler import on_error
 from ..misc.adapter_dict import Json
 
+T = TypeVar('T')
 engine: DataBase = None
 
 
@@ -10,20 +11,23 @@ class CommandDB:
     def __init__(self, guild_id: int) -> None:
         self.guild_id = guild_id
 
-    @on_error()
-    def get(self, command, default=None) -> dict:
-        data = engine.fetchone(
+    @overload
+    def get(self, command: str) -> Optional[dict]: ...
+
+    @overload
+    def get(self, command: str, default: T) -> dict | T: ...
+
+    def get(self, command: str, default: T = None) -> dict | T:
+        data = engine.fetchvalue(
             "SELECT command_permissions ->> %s FROM guilds WHERE id = %s",
             (command, self.guild_id,)
         )
 
-        if not data[0]:
+        if not data:
             return default
-        data_new = Json.loads(data[0])
-        return data_new
+        return data
 
-    @on_error()
-    def update(self, key, value):
+    def update(self, key: str, value: dict) -> None:
         value = Json.dumps(value)
 
         engine.execute(
