@@ -2,6 +2,7 @@
 import random
 import asyncio
 import random
+import re
 import nextcord
 from nextcord.ext import commands
 
@@ -16,6 +17,7 @@ from typing import Optional, Union, Literal
 
 
 from bot.databases import EconomyMemberDB, GuildDateBases
+from bot.resources import check
 from bot.views.economy_shop import EconomyShopView
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
@@ -188,6 +190,8 @@ class Economy(commands.Cog):
 
     @commands.command(name='work')
     async def work(self, ctx: commands.Context):
+        # TODO logs
+
         loctime = time.time()
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
@@ -425,6 +429,8 @@ class Economy(commands.Cog):
 
     @commands.command(name="roulette", aliases=["rou"])
     async def roulette(self, ctx: commands.Context, amount: int, *, val: str):
+        # TODO logs
+
         gdb = GuildDateBases(ctx.guild.id)
         prefix = gdb.get('prefix')
         color = gdb.get('color')
@@ -523,6 +529,8 @@ class Economy(commands.Cog):
 
     @commands.command(name="blackjack", aliases=["bj"])
     async def blackjack(self, ctx: commands.Context, amount: int):
+        # TODO logs
+
         gdb = GuildDateBases(ctx.guild.id)
         economic_settings: dict = gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
@@ -559,6 +567,64 @@ class Economy(commands.Cog):
 
         view = BlackjackView(bjg)
         await ctx.send(embed=bjg.embed, view=view)
+
+    @staticmethod
+    def get_slots_embed(member: nextcord.Member, color: int, results: list) -> nextcord.Embed:
+        embed = nextcord.Embed(
+            title='S L O T S',
+            description='\n'.join(' | '.join(res) for res in results),
+            color=color
+        )
+        embed.set_footer(text=member, icon_url=member.display_avatar)
+        return embed
+
+    @commands.command()
+    @check.team_only()
+    async def slots(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+        color = gdb.get('color')
+
+        emojis = ["⭐", "7️⃣", "💰", "🫡", "💀", "🎁", "🎉", "🥺"]
+        results = (
+            ['◾', '◾', '◾'],
+            ['◾', '◾', '◾'],
+            ['◾', '◾', '◾']
+        )
+
+        embed = self.get_slots_embed(ctx.author, color, results)
+        message = await ctx.send(embed=embed)
+
+        for _ in range(6):
+            await asyncio.sleep(0.4)
+            results = (
+                [random.choice(emojis) for _ in range(3)],
+                results[0],
+                results[1]
+            )
+            embed = self.get_slots_embed(ctx.author, color, results)
+            await message.edit(embed=embed)
+
+        await asyncio.sleep(0.55)
+
+        results[2][1] = results[1][1]
+        results[1][1] = results[0][1]
+        results[0][1] = random.choice(emojis)
+
+        results[2][2] = results[1][2]
+        results[1][2] = results[0][2]
+        results[0][2] = random.choice(emojis)
+
+        embed = self.get_slots_embed(ctx.author, color, results)
+        await message.edit(embed=embed)
+
+        await asyncio.sleep(0.7)
+
+        results[2][2] = results[1][2]
+        results[1][2] = results[0][2]
+        results[0][2] = random.choice(emojis)
+
+        embed = self.get_slots_embed(ctx.author, color, results)
+        await message.edit(embed=embed)
 
 
 def setup(bot):
