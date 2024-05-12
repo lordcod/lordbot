@@ -1,6 +1,6 @@
 
 import nextcord
-from nextcord.ext import commands
+from nextcord.ext import commands, application_checks
 
 from bot.misc import utils
 from bot.misc.utils import TimeCalculator
@@ -43,7 +43,7 @@ class Moderations(commands.Cog):
         await ctx.send(embed=view.embed, view=view)
 
     @nextcord.slash_command(name="delete-category")
-    @commands.has_permissions(manage_channels=True)
+    @application_checks.has_permissions(manage_channels=True)
     async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
         view = DelCatView(interaction.user, category)
 
