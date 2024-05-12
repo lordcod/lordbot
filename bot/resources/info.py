@@ -10,6 +10,23 @@ DEFAULT_ECONOMY_THEFT = {'cooldown': 86400, 'jail': True, 'time_prison': {
     'min': 86400, 'max': 259200, 'adaptive': 86400}}
 DEFAULT_ECONOMY_SETTINGS = orjson.dumps(
     {'emoji': DEFAULT_EMOJI, 'theft': DEFAULT_ECONOMY_THEFT}).decode()
+DEFAULT_ECONOMY_SETTINGS = {
+    'emoji': DEFAULT_EMOJI,
+    "daily": 10,
+    "weekly": 50,
+    "monthly": 200,
+    'work': {
+        'min': 5,
+        'max': 30,
+        'cooldown': 60 * 60 * 6
+    },
+    'bet': {
+        'min': 10,
+        'max': 1000
+    }
+}
+DEFAULT_ECONOMY_SETTINGS_JSON = orjson.dumps(DEFAULT_ECONOMY_SETTINGS).decode()
+
 
 COUNT_ROLES_PAGE = 5
 
