@@ -2,27 +2,14 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc import utils
-from bot.misc.logger import Logger
 from bot.databases import GuildDateBases
 
-import functools
 import asyncio
 import jmespath
 import time
-from typing import Dict, List, Optional
+from typing import Optional
 
 from bot.misc.lordbot import LordBot
-
-
-def on_error(func):
-    @functools.wraps(func)
-    async def wrapped(self, member, gdb):
-        try:
-            result = await func(self, member, gdb)
-            return result
-        except Exception as err:
-            Logger.error(err)
-    return wrapped
 
 
 class MembersEvent(commands.Cog):
@@ -34,13 +21,12 @@ class MembersEvent(commands.Cog):
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
 
-        invite = await self.process_invites(member, gdb)
         await asyncio.gather(
+            self.process_invites(member, gdb),
             self.auto_roles(member, gdb),
-            self.auto_message(member, invite, gdb)
+            self.auto_message(member, gdb)
         )
 
-    @on_error
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
         roles_ids = gdb.get('auto_roles')
 
@@ -52,8 +38,7 @@ class MembersEvent(commands.Cog):
 
         await member.add_roles(*roles, atomic=False)
 
-    @on_error
-    async def auto_message(self, member: nextcord.Member, invite: nextcord.Invite | None, gdb: GuildDateBases):
+    async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
         guild = member.guild
         greeting_message: dict = gdb.get('greeting_message', {})
 

@@ -29,7 +29,7 @@ class Modal(nextcord.ui.Modal):
 
         view = Bonus(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class DropDown(nextcord.ui.StringSelect):
@@ -101,4 +101,4 @@ class Bonus(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = economy.Economy(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

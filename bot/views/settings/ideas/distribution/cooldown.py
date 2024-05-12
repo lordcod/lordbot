@@ -30,7 +30,7 @@ class CooldownModal(nextcord.ui.Modal):
         self.gdb.set('ideas', idea_datas)
 
         view = CooldownView(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class CooldownView(DefaultSettingsView):
@@ -46,7 +46,7 @@ class CooldownView(DefaultSettingsView):
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = ideas.IdeasView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

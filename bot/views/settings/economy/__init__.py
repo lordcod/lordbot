@@ -39,7 +39,7 @@ class DropDown(nextcord.ui.Select):
             'shop': ShopView
         }
         view = distrubutes[value](interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class Economy(DefaultSettingsView):
@@ -80,7 +80,7 @@ class Economy(DefaultSettingsView):
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Switch', style=nextcord.ButtonStyle.green, row=1)
     async def economy_switcher(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -89,4 +89,4 @@ class Economy(DefaultSettingsView):
 
         view = self.__class__(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

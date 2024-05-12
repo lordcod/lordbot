@@ -24,7 +24,7 @@ class DropDown(nextcord.ui.ChannelSelect):
 
         view = OffersView(interaction.guild, channel)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class OffersView(DefaultSettingsView):
@@ -48,7 +48,7 @@ class OffersView(DefaultSettingsView):
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = ideas.IdeasView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -58,4 +58,4 @@ class OffersView(DefaultSettingsView):
         self.gdb.set('ideas', idea_datas)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

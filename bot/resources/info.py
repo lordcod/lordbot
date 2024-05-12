@@ -6,7 +6,10 @@ DEFAULT_PREFIX = 'l.'
 DEFAULT_COLOR = 2829617
 DEFAULT_LANGUAGE = 'en'
 DEFAULT_EMOJI = Emoji.diamod
-DEFAULT_ECONOMY_SETTINGS = orjson.dumps({'emoji': DEFAULT_EMOJI}).decode()
+DEFAULT_ECONOMY_THEFT = {'cooldown': 86400, 'jail': True, 'time_prison': {
+    'min': 86400, 'max': 259200, 'adaptive': 86400}}
+DEFAULT_ECONOMY_SETTINGS = orjson.dumps(
+    {'emoji': DEFAULT_EMOJI, 'theft': DEFAULT_ECONOMY_THEFT}).decode()
 
 COUNT_ROLES_PAGE = 5
 

@@ -34,7 +34,7 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
 
         view = InstallEmojiView(channel.guild.id, channel.id)
 
-        await interaction.message.edit(view=view)
+        await interaction.response.edit_message(view=view)
 
 
 class InstallEmojiView(DefaultSettingsView):
@@ -63,7 +63,7 @@ class InstallEmojiView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = reactions.AutoReactions(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Install emoji',
                         style=nextcord.ButtonStyle.blurple,

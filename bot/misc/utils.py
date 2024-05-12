@@ -1,7 +1,4 @@
 from __future__ import annotations
-import asyncio
-from collections import namedtuple
-
 import nextcord
 from nextcord.ext import commands
 
@@ -139,6 +136,10 @@ def lord_format(
 
 
 def translate_flags(text: str) -> dict:
+    if not text:
+        return {}
+    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-\s]+)?(\s|$)){1,}", text):
+        raise TypeError("Not a flag.")
     return dict(map(
         lambda item: (item[0], item[1]) if item[1] else (item[0], True),
         regex.findall(
@@ -151,15 +152,8 @@ def translate_flags(text: str) -> dict:
 async def clone_message(message: nextcord.Message) -> dict:
     content = message.content
     embeds = message.embeds
-    files = []
-    for attach in message.attachments:
-        filebytes = await attach.read()
-        files.append(nextcord.File(
-            fp=filebytes,
-            filename=attach.filename,
-            description=attach.description,
-            spoiler=attach.is_spoiler()
-        ))
+    files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
+                                   for attach in message.attachments])
 
     return {
         "content": content,
@@ -236,9 +230,20 @@ def clamp(val: Union[int, float],
     return min(maxv, max(minv, val))
 
 
-def is_emoji(text: str) -> bool:
+def is_default_emoji(text: str) -> bool:
     text = text.strip()
-    return any((regex.fullmatch(r'<a?:.+?:\d{18,}>', text), text in emoji.EMOJI_DATA))
+    return text in emoji.EMOJI_DATA
+
+
+def is_custom_emoji(text: str) -> bool:
+    text = text.strip()
+    if regex.fullmatch(r'<a?:.+?:\d{18,}>', text):
+        return True
+    return False
+
+
+def is_emoji(text: str) -> bool:
+    return is_default_emoji(text) or is_custom_emoji(text)
 
 
 def randquan(quan: int) -> int:
@@ -441,6 +446,10 @@ def get_award(number):
     return award
 
 
+def randfloat(a: float | int, b: float | int, scope: int = 14) -> float:
+    return random.randint(int(a*10**scope), int(b*10**scope)) / 10**scope
+
+
 async def generate_message(content: str) -> dict:
     content = str(content)
     message = {}
@@ -566,7 +575,7 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
 
     profile_image = await load_image_async(
         member.display_avatar.with_size(128).url)
-    profile = Editor(profile_image).resize((150, 150)).circle_image()\
+    profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     nunito = Font("assets/Nunito-ExtraBold.ttf", 40)
     nunito_small = Font("assets/Nunito-Black.ttf", 25)
@@ -586,7 +595,7 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
     background.text(
         (400, 320),
         member.display_name,
-        color=0xff0000,
+        color="#ff00a6",
         font=nunito_small,
         align="center"
     )

@@ -36,7 +36,7 @@ class VolumeModal(nextcord.ui.Modal):
 
         view = VolumeView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class VolumeView(DefaultSettingsView):
@@ -58,7 +58,7 @@ class VolumeView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = music.MusicView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
     async def edit(self,

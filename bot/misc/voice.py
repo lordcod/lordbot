@@ -1,9 +1,9 @@
 import nextcord
 
-from yandex_music_api.datas import Track
+from yandex_music_api.track import Track
 
 import random
-from typing import Union, Optional, Dict
+from typing import List, Union, Optional, Dict
 
 ffmpeg_path = "ffmpeg"
 initally_num = 10
@@ -32,29 +32,29 @@ class Queue:
         val = random.randint(1000000, 9999999)
         return val
 
-    def register_guild(self, guild_id):
+    def register_guild(self, guild_id: int):
         self.data.setdefault(guild_id, [])
 
-    def get_all(self, guild_id):
+    def get_all(self, guild_id: int):
         self.register_guild(guild_id)
 
         return self.data[guild_id]
 
-    def add(self, guild_id, track: Track) -> int:
+    def add(self, guild_id: int, track: Track) -> int:
         self.register_guild(guild_id)
 
         self.data[guild_id].append(track)
 
         return track.id
 
-    def remove(self, guild_id, token: Optional[int] = None) -> None:
+    def remove(self, guild_id: int, token: Optional[int] = None) -> None:
         self.register_guild(guild_id)
         data = self.get(guild_id)
 
         if data is not None and (token is None or data.id == token):
             self.data[guild_id].pop(0)
 
-    def clear(self, guild_id) -> None:
+    def clear(self, guild_id: int) -> None:
         self.data[guild_id] = []
 
     def get(self, guild_id) -> Optional[Track]:
@@ -64,14 +64,14 @@ class Queue:
         except IndexError:
             return None
 
-    def index(self, guild_id, index) -> Optional[Track]:
+    def index(self, guild_id: int, index: int) -> Optional[Track]:
         self.register_guild(guild_id)
         try:
             return self.data[guild_id][index]
         except IndexError:
             return None
 
-    def set(self, guild_id, tracks) -> None:
+    def set(self, guild_id: int, tracks: List[Track]) -> None:
         self.register_guild(guild_id)
         self.data[guild_id] = tracks
 
@@ -158,4 +158,4 @@ class MusicPlayer:
 
 
 current_players: Dict[int, MusicPlayer] = {}
-queue = Queue()
+queue: Queue = Queue()
