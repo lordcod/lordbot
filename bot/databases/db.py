@@ -34,6 +34,7 @@ class GuildsDB(Table):
     greeting_message = Colum(data_type=PostType.JSON, default="{}")
     command_permissions = Colum(data_type=PostType.JSON, default="{}")
     ideas = Colum(data_type=PostType.JSON, default="{}")
+    logs = Colum(data_type=PostType.JSON, default="{}")
 
 
 class EconomicDB(Table):

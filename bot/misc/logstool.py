@@ -1,6 +1,7 @@
 import asyncio
 from dataclasses import dataclass
 import datetime
+from enum import IntEnum
 import functools
 from typing import Dict, List, Optional, Self, Tuple
 import nextcord
@@ -15,6 +16,14 @@ class Message:
     content: Optional[str] = None
     embed: Optional[nextcord.Embed] = None
     files: Optional[List[nextcord.File]] = None
+
+
+class LogType(IntEnum):
+    delete_message = 0
+    edit_message = 1
+    punishment = 2
+    economy = 3
+    ideas = 4
 
 
 def embed_to_text(embed: nextcord.Embed) -> str:
@@ -61,35 +70,28 @@ async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: i
 class Logs:
     def __init__(self, guild: nextcord.Guild):
         self.guild = guild
-        self.guild_data = {0: 1229044270996918272,
-                           1: 1229044270996918272,
-                           2: 1229044270996918272,
-                           3: 1229044270996918272,
-                           4: 1229044270996918272,
-                           5: 1229044270996918272}
+        self.gdb = GuildDateBases(guild.id)
+        self.guild_data: Dict[int, List[LogType]] = self.gdb.get('logs')
 
     @staticmethod
     def on_logs(log_type: int):
         def predicte(coro):
             @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
-                if log_type not in self.guild_data:
-                    return
+                for channel_id, logs_types in self.guild_data.items():
+                    if log_type not in logs_types:
+                        continue
 
-                channel_id = self.guild_data[log_type]
-                channel = self.guild.get_channel(channel_id)
-
-                mes: Message = await coro(self, *args, **kwargs)
-
-                if mes is None:
-                    return
-
-                await channel.send(content=mes.content, embed=mes.embed, files=mes.files)
+                    channel = self.guild.get_channel(channel_id)
+                    mes: Message = await coro(self, *args, **kwargs)
+                    if mes is None:
+                        return
+                    await channel.send(content=mes.content, embed=mes.embed, files=mes.files)
 
             return wrapped
         return predicte
 
-    @on_logs(0)
+    @on_logs(LogType.delete_message)
     async def delete_message(self, message: nextcord.Message, moderator: Optional[nextcord.Member] = None):
         if message.author.bot:
             return
@@ -121,7 +123,7 @@ class Logs:
             files = None
         return Message(embed=embed, files=files)
 
-    @on_logs(1)
+    @on_logs(LogType.edit_message)
     async def edit_message(self, before: nextcord.Message, after: nextcord.Message):
         if after.author.bot:
             return
@@ -146,7 +148,7 @@ class Logs:
         )
         return Message(embed=embed)
 
-    @on_logs(2)
+    @on_logs(LogType.punishment)
     async def timeout(
             self,
             member: nextcord.Member,
@@ -166,7 +168,7 @@ class Logs:
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(2)
+    @on_logs(LogType.punishment)
     async def untimeout(self,
                         member: nextcord.Member,
                         duration: Optional[int] = None,
@@ -186,7 +188,7 @@ class Logs:
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(2)
+    @on_logs(LogType.punishment)
     async def kick(self, guild: nextcord.Guild, user: nextcord.User,
                    moderator: nextcord.Member, reason: Optional[str]):
         embed = nextcord.Embed(
@@ -201,7 +203,7 @@ class Logs:
         embed.set_thumbnail(user.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(2)
+    @on_logs(LogType.punishment)
     async def ban(self, guild: nextcord.Guild, user: nextcord.User,
                   moderator: nextcord.Member, reason: Optional[str]):
         embed = nextcord.Embed(
@@ -216,7 +218,7 @@ class Logs:
         embed.set_thumbnail(user.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(2)
+    @on_logs(LogType.punishment)
     async def unban(self, guild: nextcord.Guild, user: nextcord.User,
                     moderator: nextcord.Member, reason: Optional[str]):
         embed = nextcord.Embed(
@@ -231,7 +233,7 @@ class Logs:
         embed.set_thumbnail(user.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(3)
+    @on_logs(LogType.economy)
     async def add_currency(self, member: nextcord.Member, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
         gdb = GuildDateBases(member.guild.id)
         economy_settings = gdb.get('economic_settings')
@@ -251,7 +253,7 @@ class Logs:
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(3)
+    @on_logs(LogType.economy)
     async def remove_currency(self, member: nextcord.Member, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
         gdb = GuildDateBases(member.guild.id)
         economy_settings = gdb.get('economic_settings')
@@ -271,7 +273,7 @@ class Logs:
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(4)
+    @on_logs(LogType.ideas)
     async def create_idea(self, member: nextcord.Member, idea: str, image: Optional[str] = None):
         embed = nextcord.Embed(
             title='Created new idea',
@@ -285,7 +287,7 @@ class Logs:
         embed.set_image(image)
         return Message(embed=embed)
 
-    @on_logs(4)
+    @on_logs(LogType.ideas)
     async def approve_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, reason: Optional[str] = None, image: Optional[str] = None):
         embed = nextcord.Embed(
             title='Approved idea',
@@ -304,7 +306,7 @@ class Logs:
                          icon_url=moderator.display_avatar)
         return Message(embed=embed)
 
-    @on_logs(4)
+    @on_logs(LogType.ideas)
     async def deny_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, image: Optional[str] = None):
         embed = nextcord.Embed(
             title='Denied idea',

@@ -1,8 +1,14 @@
+from __future__ import annotations
 from typing import (
+    TYPE_CHECKING,
     Optional,
     List,
-    TypedDict
+    TypedDict,
+    Dict
 )
+
+if TYPE_CHECKING:
+    from bot.misc.logstool import LogType
 
 IdeasPayload = TypedDict(
     'IdeasPayload',
@@ -19,3 +25,6 @@ IdeasPayload = TypedDict(
         "moderation-role-ids": List[int]
     }
 )
+
+
+LogsPayload = Dict[int, List['LogType']]
