@@ -154,7 +154,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    # from_folder("./bot/languages/localization")
+    from_folder("./bot/languages/localization")
 
     # Translation dict
     # for lang in default_languages:
@@ -167,14 +167,14 @@ if __name__ == "__main__":
     #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    data = translation_with_languages(
-        "en", "<time>", default_languages)
-    print(data)
+    # data = translation_with_languages(
+    #     "en", "<time>", default_languages)
+    # print(data)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(
-    #     "delcat.accept.title", translation_with_languages("en", " #{self.category.name} Category Deleted", default_languages))
+    #     "settings.module-name.role-reactions", translation_with_languages("en", "Reaction Roles", default_languages))
 
     # To any locales format
     # data = to_any_locales()
@@ -183,6 +183,6 @@ if __name__ == "__main__":
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    to_i18n_translation(_parse_json(_load_file("test_loc.json")))
+    # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    to_folder("./bot/languages/localization")
+    # to_folder("./bot/languages/localization")

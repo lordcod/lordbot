@@ -1,4 +1,6 @@
+import math
 import re
+from typing import Iterable
 import nextcord
 from nextcord.ext import commands
 
@@ -6,16 +8,11 @@ from bot.languages import help as help_info, i18n
 from bot.languages.help import get_command
 from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
+from bot.misc.utils import FissionIterator
 from bot.views.help import HelpView
 
 
 REGEXP_COMMAND_NAME = re.compile(r'([ _\-\.a-zA-Z0-9]+)')
-
-
-def bool_to_str_by_command(value: bool) -> str:
-    if value:
-        return "1"
-    return "0"
 
 
 def get_disable_command_value(
@@ -23,14 +20,30 @@ def get_disable_command_value(
     command: help_info.CommandOption
 ) -> str:
     return i18n.t(locale,
-                  f"help.command-embed.connection_disabled.{str(int(command.get('allowed_disabled')))}")
+                  f"help.command-embed.connection_disabled.{int(command.get('allowed_disabled'))}")
 
 
 def get_using(
     locale: str,
     command: help_info.CommandOption
 ) -> str:
-    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(command.get('arguments')) if command.get('arguments') else ''}")
+    _arguments = command.get('arguments')
+    arguments = []
+    for arg in _arguments:
+        if isinstance(arg, dict):
+            arguments.append(arg.get(locale))
+        else:
+            arguments.append(arg)
+    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(arguments) if arguments else ''}")
+
+
+def divise_list(iterable: Iterable, count: int) -> list:
+    iterable = list(iterable)
+    ret = []
+    score = math.ceil(len(iterable)/count)
+    for i in range(count):
+        ret.append(iterable[score*i:score*(i+1)])
+    return ret
 
 
 class Help(commands.Cog):
@@ -113,7 +126,21 @@ class Help(commands.Cog):
                     inline=False
                 )
 
-        await ctx.send(embed=embed)
+        if reactions := command_data.get('reactions'):
+            react_embed = nextcord.Embed(
+                title="Reactions",
+                color=color
+            )
+            for num, reacts in enumerate(divise_list(reactions.items(), count=3), start=1):
+                react_embed.add_field(
+                    name=num,
+                    value='\n'.join([
+                        f"{name} - {react.get(locale)}" for name, react in reacts])
+                )
+
+            await ctx.send(embeds=[embed, react_embed])
+        else:
+            await ctx.send(embed=embed)
 
     async def generate_not_found(self, ctx: commands.Context):
         locale = self.gdb.get('language')

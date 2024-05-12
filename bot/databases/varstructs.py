@@ -1,9 +1,17 @@
+from __future__ import annotations
 from typing import (
+    TYPE_CHECKING,
     Optional,
     List,
+    TypedDict,
+    Dict,
     Tuple,
-    TypedDict
+    TypedDict,
+    Dict
 )
+
+if TYPE_CHECKING:
+    from bot.misc.logstool import LogType
 
 
 class GiveawayData(TypedDict):
@@ -49,3 +57,14 @@ class RoleShopPayload(TypedDict):
     name: Optional[str]
     description: Optional[str]
     using_limit: Optional[int]
+
+
+LogsPayload = Dict[int, List['LogType']]
+
+
+class ReactionRoleItemPayload(TypedDict):
+    reactions: Dict[str, int]
+    channel_id: int
+
+
+ReactionRolePayload = Dict[int, ReactionRoleItemPayload]

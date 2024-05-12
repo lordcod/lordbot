@@ -37,7 +37,7 @@ class DropDown(nextcord.ui.Select):
 
         view = Languages(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class Languages(DefaultSettingsView):
@@ -68,4 +68,4 @@ class Languages(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

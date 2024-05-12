@@ -64,4 +64,4 @@ class ModalBuilder(nextcord.ui.Modal):
         gdb.set('reactions', reacts)
 
         view = reactions.AutoReactions(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

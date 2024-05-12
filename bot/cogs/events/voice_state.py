@@ -13,7 +13,7 @@ SCORE_STATE_DB = localdb.get_table('score')
 TEMP_VOICE_STATE_DB = {}
 
 
-class voice_state_event(commands.Cog):
+class VoiceStateEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -50,5 +50,5 @@ class voice_state_event(commands.Cog):
             0.5 * multiplier / math.sqrt(user_level)
 
 
-def setup(bot):
-    bot.add_cog(voice_state_event(bot))
+def setup(bot: LordBot):
+    bot.add_cog(VoiceStateEvent(bot))

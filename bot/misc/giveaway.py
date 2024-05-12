@@ -1,34 +1,46 @@
 import asyncio
 import nextcord
-from typing import List, Coroutine, Any
+from typing import Coroutine, Any, Dict
 from bot.databases import localdb
+from bot.databases.handlers.economyHD import EconomyMemberDB
 from bot.databases.varstructs import GiveawayData
 from bot.databases import GuildDateBases
 from bot.misc import utils
 from bot.views import giveaway as views_giveaway
 
+VOICE_STATE_DB = localdb.get_table('voice_state')
+SCORE_STATE_DB = localdb.get_table('score')
+
 
 class GiveawayTypesChecker:
-    def __init__(self, types: List[int]) -> None:
+    def __init__(self, types: Dict[int, Any], giveaway: 'GiveawayData', member: nextcord.Member) -> None:
+        self.member = member
+        self.giveaway_data = giveaway
         self.types = types
 
-    def check_count_invites(): ...
+    def check_count_invites(self):
+        return True
 
-    def check_date_join(): ...
+    def check_date_join(self):
+        return self.member.joined_at.timestamp() >= self.types[1]
 
-    def check_min_balance(): ...
+    def check_min_balance(self):
+        emdb = EconomyMemberDB(self.member.guild.id, self.member.id)
+        balance = emdb.get('balance')
+        bank = emdb.get('bank')
+        return balance + bank >= self.types[2]
 
-    def check_guild_connect(): ...
+    def check_guild_connect(self):
+        ofter_guild = self.member._state._get_guild(self.types[3])
+        return True if ofter_guild.get_member(self.member.id) else False
 
-    def check_voice_connect(): ...
+    def check_voice_connect(self):
+        return True if self.member.voice else False
 
-    def check_voice_connect_latest(): ...
+    def check_min_voice_time(self):
+        return VOICE_STATE_DB.get(self.member.id) >= self.types[5]
 
-    def check_min_voice_time(): ...
-
-    def check_min_voice_time_gap(): ...
-
-    def check_min_level(): ...
+    def check_min_level(self): ...
 
     types_function = {
         0: check_count_invites,
@@ -36,10 +48,8 @@ class GiveawayTypesChecker:
         2: check_min_balance,
         3: check_guild_connect,
         4: check_voice_connect,
-        5: check_voice_connect_latest,
-        6: check_min_voice_time,
-        7: check_min_voice_time_gap,
-        8: check_min_level
+        5: check_min_voice_time,
+        6: check_min_level
     }
 
 

@@ -48,7 +48,7 @@ class DropDown(nextcord.ui.Select):
         catalog = self.values[0]
         view = distrubuters.get(catalog)(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class IdeasView(DefaultSettingsView):
@@ -119,7 +119,7 @@ class IdeasView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Enabled', style=nextcord.ButtonStyle.blurple)
     async def enabled(self,
@@ -163,7 +163,7 @@ class IdeasView(DefaultSettingsView):
         gdb.set('ideas', ideas)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Disabled', style=nextcord.ButtonStyle.red)
     async def disabled(self,
@@ -189,7 +189,7 @@ class IdeasView(DefaultSettingsView):
         gdb.set('ideas', ideas)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label="Allow image")
     async def allow_image(self,
@@ -201,7 +201,7 @@ class IdeasView(DefaultSettingsView):
         gdb.set('ideas', ideas)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label="Thread delete")
     async def thread_delete(self,
@@ -213,4 +213,4 @@ class IdeasView(DefaultSettingsView):
         gdb.set('ideas', ideas)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

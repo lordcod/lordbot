@@ -17,7 +17,10 @@ class ReadyEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-
+        try:
+            await asyncio.wait_for(self.bot.__with_ready__, timeout=30)
+        except asyncio.TimeoutError:
+            await self.bot.close()
         await self.process_temp_roles()
         await self.process_temp_bans()
 

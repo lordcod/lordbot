@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import random
 import time
 import nextcord
@@ -6,6 +7,7 @@ import math
 from nextcord.ext import commands
 
 from bot.databases import GuildDateBases, localdb
+from bot.misc import logstool
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import is_emoji
 from bot.languages import i18n
@@ -21,9 +23,25 @@ BETWEEN_MESSAGES_TIME = {}
 LAST_MESSAGES_USER = {}
 
 
+_pat_current_delay = {}
+
+
+def create_delay_at_pat(delay: float):
+    def _create_delay_at(func):
+        @functools.wraps(func)
+        async def wrapped(self, message: nextcord.Message):
+            if _pat_current_delay.get(message.guild.id, 0) > time.time():
+                return
+            _pat_current_delay[message.guild.id] = time.time()+delay
+            return await func(self, message)
+        return wrapped
+    return _create_delay_at
+
+
 class MessageEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+        self.bot
         super().__init__()
 
     @commands.Cog.listener()
@@ -35,9 +53,10 @@ class MessageEvent(commands.Cog):
             self.process_mention(message),
             self.give_score(message),
             self.give_message_score(message),
-            self.process_auto_translation(message)
+            # self.process_auto_translation(message)
         )
 
+    @create_delay_at_pat(15)
     async def process_auto_translation(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
         auto_translation = gdb.get('auto_translate')
@@ -57,28 +76,28 @@ class MessageEvent(commands.Cog):
                                                           avatar=self.bot.user.display_avatar)
 
         view = AutoTranslateView()
-        files = [await attach.to_file(use_cached=True, spoiler=attach.is_spoiler()) for attach in message.attachments]
-        await bot_wh.send(
-            content=message.content,
-            files=files,
-            view=view,
-            username=message.author.display_name,
-            avatar_url=message.author.display_avatar.url
+        files = await asyncio.gather(*[attach.to_file(use_cached=True, spoiler=attach.is_spoiler()) for attach in message.attachments]) if message.attachments else None
+        await asyncio.gather(
+            bot_wh.send(
+                content=message.content,
+                files=files,
+                view=view,
+                username=message.author.display_name,
+                avatar_url=message.author.display_avatar.url
+            ),
+            message.delete()
         )
-        await message.delete()
 
     async def add_reactions(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
 
-        if (reactions := gdb.get('reactions')) and (
+        if (reactions := gdb.get('reactions', {})) and (
                 data_reactions := reactions.get(message.channel.id)):
             for reat in data_reactions:
                 if not is_emoji(reat):
                     continue
-                try:
-                    asyncio.create_task(message.add_reaction(reat))
-                except nextcord.HTTPException:
-                    break
+                asyncio.create_task(message.add_reaction(
+                    reat), name=f'auto-reaction:{message.guild.id}:{message.channel.id}:{message.id}')
 
     async def process_mention(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
@@ -121,6 +140,34 @@ class MessageEvent(commands.Cog):
         SCORE_STATE_DB[message.author.id] += random.randint(
             0, 10) * multiplier / math.sqrt(user_level)
         BETWEEN_MESSAGES_TIME[message.author.id] = time.time() + 10
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before: nextcord.Message, after: nextcord.Message):
+        await logstool.Logs(before.guild).edit_message(before, after)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message: nextcord.Message):
+        await logstool.pre_message_delete_log(message)
+
+    @commands.Cog.listener()
+    async def on_guild_audit_log_entry_create(self, entry: nextcord.AuditLogEntry):
+        if entry.action != nextcord.AuditLogAction.message_delete:
+            return
+        await logstool.set_message_delete_audit_log(entry.user, entry.extra.channel.id, entry.target.id)
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before: nextcord.Message, after: nextcord.Message):
+        await logstool.Logs(before.guild).edit_message(before, after)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message: nextcord.Message):
+        await logstool.pre_message_delete_log(message)
+
+    @commands.Cog.listener()
+    async def on_guild_audit_log_entry_create(self, entry: nextcord.AuditLogEntry):
+        if entry.action != nextcord.AuditLogAction.message_delete:
+            return
+        await logstool.set_message_delete_audit_log(entry.user, entry.extra.channel.id, entry.target.id)
 
 
 def setup(bot):

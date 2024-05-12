@@ -1,9 +1,7 @@
 import nextcord
-from nextcord import ui
 
 
-class Menus(ui.View):
-
+class Menus(nextcord.ui.View):
     def __init__(self, value: list, timeout: float | None = None):
         super().__init__(timeout=timeout)
         self.len = len(value)
@@ -66,7 +64,7 @@ class Menus(ui.View):
         self.value.remove(val)
         self.len -= 1
 
-    @ui.button(emoji='⏮', style=nextcord.ButtonStyle.grey, disabled=True)
+    @nextcord.ui.button(emoji='⏮', style=nextcord.ButtonStyle.grey, disabled=True)
     async def button_previous(self,
                               button: nextcord.ui.Button, interaction:
                                   nextcord.Interaction):
@@ -75,7 +73,7 @@ class Menus(ui.View):
         await self.previous(button, interaction)
         await self.callback(button, interaction)
 
-    @ui.button(emoji='◀️', style=nextcord.ButtonStyle.grey, disabled=True)
+    @nextcord.ui.button(emoji='◀️', style=nextcord.ButtonStyle.grey, disabled=True)
     async def button_backward(self,
                               button: nextcord.ui.Button,
                               interaction: nextcord.Interaction):
@@ -84,7 +82,7 @@ class Menus(ui.View):
         await self.backward(button, interaction)
         await self.callback(button, interaction)
 
-    @ui.button(emoji='▶', style=nextcord.ButtonStyle.grey)
+    @nextcord.ui.button(emoji='▶', style=nextcord.ButtonStyle.grey)
     async def button_forward(self,
                              button: nextcord.ui.Button,
                              interaction: nextcord.Interaction):
@@ -93,7 +91,7 @@ class Menus(ui.View):
         await self.forward(button, interaction)
         await self.callback(button, interaction)
 
-    @ui.button(emoji='⏭', style=nextcord.ButtonStyle.grey)
+    @nextcord.ui.button(emoji='⏭', style=nextcord.ButtonStyle.grey)
     async def button_next(self,
                           button: nextcord.ui.Button,
                           interaction: nextcord.Interaction):

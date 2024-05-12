@@ -139,7 +139,8 @@
             "command-permission": "Ustawienia poleceń",
             "ideas": "Pomysły",
             "welcomer": "Witamy nowych członków",
-            "auto-roles": "Role automatyczne"
+            "auto-roles": "Role automatyczne",
+            "logs": "Dzienniki"
         },
         "button": {
             "back": "Z powrotem",
@@ -271,19 +272,6 @@
                 "description": "Role, które mogą kontrolować muzykę.",
                 "value": "Role DJ: {roles}"
             }
-        }
-    },
-    "delcat": {
-        "issue": {
-            "title": "Jesteś pewny?",
-            "description": "To na stałe usunie kategorię {category} i każdy kanał w niej."
-        },
-        "accept": {
-            "title": "#{category} usunięta kategoria",
-            "description": "A także zdalnie {count} kanały, które były w kategorii"
-        },
-        "cancel": {
-            "title": "Usuwanie kategorii anulowane"
         }
     }
 }

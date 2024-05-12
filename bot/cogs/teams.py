@@ -1,21 +1,20 @@
 import nextcord
 from nextcord.ext import commands
+
 from bot.misc.lordbot import LordBot
-
 from bot.resources import check
-
-import os
+from bot.resources.ether import Emoji
 
 
 class Teams(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
-    @commands.command(name="shutdown")
+    @commands.command()
     @check.team_only()
     async def shutdown(self, ctx: commands.Context):
         await ctx.send("The bot has activated the completion process!")
-        os._exit(1)
+        await self.bot.close()
 
     @commands.command()
     @commands.guild_only()
@@ -64,6 +63,17 @@ class Teams(commands.Cog):
         name_exts = [ext.__name__ for ext in exts.values()]
         string = "\n".join(name_exts)
         await ctx.send(string)
+
+    @commands.command()
+    @check.team_only()
+    async def sql_execute(
+        self,
+        ctx: commands.Context,
+        *,
+        query: str
+    ):
+        self.bot.engine.execute(query)
+        await ctx.message.add_reaction(Emoji.success)
 
 
 def setup(bot):

@@ -106,6 +106,6 @@ class DataBase:
         with self.connection.cursor() as cursor:
             cursor.execute(query, vars)
             data = cursor.fetchone()
-        if 0 >= len(data):
+        if not data:
             return None
         return data[0]

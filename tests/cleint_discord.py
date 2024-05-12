@@ -2,16 +2,61 @@ import json
 import threading
 import asyncio
 import aiohttp
+import openai
 import requests
 import time
 import websocket
 
 
 token = "NjM2ODI0OTk4MTIzNzk4NTMx.GcTtlO.noEQzXaHYNnnNa4xmvMwPTwczqXRCZvVSBz-SI"
+BASE_API = "https://discord.com/api/v9"
+
+
+async def hearbeat_send(ws, heartbeat_interval):
+    while True:
+        try:
+            print("Hearbeat send!", "Next step", heartbeat_interval/1000)
+            await ws.send_json({
+                "op": 1,
+                "d": None
+            })
+            time.sleep(heartbeat_interval/1000)
+        except Exception as err:
+            print('Hearbeat ERROR', err)
+
+
+async def main():
+    async with aiohttp.ClientSession() as session:
+        ws = await session.ws_connect("wss://gateway.discord.gg/?v=9&encoding=json")
+        RECV = (await ws.receive()).json()
+        heartbeat_interval = RECV['d']['heartbeat_interval']
+        await ws.send_json({"op": 2, "d": {"token": token, "properties": {
+            "$os": "windows", "$browser": "Discord", "$device": "desktop"}}})
+        _heartbeat_task = asyncio.create_task(
+            hearbeat_send(ws, heartbeat_interval))
+        print('Next step')
+        while True:
+            print('Recv')
+            try:
+                data = (await ws.receive()).json()
+                if data['t'] == "MESSAGE_CREATE" and data['d']['channel_id'] == "1179069504651796562":
+                    print('Send message!')
+            except KeyboardInterrupt:
+                print('KI')
+                _heartbeat_task.cancel()
+                break
+            except Exception as err:
+                pass
+        await ws.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+exit()
 
 ws = websocket.WebSocket()
 ws.connect("wss://gateway.discord.gg/?v=9&encoding=json")
-
 
 RECV = json.loads(ws.recv())
 enabled = True
@@ -27,6 +72,12 @@ def add_reaction(channel_id: int, message_id: int, reaction: str):
     url = f"{BASE_API}/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me"
     headers = {"Authorization": token}
     requests.put(url=url, headers=headers)
+
+
+def typing(channel_id: int):
+    url = f"{BASE_API}/channels/{channel_id}/typing"
+    headers = {"Authorization": token}
+    requests.post(url=url, headers=headers)
 
 
 def hearbeat_send():
@@ -51,7 +102,7 @@ while True:
         data = json.loads(ws.recv())
         if data['t'] == "MESSAGE_CREATE" and data['d']['channel_id'] == "1179069504651796562":
             add_reaction(
-                data['d']['channel_id'], data['d']['id'], "😣")
+                data['d']['channel_id'], data['d']['id'], "💀")
     except KeyboardInterrupt:
         print('KI')
         enabled = False
@@ -62,12 +113,3 @@ while True:
         pass
 
 ws.close()
-
-
-async def main():
-    session = aiohttp.ClientSession()
-    session.ws_connect
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

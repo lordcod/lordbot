@@ -48,6 +48,7 @@ class Basic(commands.Cog):
                 f"Discord latency: {discord_latency_ms}ms\n"
                 f"Databases latency: {databases_latency_ms}ms\n"
                 f"Command processing latency: {command_latency_ms}ms\n"
+                f"Shard id: 1"
             ),
             color=color
         )
@@ -55,7 +56,7 @@ class Basic(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_guild=True)
     async def giveaway(self, ctx: commands.Context):
         view = GiveawaySettingsView(ctx.author, ctx.guild.id)
         await ctx.send(embed=view.embed, view=view)
@@ -145,7 +146,7 @@ class Basic(commands.Cog):
 
         view = nextcord.ui.View(timeout=None)
         view.add_item(nextcord.ui.Button(
-            label="Activiti", emoji=Emoji.roketa, url=inv.url))
+            label="Activiti", emoji=Emoji.rocket, url=inv.url))
 
         embed = nextcord.Embed(
             title=i18n.t(lang, 'activiti.embed.title'),

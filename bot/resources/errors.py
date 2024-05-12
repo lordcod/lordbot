@@ -65,7 +65,7 @@ class CallbackCommandError:
                 await item()
                 break
         else:
-            await self.OfterError()
+            raise self.error
 
     @attach_exception(commands.MissingPermissions)
     async def MissingPermissions(self):
