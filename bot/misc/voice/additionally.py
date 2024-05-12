@@ -40,7 +40,7 @@ class Queue:
 
         return self.data[guild_id]
 
-    def add(self, guild_id, track: Track) -> int:
+    def add(self, guild_id, track) -> int:
         self.register_guild(guild_id)
 
         self.data[guild_id].append(track)
@@ -57,7 +57,7 @@ class Queue:
     def clear(self, guild_id) -> None:
         self.data[guild_id] = []
 
-    def get(self, guild_id) -> Optional[Track]:
+    def get(self, guild_id):
         self.register_guild(guild_id)
         try:
             return self.data[guild_id][0]

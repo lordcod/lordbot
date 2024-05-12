@@ -58,6 +58,11 @@ class SetDropdown(nextcord.ui.Select):
                 value='ThreadMessage'
             ),
             nextcord.SelectOption(
+                label=i18n.t(locale, 'settings.module-name.logs'),
+                emoji=Emoji.frame_person,
+                value='Logs'
+            ),
+            nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.ideas'),
                 emoji=Emoji.lightbulb,
                 value='Ideas'
