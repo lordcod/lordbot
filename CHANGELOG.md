@@ -1,5 +1,26 @@
 # 📑 Change Log
 
+## v0.4.1-beta
+
+12.05.2024
+
+### What's Changed
+- Added new types of logs:
+  - Actions with deleted messages: All deleted messages are now recorded, providing transparency regarding deleted data.
+  - Edited messages: You can now view the history of changes to messages, which helps to control the integrity of communication.
+  - Penalties applied for violations: A system of penalties for violations of the rules has been introduced, ensuring order and fairness in the system.
+  - Transactions or changes in the economy: Added the ability to track all financial transactions and changes in the economy of the system.
+  - Considered proposals and ideas: Now all proposed ideas and proposals are being recorded, which contributes to the development of the idea and improvement of the system.
+
+- The following changes have been made to the functionality:
+  - Reaction roles: Added the ability to assign roles to users based on their reactions, which increases participation in the community.
+  - Reaction Commands: Users can now use reaction commands to perform certain actions, improving interaction.
+  - Work in the economy: A new economic system has been introduced that allows users to carry out various financial transactions.
+  - Games in economics: Added the ability to play various games using the game currency from the system's economy.
+  - New settings: Users have access to new settings that allow them to manage various aspects of the system.
+  - Theft: A theft feature has been introduced that allows users to interact with the economic system through theft.
+  - New database system: The database system has been updated to provide more efficient and reliable data storage.
+
 
 ## v0.3.1-beta
 

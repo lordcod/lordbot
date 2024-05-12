@@ -2,7 +2,7 @@ import logging
 from bot import main
 
 _log = logging.basicConfig(
-    filename="botlog.txt",
+    filename="bot.log",
     level=logging.DEBUG,
     filemode="w",
     format="%(asctime)s %(levelname)s %(message)s"

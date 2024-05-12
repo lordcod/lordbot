@@ -4,6 +4,8 @@ from nextcord.ext import commands
 
 
 import inspect
+import nextcord.types
+import nextcord.types.message
 import regex
 import string
 import random

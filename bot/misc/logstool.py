@@ -78,14 +78,15 @@ class Logs:
         def predicte(coro):
             @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
+                mes: Message = await coro(self, *args, **kwargs)
+                if mes is None:
+                    return
+
                 for channel_id, logs_types in self.guild_data.items():
                     if log_type not in logs_types:
                         continue
 
                     channel = self.guild.get_channel(channel_id)
-                    mes: Message = await coro(self, *args, **kwargs)
-                    if mes is None:
-                        return
                     await channel.send(content=mes.content, embed=mes.embed, files=mes.files)
 
             return wrapped
