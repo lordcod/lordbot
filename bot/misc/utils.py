@@ -1,10 +1,4 @@
 from __future__ import annotations
-import asyncio
-from collections import namedtuple
-import time
-from typing import Any, TypeVar, overload
-import emoji
-
 import nextcord
 from nextcord.ext import commands
 

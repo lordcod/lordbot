@@ -3,7 +3,8 @@
         "economy": "💎",
         "major": "👑",
         "voice": "🎤",
-        "moderation": "⚠"
+        "moderation": "⚠",
+        "reactions": "🎭"
     },
     "categories_name": {
         "economy": {
@@ -49,6 +50,17 @@
             "fr": "Modération",
             "pl": "Moderacja",
             "tr": "Ilımlılık"
+        },
+        "reactions": {
+            "da": "Reaktioner",
+            "de": "Reaktionen",
+            "en": "Reactions",
+            "es": "Reacciones",
+            "fr": "Réactions",
+            "id": "Reaksi",
+            "pl": "Reakcje",
+            "ru": "Реакции",
+            "tr": "Reaksiyonlar"
         }
     },
     "commands": [
@@ -1781,6 +1793,851 @@
                 "tr": "Belirli bir zamanda belirtilen metni hatırlatır"
             },
             "allowed_disabled": true
+        },
+        {
+            "name": "reactions",
+            "category": "reactions",
+            "aliases": [
+                "reacts"
+            ],
+            "arguments": [
+                {
+                    "da": "<reaktionstype>",
+                    "de": "<Reaktionstyp>",
+                    "en": "<reaction_type>",
+                    "es": "<tipo_de_reacción>",
+                    "fr": "<type_de_réaction>",
+                    "id": "<jenis_reaksi>",
+                    "pl": "<typ_reakcji>",
+                    "ru": "<тип_реакции>",
+                    "tr": "<reaksiyon_türü>"
+                },
+                {
+                    "da": "[bruger]",
+                    "de": "[Benutzer]",
+                    "en": "[user]",
+                    "es": "[usuario]",
+                    "fr": "[utilisateur]",
+                    "id": "[pengguna]",
+                    "pl": "[użytkownik]",
+                    "ru": "[пользователь]",
+                    "tr": "[kullanıcı]"
+                },
+                {
+                    "da": "[kommentar]",
+                    "de": "[Kommentar]",
+                    "en": "[comment]",
+                    "es": "[comentario]",
+                    "fr": "[commentaire]",
+                    "id": "[komentar]",
+                    "pl": "[komentarz]",
+                    "ru": "[комментарий]",
+                    "tr": "[yorum]"
+                }
+            ],
+            "examples": [
+                [
+                    "reactions kiss @lordcode",
+                    {
+                        "en": "Sends a message about the kisses of the participant @lordcode",
+                        "da": "Sender en besked om deltagerens kys @lordcode",
+                        "de": "Sendet eine Nachricht über die Küsse des Teilnehmers @lordcode",
+                        "es": "Envía un mensaje sobre los besos del participante @lordcode",
+                        "fr": "Envoie un message sur les baisers du participant @lordcode",
+                        "id": "Mengirim pesan tentang ciuman peserta @lordcode",
+                        "pl": "Wysyła wiadomość o pocałunkach uczestnika @LordCode",
+                        "ru": "Отправляет сообщение о поцелуях участника @lordcode",
+                        "tr": "Katılımcının öpücükleri hakkında bir mesaj gönderir @Lordcode"
+                    }
+                ],
+                [
+                    "reactions blush",
+                    {
+                        "en": "It will show that you are blushing",
+                        "da": "Det viser, at du rødmer",
+                        "de": "Es wird zeigen, dass Sie rot werden",
+                        "es": "Mostrará que estás sonrojando",
+                        "fr": "Cela montrera que vous rougissez",
+                        "id": "Itu akan menunjukkan bahwa Anda memerah",
+                        "pl": "Pokaże, że rumienisz",
+                        "ru": "Это покажет, что вы краснеете",
+                        "tr": "Kızardığınızı gösterecek"
+                    }
+                ]
+            ],
+            "descriptrion": {
+                "ru": "Команда 'reactions' позволяет использовать разнообразные реакции для выражения эмоций и реакций персонажей. Здесь вы найдете широкий спектр действий, от обычных улыбок и обнимашек до более экспрессивных реакций, таких как крик, укус или даже смешной чих. Используйте эти реакции, чтобы добавить глубину и живость в ваши ролевые сцены или общение с другими участниками чата. Погрузитесь в мир эмоций и выражений, доступных с помощью команды 'reactions'.",
+                "en": "The 'reactions' command allows you to use various reactions to express emotions and character responses. Here you will find a wide range of actions, from simple smiles and hugs to more expressive reactions such as shouting, biting, or even a funny sneeze. Use these reactions to add depth and liveliness to your role-playing scenes or communication with other chat participants. Immerse yourself in the world of emotions and expressions available through the 'reactions' command.",
+                "id": "Perintah 'reactions' memungkinkan Anda menggunakan berbagai reaksi untuk mengekspresikan emosi dan respons karakter. Di sini Anda akan menemukan berbagai tindakan, mulai dari senyuman dan pelukan sederhana hingga reaksi yang lebih ekspresif seperti berteriak, menggigit, atau bahkan bersin lucu. Gunakan reaksi ini untuk menambah kedalaman dan kehidupan pada adegan peran atau komunikasi dengan peserta obrolan lainnya. Merasakan dunia emosi dan ekspresi yang tersedia melalui perintah 'reactions'.",
+                "da": "Kommandoen 'reactions' giver dig mulighed for at bruge forskellige reaktioner til at udtrykke følelser og karakterrespons. Her finder du et bredt udvalg af handlinger, lige fra simple smil og kram til mere udtryksfulde reaktioner som at råbe, bide eller endda et sjovt nys. Brug disse reaktioner til at tilføje dybde og livlighed til dine rollespilsscener eller kommunikation med andre chatdeltagere. Fordyb dig i verden af følelser og udtryk, der er tilgængelige gennem kommandoen 'reactions'.",
+                "de": "Der Befehl 'reactions' ermöglicht es Ihnen, verschiedene Reaktionen zu verwenden, um Emotionen und Charakterantworten auszudrücken. Hier finden Sie eine breite Palette von Handlungen, von einfachen lächeln und umarmen bis hin zu expressiveren Reaktionen wie Schreien, Beißen oder sogar einem lustigen Niesen. Verwenden Sie diese Reaktionen, um Tiefe und Lebendigkeit in Ihre Rollenspielszenen oder Kommunikation mit anderen Chat-Teilnehmern zu bringen. Tauchen Sie ein in die Welt der Emotionen und Ausdrücke, die durch den Befehl 'reactions' verfügbar sind.",
+                "es": "El comando 'reactions' te permite usar varias reacciones para expresar emociones y respuestas de personajes. Aquí encontrarás una amplia gama de acciones, desde simples sonrisas y abrazos hasta reacciones más expresivas como gritar, morder o incluso un gracioso estornudo. Usa estas reacciones para agregar profundidad y vivacidad a tus escenas de juego de roles o comunicación con otros participantes en el chat. Sumérgete en el mundo de emociones y expresiones disponibles a través del comando 'reactions'.",
+                "fr": "La commande 'reactions' vous permet d'utiliser diverses réactions pour exprimer des émotions et des réponses de personnage. Vous trouverez ici un large éventail d'actions, des simples sourires et câlins aux réactions plus expressives telles que crier, mordre ou même un éternuement drôle. Utilisez ces réactions pour ajouter de la profondeur et de la vivacité à vos scènes de jeu de rôle ou à votre communication avec d'autres participants au chat. Plongez dans le monde des émotions et des expressions disponibles grâce à la commande 'reactions'.",
+                "pl": "Komenda 'reactions' pozwala na korzystanie z różnych reakcji, aby wyrazić emocje i odpowiedzi postaci. Tutaj znajdziesz szeroki zakres działań, począwszy od prostych uśmiechów i przytuleń, a skończywszy na bardziej ekspresyjnych reakcjach, takich jak krzyk, gryzienie, czy nawet śmieszne kichnięcie. Użyj tych reakcji, aby dodać głębi i żywotności do swoich scen grania w role lub komunikacji z innymi uczestnikami czatu. Zanurz się w świat emocji i wyrażeń dostępnych za pomocą komendy 'reactions'.",
+                "tr": "'Reactions' komutu, duyguları ve karakter tepkilerini ifade etmek için çeşitli tepkileri kullanmanıza olanak tanır. Burada basit gülümsemelerden ve kucaklamalardan daha ifade edici tepkilere kadar geniş bir eylem yelpazesi bulacaksınız, çığlık atma, ısırma veya hatta komik bir hapşırma gibi. Bu tepkileri, rol yapma sahnelerinize veya diğer sohbet katılımcılarıyla iletişiminize derinlik ve canlılık katmak için kullanın. 'Reactions' komutu aracılığıyla kullanılabilen duygular ve ifadeler dünyasına dalın."
+            },
+            "brief_descriptrion": {
+                "ru": "Команда 'reactions' - широкий выбор эмоциональных реакций для обогащения вашего общения. Выразите свои чувства от радости до гнева с помощью разнообразных жестов и выражений лица.",
+                "en": "The 'reactions' command offers a wide range of emotional reactions to enrich your communication. Express your feelings from joy to anger with various gestures and facial expressions.",
+                "id": "Perintah 'reactions' menawarkan beragam reaksi emosional untuk memperkaya komunikasi Anda. Ungkapkan perasaan Anda mulai dari kegembiraan hingga kemarahan dengan berbagai gerakan dan ekspresi wajah.",
+                "da": "Kommandoen 'reactions' tilbyder et bredt udvalg af følelsesmæssige reaktioner for at berige din kommunikation. Udtryk dine følelser fra glæde til vrede med forskellige gestus og ansigtsudtryk.",
+                "de": "Der Befehl 'reactions' bietet eine breite Palette emotionaler Reaktionen, um Ihre Kommunikation zu bereichern. Drücken Sie Ihre Gefühle von Freude bis Ärger mit verschiedenen Gesten und Gesichtsausdrücken aus.",
+                "es": "El comando 'reactions' ofrece una amplia gama de reacciones emocionales para enriquecer su comunicación. Expresa tus sentimientos desde la alegría hasta la ira con diversos gestos y expresiones faciales.",
+                "fr": "La commande 'reactions' offre une large gamme de réactions émotionnelles pour enrichir votre communication. Exprimez vos sentiments de la joie à la colère avec divers gestes et expressions faciales.",
+                "pl": "Komenda 'reactions' oferuje szeroki zakres reakcji emocjonalnych, aby wzbogacić twoją komunikację. Wyraź swoje uczucia od radości po złość za pomocą różnych gestów i wyrazów twarzy.",
+                "tr": "'Reactions' komutu, iletişiminizi zenginleştirmek için geniş bir duygusal tepkiler yelpazesi sunar. Sevinçten öfkeye kadar hislerinizi çeşitli jestler ve yüz ifadeleri ile ifade edin."
+            },
+            "allowed_disabled": true,
+            "reactions": {
+                "airkiss": {
+                    "da": "Virtuel luftkys.",
+                    "de": "Virtueller Luftkuss.",
+                    "en": "Virtual air kiss.",
+                    "es": "Beso virtual en el aire.",
+                    "fr": "Bisou virtuel dans l'air.",
+                    "id": "Cium udara virtual.",
+                    "pl": "Wirtualny powietrzny pocałunek.",
+                    "ru": "Виртуальный воздушный поцелуй.",
+                    "tr": "Sanal hava öpücüğü."
+                },
+                "angrystare": {
+                    "da": "Vredt stirre.",
+                    "de": "Wütender Blick.",
+                    "en": "Angry stare.",
+                    "es": "Mirada enojada.",
+                    "fr": "Regard en colère.",
+                    "id": "Tatapan marah.",
+                    "pl": "Złe spojrzenie.",
+                    "ru": "Злой взгляд.",
+                    "tr": "Kızgın bakış."
+                },
+                "bite": {
+                    "da": "Bide.",
+                    "de": "Beißen.",
+                    "en": "Bite.",
+                    "es": "Mordisco.",
+                    "fr": "Morsure.",
+                    "id": "Gigit.",
+                    "pl": "Gryzienie.",
+                    "ru": "Укус.",
+                    "tr": "Isırma."
+                },
+                "bleh": {
+                    "da": "Uha.",
+                    "de": "Bleh.",
+                    "en": "Bleh.",
+                    "es": "Bleh.",
+                    "fr": "Bleh.",
+                    "id": "Bleh.",
+                    "pl": "Bleh.",
+                    "ru": "Бле.",
+                    "tr": "Bleh."
+                },
+                "blush": {
+                    "da": "Rødme.",
+                    "de": "Erröten.",
+                    "en": "Blush.",
+                    "es": "Sonrojar.",
+                    "fr": "Rougeur.",
+                    "id": "Kemerahan.",
+                    "pl": "Rumienić się.",
+                    "ru": "Краснеть.",
+                    "tr": "Kızarmak."
+                },
+                "brofist": {
+                    "da": "Broknytningsknytnæve.",
+                    "de": "Brofist.",
+                    "en": "Brofist.",
+                    "es": "Puño de hermano.",
+                    "fr": "Poing de frère.",
+                    "id": "Buduk saudara.",
+                    "pl": "Puknięcie brata.",
+                    "ru": "Кулак брата.",
+                    "tr": "Kardeş yumruğu."
+                },
+                "celebrate": {
+                    "da": "Fejre.",
+                    "de": "Feiern.",
+                    "en": "Celebrate.",
+                    "es": "Celebrar.",
+                    "fr": "Célébrer.",
+                    "id": "Merayakan.",
+                    "pl": "Obchodzić.",
+                    "ru": "Праздновать.",
+                    "tr": "Kutlamak."
+                },
+                "cheers": {
+                    "da": "Skål.",
+                    "de": "Prost.",
+                    "en": "Cheers.",
+                    "es": "Salud.",
+                    "fr": "Santé.",
+                    "id": "Salam.",
+                    "pl": "Na zdrowie.",
+                    "ru": "На здоровье.",
+                    "tr": "Şerefe."
+                },
+                "clap": {
+                    "da": "Klappe.",
+                    "de": "Klatschen.",
+                    "en": "Clap.",
+                    "es": "Aplaudir.",
+                    "fr": "Applaudir.",
+                    "id": "Tepuk tangan.",
+                    "pl": "Klaskać.",
+                    "ru": "Хлопать.",
+                    "tr": "Vurmak."
+                },
+                "confused": {
+                    "da": "Forvirret.",
+                    "de": "Verwirrt.",
+                    "en": "Confused.",
+                    "es": "Confundido.",
+                    "fr": "Confus.",
+                    "id": "Bingung.",
+                    "pl": "Zdezorientowany.",
+                    "ru": "Смущенный.",
+                    "tr": "Kafası karışmış."
+                },
+                "cool": {
+                    "da": "Cool.",
+                    "de": "Cool.",
+                    "en": "Cool.",
+                    "es": "Genial.",
+                    "fr": "Cool.",
+                    "id": "Keren.",
+                    "pl": "Cool.",
+                    "ru": "Круто.",
+                    "tr": "Cool."
+                },
+                "cry": {
+                    "da": "Græde.",
+                    "de": "Weinen.",
+                    "en": "Cry.",
+                    "es": "Llorar.",
+                    "fr": "Pleurer.",
+                    "id": "Menangis.",
+                    "pl": "Płakać.",
+                    "ru": "Плакать.",
+                    "tr": "Ağlamak."
+                },
+                "cuddle": {
+                    "da": "Kæle.",
+                    "de": "Kuscheln.",
+                    "en": "Cuddle.",
+                    "es": "Cariño.",
+                    "fr": "Câlin.",
+                    "id": "Peluk.",
+                    "pl": "Tulić się.",
+                    "ru": "Обнимать.",
+                    "tr": "Kucaklaşmak."
+                },
+                "dance": {
+                    "da": "Dans.",
+                    "de": "Tanz.",
+                    "en": "Dance.",
+                    "es": "Bailar.",
+                    "fr": "Danser.",
+                    "id": "Menari.",
+                    "pl": "Taniec.",
+                    "ru": "Танцевать.",
+                    "tr": "Dans etmek."
+                },
+                "drool": {
+                    "da": "Dralle.",
+                    "de": "Sabbern.",
+                    "en": "Drool.",
+                    "es": "Babar.",
+                    "fr": "Baver.",
+                    "id": "Slobber.",
+                    "pl": "Ślinić się.",
+                    "ru": "Слюнить.",
+                    "tr": "Tatlı sert."
+                },
+                "evillaugh": {
+                    "da": "Ond latter.",
+                    "de": "Böses Lachen.",
+                    "en": "Evil laugh.",
+                    "es": "Risa malvada.",
+                    "fr": "Rire diabolique.",
+                    "id": "Tertawa jahat.",
+                    "pl": "Złośliwy śmiech.",
+                    "ru": "Злобный смех.",
+                    "tr": "Kötü gülmek."
+                },
+                "facepalm": {
+                    "da": "Ansigtspalme.",
+                    "de": "Gesichtspalme.",
+                    "en": "Facepalm.",
+                    "es": "Palmada en la cara.",
+                    "fr": "Facepalm.",
+                    "id": "Palm wajah.",
+                    "pl": "Uderzenie w twarz.",
+                    "ru": "Ладонь лица.",
+                    "tr": "Yüz avuç içi."
+                },
+                "handhold": {
+                    "da": "Håndhold.",
+                    "de": "Handhalten.",
+                    "en": "Handhold.",
+                    "es": "Sujeción de mano.",
+                    "fr": "Maintien de main.",
+                    "id": "Pegangan tangan.",
+                    "pl": "Trzymanie za rękę.",
+                    "ru": "Взятие за руку.",
+                    "tr": "El tutma."
+                },
+                "happy": {
+                    "da": "Lykkelig.",
+                    "de": "Glücklich.",
+                    "en": "Happy.",
+                    "es": "Feliz.",
+                    "fr": "Heureux.",
+                    "id": "Bahagia.",
+                    "pl": "Szczęśliwy.",
+                    "ru": "Счастливый.",
+                    "tr": "Mutlu."
+                },
+                "headbang": {
+                    "da": "Headbang.",
+                    "de": "Headbang.",
+                    "en": "Headbang.",
+                    "es": "Cabecear.",
+                    "fr": "Headbang.",
+                    "id": "Headbang.",
+                    "pl": "Headbang.",
+                    "ru": "Бейсхед.",
+                    "tr": "Baş çarpmak."
+                },
+                "hug": {
+                    "da": "Kram.",
+                    "de": "Umarmung.",
+                    "en": "Hug.",
+                    "es": "Abrazo.",
+                    "fr": "Câlin.",
+                    "id": "Peluk.",
+                    "pl": "Uścisk.",
+                    "ru": "Объятия.",
+                    "tr": "Sarılma."
+                },
+                "kiss": {
+                    "da": "Kys.",
+                    "de": "Kuss.",
+                    "en": "Kiss.",
+                    "es": "Beso.",
+                    "fr": "Baiser.",
+                    "id": "Cium.",
+                    "pl": "Pocałunek.",
+                    "ru": "Поцелуй.",
+                    "tr": "Öpücük."
+                },
+                "laugh": {
+                    "da": "Grin.",
+                    "de": "Lachen.",
+                    "en": "Laugh.",
+                    "es": "Risa.",
+                    "fr": "Rire.",
+                    "id": "Tertawa.",
+                    "pl": "Śmiech.",
+                    "ru": "Смех.",
+                    "tr": "Gülmek."
+                },
+                "lick": {
+                    "da": "Slik.",
+                    "de": "Lecken.",
+                    "en": "Lick.",
+                    "es": "Lamer.",
+                    "fr": "Lécher.",
+                    "id": "Jilat.",
+                    "pl": "Liznąć.",
+                    "ru": "Лизать.",
+                    "tr": "Yalamak."
+                },
+                "love": {
+                    "da": "Kærlighed.",
+                    "de": "Liebe.",
+                    "en": "Love.",
+                    "es": "Amor.",
+                    "fr": "Amour.",
+                    "id": "Cinta.",
+                    "pl": "Miłość.",
+                    "ru": "Любовь.",
+                    "tr": "Aşk."
+                },
+                "mad": {
+                    "da": "Vred.",
+                    "de": "Wütend.",
+                    "en": "Mad.",
+                    "es": "Loco.",
+                    "fr": "Fâché.",
+                    "id": "Gila.",
+                    "pl": "Zły.",
+                    "ru": "Сердитый.",
+                    "tr": "Delirmiş."
+                },
+                "nervous": {
+                    "da": "Nervøs.",
+                    "de": "Nervös.",
+                    "en": "Nervous.",
+                    "es": "Nervioso.",
+                    "fr": "Nerveux.",
+                    "id": "Gugup.",
+                    "pl": "Zdenerwowany.",
+                    "ru": "Нервничает.",
+                    "tr": "Sinirli."
+                },
+                "no": {
+                    "da": "Nej.",
+                    "de": "Nein.",
+                    "en": "No.",
+                    "es": "No.",
+                    "fr": "Non.",
+                    "id": "Tidak.",
+                    "pl": "Nie.",
+                    "ru": "Нет.",
+                    "tr": "Hayır."
+                },
+                "nom": {
+                    "da": "Nom.",
+                    "de": "Nom.",
+                    "en": "Nom.",
+                    "es": "Nom.",
+                    "fr": "Nom.",
+                    "id": "Nom.",
+                    "pl": "Nom.",
+                    "ru": "Ном.",
+                    "tr": "Nom."
+                },
+                "nosebleed": {
+                    "da": "Næseblod.",
+                    "de": "Nasenbluten.",
+                    "en": "Nosebleed.",
+                    "es": "Sangrado nasal.",
+                    "fr": "Saignement de nez.",
+                    "id": "Pendarahan hidung.",
+                    "pl": "Krwawienie z nosa.",
+                    "ru": "Кровь из носа.",
+                    "tr": "Burun kanaması."
+                },
+                "nuzzle": {
+                    "da": "Gnide.",
+                    "de": "Schmiegen.",
+                    "en": "Nuzzle.",
+                    "es": "Frotar.",
+                    "fr": "Frotter.",
+                    "id": "Gosok.",
+                    "pl": "Głaskać.",
+                    "ru": "Трение носами.",
+                    "tr": "Sürtmek."
+                },
+                "nyah": {
+                    "da": "Njah.",
+                    "de": "Njah.",
+                    "en": "Nyah.",
+                    "es": "Nyah.",
+                    "fr": "Nyah.",
+                    "id": "Nyah.",
+                    "pl": "Nyah.",
+                    "ru": "Ня.",
+                    "tr": "Nyah."
+                },
+                "pat": {
+                    "da": "Klappe.",
+                    "de": "Klopfen.",
+                    "en": "Pat.",
+                    "es": "Palmada.",
+                    "fr": "Taper.",
+                    "id": "Ketuk.",
+                    "pl": "Poklepać.",
+                    "ru": "Поглаживание.",
+                    "tr": "Okşamak."
+                },
+                "peek": {
+                    "da": "Kig.",
+                    "de": "Gucken.",
+                    "en": "Peek.",
+                    "es": "Echar un vistazo.",
+                    "fr": "Jeter un coup d'œil.",
+                    "id": "Mengintip.",
+                    "pl": "Zajrzeć.",
+                    "ru": "Подглядывать.",
+                    "tr": "Gizlice bakmak."
+                },
+                "pinch": {
+                    "da": "Nip.",
+                    "de": "Kneifen.",
+                    "en": "Pinch.",
+                    "es": "Pellizco.",
+                    "fr": "Pincer.",
+                    "id": "Jepit.",
+                    "pl": "Uszczypnąć.",
+                    "ru": "Щипать.",
+                    "tr": "Çimdik."
+                },
+                "poke": {
+                    "da": "Poke.",
+                    "de": "Stupsen.",
+                    "en": "Poke.",
+                    "es": "Poke.",
+                    "fr": "Poke.",
+                    "id": "Poke.",
+                    "pl": "Poke.",
+                    "ru": "Тыкать.",
+                    "tr": "Dürtmek."
+                },
+                "pout": {
+                    "da": "Pout.",
+                    "de": "Schmollen.",
+                    "en": "Pout.",
+                    "es": "Hacer pucheros.",
+                    "fr": "Faire la moue.",
+                    "id": "Mengomel.",
+                    "pl": "Zacisnąć usta.",
+                    "ru": "Надувать губы.",
+                    "tr": "Sırıtmak."
+                },
+                "punch": {
+                    "da": "Punch.",
+                    "de": "Schlagen.",
+                    "en": "Punch.",
+                    "es": "Puñetazo.",
+                    "fr": "Punch.",
+                    "id": "Punch.",
+                    "pl": "Punch.",
+                    "ru": "Удар.",
+                    "tr": "Yumruk."
+                },
+                "roll": {
+                    "da": "Rulle.",
+                    "de": "Rolle.",
+                    "en": "Roll.",
+                    "es": "Rodar.",
+                    "fr": "Rouler.",
+                    "id": "Gulung.",
+                    "pl": "Rola.",
+                    "ru": "Катить.",
+                    "tr": "Rulo."
+                },
+                "run": {
+                    "da": "Løb.",
+                    "de": "Lauf.",
+                    "en": "Run.",
+                    "es": "Correr.",
+                    "fr": "Courir.",
+                    "id": "Berlari.",
+                    "pl": "Biegać.",
+                    "ru": "Бег.",
+                    "tr": "Koş."
+                },
+                "sad": {
+                    "da": "Trist.",
+                    "de": "Traurig.",
+                    "en": "Sad.",
+                    "es": "Triste.",
+                    "fr": "Triste.",
+                    "id": "Sedih.",
+                    "pl": "Smutny.",
+                    "ru": "Грустный.",
+                    "tr": "Üzgün."
+                },
+                "scared": {
+                    "da": "Bange.",
+                    "de": "Ängstlich.",
+                    "en": "Scared.",
+                    "es": "Asustado.",
+                    "fr": "Effrayé.",
+                    "id": "Takut.",
+                    "pl": "Przestraszony.",
+                    "ru": "Испуганный.",
+                    "tr": "Korkmuş."
+                },
+                "shout": {
+                    "da": "Råb.",
+                    "de": "Schreien.",
+                    "en": "Shout.",
+                    "es": "Gritar.",
+                    "fr": "Crier.",
+                    "id": "Teriak.",
+                    "pl": "Krzyk.",
+                    "ru": "Кричать.",
+                    "tr": "Bağırmak."
+                },
+                "shrug": {
+                    "da": "Skuldertræk.",
+                    "de": "Achselzucken.",
+                    "en": "Shrug.",
+                    "es": "Encogerse de hombros.",
+                    "fr": "Haussement d'épaules.",
+                    "id": "Angkat bahu.",
+                    "pl": "Wzruszenie ramionami.",
+                    "ru": "Пожимать плечами.",
+                    "tr": "Omuz silkme."
+                },
+                "shy": {
+                    "da": "Genert.",
+                    "de": "Schüchtern.",
+                    "en": "Shy.",
+                    "es": "Tímido.",
+                    "fr": "Timide.",
+                    "id": "Pemalu.",
+                    "pl": "Nieśmiały.",
+                    "ru": "Скромный.",
+                    "tr": "Utangaç."
+                },
+                "sigh": {
+                    "da": "Suk.",
+                    "de": "Seufzen.",
+                    "en": "Sigh.",
+                    "es": "Suspiro.",
+                    "fr": "Soupir.",
+                    "id": "Mengeluh.",
+                    "pl": "Wzdychać.",
+                    "ru": "Вздох.",
+                    "tr": "İç çekmek."
+                },
+                "sip": {
+                    "da": "Sip.",
+                    "de": "Sip.",
+                    "en": "Sip.",
+                    "es": "Sorbo.",
+                    "fr": "Gorgée.",
+                    "id": "Sip.",
+                    "pl": "Sip.",
+                    "ru": "Глоток.",
+                    "tr": "Yudum."
+                },
+                "slap": {
+                    "da": "Slap.",
+                    "de": "Ohrfeige.",
+                    "en": "Slap.",
+                    "es": "Bofetada.",
+                    "fr": "Gifle.",
+                    "id": "Sapu.",
+                    "pl": "Uderzenie.",
+                    "ru": "Пощечина.",
+                    "tr": "Tokat."
+                },
+                "sleep": {
+                    "da": "Søvn.",
+                    "de": "Schlaf.",
+                    "en": "Sleep.",
+                    "es": "Dormir.",
+                    "fr": "Sommeil.",
+                    "id": "Tidur.",
+                    "pl": "Sen.",
+                    "ru": "Спать.",
+                    "tr": "Uyku."
+                },
+                "slowclap": {
+                    "da": "Langsom klaps.",
+                    "de": "Langsamer Klatsch.",
+                    "en": "Slow clap.",
+                    "es": "Aplauso lento.",
+                    "fr": "Applaudissements lents.",
+                    "id": "Tepuk lambat.",
+                    "pl": "Powolne klaskanie.",
+                    "ru": "Медленный аплодисменты.",
+                    "tr": "Yavaş alkış."
+                },
+                "smack": {
+                    "da": "Smæk.",
+                    "de": "Klatsch.",
+                    "en": "Smack.",
+                    "es": "Beso.",
+                    "fr": "Baiser.",
+                    "id": "Sap.",
+                    "pl": "Cios.",
+                    "ru": "Удар.",
+                    "tr": "Tokat."
+                },
+                "smile": {
+                    "da": "Smil.",
+                    "de": "Lächeln.",
+                    "en": "Smile.",
+                    "es": "Sonrisa.",
+                    "fr": "Sourire.",
+                    "id": "Senyum.",
+                    "pl": "Uśmiech.",
+                    "ru": "Улыбка.",
+                    "tr": "Gülümseme."
+                },
+                "smug": {
+                    "da": "Selvtilfreds.",
+                    "de": "Selbstgefällig.",
+                    "en": "Smug.",
+                    "es": "Satisfecho.",
+                    "fr": "Suffisant.",
+                    "id": "Puas.",
+                    "pl": "Zadufany.",
+                    "ru": "Заносчивый.",
+                    "tr": "Kendinden emin."
+                },
+                "sneeze": {
+                    "da": "Nyse.",
+                    "de": "Niesen.",
+                    "en": "Sneeze.",
+                    "es": "Estornudo.",
+                    "fr": "Éternuement.",
+                    "id": "Bersin.",
+                    "pl": "Kichać.",
+                    "ru": "Чих.",
+                    "tr": "Hapşırmak."
+                },
+                "sorry": {
+                    "da": "Undskyld.",
+                    "de": "Entschuldigung.",
+                    "en": "Sorry.",
+                    "es": "Lo siento.",
+                    "fr": "Désolé.",
+                    "id": "Maaf.",
+                    "pl": "Przepraszam.",
+                    "ru": "Прости.",
+                    "tr": "Üzgünüm."
+                },
+                "stare": {
+                    "da": "Stirre.",
+                    "de": "Starren.",
+                    "en": "Stare.",
+                    "es": "Mirada fija.",
+                    "fr": "Regard fixe.",
+                    "id": "Tatapan.",
+                    "pl": "Patrzeć intensywnie.",
+                    "ru": "Посмотреть.",
+                    "tr": "Sabit bakış."
+                },
+                "stop": {
+                    "da": "Stop.",
+                    "de": "Stop.",
+                    "en": "Stop.",
+                    "es": "Detener.",
+                    "fr": "Arrêtez.",
+                    "id": "Berhenti.",
+                    "pl": "Zatrzymać się.",
+                    "ru": "Стоп.",
+                    "tr": "Dur."
+                },
+                "surprised": {
+                    "da": "Overrasket.",
+                    "de": "Überrascht.",
+                    "en": "Surprised.",
+                    "es": "Sorprendido.",
+                    "fr": "Surpris.",
+                    "id": "Terkejut.",
+                    "pl": "Zaskoczony.",
+                    "ru": "Удивленный.",
+                    "tr": "Şaşırmış."
+                },
+                "sweat": {
+                    "da": "Sved.",
+                    "de": "Schwitzen.",
+                    "en": "Sweat.",
+                    "es": "Sudor.",
+                    "fr": "Transpiration.",
+                    "id": "Keringat.",
+                    "pl": "Pot.",
+                    "ru": "Пот.",
+                    "tr": "Ter."
+                },
+                "thumbsup": {
+                    "da": "Tomme op.",
+                    "de": "Daumen hoch.",
+                    "en": "Thumbs up.",
+                    "es": "Pulgar arriba.",
+                    "fr": "Pouce en l'air.",
+                    "id": "Ibu jari ke atas.",
+                    "pl": "Kciuk w górę.",
+                    "ru": "Большой палец вверх.",
+                    "tr": "Başparmak yukarı."
+                },
+                "tickle": {
+                    "da": "Kildre.",
+                    "de": "Kitzeln.",
+                    "en": "Tickle.",
+                    "es": "Cosquillas.",
+                    "fr": "Chatouiller.",
+                    "id": "Merangkak.",
+                    "pl": "Drapać.",
+                    "ru": "Ласкать.",
+                    "tr": "Gıdıklamak."
+                },
+                "tired": {
+                    "da": "Træt.",
+                    "de": "Müde.",
+                    "en": "Tired.",
+                    "es": "Cansado.",
+                    "fr": "Fatigué.",
+                    "id": "Capek.",
+                    "pl": "Zmęczony.",
+                    "ru": "Усталый.",
+                    "tr": "Yorgun."
+                },
+                "wave": {
+                    "da": "Bølge.",
+                    "de": "Welle.",
+                    "en": "Wave.",
+                    "es": "Ola.",
+                    "fr": "Vague.",
+                    "id": "Gelombang.",
+                    "pl": "Fala.",
+                    "ru": "Волна.",
+                    "tr": "Dalga."
+                },
+                "wink": {
+                    "da": "Blink.",
+                    "de": "Zwinkern.",
+                    "en": "Wink.",
+                    "es": "Guiño.",
+                    "fr": "Clin d'œil.",
+                    "id": "Kedip.",
+                    "pl": "Mrużyć oko.",
+                    "ru": "Подмигивать.",
+                    "tr": "Göz kırp."
+                },
+                "woah": {
+                    "da": "Woah.",
+                    "de": "Woah.",
+                    "en": "Woah.",
+                    "es": "Woah.",
+                    "fr": "Woah.",
+                    "id": "Woah.",
+                    "pl": "Woah.",
+                    "ru": "Ух ты.",
+                    "tr": "Woah."
+                },
+                "yawn": {
+                    "da": "Gabe.",
+                    "de": "Gähnen.",
+                    "en": "Yawn.",
+                    "es": "Bostezo.",
+                    "fr": "Bâillement.",
+                    "id": "Menguap.",
+                    "pl": "Ziewać.",
+                    "ru": "Зевота.",
+                    "tr": "Esnek."
+                },
+                "yay": {
+                    "da": "Hurra.",
+                    "de": "Hurra.",
+                    "en": "Yay.",
+                    "es": "¡Hurra!",
+                    "fr": "Hourra.",
+                    "id": "Yay.",
+                    "pl": "Hura.",
+                    "ru": "Ура.",
+                    "tr": "Yay."
+                },
+                "yes": {
+                    "da": "Ja.",
+                    "de": "Ja.",
+                    "en": "Yes.",
+                    "es": "Sí.",
+                    "fr": "Oui.",
+                    "id": "Iya.",
+                    "pl": "Tak.",
+                    "ru": "Да.",
+                    "tr": "Evet."
+                }
+            }
         }
     ]
 }
