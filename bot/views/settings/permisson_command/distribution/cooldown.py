@@ -3,7 +3,7 @@ import nextcord
 from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
 
-from bot.misc import utils
+from bot.misc.utils import TimeCalculator
 from bot.misc.time_transformer import display_time
 from bot.misc.ratelimit import BucketType, reset_cooldown
 from bot.databases import GuildDateBases, CommandDB
@@ -29,13 +29,13 @@ class CoolModal(nextcord.ui.Modal):
         super().__init__("Cooldown")
 
         self.rate = nextcord.ui.TextInput(
-            label="Rate (Exemple: 2)",
+            label="Rate (Example: 2)",
             placeholder=rate,
             min_length=1,
             max_length=4,
         )
         self.per = nextcord.ui.TextInput(
-            label="Per (Exemple: 1h10m)",
+            label="Per (Example: 1h10m)",
             placeholder=per,
             min_length=1,
             max_length=10
@@ -46,10 +46,11 @@ class CoolModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         srate = self.rate.value
-        per = utils.calculate_time(self.per.value)
+        per = TimeCalculator().convert(self.per.value)
         rate = srate.isdigit() and int(srate)
 
         if not (per and rate):
+            raise TypeError
             await interaction.response.send_message("Error #1", ephemeral=True)
             return
 

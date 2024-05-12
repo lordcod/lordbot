@@ -60,6 +60,7 @@ distributing = {
 
 def time_convert(timestamp: (int | float)) -> dict[str, int]:
     return {
+        "years": int(timestamp / 31_579_200),
         "months": int(timestamp / 2_631_600 % 12),
         "days": int(timestamp / 86_400 % 30),
         "hours": int(timestamp / 3_600 % 24),
@@ -68,9 +69,9 @@ def time_convert(timestamp: (int | float)) -> dict[str, int]:
     }
 
 
-def display_time(number: int, lang: str = "en") -> str:
-    distributing.get(lang, distributing['en'])
+def display_time(number: int, lang: str = "en", max_items: int = 3) -> str:
+    func = distributing.get(lang, distributing['en'])
     current_time = time_convert(number)
-    time_strings = [distributing[lang](num, key)
+    time_strings = [func(num, key)
                     for key, num in current_time.items() if num != 0]
-    return ", ".join(time_strings)
+    return ", ".join(time_strings[:max_items])

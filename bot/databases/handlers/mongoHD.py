@@ -1,8 +1,10 @@
 from __future__ import annotations
+from typing import TypeVar, overload
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
-from ..misc.utils import Json
+from ..misc.adapter_dict import Json
 
+T = TypeVar("T")
 engine: DataBase = None
 
 
@@ -29,8 +31,14 @@ class MongoDB:
         if data is None:
             self.create()
 
+    @overload
+    def get(self, key: str) -> dict | None: ...
+
+    @overload
+    def get(self, key: str, default: T) -> dict | T: ...
+
     @on_error()
-    def get(self, key: str, default=None) -> dict:
+    def get(self, key: str, default: T = None) -> dict | T:
         key = str(key)
 
         data = engine.fetchone(

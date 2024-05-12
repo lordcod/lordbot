@@ -1,6 +1,10 @@
+import asyncio
 from typing import Any, Coroutine
 import nextcord
+import asyncio
 
+from bot.languages import i18n
+from bot.databases import GuildDateBases
 from bot.resources.ether import Emoji
 
 
@@ -10,11 +14,16 @@ class DelCatView(nextcord.ui.View):
         member: nextcord.Member,
         category: nextcord.CategoryChannel
     ) -> None:
+        gdb = GuildDateBases(member.guild.id)
+        self.locale = gdb.get('language')
+
         self.member = member
         self.category = category
         self.embed = nextcord.Embed(
-            title=f"{Emoji.warn} Are you sure?",
-            description=f"This will permanently delete the {category.mention} category and every channel inside of it.",
+            title=Emoji.warn + " " +
+            i18n.t(self.locale, "delcat.issue.title"),
+            description=i18n.t(self.locale, "delcat.issue.description",
+                               category=self.category.name),
             color=0xED390D
         )
         super().__init__()
@@ -25,26 +34,34 @@ class DelCatView(nextcord.ui.View):
         button: nextcord.ui.Button,
         interaction: nextcord.Interaction
     ) -> None:
+        tasks = [self.category.delete()] + [channel.delete()
+                                            for channel in self.category.channels]
+        await asyncio.gather(*tasks)
+
         embed = nextcord.Embed(
-            title=f"{Emoji.success} #{self.category.name} Category Deleted",
-            description=f"And also remotely {len(self.category.channels)} channels that were in the category",
+            title=Emoji.success + " " +
+            i18n.t(self.locale, "delcat.accept.title",
+                   category=self.category.name),
+            description=i18n.t(
+                self.locale, "delcat.accept.description", count=len(self.category.channels)),
             color=0x57F287
         )
 
         for channel in self.category.channels:
-            await channel.delete()
+            asyncio.create_task(channel.delete())
         await self.category.delete()
 
         await interaction.message.edit(embed=embed, view=None)
 
-    @nextcord.ui.button(label="Cancel", style=nextcord.ButtonStyle.red)
+    @ nextcord.ui.button(label="Cancel", style=nextcord.ButtonStyle.red)
     async def cancel(
         self,
         button: nextcord.ui.Button,
         interaction: nextcord.Interaction
     ) -> None:
         embed = nextcord.Embed(
-            title=f"{Emoji.success} Category Deletion Canceled",
+            title=Emoji.success + " " +
+            i18n.t(self.locale, "delcat.cancel.title"),
             color=0x57F287
         )
 
@@ -54,6 +71,4 @@ class DelCatView(nextcord.ui.View):
         self,
         interaction: nextcord.Interaction
     ) -> Coroutine[Any, Any, bool]:
-        if interaction.user != self.member:
-            return False
-        return True
+        return interaction.user == self.member

@@ -162,18 +162,19 @@ if __name__ == "__main__":
     #         continue
     #     print(lang)
     #     trd = translate_dict(
-    #         "en", lang, resource_dict['en']["ideas"])
+    #         "en", lang, resource_dict['en']['delcat'])
     #     print(trd)
-    #     parser(trd, lang, "ideas", loadable=False)
+    #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    # data = translation_with_languages(
-    #     "en", "Delete reaction", default_languages)
+    data = translation_with_languages(
+        "en", "<time>", default_languages)
+    print(data)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
-    add_dict_translations(
-        "settings.module-name.logs", translation_with_languages("en", "Logs", default_languages))
+    # add_dict_translations(
+    #     "delcat.accept.title", translation_with_languages("en", " #{self.category.name} Category Deleted", default_languages))
 
     # To any locales format
     # data = to_any_locales()

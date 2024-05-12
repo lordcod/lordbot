@@ -13,8 +13,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-path = 'ffmpeg'
-
 ydl_opts = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -73,8 +71,7 @@ class Voice(commands.Cog):
 
         if finder := YANDEX_MUSIC_SEARCH.fullmatch(request):
             found = finder.group(2)
-            tracks = await self.yandex_client.get_list(found, 'track')
-            track = tracks[0]
+            track = await self.yandex_client.get_list(found, 'track', with_only_result=True)
         else:
             tracks = await self.yandex_client.search(request)
             view = MusicView(ctx.guild.id, queue, MusicPlayer(
@@ -121,7 +118,7 @@ class Voice(commands.Cog):
 
         url = info.get("url")
 
-        source = nextcord.FFmpegPCMAudio(url, pipe=False, executable=path)
+        source = nextcord.FFmpegPCMAudio(url, pipe=False)
         source = nextcord.PCMVolumeTransformer(source, volume=0.5)
 
         async def callback(err):
@@ -129,13 +126,24 @@ class Voice(commands.Cog):
         voice.play(source, after=callback)
         await mes.edit(content=f"Title: {info['title']}")
 
-    @commands.command(name="volume")
+    @commands.command()
+    async def move(self, ctx: commands.Context, index: int):
+        if not current_players.get(ctx.guild.id):
+            return
+        try:
+            await (current_players.get(ctx.guild.id)).move_to(index-1)
+        except IndexError:
+            await ctx.send(f"Track at index {index} was not found")
+        else:
+            await ctx.send(f"Started playing a track with an index of {index}")
+
+    @commands.command()
     async def volume(self, ctx: commands.Context, vol: int = None):
         voice: nextcord.VoiceClient = ctx.guild.voice_client
         if voice and voice.is_playing() and vol:
             vol = clamp(vol, 1, 100)
 
-            voice.source.volume = vol/100
+            voice.source.volume = vol / 100
             await ctx.send(f"Current volume: {vol}")
         elif voice and voice.is_playing():
             await ctx.send(f"Current volume: {voice.source.volume * 100}")

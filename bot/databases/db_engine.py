@@ -5,7 +5,6 @@ from bot.misc.logger import Logger
 
 
 Vars = Sequence[Any] | Mapping[str, Any] | None
-i = 0
 
 
 class DataBase:
@@ -50,7 +49,7 @@ class DataBase:
             Logger.critical(
                 'The database could not be loaded and the program is terminated because of this')
 
-            raise err
+            raise
         else:
             Logger.success("Successful connection")
             self = cls(connection)
@@ -98,3 +97,15 @@ class DataBase:
         with self.connection.cursor() as cursor:
             cursor.execute(query, vars)
             return cursor.fetchone()
+
+    def fetchvalue(
+        self,
+        query: str | bytes,
+        vars: Vars = None
+    ) -> Any | None:
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, vars)
+            data = cursor.fetchone()
+        if 0 >= len(data):
+            return None
+        return data[0]

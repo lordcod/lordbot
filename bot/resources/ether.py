@@ -1,5 +1,7 @@
+from enum import StrEnum
 
-class Emoji:
+
+class Emoji(StrEnum):
     # Channels
     category = '<:category:1166001036553621534>'
     channel_text = '<:channel_text:1166001040198484178>'
@@ -10,6 +12,7 @@ class Emoji:
     thread = '<:thread:1166096258511937666>'
 
     # Economy
+    diamod = '<:diamond:1183363436780978186>'
     bagmoney = '<:bagmoney:1178745646128300083>'
     bank = '<:bank:1178745652352663663> '
     money = '<:money:1178745649248882770>'
@@ -46,7 +49,7 @@ class Emoji:
     cooldown = '<:cooldown:1185277451295793192>'
     lightbulb = '<:lightbulb:1191467123462119554>'
     congratulation = '<a:congratulation:1165684808844845176>'
-    roketa = '<a:rocketa:1165684783754522704>'
+    rocket = '<a:rocketa:1165684783754522704>'
 
     undo = '<:undo:1191377269143388250>'
     redo = '<:redo:1191377267574710372>'
@@ -58,7 +61,7 @@ class Emoji:
     warn = '<a:warn:1165684798686244874>'
 
 
-Channel_Type = {
+channel_types_emoji = {
     0: Emoji.channel_text,
     1: Emoji.channel_text,
     2: Emoji.channel_voice,
@@ -71,5 +74,5 @@ Channel_Type = {
     13: Emoji.channel_stage,
     14: Emoji.category,
     15: Emoji.channel_forum,
-    16: Emoji.channel_forum,
+    16: Emoji.channel_forum
 }
