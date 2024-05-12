@@ -33,12 +33,12 @@ class MusicDropDown(nextcord.ui.Select):
             ]
         )
 
-    async def callback(self, inter: nextcord.Interaction):
+    async def callback(self, interaction: nextcord.Interaction):
         track_id = int(self.values[0])
         track = utils.get(self.tracks, id=track_id)
 
         token = self.queue.add(
-            inter.guild_id,
+            interaction.guild_id,
             track
         )
         await self.player.process(token)

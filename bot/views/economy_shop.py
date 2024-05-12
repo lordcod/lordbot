@@ -53,24 +53,28 @@ class ShopAcceptView(nextcord.ui.View):
 
         if self.data.get('role_id') in interaction.user._roles:
             await interaction.response.send_message(
-                f"You already have this role!", ephemeral=True)
+                "You already have this role!", ephemeral=True)
             return
         if self.data.get('limit') and self.data.get('using_limit', 0) >= self.data.get('limit'):
             await interaction.response.send_message(
-                f"The entire limit is exhausted!", ephemeral=True)
+                "The entire limit is exhausted!", ephemeral=True)
             return
         if self.data.get('amount') > emdb.get('balance'):
             await interaction.response.send_message(
                 f"Your balance must be more than {self.data.get('amount')}{economy_settings.get('emoji')}",
                 ephemeral=True)
             return
-
-        await interaction.user._state.http.add_role(
-            guild_id=interaction.guild_id,
-            user_id=interaction.user.id,
-            role_id=self.data.get('role_id'),
-            reason="Buying a role in the store"
-        )
+        try:
+            await interaction.user._state.http.add_role(
+                guild_id=interaction.guild_id,
+                user_id=interaction.user.id,
+                role_id=self.data.get('role_id'),
+                reason="Buying a role in the store"
+            )
+        except nextcord.HTTPException:
+            interaction.user.send(
+                f"[**{interaction.guild.name}**] Shop role was not found! Contact the server administrators!")
+            return
         for rd in shop_info:
             if rd.get('role_id') == self.data.get('role_id'):
                 rd['using_limit'] = rd.get('using_limit', 0) + 1
@@ -119,11 +123,11 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
 
         if role_id in interaction.user._roles:
             await interaction.response.send_message(
-                f"You already have this role!", ephemeral=True)
+                "You already have this role!", ephemeral=True)
             return
         if role_data.get('limit') and role_data.get('using_limit', 0) >= role_data.get('limit'):
             await interaction.response.send_message(
-                f"The entire limit is exhausted!", ephemeral=True)
+                "The entire limit is exhausted!", ephemeral=True)
             return
         if role_data.get('amount') > emdb.get('balance'):
             await interaction.response.send_message(

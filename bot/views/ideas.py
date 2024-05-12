@@ -302,7 +302,7 @@ class ReactionConfirmView(ConfirmView):
     def check_data(self, message_id) -> None:
         promoted_data = getattr(self, "promoted_data", None)
         demoted_data = getattr(self, "demoted_data", None)
-        if promoted_data is None and demoted_data is None:
+        if promoted_data is None or demoted_data is None:
             self.load_data(message_id)
 
     @nextcord.ui.button(label="0", emoji="👍", row=2, custom_id="reactions-ideas-confirm:promote")
