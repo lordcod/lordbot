@@ -6,8 +6,6 @@ from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
-from bot.resources.info import COUNT_ROLES_PAGE
-from bot.misc.utils import FissionIterator, get_award
 from nextcord.utils import escape_markdown
 
 import time
@@ -76,7 +74,7 @@ class Economy(commands.Cog):
     @commands.command(name="balance", aliases=["bal"])
     async def balance(self,
                       ctx: commands.Context,
-                      member: nextcord.Member = None):
+                      member: Optional[nextcord.Member] = None):
         if not member:
             member = ctx.author
 
@@ -145,7 +143,7 @@ class Economy(commands.Cog):
         if sum <= 0:
             await ctx.send(content="Specify the amount more **0**")
             return
-        elif (from_account.get('balance', 0)-sum) < 0:
+        elif sum > from_account.get('balance', 0):
             await ctx.send(content=f"Not enough funds to check your balance use `{prefix}bal`")
             return
 
@@ -157,10 +155,10 @@ class Economy(commands.Cog):
         embed.set_footer(
             text=f'From {ctx.author.display_name}', icon_url=ctx.author.display_avatar)
 
-        await ctx.send(embed=embed)
-
         from_account["balance"] -= sum
         to_account["balance"] += sum
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="deposit", aliases=["dep"])
     async def deposit(self, ctx: commands.Context, sum: Union[Literal['all'], int]):
@@ -181,8 +179,9 @@ class Economy(commands.Cog):
         if (balance - sum) < 0:
             await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
-        account['balance'] = account['balance'] - sum
-        account['bank'] = account['bank'] + sum
+
+        account['balance'] -= sum
+        account['bank'] += sum
 
         embed = nextcord.Embed(
             title="Transfer of currency",
@@ -246,7 +245,7 @@ class Economy(commands.Cog):
 
         account["balance"] += sum
 
-        await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji}")
+        await ctx.send(f"You have transferred the amount of **{sum}**{currency_emoji} to {member.display_name}")
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
@@ -266,13 +265,13 @@ class Economy(commands.Cog):
             await ctx.send("The amount must be positive")
             return
 
-        if 0 > (account.get('balance')-sum):
+        if account.get('balance') >= sum:
             await ctx.send('The operation cannot be performed because the balance will become negative during it')
             return
 
         account["balance"] -= sum
 
-        await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
+        await ctx.send(f"You have withdrawn an amount of **{sum}**{currency_emoji} from {member.display_name}")
 
 
 def setup(bot):

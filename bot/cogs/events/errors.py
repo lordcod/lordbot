@@ -11,9 +11,6 @@ from bot.resources.errors import (CallbackCommandError,
                                   MissingChannel,
                                   CommandOnCooldown)
 
-TrueType = type(True)
-NumberType = (int, float)
-
 
 class PermissionChecker:
     def __init__(self, ctx: commands.Context) -> None:
@@ -108,12 +105,12 @@ class CommandEvent(commands.Cog):
         self.bot = bot
         super().__init__()
 
-        bot.after_invoke(self.after_invoke)
-        bot.set_event(self.on_error)
-        bot.set_event(self.on_command_error)
-        bot.set_event(self.on_application_error)
+        # bot.after_invoke(self.after_invoke)
+        # bot.set_event(self.on_error)
+        # bot.set_event(self.on_command_error)
+        # bot.set_event(self.on_application_error)
 
-        bot.add_check(self.permission_check)
+        # bot.add_check(self.permission_check)
 
     async def on_application_error(
             self, interaction: nextcord.Interaction, error: Exception):
@@ -133,8 +130,8 @@ class CommandEvent(commands.Cog):
         return answer
 
     async def after_invoke(self, ctx: commands.Context) -> None:
-        if hasattr(ctx, 'cooldown'):
-            ctx.cooldown.add()
+        if cooldown := getattr(ctx, 'cooldown', None):
+            cooldown.add()
 
 
 def setup(bot):

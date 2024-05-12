@@ -28,6 +28,13 @@ def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
                 pass
 
 
+def clear_empty_ofter_leaderboard(guild: nextcord.Guild, leaderboard: list):
+    for member_id, value in leaderboard.copy():
+        member = guild._state.get_user(member_id)
+        if not member:
+            leaderboard.remove((member_id, value))
+
+
 def get_item_param(item: Tuple[int, T]) -> T:
     return item[1]
 
@@ -48,7 +55,7 @@ class EconomyLeaderboardView(menus.Menus):
         self.leaderboard_indexs = leaderboard_indexs
         self._embed = embed
 
-        super().__init__(leaderboards)
+        super().__init__(leaderboards, timeout=600)
 
         self.handler_disable()
 
@@ -57,7 +64,7 @@ class EconomyLeaderboardView(menus.Menus):
 
         self.add_item(LeaderboardDropDown(guild.id))
 
-    @property
+    @ property
     def embed(self) -> nextcord.Embed:
         self._embed.clear_fields()
         for (member_id, balance, bank, total) in self.value[self.index]:
@@ -112,7 +119,10 @@ class LeaderboardTypes:
         clear_empty_leaderboard(guild, leaderboard)
         fission_leaderboards = FissionIterator(leaderboard, 6).to_list()
         leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
-        user_index = leaderboard_indexs.index(member.id)+1
+        try:
+            user_index = leaderboard_indexs.index(member.id)+1
+        except ValueError:
+            user_index = len(leaderboard_indexs) + 1
 
         file_pedestal = nextcord.File(
             "assets/pedestal.png", filename="pedestal.png")
@@ -141,6 +151,7 @@ class LeaderboardTypes:
         locale = gdb.get('language')
         leaderboard = sorted(VOICE_STATE_DB.items(),
                              key=get_item_param, reverse=True)
+        clear_empty_ofter_leaderboard(guild, leaderboard)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
 
         try:
@@ -180,6 +191,7 @@ class LeaderboardTypes:
         locale = gdb.get('language')
         leaderboard = sorted(MESSAGE_STATE_DB.items(),
                              key=get_item_param, reverse=True)
+        clear_empty_ofter_leaderboard(guild, leaderboard)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
 
         try:
@@ -219,6 +231,7 @@ class LeaderboardTypes:
         locale = gdb.get('language')
         leaderboard = sorted(SCORE_STATE_DB.items(),
                              key=get_item_param, reverse=True)
+        clear_empty_ofter_leaderboard(guild, leaderboard)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
 
         try:
