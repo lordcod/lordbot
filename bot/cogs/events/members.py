@@ -9,7 +9,7 @@ import functools
 import asyncio
 import jmespath
 import time
-from typing import Dict, List, Optional
+from typing import Optional
 
 from bot.misc.lordbot import LordBot
 
@@ -34,10 +34,10 @@ class MembersEvent(commands.Cog):
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
 
-        invite = await self.process_invites(member, gdb)
         await asyncio.gather(
+            self.process_invites(member, gdb),
             self.auto_roles(member, gdb),
-            self.auto_message(member, invite, gdb)
+            self.auto_message(member, gdb)
         )
 
     @on_error
@@ -53,7 +53,7 @@ class MembersEvent(commands.Cog):
         await member.add_roles(*roles, atomic=False)
 
     @on_error
-    async def auto_message(self, member: nextcord.Member, invite: nextcord.Invite | None, gdb: GuildDateBases):
+    async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
         guild = member.guild
         greeting_message: dict = gdb.get('greeting_message', {})
 
