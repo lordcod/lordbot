@@ -44,7 +44,7 @@ class DropDown(nextcord.ui.StringSelect):
             self.command_name
         )
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class CommandData(DefaultSettingsView):
@@ -103,7 +103,7 @@ class CommandData(DefaultSettingsView):
 
         view = permisson_command.CommandsDataView(interaction.guild, index)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Switcher')
     async def switcher(self,
@@ -118,4 +118,4 @@ class CommandData(DefaultSettingsView):
 
         view = self.__class__(interaction.guild, self.command_name)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

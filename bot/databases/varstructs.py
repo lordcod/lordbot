@@ -6,7 +6,8 @@ from typing import (
     TypedDict,
     Dict
     Tuple,
-    TypedDict
+    TypedDict,
+    Dict
 )
 
 
@@ -76,3 +77,11 @@ IdeasPayload = TypedDict(
 
 
 LogsPayload = Dict[int, List['LogType']]
+
+
+class ReactionRoleItemPayload(TypedDict):
+    reactions: Dict[str, int]
+    channel_id: int
+
+
+ReactionRolePayload = Dict[int, ReactionRoleItemPayload]

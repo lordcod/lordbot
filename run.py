@@ -6,5 +6,13 @@ _log = logging.basicConfig(
     level=logging.DEBUG
 )
 
+_log = logging.basicConfig(
+    filename="botlog.txt",
+    level=logging.DEBUG,
+    filemode="w",
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+
+
 if __name__ == "__main__":
     main.start_bot()

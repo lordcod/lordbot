@@ -51,7 +51,7 @@ class MusicDropDown(nextcord.ui.StringSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         view = distribution[self.values[0]](interaction.guild)
-        await interaction.message.edit(view=view)
+        await interaction.response.edit_message(view=view)
 
 
 class MusicView(DefaultSettingsView):
@@ -101,4 +101,4 @@ class MusicView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

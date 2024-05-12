@@ -38,7 +38,7 @@ class MyIWMModal(nextcord.ui.Modal):
 
         view = WelcomerView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class IWMDropDown(nextcord.ui.StringSelect):
@@ -74,7 +74,7 @@ class IWMDropDown(nextcord.ui.StringSelect):
 
         view = WelcomerView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class MessageModal(nextcord.ui.Modal):
@@ -98,7 +98,7 @@ class MessageModal(nextcord.ui.Modal):
 
         view = WelcomerView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class ChannelsDropDown(nextcord.ui.ChannelSelect):
@@ -123,7 +123,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
 
         view = WelcomerView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class WelcomerView(DefaultSettingsView):
@@ -181,7 +181,7 @@ class WelcomerView(DefaultSettingsView):
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.success)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -218,4 +218,4 @@ class WelcomerView(DefaultSettingsView):
 
         view = self.__class__(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

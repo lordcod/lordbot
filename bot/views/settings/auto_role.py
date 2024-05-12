@@ -38,7 +38,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
                     content=f"The {role.mention} role cannot be assigned and is used for integration or by a bot.",
                     ephemeral=True
                 )
-            elif role.position >= interaction.guild.me.top_role.position:
+            elif not role.is_assignable():
                 await interaction.response.send_message(
                     content=f"The bot will not be able to assign the role {role.mention}, as that role is lower than the bot's. To resolve this issue, please move the role {interaction.guild.self_role.mention} to a higher position than {role.mention}.",
                     ephemeral=True
@@ -52,7 +52,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
 
         view = AutoRoleView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class AutoRoleView(DefaultSettingsView):
@@ -94,7 +94,7 @@ class AutoRoleView(DefaultSettingsView):
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Clear roles', style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -102,4 +102,4 @@ class AutoRoleView(DefaultSettingsView):
 
         view = self.__class__(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

@@ -57,8 +57,8 @@ class DropDown(nextcord.ui.StringSelect):
                 locale, 'settings.thread.init.channel', channel=channel.mention),
             color=color
         )
-        await interaction.message.edit(embed=embed,
-                                       view=ThreadData(channel, channel_data))
+        await interaction.response.edit_message(embed=embed,
+                                                view=ThreadData(channel, channel_data))
 
 
 class AutoThreadMessage(DefaultSettingsView):
@@ -92,7 +92,7 @@ class AutoThreadMessage(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
     async def addtion(self,
@@ -100,4 +100,4 @@ class AutoThreadMessage(DefaultSettingsView):
                       interaction: nextcord.Interaction):
         view = InstallThreadView(interaction.guild_id)
 
-        await interaction.message.edit(embed=None, view=view)
+        await interaction.response.edit_message(embed=None, view=view)

@@ -57,7 +57,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
             self.command_name
         )
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class ChannelsView(DefaultSettingsView):
@@ -114,4 +114,17 @@ class ChannelsView(DefaultSettingsView):
             self.command_name
         )
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        cdb = CommandDB(interaction.guild_id)
+
+        command_data = cdb.get(self.command_name, {})
+        command_data.setdefault("distribution", {})
+        command_data["distribution"].pop("allow-channel", None)
+
+        cdb.update(self.command_name, command_data)
+
+        view = ChannelsView(interaction.guild, self.command_name)
+        await interaction.response.edit_message(embed=view.embed, view=view)

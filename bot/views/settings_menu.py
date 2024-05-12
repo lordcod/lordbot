@@ -43,6 +43,11 @@ class SetDropdown(nextcord.ui.Select):
                 value='AutoRoles'
             ),
             nextcord.SelectOption(
+                label=i18n.t(locale, 'settings.module-name.role-reactions'),
+                emoji=Emoji.auto_role,
+                value='RoleReactions'
+            ),
+            nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.welcomer'),
                 emoji=Emoji.frame_person,
                 value='Welcomer'
@@ -85,7 +90,7 @@ class SetDropdown(nextcord.ui.Select):
     async def callback(self, interaction: nextcord.Interaction):
         value = self.values[0]
         view = moduls[value](interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class SettingsView(DefaultSettingsView):

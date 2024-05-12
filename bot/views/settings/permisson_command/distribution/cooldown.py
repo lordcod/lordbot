@@ -71,7 +71,7 @@ class CoolModal(nextcord.ui.Modal):
             self.command_name
         )
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class CooltypeDropDown(nextcord.ui.StringSelect):
@@ -116,7 +116,7 @@ class CooltypeDropDown(nextcord.ui.StringSelect):
                 interaction.guild,
                 self.command_name
             )
-            await interaction.message.edit(embed=view.embed, view=view)
+            await interaction.response.edit_message(embed=view.embed, view=view)
 
             return
 
@@ -172,7 +172,7 @@ class CooldownsView(DefaultSettingsView):
             self.command_name
         )
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -185,9 +185,10 @@ class CooldownsView(DefaultSettingsView):
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         cdb = CommandDB(interaction.guild.id)
-        command_data = cdb.get(self.command_name, {})
 
-        del command_data["distribution"]["cooldown"]
+        command_data = cdb.get(self.command_name, {})
+        command_data.setdefault("distribution", {})
+        command_data["distribution"].pop("cooldown", None)
 
         cdb.update(self.command_name, command_data)
 
@@ -198,4 +199,4 @@ class CooldownsView(DefaultSettingsView):
             self.command_name
         )
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

@@ -35,7 +35,7 @@ class Modal(nextcord.ui.Modal):
 
         view = ColorView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class ColorView(DefaultSettingsView):
@@ -70,7 +70,7 @@ class ColorView(DefaultSettingsView):
                    ):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label="Edit", style=nextcord.ButtonStyle.blurple)
     async def edit(self,
@@ -90,4 +90,4 @@ class ColorView(DefaultSettingsView):
 
         view = ColorView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

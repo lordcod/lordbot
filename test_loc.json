@@ -284,7 +284,7 @@
                 "de": "Beispiel №{number}",
                 "en": "Example №{number}",
                 "es": "Ejemplo №{number}",
-                "fr": "Exemple №{number}",
+                "fr": "Example №{number}",
                 "id": "Contoh №{number}",
                 "pl": "Przykład №{number}",
                 "ru": "Пример №{number}",
@@ -753,7 +753,7 @@
                 "fr": "Refusé | {name}",
                 "id": "Menolak | {name}",
                 "pl": "Odmówił | {name}",
-                "ru": "Отказался | {имя}",
+                "ru": "Отказался | {name}",
                 "tr": "Reddedildi | {name}"
             },
             "idea-content": {
@@ -1018,6 +1018,17 @@
                 "pl": "Role automatyczne",
                 "ru": "Автоматические роли",
                 "tr": "Otomatik roller"
+            },
+            "role-reactions": {
+                "da": "Reaktionsroller",
+                "de": "Reaktionsrollen",
+                "en": "Reaction Roles",
+                "es": "Roles de reacción",
+                "fr": "Rôles de réaction",
+                "id": "Peran reaksi",
+                "pl": "Role reakcji",
+                "ru": "Реакционные роли",
+                "tr": "Reaksiyon Rolleri"
             }
         },
         "button": {
@@ -1877,6 +1888,69 @@
                     "ru": "DJ-Rololes: {roles}",
                     "tr": "DJ-Roles: {roles}"
                 }
+            }
+        }
+    },
+    "delcat": {
+        "issue": {
+            "title": {
+                "da": "Er du sikker?",
+                "de": "Bist du sicher?",
+                "en": "Are you sure?",
+                "es": "¿Está seguro?",
+                "fr": "Es-tu sûr?",
+                "id": "Apa kamu yakin?",
+                "pl": "Jesteś pewny?",
+                "ru": "Вы уверены?",
+                "tr": "Emin misin?"
+            },
+            "description": {
+                "da": "Dette vil permanent slette kategorien {category} og hver kanal inde i den.",
+                "de": "Dadurch wird die Kategorie {category} und jeden Kanal darin dauerhaft gelöscht.",
+                "en": "This will permanently delete the {category} category and every channel inside of it.",
+                "es": "Esto eliminará permanentemente la categoría {category} y cada canal dentro de ella.",
+                "fr": "Cela supprimera en permanence la catégorie {category} et chaque canal à l'intérieur.",
+                "id": "Ini secara permanen akan menghapus kategori {category} dan setiap saluran di dalamnya.",
+                "pl": "To na stałe usunie kategorię {category} i każdy kanał w niej.",
+                "ru": "Это навсегда удалит категорию {category} и каждый канал внутри нее.",
+                "tr": "Bu, {category} kategorisini ve içindeki her kanalı kalıcı olarak silecektir."
+            }
+        },
+        "accept": {
+            "title": {
+                "da": "#{category} kategori slettet",
+                "de": "#{category} Kategorie gelöscht",
+                "en": "#{category} Category Deleted",
+                "es": "#{category} Categoría eliminada",
+                "fr": "#{category} catégorie supprimée",
+                "id": "#{category} kategori dihapus",
+                "pl": "#{category} usunięta kategoria",
+                "ru": "#{category} Категория удалена",
+                "tr": "#{category} kategori silindi"
+            },
+            "description": {
+                "da": "Og også eksternt {count} kanaler, der var i kategorien",
+                "de": "Und auch remote {count} -Kanäle, die in der Kategorie waren",
+                "en": "And also remotely {count} channels that were in the category",
+                "es": "Y también de forma remota {count} canales que estaban en la categoría",
+                "fr": "Et aussi des canaux à distance {count} qui étaient dans la catégorie",
+                "id": "Dan juga saluran {count} jarak jauh yang ada dalam kategori tersebut",
+                "pl": "A także zdalnie {count} kanały, które były w kategorii",
+                "ru": "А также удаленно {count} каналы, которые были в категории",
+                "tr": "Ve ayrıca kategorideki uzaktan {count} kanalları"
+            }
+        },
+        "cancel": {
+            "title": {
+                "da": "Kategori -deletion annulleret",
+                "de": "Kategorie Deletion Storniert",
+                "en": "Category Deletion Canceled",
+                "es": "Eliminación de categoría cancelada",
+                "fr": "Suppression de catégorie annulée",
+                "id": "Penghapusan kategori dibatalkan",
+                "pl": "Usuwanie kategorii anulowane",
+                "ru": "Удаление категории отменено",
+                "tr": "Kategori silme iptal edildi"
             }
         }
     }

@@ -38,6 +38,7 @@ class GuildsDB(Table):
     command_permissions = Colum(data_type=PostType.JSON, default="{}")
     ideas = Colum(data_type=PostType.JSON, default="{}")
     logs = Colum(data_type=PostType.JSON, default="{}")
+    role_reactions = Colum(data_type=PostType.JSON, default="{}")
     # message_state = Colum(data_type=PostType.JSON, default="{}")
     # voice_time_state = Colum(data_type=PostType.JSON, default="{}")
     # score_state = Colum(data_type=PostType.JSON, default="{}")
