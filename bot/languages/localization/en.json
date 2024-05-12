@@ -139,7 +139,8 @@
             "ideas": "Ideas",
             "welcomer": "Welcome new members",
             "auto-roles": "Automatic roles",
-            "role-reactions": "Reaction Roles"
+            "role-reactions": "Reaction Roles",
+            "logs": "Changelog"
         },
         "button": {
             "back": "Back",
