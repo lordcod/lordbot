@@ -1,3 +1,4 @@
+from bot.views.settings.logs import LogsView
 from bot.views.settings.role_reaction import RoleReactionView
 from .music import MusicView
 from .ideas import IdeasView
@@ -25,4 +26,6 @@ moduls = {
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
     'Ideas': IdeasView
+    'Ideas': IdeasView,
+    'Logs': LogsView
 }

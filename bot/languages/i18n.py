@@ -183,6 +183,6 @@ if __name__ == "__main__":
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    # from_i18n_translation(_parse_json(_load_file("test_loc.json")))
+    # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
     # to_folder("./bot/languages/localization")

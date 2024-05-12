@@ -1,6 +1,6 @@
 import nextcord
 
-from yandex_music_api.datas import Track
+from yandex_music_api.track import Track
 
 import random
 from typing import List, Union, Optional, Dict
@@ -57,7 +57,7 @@ class Queue:
     def clear(self, guild_id: int) -> None:
         self.data[guild_id] = []
 
-    def get(self, guild_id: int) -> Optional[Track]:
+    def get(self, guild_id) -> Optional[Track]:
         self.register_guild(guild_id)
         try:
             return self.data[guild_id][0]

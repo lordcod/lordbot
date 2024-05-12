@@ -3,13 +3,13 @@ import nextcord
 from nextcord import utils
 
 from bot.databases import GuildDateBases
-from yandex_music_api.datas import Track
+from yandex_music_api.track import Track
 from bot.languages import i18n
 
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bot.misc.voice.additionally import Queue, MusicPlayer
+    from bot.misc.voice import Queue, MusicPlayer
 
 
 class MusicDropDown(nextcord.ui.Select):

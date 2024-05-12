@@ -22,7 +22,7 @@ class Json:
 
     @staticmethod
     def dumps(data):
-        if not isinstance(data, dict):
+        if not isinstance(data, (dict, list)):
             return data
         try:
             return orjson.dumps(data).decode()
@@ -80,4 +80,9 @@ class NumberFormating:
 def adapt_dict(dict_var):
     data = NumberFormating.dumps(dict_var)
     data = Json.dumps(data)
+    return AsIs("'" + data + "'")
+
+
+def adapt_list(list_var):
+    data = Json.dumps(list_var)
     return AsIs("'" + data + "'")

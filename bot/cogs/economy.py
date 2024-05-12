@@ -3,6 +3,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases import EconomyMemberDB, GuildDateBases
+from bot.misc import logstool
 from bot.misc.lordbot import LordBot
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
@@ -51,6 +52,7 @@ class Economy(commands.Cog):
             )
             account[ctx.command.name] = wait_long
             account['balance'] += award
+            await logstool.Logs(ctx.guild).add_currency(ctx.author, award, reason=f'{ctx.command.name} reward')
         else:
             embed = nextcord.Embed(
                 title="The reward is not available",
@@ -157,6 +159,8 @@ class Economy(commands.Cog):
 
         from_account["balance"] -= sum
         to_account["balance"] += sum
+        await logstool.Logs(ctx.guild).add_currency(member, sum, reason=f'received from a {ctx.author.name} member')
+        await logstool.Logs(ctx.guild).remove_currency(ctx.author, sum, reason=f'passed to the {member.name} participant')
 
         await ctx.send(embed=embed)
 
@@ -245,7 +249,9 @@ class Economy(commands.Cog):
 
         account["balance"] += sum
 
+        await ctx.send(f"You have transferred the amount of **{sum}**{currency_emoji} to {member.display_name}")
         await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji}")
+        await logstool.Logs(ctx.guild).add_currency(member, sum, moderator=ctx.author)
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
@@ -265,13 +271,15 @@ class Economy(commands.Cog):
             await ctx.send("The amount must be positive")
             return
 
-        if 0 > (account.get('balance')-sum):
+        if account.get('balance') >= sum:
             await ctx.send('The operation cannot be performed because the balance will become negative during it')
             return
 
         account["balance"] -= sum
 
+        await ctx.send(f"You have withdrawn an amount of **{sum}**{currency_emoji} from {member.display_name}")
         await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
+        await logstool.Logs(ctx.guild).remove_currency(member, sum, moderator=ctx.author)
 
 
 def setup(bot):

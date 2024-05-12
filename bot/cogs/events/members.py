@@ -21,10 +21,10 @@ class MembersEvent(commands.Cog):
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
 
-        invite = await self.process_invites(member, gdb)
         await asyncio.gather(
+            self.process_invites(member, gdb),
             self.auto_roles(member, gdb),
-            self.auto_message(member, invite, gdb)
+            self.auto_message(member, gdb)
         )
 
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
@@ -38,7 +38,7 @@ class MembersEvent(commands.Cog):
 
         await member.add_roles(*roles, atomic=False)
 
-    async def auto_message(self, member: nextcord.Member, invite: nextcord.Invite | None, gdb: GuildDateBases):
+    async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
         guild = member.guild
         greeting_message: dict = gdb.get('greeting_message', {})
 

@@ -1,6 +1,7 @@
+from datetime import timedelta
 import nextcord
 from nextcord.ext import commands
-import timeit
+import time
 import asyncio
 from typing import Optional
 
@@ -19,46 +20,46 @@ class MemberTimeoutEvent(commands.Cog):
                 and hasattr(entry.before, "communication_disabled_until")):
             return
 
+        loctime = time.time()-self.bot.latency
+
         if (entry.before.communication_disabled_until is None and
                 entry.after.communication_disabled_until is not None):
-            self.bot.dispatch("timeout", entry.target, entry.user)
 
             timing = entry.target.communication_disabled_until.timestamp()
-            temp = timing-timeit.default_timer()
+            temp = timing-loctime
+
+            self.bot.dispatch(
+                "timeout", entry.target, temp, entry.user, entry.reason)
 
             th = self.bot.loop.call_later(
                 temp, asyncio.create_task, self.process_untimeout(entry.target))
 
-            self.bot.timeouts[entry.target.id] = (temp, timing, th)
+            self.bot.timeouts[entry.target.id] = (
+                temp, timing, th, loctime)
         if (entry.before.communication_disabled_until is not None and
                 entry.after.communication_disabled_until is None):
-            self.bot.dispatch("untimeout", entry.target, entry.user)
-
             try:
-                th = self.bot.timeouts[entry.target.id][2]
+                _data = self.bot.timeouts[entry.target.id]
+                duration = loctime-_data[3]
+                th = _data[2]
                 th._args[0].close()
                 th.cancel()
             except (KeyError, IndexError, AttributeError):
-                pass
-            self.bot.timeouts[entry.target.id] = None
+                duration = None
+            self.bot.dispatch("untimeout", entry.target,
+                              duration, entry.user, entry.reason)
+            self.bot.timeouts.pop(entry.target.id, None)
 
     async def process_untimeout(self, member: nextcord.Member):
-        self.bot.timeouts[member.id] = None
+        loctime = time.time()
+        try:
+            _data = self.bot.timeouts[member.id]
+            duration = loctime-_data[3]
+        except (KeyError, IndexError, AttributeError):
+            duration = None
+        self.bot.timeouts.pop(member.id, None)
         setattr(member, '_timeout', None)
-        self.bot.dispatch("untimeout", member, None)
-
-    async def on_timeout(self,
-                         member: nextcord.Member,
-                         moderator: nextcord.Member):
-        print(f"{moderator.display_name} выдал мут {member.display_name}")
-
-    async def on_untimeout(self,
-                           member: nextcord.Member,
-                           moderator: Optional[nextcord.Member] = None):
-        if moderator is None:
-            print(f"У {member.display_name} закончился мут!")
-            return
-        print(f"{moderator.display_name} забрал мут у {member.display_name}")
+        self.bot.dispatch("untimeout", member, duration, None, None)
 
 
 def setup(bot):
