@@ -1,17 +1,18 @@
 
 
 import asyncio
-import datetime
-from discord import Interaction
 import nextcord
 import time
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from bot.misc import giveaway as misc_giveaway
 from bot.misc.utils import translate_to_timestamp
 
+if TYPE_CHECKING:
+    from bot.misc.giveaway import GiveawayConfig, Giveaway
+
 
 class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
-    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         self.member = member
         self.giveaway_config = giveaway_config
         super().__init__(placeholder="Choose a giveaway sponsor")
@@ -28,7 +29,7 @@ class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
 
 
 class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
-    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         self.member = member
         self.giveaway_config = giveaway_config
         super().__init__(placeholder="Choose a giveaway channel", channel_types=[
@@ -46,7 +47,7 @@ class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
 
 
 class GiveawaySettingsPrizeModal(nextcord.ui.Modal):
-    def __init__(self, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+    def __init__(self, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         self.giveaway_config = giveaway_config
 
         super().__init__("Settings Giveaway")
@@ -79,7 +80,7 @@ class GiveawaySettingsPrizeModal(nextcord.ui.Modal):
 
 
 class GiveawaySettingsDescriptionModal(nextcord.ui.Modal):
-    def __init__(self, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+    def __init__(self, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         self.giveaway_config = giveaway_config
 
         super().__init__("Settings Giveaway")
@@ -99,7 +100,7 @@ class GiveawaySettingsDescriptionModal(nextcord.ui.Modal):
 
 
 class GiveawaySettingsDateendModal(nextcord.ui.Modal):
-    def __init__(self, guild_id: int, giveaway_config: 'misc_giveaway.GiveawayConfig') -> None:
+    def __init__(self, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         self.giveaway_config = giveaway_config
 
         super().__init__("Settings Giveaway")
@@ -134,7 +135,7 @@ class GiveawaySettingsDateendModal(nextcord.ui.Modal):
 class GiveawaySettingsView(nextcord.ui.View):
     embed: nextcord.Embed
 
-    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: Optional['misc_giveaway.GiveawayConfig'] = None) -> None:
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: Optional['GiveawayConfig'] = None) -> None:
         self.giveaway_config = giveaway_config or misc_giveaway.GiveawayConfig()
         self.member = member
         super().__init__()
@@ -198,7 +199,7 @@ class GiveawaySettingsView(nextcord.ui.View):
 
 
 class GiveawayConfirmView(nextcord.ui.View):
-    def __init__(self, giveaway: 'misc_giveaway.Giveaway') -> None:
+    def __init__(self, giveaway: 'Giveaway') -> None:
         self.giveaway = giveaway
         super().__init__()
 

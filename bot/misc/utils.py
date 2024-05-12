@@ -1,4 +1,10 @@
 from __future__ import annotations
+import asyncio
+from collections import namedtuple
+import time
+from typing import Any, TypeVar, overload
+import emoji
+
 import nextcord
 from nextcord.ext import commands
 
@@ -230,9 +236,20 @@ def clamp(val: Union[int, float],
     return min(maxv, max(minv, val))
 
 
-def is_emoji(text: str) -> bool:
+def is_default_emoji(text: str) -> bool:
     text = text.strip()
-    return any((regex.fullmatch(r'<a?:.+?:\d{18,}>', text), text in emoji.EMOJI_DATA))
+    return text in emoji.EMOJI_DATA
+
+
+def is_custom_emoji(text: str) -> bool:
+    text = text.strip()
+    if regex.fullmatch(r'<a?:.+?:\d{18,}>', text):
+        return True
+    return False
+
+
+def is_emoji(text: str) -> bool:
+    return is_default_emoji(text) or is_custom_emoji(text)
 
 
 def randquan(quan: int) -> int:
@@ -564,7 +581,7 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
 
     profile_image = await load_image_async(
         member.display_avatar.with_size(128).url)
-    profile = Editor(profile_image).resize((150, 150)).circle_image()\
+    profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     nunito = Font("assets/Nunito-ExtraBold.ttf", 40)
     nunito_small = Font("assets/Nunito-Black.ttf", 25)
@@ -584,7 +601,7 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
     background.text(
         (400, 320),
         member.display_name,
-        color=0xff0000,
+        color="#ff00a6",
         font=nunito_small,
         align="center"
     )

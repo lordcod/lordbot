@@ -30,7 +30,7 @@ class Modal(nextcord.ui.Modal):
 
         view = PrefixView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class PrefixView(DefaultSettingsView):
@@ -67,7 +67,7 @@ class PrefixView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
     async def edit(self,
@@ -85,4 +85,4 @@ class PrefixView(DefaultSettingsView):
         gdb.set('prefix', DEFAULT_PREFIX)
 
         view = PrefixView(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import logging
 import aiohttp
 import nextcord
 import regex
@@ -9,6 +10,9 @@ from bot.misc.utils import LordTimerHandler
 from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
+from bot.databases import db
+from bot.databases.db import DataBase, establish_connection
+from bot.databases.config import host, port, user, password, db_name
 from typing import Coroutine, List, Optional, Dict, Any
 
 from bot.resources.info import DEFAULT_PREFIX
@@ -26,6 +30,7 @@ def get_shard_list(shard_ids: str):
 
 
 class LordBot(commands.AutoShardedBot):
+    engine: DataBase
     ya_requests: Any = None
     invites_data: Dict[int, List[nextcord.Invite]] = {}
     timeouts = {}
@@ -86,8 +91,20 @@ class LordBot(commands.AutoShardedBot):
             shard_ids=shard_ids,
             shard_count=shard_count
         )
+        loop = asyncio.get_event_loop()
         i18n.from_folder("./bot/languages/localization")
         i18n.config['locale'] = 'en'
         self.session = aiohttp.ClientSession()
+        self.__with_ready__ = loop.create_future()
         self.lord_handler_timer = LordTimerHandler(self.loop)
         misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)
+        self.add_listener(self.listen_on_ready, 'on_ready')
+
+    async def listen_on_ready(self) -> None:
+        self.engine = engine = DataBase.create_engine(
+            host, port, user, password, db_name)
+        establish_connection(engine)
+        for t in db._tables:
+            t.set_engine(engine)
+            t.create()
+        self.__with_ready__.set_result(None)

@@ -3,7 +3,8 @@ import nextcord
 from bot.databases import GuildDateBases
 
 alphabet = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮', '🇯',
-            '🇰', '🇱', '🇲', '🇳', '🇴', '🇵', '🇶', '🇷', '🇸', '🇹', '🇺', '🇻', '🇼', '🇽', '🇾', '🇿']
+            '🇰', '🇱', '🇲', '🇳', '🇴', '🇵', '🇶', '🇷', '🇸', '🇹',
+            '🇺', '🇻', '🇼', '🇽', '🇾', '🇿']
 
 
 class CreatePoll(nextcord.ui.Modal):
@@ -63,7 +64,8 @@ class CreatePoll(nextcord.ui.Modal):
         message = await interaction.channel.send(embed=embed)
 
         for serial, _ in enumerate(choices):
-            await message.add_reaction(alphabet[serial])
+            interaction._state.loop.create_task(
+                message.add_reaction(alphabet[serial]))
 
         poll_data = {
             'title': question,

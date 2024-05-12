@@ -4,7 +4,7 @@ from types import NoneType
 
 
 @singledispatch
-def func(arg) -> None:
+def func(a) -> None:
     return
 
 

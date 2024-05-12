@@ -35,7 +35,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
 
         view = ModerationRolesView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class ModerationRolesView(DefaultSettingsView):
@@ -58,7 +58,7 @@ class ModerationRolesView(DefaultSettingsView):
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = ideas.IdeasView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -67,4 +67,4 @@ class ModerationRolesView(DefaultSettingsView):
         self.gdb.set('ideas', self.idea_datas)
 
         view = self.__class__(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

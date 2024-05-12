@@ -120,7 +120,7 @@ class ConfirmModal(nextcord.ui.Modal):
             view.demote.disabled = True
         view.approve.disabled = True
 
-        await interaction.message.edit(content=content, embed=embed, view=view)
+        await interaction.response.edit_message(content=content, embed=embed, view=view)
 
         if ideas_data.get('thread_delete') and (thread := interaction.message.thread):
             await thread.delete()
@@ -136,6 +136,7 @@ class ConfirmModal(nextcord.ui.Modal):
         )
 
         await approved_channel.send(embed=embed)
+        await logstool.Logs(interaction.guild).approve_idea(interaction.user, idea_author, idea_content, reason, idea_image)
 
 
 class DenyModal(nextcord.ui.Modal):
@@ -207,6 +208,77 @@ class DenyModal(nextcord.ui.Modal):
             await thread.delete()
 
         await interaction.message.edit(content=content, embed=embed, view=view)
+
+
+class DenyModal(nextcord.ui.Modal):
+    def __init__(self, guild_id: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = gdb.get('language')
+
+        super().__init__(i18n.t(locale, 'ideas.globals.title'))
+
+        self.reason = nextcord.ui.TextInput(
+            label="Argument:",
+            required=False,
+            style=nextcord.TextInputStyle.paragraph,
+            min_length=0,
+            max_length=1500,
+        )
+        self.add_item(self.reason)
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        await interaction.response.defer(ephemeral=True)
+
+        reason = self.reason.value
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = gdb.get('language')
+        ideas_settings: IdeasPayload = gdb.get('ideas')
+        idea_type_reaction = ideas_settings.get('reaction_system', 0)
+
+        mdb = MongoDB('ideas')
+        idea_data = mdb.get(interaction.message.id)
+        idea_content = idea_data.get('idea')
+        idea_image = idea_data.get('image')
+        idea_author_id = idea_data.get('user_id')
+        idea_author = interaction.guild.get_member(idea_author_id)
+
+        embed = nextcord.Embed(
+            title=i18n.t(locale, 'ideas.confirm-view.title'),
+            color=nextcord.Color.red()
+        )
+        embed.set_author(
+            name=idea_author.display_name,
+            icon_url=idea_author.display_avatar
+        )
+        embed.add_field(name=i18n.t(
+            locale, 'ideas.confirm-view.idea'), value=idea_content)
+        if reason:
+            embed.add_field(
+                name="Argument:",
+                value=reason,
+                inline=False
+            )
+        embed.set_footer(
+            text=i18n.t(locale, 'ideas.confirm-view.refused',
+                        name=interaction.user.display_name),
+            icon_url=interaction.user.display_avatar)
+        embed.set_image(idea_image)
+
+        content = i18n.t(locale, 'ideas.confirm-view.idea-content',
+                         mention=idea_author.mention)
+
+        if idea_type_reaction == ReactionSystemType.REACTIONS:
+            view = ConfirmView(interaction.guild_id)
+        elif idea_type_reaction == ReactionSystemType.BUTTONS:
+            view = ReactionConfirmView(interaction.guild_id)
+            view.promote.disabled = True
+            view.demote.disabled = True
+        view.deny.disabled = True
+
+        if ideas_settings.get('thread_delete') and (thread := interaction.message.thread):
+            await thread.delete()
+
+        await interaction.response.edit_message(content=content, embed=embed, view=view)
 
 
 class ConfirmView(nextcord.ui.View):
@@ -412,13 +484,14 @@ class IdeaModal(nextcord.ui.Modal):
         idea_data = {
             'user_id': interaction.user.id,
             'idea': idea,
-            'image': self.image.value
+            'image': image
         }
         mdb = MongoDB('ideas')
         mdb.set(mes.id, idea_data)
 
         Timeout.set(interaction.guild_id,
-                    interaction.user.id, cooldown)
+                    interaction.user.id, time.time()+cooldown)
+        await logstool.Logs(interaction.guild).create_idea(interaction.user, idea, image)
 
 
 class IdeaView(nextcord.ui.View):
