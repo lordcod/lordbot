@@ -1,6 +1,6 @@
 import nextcord
 
-from yandex_music_api.datas import Track
+from yandex_music_api.track import Track
 
 import random
 from typing import Union, Optional, Dict
