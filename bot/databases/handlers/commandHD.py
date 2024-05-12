@@ -25,11 +25,9 @@ class CommandDB:
 
         if not data:
             return default
-        return data
+        return Json.loads(data)
 
     def update(self, key: str, value: dict) -> None:
-        value = Json.dumps(value)
-
         engine.execute(
             """
                 UPDATE guilds 

@@ -1,3 +1,4 @@
+import traceback
 import nextcord
 import random
 import string
@@ -108,12 +109,12 @@ class CommandEvent(commands.Cog):
         self.bot = bot
         super().__init__()
 
-        # bot.after_invoke(self.after_invoke)
-        # bot.set_event(self.on_error)
-        # bot.set_event(self.on_command_error)
-        # bot.set_event(self.on_application_error)
+        bot.after_invoke(self.after_invoke)
+        bot.set_event(self.on_error)
+        bot.set_event(self.on_command_error)
+        bot.set_event(self.on_application_error)
 
-        # bot.add_check(self.permission_check)
+        bot.add_check(self.permission_check)
 
     async def on_application_error(
             self, interaction: nextcord.Interaction, error: Exception):
@@ -137,14 +138,18 @@ class CommandEvent(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
         Logger.error(
-            f"[{type(error).__name__}] Application error: {error}\nError key: {random_hex_key}")
+            f"[{type(error).__name__}] Application error: {error}\n"
+            f"Error key: {random_hex_key}"
+            f"{traceback.format_exc()}")
 
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx, error)
         await CommandError.process()
 
     async def on_error(self, event, *args, **kwargs):
-        Logger.error(event)
+        Logger.error(
+            f"Ignoring exception in {event}\n"
+            f"{traceback.format_exc()}")
 
     async def permission_check(self,  ctx: commands.Context):
         perch = PermissionChecker(ctx)

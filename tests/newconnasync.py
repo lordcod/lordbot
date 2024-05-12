@@ -13,16 +13,7 @@ async def run():
     conn = await asyncpg.connect(user=user, password=password,
                                  database=db_name, host=host,
                                  port=port)
-    values = await conn.fetch(
-        """SELECT member_id, 
-                  balance, 
-                  bank, 
-                  balance+bank as total
-         FROM economic
-        WHERE guild_id = '1179069504186232852'
-        ORDER BY total DESC;"""
-    )
-    print(values)
+    print(conn.fetch)
     await conn.close()
 
 loop = asyncio.get_event_loop()
