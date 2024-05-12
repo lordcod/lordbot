@@ -30,14 +30,6 @@ class Colum:
         self.engine = engine
 
     def add_colum(self, table_name: str) -> None:
-        print(table_name, self.name,
-              f"""
-                    ALTER TABLE {table_name}
-                    ADD {self.name} {self.data_type.value}
-                    {" PRIMARY KEY" if self.primary_key is True else ""}
-                    {" NOT NULL" if self.nullable is True else ""}
-                    {f" DEFAULT '{self.default}'" if self.default is not None else ""}
-                """)
         self.engine.execute(
             f"""
                     ALTER TABLE {table_name}

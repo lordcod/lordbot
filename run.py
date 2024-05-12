@@ -2,11 +2,6 @@ import logging
 from bot import main
 
 _log = logging.basicConfig(
-    filename="bot.log",
-    level=logging.DEBUG
-)
-
-_log = logging.basicConfig(
     filename="botlog.txt",
     level=logging.DEBUG,
     filemode="w",

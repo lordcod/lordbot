@@ -58,9 +58,13 @@ class ReactionsEvent(commands.Cog):
         role_reaction = gdb.get('role_reactions')
 
         try:
-            emoji = self.bot._connection._emojis[payload.emoji.id]
-            role_id = role_reaction[payload.message_id]['reactions'][str(
-                emoji)]
+            if payload.emoji.id is not None:
+                emoji = self.bot._connection._emojis[payload.emoji.id]
+                role_id = role_reaction[payload.message_id]['reactions'][str(
+                    emoji)]
+            else:
+                role_id = role_reaction[payload.message_id]['reactions'][str(
+                    payload.emoji)]
         except KeyError:
             return
 

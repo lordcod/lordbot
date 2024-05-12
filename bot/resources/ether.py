@@ -60,6 +60,8 @@ class Emoji(StrEnum):
     success = '<a:success:1165684794361917611>'
     warn = '<a:warn:1165684798686244874>'
 
+    empty_card = '<:empty_card:1239171805885894717>'
+
 
 channel_types_emoji = {
     0: Emoji.channel_text,

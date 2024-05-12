@@ -4,11 +4,14 @@ from typing import (
     Optional,
     List,
     TypedDict,
-    Dict
+    Dict,
     Tuple,
     TypedDict,
     Dict
 )
+
+if TYPE_CHECKING:
+    from bot.misc.logstool import LogType
 
 
 class GiveawayData(TypedDict):
@@ -54,26 +57,6 @@ class RoleShopPayload(TypedDict):
     name: Optional[str]
     description: Optional[str]
     using_limit: Optional[int]
-
-
-if TYPE_CHECKING:
-    from bot.misc.logstool import LogType
-
-IdeasPayload = TypedDict(
-    'IdeasPayload',
-    {
-        "enabled": Optional[bool],
-        "cooldown": Optional[int],
-
-        "channel-suggest-id": int,
-        "message-suggest-id": int,
-
-        "channel-offers-id": int,
-        "channel-approved-id": int,
-
-        "moderation-role-ids": List[int]
-    }
-)
 
 
 LogsPayload = Dict[int, List['LogType']]

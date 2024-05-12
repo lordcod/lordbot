@@ -212,9 +212,8 @@ class Economy(commands.Cog):
         await self.handle_rewards(ctx)
 
     @commands.command(name='work')
+    @check_prison()
     async def work(self, ctx: commands.Context):
-        # TODO logs
-
         loctime = time.time()
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
         gdb = GuildDateBases(ctx.guild.id)
@@ -246,6 +245,7 @@ class Economy(commands.Cog):
                 color=color
             )
         await ctx.send(embed=embed)
+        await logstool.Logs(ctx.guild).add_currency(ctx.author, amount, reason='part-time job')
 
     @commands.command(name="balance", aliases=["bal"])
     async def balance(self,
@@ -309,8 +309,6 @@ class Economy(commands.Cog):
 
     @commands.command(name="pay")
     @check_prison()
-    async def pay(self, ctx: commands.Context, member: nextcord.Member, sum: int):
-
     async def pay(self, ctx: commands.Context, member: nextcord.Member, amount: int):
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
@@ -330,7 +328,7 @@ class Economy(commands.Cog):
         embed = nextcord.Embed(
             title="Transfer of currency",
             color=color,
-            description=f"You were given **{amount}**{currency_emoji}"
+            description=f"You were given **{amount :,}**{currency_emoji}"
         )
         embed.set_footer(
             text=f'From {ctx.author.display_name}', icon_url=ctx.author.display_avatar)
@@ -348,8 +346,6 @@ class Economy(commands.Cog):
 
     @commands.command(name="deposit", aliases=["dep"])
     @check_prison()
-    async def deposit(self, ctx: commands.Context, sum: Union[Literal['all'], int]):
-
     async def deposit(self, ctx: commands.Context, amount: Union[Literal['all'], int]):
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
@@ -365,7 +361,7 @@ class Economy(commands.Cog):
         if amount <= 0:
             await ctx.send(content="Specify the amount more `0`")
             return
-        if (balance - amount) < 0:
+        if amount > balance:
             await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
         account['balance'] -= amount
@@ -374,7 +370,7 @@ class Economy(commands.Cog):
         embed = nextcord.Embed(
             title="Transfer of currency",
             color=color,
-            description=f"You have transferred **{amount}**{currency_emoji} to the bank account"
+            description=f"You have transferred **{amount :,}**{currency_emoji} to the bank account"
         )
         embed.set_footer(text=ctx.author.display_name,
                          icon_url=ctx.author.display_avatar)
@@ -397,7 +393,7 @@ class Economy(commands.Cog):
         if amount <= 0:
             await ctx.send(content="Specify the amount more `0`")
             return
-        if (bank - amount) < 0:
+        if amount > bank:
             await ctx.send(content=f"Not enough funds to check your balance use `{prefix}balance`")
             return
         account['balance'] += amount
@@ -406,7 +402,7 @@ class Economy(commands.Cog):
         embed = nextcord.Embed(
             title="Transfer of currency",
             color=color,
-            description=f"You have transferred **{amount}**{currency_emoji} to the account"
+            description=f"You have transferred **{amount :,}**{currency_emoji} to the account"
         )
         embed.set_footer(text=ctx.author.display_name,
                          icon_url=ctx.author.display_avatar)
@@ -415,9 +411,7 @@ class Economy(commands.Cog):
 
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
-    async def gift(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: int, *, flags: translate_flags = {}):
-
-    async def gift(self, ctx: commands.Context, member: Optional[nextcord.Member], amount: int):
+    async def gift(self, ctx: commands.Context, member: Optional[nextcord.Member], amount: int, *, flags: translate_flags = {}):
         if not member:
             member = ctx.author
 
@@ -426,30 +420,21 @@ class Economy(commands.Cog):
         currency_emoji = economic_settings.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
-        if sum != 'all' and 0 >= sum:
-        if amount > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
-            return
         if 0 >= amount:
             await ctx.send("The amount must be positive")
             return
 
         if flags.get('bank'):
-            account["bank"] += sum
+            account["bank"] += amount
         else:
-            account["balance"] += sum
-        account["balance"] += amount
+            account["balance"] += amount
 
-        await ctx.send(f"You have transferred the amount of **{sum}**{currency_emoji} to {member.display_name}")
-        await ctx.send(f"You passed {member.display_name}, **{sum}**{currency_emoji}")
-        await logstool.Logs(ctx.guild).add_currency(member, sum, moderator=ctx.author)
-        await ctx.send(f"You passed {member.display_name}, **{amount}**{currency_emoji}")
+        await ctx.send(f"You have transferred the amount of **{amount :,}**{currency_emoji} to {member.display_name}")
+        await logstool.Logs(ctx.guild).add_currency(member, amount, moderator=ctx.author)
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
-    async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], sum: Union[Literal['all'], int], *, flags: translate_flags = {}):
-
-    async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], amount: int):
+    async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], amount: Union[Literal['all'], int], *, flags: translate_flags = {}):
         if not member:
             member = ctx.author
 
@@ -458,37 +443,29 @@ class Economy(commands.Cog):
         currency_emoji = economic_settings.get('emoji')
         account = EconomyMemberDB(ctx.guild.id, member.id)
 
-        if sum != 'all' and 0 >= sum:
-        if amount > 1_000_000:
-            await ctx.send(f"The maximum amount for this server - {1_000_000: ,}{currency_emoji}")
-            return
-        if 0 >= amount:
+        if amount != 'all' and 0 >= amount:
             await ctx.send("The amount must be positive")
             return
+
         if flags.get('bank'):
-            if sum == 'all':
-                sum = account['bank']
-            if sum > account['bank']:
+            if amount == 'all':
+                amount = account['bank']
+            if amount > account['bank']:
                 await ctx.send('The operation cannot be performed because the bank balance will become negative during it')
                 return
 
-            account['bank'] -= sum
+            account['bank'] -= amount
         else:
-            if sum == 'all':
-                sum = account['balance']
-            if sum > account['balance']:
+            if amount == 'all':
+                amount = account['balance']
+            if amount > account['balance']:
                 await ctx.send('The operation cannot be performed because the balance will become negative during it')
                 return
-        if 0 > (account.get('balance')-amount):
-            await ctx.send('The operation cannot be performed because the balance will become negative during it')
-            return
 
-            account["balance"] -= sum
-        account["balance"] -= amount
+            account['balance'] -= amount
 
-        await ctx.send(f"You have withdrawn an amount of **{sum}**{currency_emoji} from {member.display_name}")
-        await ctx.send(f"You passed `{member.display_name}`, **{sum}**{currency_emoji} ")
-        await logstool.Logs(ctx.guild).remove_currency(member, sum, moderator=ctx.author)
+        await ctx.send(f"You have withdrawn an amount of **{amount :,}**{currency_emoji} from {member.display_name}")
+        await logstool.Logs(ctx.guild).remove_currency(member, amount, moderator=ctx.author)
 
     @commands.command()
     @check_prison()
@@ -540,6 +517,8 @@ class Economy(commands.Cog):
                     description=f"{ctx.author.mention}, you were able to steal an {calculated_debt: ,.0f}{currency_emoji}, but the victim lost the {debt: ,.0f}{currency_emoji}.",
                     color=color
                 )
+                await logstool.Logs(ctx.guild).add_currency(ctx.author, calculated_debt, reason='a successful attempt at theft')
+                await logstool.Logs(ctx.guild).remove_currency(member, debt, reason='a successful attempt at theft')
             else:
                 thief_account['balance'] += debt
                 victim_account['balance'] -= debt
@@ -548,6 +527,8 @@ class Economy(commands.Cog):
                     description=f"{ctx.author.mention}, you were able to steal an {debt: ,.0f}{currency_emoji}.",
                     color=color
                 )
+                await logstool.Logs(ctx.guild).add_currency(ctx.author, debt, reason='a successful attempt at theft')
+                await logstool.Logs(ctx.guild).remove_currency(member, debt, reason='a successful attempt at theft')
         else:
             thief_account['conclusion'] = conclusion
             debt = (1-win_chance) * thief_account['balance'] * 1/2
@@ -558,83 +539,11 @@ class Economy(commands.Cog):
                              f"And you were also put in jail for a <t:{conclusion}:R>."),
                 color=color
             )
+            await logstool.Logs(ctx.guild).remove_currency(ctx.author, debt, reason='a failed theft attempt')
         await ctx.send(embed=embed)
-
-    @commands.command()
-    @check_prison()
-    async def rob(self, ctx: commands.Context, member: nextcord.Member):
-        gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
-        economic_settings: dict = gdb.get('economic_settings')
-        currency_emoji = economic_settings.get('emoji')
-        theft_data = economic_settings.get('theft', DEFAULT_ECONOMY_THEFT)
-        scope = (theft_data['time_prison']['max'] -
-                 theft_data['time_prison']['min'] /
-                 theft_data['time_prison']['adaptive'])
-        conclusion = (
-            time.time() +
-            theft_data['time_prison']['adaptive'] *
-            random.randint(1, scope+1)
-        )
-        thief_account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
-        victim_account = EconomyMemberDB(ctx.guild.id, member.id)
-
-        if thief_account['rob']+theft_data['cooldown'] > time.time():
-            embed = nextcord.Embed(
-                title="Robbery",
-                description=f"{ctx.author.mention}, You can rob now, come through <t:{thief_account['rob']+theft_data['cooldown'] :.0f}:R>.",
-                color=color
-            )
-            await ctx.send(embed=embed)
-            return
-
-        thief_account['rob'] = time.time()
-        win_chance = clamp(
-            0.1, thief_account['balance']/(victim_account['balance']+thief_account['balance']), 0.75)
-        if member.status != nextcord.Status.offline:
-            win_chance -= 0.05
-        chance = random.random()
-        if win_chance > chance:
-            debt = win_chance * \
-                victim_account['balance'] * 1/2
-            if debt >= thief_account['balance']:
-                calculated_debt = (
-                    thief_account['balance'] * .6
-                                             * debt * .2
-                                             * randfloat(.8, 1.2)
-                )
-                thief_account['balance'] += calculated_debt
-                victim_account['balance'] -= debt
-                embed = nextcord.Embed(
-                    title="Robbery",
-                    description=f"{ctx.author.mention}, you were able to steal an {calculated_debt: ,.0f}{currency_emoji}, but the victim lost the {debt: ,.0f}{currency_emoji}.",
-                    color=color
-                )
-            else:
-                thief_account['balance'] += debt
-                victim_account['balance'] -= debt
-                embed = nextcord.Embed(
-                    title="Robbery",
-                    description=f"{ctx.author.mention}, you were able to steal an {debt: ,.0f}{currency_emoji}.",
-                    color=color
-                )
-        else:
-            thief_account['conclusion'] = conclusion
-            debt = (1-win_chance) * thief_account['balance'] * 1/2
-            thief_account['balance'] -= debt
-            embed = nextcord.Embed(
-                title="Robbery",
-                description=(f"{ctx.author.mention}, you couldn't steal anything during the robbery, but you lost {debt: ,.0f}{currency_emoji}.\n"
-                             f"And you were also put in jail for a <t:{conclusion}:R>."),
-                color=color
-            )
-        await ctx.send(embed=embed)
-        await ctx.send(f"You passed `{member.display_name}`, **{amount}**{currency_emoji} ")
 
     @commands.command(name="roulette", aliases=["rou"])
     async def roulette(self, ctx: commands.Context, amount: int, *, val: str):
-        # TODO logs
-
         gdb = GuildDateBases(ctx.guild.id)
         prefix = gdb.get('prefix')
         color = gdb.get('color')
@@ -660,6 +569,7 @@ class Economy(commands.Cog):
             raise TypeError('Planned error')
 
         account["balance"] -= amount
+        await logstool.Logs(ctx.guild).remove_currency(ctx.author, amount, reason='the beginning of the roulette game')
 
         if rg := roulette_games.get(ctx.guild.id):
             postpone, listener, mes = rg
@@ -714,11 +624,15 @@ class Economy(commands.Cog):
                     if roulette_item["random_condition"](_arg, ran):
                         account["balance"] += _amount * \
                             roulette_item["multiplier"]
+                        await logstool.Logs(ctx.guild).add_currency(_member,
+                                                                    _amount *
+                                                                    roulette_item["multiplier"],
+                                                                    reason='the game of roulette won')
                         results.append(
-                            f"{_member.mention} won **{_amount * roulette_item['multiplier']}**{currency_emoji}")
+                            f"{_member.mention} won **{_amount * roulette_item['multiplier'] :,}**{currency_emoji}")
                     else:
                         results.append(
-                            f"{_member.mention} lost **{_amount}**{currency_emoji}")
+                            f"{_member.mention} lost **{_amount :,}**{currency_emoji}")
                     break
         win_color = 'red' if arguments_roulette[6]["random_condition"](
             0, ran) else 'black'
@@ -733,8 +647,6 @@ class Economy(commands.Cog):
 
     @commands.command(name="blackjack", aliases=["bj"])
     async def blackjack(self, ctx: commands.Context, amount: int):
-        # TODO logs
-
         gdb = GuildDateBases(ctx.guild.id)
         economic_settings: dict = gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
@@ -757,6 +669,7 @@ class Economy(commands.Cog):
             raise TypeError('Planned error')
 
         account["balance"] -= amount
+        await logstool.Logs(ctx.guild).remove_currency(ctx.author, amount, reason='the beginning of the blackjack game')
         bjg = BlackjackGame(ctx.author, amount)
 
         if bjg.is_avid_winner() is not None:
@@ -764,8 +677,10 @@ class Economy(commands.Cog):
             match bjg.is_avid_winner():
                 case 2:
                     account["balance"] += amount
+                    await logstool.Logs(ctx.guild).add_currency(ctx.author, amount, reason='draw at blackjack')
                 case 1:
                     account["balance"] += 3.5*amount
+                    await logstool.Logs(ctx.guild).add_currency(ctx.author, amount, reason='a golden point in blackjack. victory')
             bjg.complete()
             return
 

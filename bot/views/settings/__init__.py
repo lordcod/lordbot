@@ -25,7 +25,6 @@ moduls = {
     'AutoRoles': AutoRoleView,
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
-    'Ideas': IdeasView
     'Ideas': IdeasView,
     'Logs': LogsView
 }

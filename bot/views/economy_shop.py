@@ -131,7 +131,7 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
             return
         if role_data.get('amount') > emdb.get('balance'):
             await interaction.response.send_message(
-                f"Your balance must be more than {role_data.get('amount')}{economy_settings.get('emoji')}",
+                f"Your balance must be more than {role_data.get('amount') :,}{economy_settings.get('emoji')}",
                 ephemeral=True)
             return
 
@@ -176,7 +176,7 @@ class EconomyShopView(menus.Menus):
                 name=role.get('name') or f"Role #{num}",
                 value=(
                     f"・Role: <@&{role.get('role_id')}>\n"
-                    f"・Amount: {role.get('amount')}{self.economy_settings.get('emoji')}\n"
+                    f"・Amount: {role.get('amount') :,}{self.economy_settings.get('emoji')}\n"
                     f"・Purchase limit: {role_limit}"
                 ),
                 inline=False

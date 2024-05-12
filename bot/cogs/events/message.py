@@ -6,7 +6,7 @@ import nextcord
 import math
 from nextcord.ext import commands
 
-from bot.databases import GuildDateBases
+from bot.databases import GuildDateBases, localdb
 from bot.misc import logstool
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import is_emoji

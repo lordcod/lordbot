@@ -2,7 +2,6 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.misc.lordbot import LordBot
-from bot.databases.db import engine
 from bot.resources import check
 from bot.resources.ether import Emoji
 
@@ -73,7 +72,7 @@ class Teams(commands.Cog):
         *,
         query: str
     ):
-        engine.execute(query)
+        self.bot.engine.execute(query)
         await ctx.message.add_reaction(Emoji.success)
 
 

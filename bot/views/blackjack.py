@@ -2,6 +2,7 @@ from typing import Coroutine, Any
 import nextcord
 
 from bot.databases.handlers.economyHD import EconomyMemberDB
+from bot.misc import logstool
 from bot.misc.utils import BlackjackGame
 
 
@@ -38,7 +39,9 @@ class BlackjackView(nextcord.ui.View):
         match self.bjg.is_winner():
             case 2:
                 self.account["balance"] += self.bjg.amount
+                await logstool.Logs(self.bjg.member.guild).add_currency(self.bjg.member, self.bjg.amount, reason='draw at blackjack')
             case 1:
                 self.account["balance"] += 2*self.bjg.amount
+                await logstool.Logs(self.bjg.member.guild).add_currency(self.bjg.member, self.bjg.amount, reason='winning at blackjack')
 
         self.bjg.complete()

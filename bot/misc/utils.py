@@ -16,7 +16,7 @@ import orjson
 from asyncio import TimerHandle
 from collections import namedtuple
 from typing import (Coroutine, Dict,  Optional,  Tuple, Union,
-                    Mapping, Any, Iterable, SupportsIndex, Self, List)
+                    Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
 from typing import Any, Coroutine, Dict, Iterable,  Optional, Self, SupportsIndex,  Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
@@ -27,6 +27,8 @@ from easy_pil import Editor, Font, load_image_async
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from cryptography.fernet import Fernet
+
+from bot.resources.ether import Emoji
 
 
 T = TypeVar('T')
@@ -209,7 +211,7 @@ class BlackjackGame:
         embed.add_field(
             name="Dealer Hand",
             value=(
-                f"{self.dealer_cards[0]} <:test_carts:1235931588273897492>\n\n"
+                f"{self.dealer_cards[0]} {Emoji.empty_card}\n\n"
                 f"Value: {self.calculate_result(self.dealer_cards[0:1])}"
             )
         )
@@ -247,11 +249,11 @@ class BlackjackGame:
 
         match self.is_winner():
             case 2:
-                return f"Draw {self.amount}{currency_emoji}"
+                return f"Draw {self.amount :,}{currency_emoji}"
             case 1:
-                return f"Won {int(1.5*self.amount)}{currency_emoji}" if self.is_avid_winner() == 1 else f"Won {self.amount}{currency_emoji}"
+                return f"Won {1.5*self.amount :,.0f}{currency_emoji}" if self.is_avid_winner() == 1 else f"Won {self.amount :,}{currency_emoji}"
             case 0:
-                return f"Loss -{self.amount}{currency_emoji}"
+                return f"Loss -{self.amount :,}{currency_emoji}"
 
     def is_exceeds_your(self) -> int:
         return self.your_value > 21
