@@ -142,6 +142,10 @@ def lord_format(
 
 
 def translate_flags(text: str) -> dict:
+    if not text:
+        return {}
+    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-\s]+)?(\s|$)){1,}", text):
+        raise TypeError("Not a flag.")
     return dict(map(
         lambda item: (item[0], item[1]) if item[1] else (item[0], True),
         regex.findall(
@@ -154,15 +158,8 @@ def translate_flags(text: str) -> dict:
 async def clone_message(message: nextcord.Message) -> dict:
     content = message.content
     embeds = message.embeds
-    files = []
-    for attach in message.attachments:
-        filebytes = await attach.read()
-        files.append(nextcord.File(
-            fp=filebytes,
-            filename=attach.filename,
-            description=attach.description,
-            spoiler=attach.is_spoiler()
-        ))
+    files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
+                                   for attach in message.attachments])
 
     return {
         "content": content,
@@ -453,6 +450,10 @@ def get_award(number):
     }
     award = awards.get(number, number)
     return award
+
+
+def randfloat(a: float | int, b: float | int, scope: int = 14) -> float:
+    return random.randint(int(a*10**scope), int(b*10**scope)) / 10**scope
 
 
 async def generate_message(content: str) -> dict:

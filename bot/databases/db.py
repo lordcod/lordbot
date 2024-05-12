@@ -54,6 +54,8 @@ class EconomicDB(Table):
     daily = Colum(data_type=PostType.BIGINT, default="0")
     weekly = Colum(data_type=PostType.BIGINT, default="0")
     monthly = Colum(data_type=PostType.BIGINT, default="0")
+    rob = Colum(data_type=PostType.BIGINT, default="0")
+    conclusion = Colum(data_type=PostType.BIGINT, default="0")
 
 
 class RolesDB(Table):
