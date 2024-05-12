@@ -110,7 +110,7 @@ class ShopModal(nextcord.ui.Modal):
 
         view = ShopView(interaction.guild,
                         interaction.guild.get_role(self.role_id))
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class ShopDropDown(nextcord.ui.RoleSelect):
@@ -146,7 +146,7 @@ class ShopDropDown(nextcord.ui.RoleSelect):
             )
         else:
             view = ShopView(interaction.guild, role)
-            await interaction.message.edit(embed=view.embed, view=view)
+            await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class ShopView(DefaultSettingsView):
@@ -187,7 +187,7 @@ class ShopView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = economy.Economy(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label="Create", style=nextcord.ButtonStyle.success, disabled=True)
     async def create(self,
@@ -214,4 +214,4 @@ class ShopView(DefaultSettingsView):
         self.gdb.set('economic_settings', economy_settings)
 
         view = ShopView(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

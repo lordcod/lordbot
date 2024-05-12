@@ -39,7 +39,7 @@ class Modal(nextcord.ui.Modal):
 
         view = EmojiView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 class SelectedEmojiDropDown(nextcord.ui.StringSelect):
@@ -80,7 +80,7 @@ class EmojiView(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = economy.Economy(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.blurple)
     async def install(self,
@@ -103,4 +103,4 @@ class EmojiView(DefaultSettingsView):
 
         view = EmojiView(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

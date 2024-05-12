@@ -36,4 +36,4 @@ class ModalBuilder(nextcord.ui.Modal):
         gdb.set('thread_messages', forum_message)
 
         view = thread_message.AutoThreadMessage(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

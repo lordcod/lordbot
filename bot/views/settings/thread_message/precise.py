@@ -36,7 +36,7 @@ class ThreadData(DefaultSettingsView):
                    interaction: nextcord.Interaction):
         view = thread_message.AutoThreadMessage(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Message', style=nextcord.ButtonStyle.success)
     async def message(self,
@@ -73,4 +73,4 @@ class ThreadData(DefaultSettingsView):
         self.gdb.set('thread_messages', self.forum_message)
 
         view = thread_message.AutoThreadMessage(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

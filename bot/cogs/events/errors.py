@@ -1,5 +1,8 @@
 import nextcord
+import random
+import string
 from nextcord.ext import commands
+from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
@@ -94,8 +97,8 @@ class PermissionChecker:
             raise TypeError(retry)
 
     allowed_types = {
-        'allow-roles': _is_allowed_role,
-        'allow-channels': _is_allowed_channel,
+        'allow-role': _is_allowed_role,
+        'allow-channel': _is_allowed_channel,
         'cooldown': _is_cooldown
     }
 
@@ -105,16 +108,36 @@ class CommandEvent(commands.Cog):
         self.bot = bot
         super().__init__()
 
-        bot.after_invoke(self.after_invoke)
+        # bot.after_invoke(self.after_invoke)
         # bot.set_event(self.on_error)
-        bot.set_event(self.on_command_error)
-        bot.set_event(self.on_application_error)
+        # bot.set_event(self.on_command_error)
+        # bot.set_event(self.on_application_error)
 
         # bot.add_check(self.permission_check)
 
     async def on_application_error(
             self, interaction: nextcord.Interaction, error: Exception):
-        pass
+        if interaction.response.is_done():
+            return
+
+        gdb = GuildDateBases(interaction.guild_id)
+        color = gdb.get('color')
+
+        random_hex_key = ''.join(
+            [random.choice(string.hexdigits) for _ in range(10)])
+
+        embed = nextcord.Embed(
+            title="The interaction time has expired",
+            description=(
+                "A critical error occurred while processing the command\n"
+                f"Error key: **{random_hex_key}**"
+            ),
+            color=color
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        Logger.error(
+            f"[{type(error).__name__}] Application error: {error}\nError key: {random_hex_key}")
 
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx, error)
