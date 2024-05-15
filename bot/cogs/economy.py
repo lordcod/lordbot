@@ -1,20 +1,14 @@
 
-import random
-import random
-import asyncio
-import random
-import re
 import nextcord
 from nextcord.ext import commands
-
-
-import time
-from typing import Callable, Dict, List, Optional, Tuple, TypedDict, Union, Literal
 from nextcord.utils import escape_markdown
 
+
+import random
+import asyncio
 import time
 import orjson
-from typing import Optional, Union, Literal
+from typing import Callable, Dict, List, Optional, Tuple, TypedDict, Union, Literal
 
 
 from bot.databases import EconomyMemberDB, GuildDateBases
@@ -25,15 +19,8 @@ from bot.misc.lordbot import LordBot
 from bot.misc.utils import clamp, randfloat, translate_flags
 from bot.resources.errors import NotActivateEconomy
 from bot.resources.ether import Emoji
-from bot.misc.utils import BlackjackGame, get_award
-from nextcord.utils import escape_markdown
-
-import time
-from typing import Optional, Union, Literal
-
+from bot.misc.utils import BlackjackGame
 from bot.resources.info import DEFAULT_ECONOMY_THEFT
-from bot.views.economy_shop import EconomyShopView
-
 from bot.views.blackjack import BlackjackView
 
 
@@ -536,7 +523,7 @@ class Economy(commands.Cog):
             embed = nextcord.Embed(
                 title="Robbery",
                 description=(f"{ctx.author.mention}, you couldn't steal anything during the robbery, but you lost {debt: ,.0f}{currency_emoji}.\n"
-                             f"And you were also put in jail for a <t:{conclusion}:R>."),
+                             f"And you were also put in jail for a <t:{conclusion :.0f}:R>."),
                 color=color
             )
             await logstool.Logs(ctx.guild).remove_currency(ctx.author, debt, reason='a failed theft attempt')

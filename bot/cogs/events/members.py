@@ -1,3 +1,4 @@
+import functools
 import nextcord
 from nextcord.ext import commands
 
@@ -10,6 +11,13 @@ import time
 from typing import Optional
 
 from bot.misc.lordbot import LordBot
+
+
+def disable(func):
+    @functools.wraps(func)
+    async def wrapped(*args, **kwargs):
+        return None
+    return wrapped
 
 
 class MembersEvent(commands.Cog):
@@ -61,6 +69,7 @@ class MembersEvent(commands.Cog):
 
         await channel.send(**message_data)
 
+    @disable
     async def process_invites(self, member: nextcord.Member, gdb: GuildDateBases) -> nextcord.Invite | None:
         old_invites = self.bot.invites_data.get(member.guild.id, [])
         new_invites = await member.guild.invites()
@@ -84,7 +93,8 @@ class MembersEvent(commands.Cog):
 
         return invite
 
-    @ commands.command()
+    @commands.command()
+    @disable
     async def invites(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')

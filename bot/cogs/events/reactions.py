@@ -1,5 +1,4 @@
 
-import emoji
 import nextcord
 from nextcord.ext import commands
 import nextcord.types

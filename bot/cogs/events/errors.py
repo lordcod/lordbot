@@ -3,7 +3,7 @@ import nextcord
 import random
 import string
 from nextcord.ext import commands
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown

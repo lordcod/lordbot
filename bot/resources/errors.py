@@ -144,6 +144,8 @@ class CallbackCommandError:
     async def MissingRequiredArgument(self):
         title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
         color = self.gdb.get('color')
+        
+        self.ctx
 
         cmd_data = get_command(self.ctx.command.name)
         using = f"`{cmd_data.get('name')}{' '+' '.join([arg.get(self.locale) for arg in cmd_data.get('arguments')]) if cmd_data.get('arguments') else ''}`"

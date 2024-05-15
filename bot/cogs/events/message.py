@@ -26,6 +26,13 @@ LAST_MESSAGES_USER = {}
 _pat_current_delay = {}
 
 
+def disable(func):
+    @functools.wraps(func)
+    async def wrapped(*args, **kwargs):
+        return None
+    return wrapped
+
+
 def create_delay_at_pat(delay: float):
     def _create_delay_at(func):
         @functools.wraps(func)
@@ -51,12 +58,13 @@ class MessageEvent(commands.Cog):
         await asyncio.gather(
             self.add_reactions(message),
             self.process_mention(message),
-            self.give_score(message),
-            self.give_message_score(message),
+            # self.give_score(message),
+            # self.give_message_score(message),
             # self.process_auto_translation(message)
         )
 
     @create_delay_at_pat(15)
+    @disable
     async def process_auto_translation(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
         auto_translation = gdb.get('auto_translate')
@@ -120,10 +128,12 @@ class MessageEvent(commands.Cog):
 
             asyncio.create_task(message.channel.send(embed=embed))
 
+    @disable
     async def give_message_score(self, message: nextcord.Message) -> None:
         MESSAGE_STATE_DB.setdefault(message.author.id, 0)
         MESSAGE_STATE_DB[message.author.id] += 1
 
+    @disable
     async def give_score(self, message: nextcord.Message) -> None:
         if message.author.bot:
             return
@@ -165,7 +175,7 @@ class MessageEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_audit_log_entry_create(self, entry: nextcord.AuditLogEntry):
-        if entry.action != nextcord.AuditLogAction.message_delete:
+        if entry.action != nextcord.AuditLogAction.message_delete or entry.target.id is None:
             return
         await logstool.set_message_delete_audit_log(entry.user, entry.extra.channel.id, entry.target.id)
 

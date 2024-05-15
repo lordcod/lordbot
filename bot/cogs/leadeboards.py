@@ -279,7 +279,7 @@ class Leaderboards(commands.Cog):
     @commands.command(name="leaderboard", aliases=["lb", "leaders", "top"])
     async def leaderboard(self, ctx: commands.Context):
         message = await ctx.send("Uploading data...")
-        await LeaderboardTypes.set_score_lb(ctx.author, ctx.guild, message)
+        await LeaderboardTypes.set_balance_lb(ctx.author, ctx.guild, message)
 
 
 def setup(bot):

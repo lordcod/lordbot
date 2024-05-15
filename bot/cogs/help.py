@@ -8,7 +8,6 @@ from bot.languages import help as help_info, i18n
 from bot.languages.help import get_command
 from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import FissionIterator
 from bot.views.help import HelpView
 
 
