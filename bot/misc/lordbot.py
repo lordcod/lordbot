@@ -108,3 +108,8 @@ class LordBot(commands.AutoShardedBot):
             t.set_engine(engine)
             t.create()
         self.__with_ready__.set_result(None)
+
+    def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
+        if not self.__with_ready__.done():
+            return
+        return super().dispatch(event_name, *args, **kwargs)
