@@ -1,12 +1,12 @@
 import logging
 from bot import main
 
-# _log = logging.basicConfig(
-#     filename="bot.log",
-#     level=logging.DEBUG,
-#     filemode="w",
-#     format="%(asctime)s %(levelname)s %(message)s"
-# )
+_log = logging.basicConfig(
+    filename="bot.log",
+    level=logging.DEBUG,
+    filemode="w",
+    format="%(asctime)s %(levelname)s %(message)s"
+)
 
 
 if __name__ == "__main__":

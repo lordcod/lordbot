@@ -19,7 +19,7 @@ class ReadyEvent(commands.Cog):
         try:
             await asyncio.wait_for(self.bot.__with_ready__, timeout=30)
         except asyncio.TimeoutError:
-            await self.bot.close()
+            return
         await self.process_temp_roles()
         await self.process_temp_bans()
 

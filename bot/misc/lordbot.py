@@ -3,6 +3,7 @@ import asyncio
 import logging
 import aiohttp
 import nextcord
+import psycopg2
 import regex
 from nextcord.ext import commands
 
@@ -91,18 +92,28 @@ class LordBot(commands.AutoShardedBot):
             shard_ids=shard_ids,
             shard_count=shard_count
         )
+
         loop = asyncio.get_event_loop()
+
         i18n.from_folder("./bot/languages/localization")
         i18n.config['locale'] = 'en'
+
         self.session = aiohttp.ClientSession()
+
         self.__with_ready__ = loop.create_future()
+
         self.lord_handler_timer = LordTimerHandler(self.loop)
         misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)
+
         self.add_listener(self.listen_on_ready, 'on_ready')
 
     async def listen_on_ready(self) -> None:
-        self.engine = engine = DataBase.create_engine(
-            host, port, user, password, db_name)
+        try:
+            self.engine = engine = DataBase.create_engine(
+                host, port, user, password, db_name)
+        except psycopg2.OperationalError:
+            await self.close()
+            return
         establish_connection(engine)
         for t in db._tables:
             t.set_engine(engine)
