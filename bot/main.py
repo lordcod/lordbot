@@ -1,7 +1,10 @@
+import sys
 from bot.misc import env
 from bot.misc.lordbot import LordBot
 
 import os
+
+from bot.misc.utils import translate_flags
 
 
 bot = LordBot()
@@ -20,6 +23,11 @@ def load_dir(dirpath: str) -> None:
 
 
 def start_bot():
+    flags = translate_flags(' '.join(sys.argv[1:]))
+
     load_dir("./bot/cogs")
 
-    bot.run(env.Tokens.token)
+    if token_name := flags.get('token'):
+        bot.run(getattr(env.Tokens, 'token_'+token_name))
+    else:
+        bot.run(env.Tokens.token)

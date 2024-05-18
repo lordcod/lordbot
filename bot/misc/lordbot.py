@@ -1,13 +1,14 @@
 from __future__ import annotations
 import asyncio
 import logging
+import sys
 import aiohttp
 import nextcord
 import psycopg2
 import regex
 from nextcord.ext import commands
 
-from bot.misc.utils import LordTimerHandler
+from bot.misc.utils import LordTimerHandler, translate_flags
 from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
@@ -81,7 +82,9 @@ class LordBot(commands.AutoShardedBot):
         setattr(self, name, coro)
 
     def __init__(self) -> None:
-        shard_ids, shard_count = input("Shared info: ").split("/")
+        flags = translate_flags(' '.join(sys.argv[1:]))
+        shard_ids, shard_count = (flags.get(
+            'shards') or input("Shared info: ")).split("/")
         shard_count = int(shard_count)
         shard_ids = get_shard_list(shard_ids)
 

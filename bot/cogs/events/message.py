@@ -58,9 +58,9 @@ class MessageEvent(commands.Cog):
         await asyncio.gather(
             self.add_reactions(message),
             self.process_mention(message),
-            # self.give_score(message),
-            # self.give_message_score(message),
-            # self.process_auto_translation(message)
+            self.give_score(message),
+            self.give_message_score(message),
+            self.process_auto_translation(message)
         )
 
     @create_delay_at_pat(15)

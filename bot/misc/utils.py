@@ -308,12 +308,12 @@ def lord_format(
 def translate_flags(text: str) -> dict:
     if not text:
         return {}
-    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-\s]+)?(\s|$)){1,}", text):
+    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)){1,}", text):
         raise TypeError("Not a flag.")
     return dict(map(
         lambda item: (item[0], item[1]) if item[1] else (item[0], True),
         regex.findall(
-            r"\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-]+)?(\s|$)",
+            r"\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)",
             text
         )
     ))
