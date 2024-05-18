@@ -67,7 +67,7 @@ class MessageEvent(commands.Cog):
     @disable
     async def process_auto_translation(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
-        auto_translation = gdb.get('auto_translate')
+        auto_translation = await gdb.get('auto_translate')
 
         if not (message.channel.id in auto_translation
                 and message.content) or message.author.bot:
@@ -76,9 +76,8 @@ class MessageEvent(commands.Cog):
         webhooks = await message.channel.webhooks()
         for wh in webhooks:
             if wh.user != self.bot.user:
-                continue
-            bot_wh = wh
-            break
+                bot_wh = wh
+                break
         else:
             bot_wh = await message.channel.create_webhook(name=self.bot.user.display_name,
                                                           avatar=self.bot.user.display_avatar)
@@ -99,7 +98,7 @@ class MessageEvent(commands.Cog):
     async def add_reactions(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
 
-        if (reactions := gdb.get('reactions', {})) and (
+        if (reactions := await gdb.get('reactions', {})) and (
                 data_reactions := reactions.get(message.channel.id)):
             for reat in data_reactions:
                 if not is_emoji(reat):
@@ -110,9 +109,9 @@ class MessageEvent(commands.Cog):
     async def process_mention(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
 
-        color = gdb.get('color')
-        locale = gdb.get('language')
-        prefix = gdb.get('prefix')
+        color = await gdb.get('color')
+        locale = await gdb.get('language')
+        prefix = await gdb.get('prefix')
 
         if message.content.strip() == self.bot.user.mention:
             embed = nextcord.Embed(

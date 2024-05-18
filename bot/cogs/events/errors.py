@@ -24,7 +24,7 @@ class PermissionChecker:
         ctx = self.ctx
         command_name = ctx.command.qualified_name
         cdb = CommandDB(ctx.guild.id)
-        self.command_permissions = cdb.get(command_name, {})
+        self.command_permissions = await cdb.get(command_name, {})
 
         enabled = await self.is_enabled()
         allowed = await self.is_allowed()
@@ -122,7 +122,7 @@ class CommandEvent(commands.Cog):
             return
 
         gdb = GuildDateBases(interaction.guild_id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         random_hex_key = ''.join(
             [random.choice(string.hexdigits) for _ in range(10)])

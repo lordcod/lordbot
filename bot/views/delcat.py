@@ -1,21 +1,22 @@
 import asyncio
 from typing import Any, Coroutine
 import nextcord
-import asyncio
 
 from bot.languages import i18n
 from bot.databases import GuildDateBases
+from bot.misc.utils import to_async
 from bot.resources.ether import Emoji
 
 
+@to_async
 class DelCatView(nextcord.ui.View):
-    def __init__(
+    async def __ainit__(
         self,
         member: nextcord.Member,
         category: nextcord.CategoryChannel
     ) -> None:
         gdb = GuildDateBases(member.guild.id)
-        self.locale = gdb.get('language')
+        self.locale = await gdb.get('language')
 
         self.member = member
         self.category = category

@@ -20,7 +20,7 @@ class GuildsEvent(commands.Cog):
         gdb = GuildDateBases(guild.id)
         delay = 60 * 60 * 24 * 3
         self.bot.lord_handler_timer.create_timer_handler(
-            delay, gdb.adelete(), f'guild-deleted:{guild.id}')
+            delay, gdb.delete(), f'guild-deleted:{guild.id}')
 
 
 def setup(bot):

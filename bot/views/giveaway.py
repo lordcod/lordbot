@@ -207,10 +207,10 @@ class GiveawayConfirmView(nextcord.ui.View):
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         asyncio.create_task(interaction.delete_original_message())
 
-        if not self.giveaway.check_participation(interaction.user.id):
+        if not await self.giveaway.check_participation(interaction.user.id):
             return
 
-        self.giveaway.demote_participant(interaction.user.id)
+        await self.giveaway.demote_participant(interaction.user.id)
         await self.giveaway.update_message()
 
 
@@ -230,6 +230,6 @@ class GiveawayView(nextcord.ui.View):
                                                     ephemeral=True)
             return
 
-        giveaway.promote_participant(interaction.user.id)
+        await giveaway.promote_participant(interaction.user.id)
 
         await giveaway.update_message()

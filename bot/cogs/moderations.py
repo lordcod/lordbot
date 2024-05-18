@@ -45,7 +45,7 @@ class Moderations(commands.Cog):
     @nextcord.slash_command(name="delete-category", default_member_permissions=48)
     @application_checks.has_permissions(manage_channels=True)
     async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
-        view = DelCatView(interaction.user, category)
+        view = await DelCatView(interaction.user, category)
 
         await interaction.response.send_message(embed=view.embed, view=view)
 
@@ -61,8 +61,8 @@ class Moderations(commands.Cog):
     ):
         gdb = GuildDateBases(ctx.guild.id)
         bsdb = BanDateBases(ctx.guild.id, member.id)
-        locale = gdb.get('language')
-        color = gdb.get('color')
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
 
         self.bot.lord_handler_timer.close_as_key(
             f"ban:{ctx.guild.id}:{member.id}")
@@ -103,7 +103,7 @@ class Moderations(commands.Cog):
         color = gdb.get('color')
 
         rsdb = BanDateBases(ctx.guild.id)
-        datas = rsdb.get_as_guild()
+        datas = await rsdb.get_as_guild()
 
         message = ""
 
@@ -130,9 +130,9 @@ class Moderations(commands.Cog):
     ):
         gdb = GuildDateBases(ctx.guild.id)
         rsdb = RoleDateBases(ctx.guild.id, member.id)
-        locale = gdb.get('language')
-        color = gdb.get('color')
-        _role_time = rsdb.get_as_role(role.id)
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
+        _role_time = await rsdb.get_as_role(role.id)
 
         if _role_time is not None:
             self.bot.lord_handler_timer.close_as_key(
@@ -165,7 +165,7 @@ class Moderations(commands.Cog):
                 inline=False
             )
 
-        rsdb.set_role(role.id, ftime+time.time())
+        await rsdb.set_role(role.id, ftime+time.time())
 
         self.bot.lord_handler_timer.create_timer_handler(
             ftime, rsdb.remove_role(member, role), f"role:{ctx.guild.id}:{member.id}:{role.id}")
@@ -177,14 +177,14 @@ class Moderations(commands.Cog):
     @temp_role.command(name='list')
     async def temp_role_list(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         if member is not None:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
-            datas = rsdb.get_as_member()
+            datas = await rsdb.get_as_member()
         else:
             rsdb = RoleDateBases(ctx.guild.id)
-            datas = rsdb.get_as_guild()
+            datas = await rsdb.get_as_guild()
 
         message = ""
 

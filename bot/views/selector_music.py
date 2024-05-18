@@ -8,14 +8,17 @@ from bot.languages import i18n
 
 from typing import List, TYPE_CHECKING
 
+from bot.misc.utils import to_async
+
 if TYPE_CHECKING:
     from bot.misc.voice import Queue, MusicPlayer
 
 
+@to_async
 class MusicDropDown(nextcord.ui.Select):
-    def __init__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
+    def __ainit__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
         self.tracks = tracks
         self.queue = queue
         self.player = player

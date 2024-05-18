@@ -1,12 +1,10 @@
 
-import time
 import nextcord
 from nextcord.ext import commands, application_checks
 from nextcord.utils import oauth_url
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
-from bot.misc.utils import TimeCalculator, translate_flags
 from bot.views.giveaway import GiveawaySettingsView
 from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
@@ -34,7 +32,7 @@ class Basic(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
 
         stime = timeit.default_timer()
-        color = gdb.get('color')
+        color = await gdb.get('color')
         ftime = timeit.default_timer()
 
         discord_latency_ms = round(self.bot.latency*100, 2)
@@ -73,8 +71,7 @@ class Basic(commands.Cog):
     async def invite(self, ctx: commands.Context):
         invite_link = oauth_url(
             client_id=self.bot.user.id,
-            permissions=nextcord.Permissions.all(),
-            redirect_uri=info.site_link,
+            permissions=nextcord.Permissions(administrator=True),
             scopes=("bot", "applications.commands"),
         )
 
@@ -83,7 +80,7 @@ class Basic(commands.Cog):
     @commands.command()
     async def captcha(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
-        lang = gdb.get('language')
+        lang = await gdb.get('language')
         data, code = await utils.generator_captcha(random.randint(3, 7))
         image_file = nextcord.File(
             data, filename="captcha.png", description="Captcha", spoiler=True)
@@ -128,8 +125,8 @@ class Basic(commands.Cog):
         ),
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        lang = gdb.get('language')
-        color = gdb.get('color')
+        lang = await gdb.get('language')
+        color = await gdb.get('color')
 
         activiti: dict = jmespath.search(
             f"[?label=='{act}']|[0]", info.activities_list)
@@ -172,7 +169,7 @@ class Basic(commands.Cog):
         message: nextcord.Message
     ):
         gdb = GuildDateBases(inters.guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         if not message.content:
             await inters.response.send_message(i18n.t(locale, 'translate.failed'),

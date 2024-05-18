@@ -14,7 +14,7 @@ class InteractionsEvent(commands.Cog):
 
     async def dis_interaction_failed(self, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         if interaction.type not in {2, 3, 5}:
             return

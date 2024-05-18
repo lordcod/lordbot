@@ -25,8 +25,8 @@ class Polls(commands.Cog):
         await interaction.response.defer(ephemeral=True, with_message=False)
 
         gdb = GuildDateBases(interaction.guild_id)
-        polls = gdb.get('polls')
-        color = gdb.get('color')
+        polls = await gdb.get('polls')
+        color = await gdb.get('color')
         poll_data: dict = polls.get(message.id, {})
 
         user_id = poll_data.get('user_id')

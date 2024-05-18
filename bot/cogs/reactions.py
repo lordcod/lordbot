@@ -2,7 +2,7 @@ from typing import Literal, Optional
 import typing
 import nextcord
 from nextcord.ext import commands
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 
@@ -168,7 +168,7 @@ class ReactionsCommand(commands.Cog):
     @commands.command()
     async def reactions(self, ctx: commands.Context, react_type: AllReactionsType, user: Optional[nextcord.Member] = None, *, comment: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         if user is None and isinstance(react_type, GreedyUser):
             await ctx.send("You must specify the user")

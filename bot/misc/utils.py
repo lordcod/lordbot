@@ -1,4 +1,5 @@
 from __future__ import annotations
+import functools
 import nextcord
 from nextcord.ext import commands
 
@@ -27,7 +28,7 @@ from functools import lru_cache
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
 
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from cryptography.fernet import Fernet
 
 from bot.resources.ether import Emoji
@@ -165,14 +166,13 @@ class BlackjackGame:
     def dealer_value(self) -> int:
         return self.calculate_result(self.dealer_cards)
 
-    @property
-    def completed_embed(self) -> nextcord.Embed:
+    async def completed_embed(self) -> nextcord.Embed:
         gdb = GuildDateBases(self.member.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title="Blackjack",
-            description=f"Result: {self.get_winner_title()}",
+            description=f"Result: {await self.get_winner_title()}",
             color=color
         )
         embed.add_field(
@@ -191,11 +191,10 @@ class BlackjackGame:
         )
         return embed
 
-    @property
-    def embed(self) -> nextcord.Embed:
+    async def embed(self) -> nextcord.Embed:
         gdb = GuildDateBases(self.member.guild.id)
-        color = gdb.get('color')
-        economic_settings: dict = gdb.get('economic_settings')
+        color = await gdb.get('color')
+        economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
 
         embed = nextcord.Embed(
@@ -244,9 +243,9 @@ class BlackjackGame:
         if self.dealer_value > self.your_value:
             return 0
 
-    def get_winner_title(self) -> int:
+    async def get_winner_title(self) -> int:
         gdb = GuildDateBases(self.member.guild.id)
-        economic_settings: dict = gdb.get('economic_settings')
+        economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
 
         match self.is_winner():
@@ -392,6 +391,16 @@ class FissionIterator:
 
     def to_list(self):
         return list(iter(self))
+
+
+def to_async(cls):
+    @functools.wraps(cls)
+    async def wrapped(*args, **kwargs):
+        self = cls.__new__(cls)
+        await self.__ainit__(*args, **kwargs)
+        return self
+    wrapped.__init__.__annotations__ = cls.__ainit__.__annotations__
+    return wrapped
 
 
 def clamp(val: Union[int, float],

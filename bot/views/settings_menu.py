@@ -1,4 +1,5 @@
 import nextcord
+from bot.misc.utils import to_async
 from bot.resources.ether import Emoji
 from bot.databases import GuildDateBases
 from bot.views.settings import moduls
@@ -6,10 +7,11 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.languages import i18n
 
 
+@to_async
 class SetDropdown(nextcord.ui.Select):
-    def __init__(self, guild_id):
+    def __ainit__(self, guild_id):
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         options = [
             nextcord.SelectOption(

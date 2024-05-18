@@ -1,10 +1,8 @@
 from __future__ import annotations
 import asyncio
-import logging
 import sys
 import aiohttp
 import nextcord
-import psycopg2
 import regex
 from nextcord.ext import commands
 
@@ -47,7 +45,7 @@ class LordBot(commands.AutoShardedBot):
         if msg.guild is None:
             return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
         gdb = GuildDateBases(msg.guild.id)
-        prefix = gdb.get('prefix')
+        prefix = await gdb.get('prefix')
         return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
     def set_event(self, coro: Coroutine, name: Optional[str] = None) -> None:
@@ -112,15 +110,15 @@ class LordBot(commands.AutoShardedBot):
 
     async def listen_on_ready(self) -> None:
         try:
-            self.engine = engine = DataBase.create_engine(
+            self.engine = engine = await DataBase.create_engine(
                 host, port, user, password, db_name)
-        except psycopg2.OperationalError:
+        except Exception:
             await self.close()
             return
         establish_connection(engine)
         for t in db._tables:
             t.set_engine(engine)
-            t.create()
+            await t.create()
         self.__with_ready__.set_result(None)
 
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:

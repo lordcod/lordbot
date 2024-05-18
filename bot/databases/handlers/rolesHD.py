@@ -1,9 +1,9 @@
 from __future__ import annotations
 import nextcord
 from typing import Optional
-from ..db_engine import DataBase
 
-from ..misc.adapter_dict import Json
+from bot.databases.misc.simple_task import to_task
+from ..db_engine import DataBase
 from ..misc.error_handler import on_error
 
 engine: DataBase = None
@@ -19,35 +19,32 @@ class RoleDateBases:
         self.member_id = member_id
 
     @on_error()
-    def get_all(self):
-        datas = engine.fetchall('SELECT * FROM roles')
-
-        datas = Json.loads(datas)
-
-        return datas
+    async def get_all(self):
+        data = await engine.fetchall('SELECT guild_id, member_id, role_id, time FROM roles')
+        return data
 
     @on_error()
-    def get_as_guild(self):
-        datas = engine.fetchall(
+    async def get_as_guild(self):
+        data = await engine.fetchall(
             ('SELECT member_id, role_id, time '
              'FROM roles WHERE guild_id = %s'),
             [self.guild_id])
 
-        return datas
+        return data
 
     @on_error()
-    def get_as_member(self):
-        datas = engine.fetchall(
+    async def get_as_member(self):
+        data = await engine.fetchall(
             ('SELECT member_id, role_id, time FROM roles '
              'WHERE guild_id = %s AND member_id = %s'),
             (self.guild_id, self.member_id)
         )
 
-        return datas
+        return data
 
     @on_error()
-    def get_as_role(self, role_id: int):
-        data = engine.fetchone(
+    async def get_as_role(self, role_id: int):
+        data = await engine.fetchone(
             ('SELECT time FROM roles '
              'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
             (self.guild_id, self.member_id, role_id)
@@ -55,46 +52,52 @@ class RoleDateBases:
 
         return data
 
+    @to_task
     @on_error()
-    def insert(self, role_id: int, time: int):
-        engine.execute(
+    async def insert(self, role_id: int, time: int):
+        await engine.execute(
             ('INSERT INTO roles '
              '(guild_id, member_id, role_id, time) '
              'VALUES (%s, %s, %s, %s)'),
             (self.guild_id, self.member_id, role_id, time)
         )
 
+    @to_task
     @on_error()
-    def update(self, role_id: int, time: int):
-        engine.execute(
+    async def update(self, role_id: int, time: int):
+        await engine.execute(
             ('UPDATE roles '
              'SET time = %s '
              'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
             (time, self.guild_id, self.member_id, role_id)
         )
 
+    @to_task
     @on_error()
-    def delete(self, role_id: int):
-        engine.execute(
+    async def delete(self, role_id: int):
+        await engine.execute(
             ('DELETE FROM roles '
              'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
             (self.guild_id, self.member_id, role_id)
         )
 
+    @to_task
     @on_error()
-    def remove(self, role_id):
-        _role_data = self.get_as_role(role_id)
+    async def remove(self, role_id):
+        _role_data = await self.get_as_role(role_id)
         if _role_data is not None:
-            self.delete(role_id)
+            await self.delete(role_id)
 
+    @to_task
     @on_error()
-    def set_role(self, role_id: int, time: int) -> None:
-        _role_data = self.get_as_role(role_id)
+    async def set_role(self, role_id: int, time: int) -> None:
+        _role_data = await self.get_as_role(role_id)
         if _role_data is None:
-            self.insert(role_id, time)
+            await self.insert(role_id, time)
         else:
-            self.update(role_id, time)
+            await self.update(role_id, time)
 
+    @to_task
     async def remove_role(self, member: nextcord.Member, role: nextcord.Role):
+        await self.remove(role.id)
         await member.remove_roles(role)
-        self.remove(role.id)

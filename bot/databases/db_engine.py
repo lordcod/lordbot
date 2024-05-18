@@ -1,7 +1,8 @@
 from __future__ import annotations
-from typing import Any, Mapping, Sequence
-import psycopg2
+from typing import Any, Mapping, Optional, Sequence
+import asyncpg
 from bot.misc.logger import Logger
+from .misc.adapter_dict import adapt_dict, adapt_list, decode_dict, decode_list
 
 
 Vars = Sequence[Any] | Mapping[str, Any] | None
@@ -10,22 +11,26 @@ Vars = Sequence[Any] | Mapping[str, Any] | None
 class DataBase:
     conn_kwargs: dict
 
-    def __init__(
-        self,
-        __connection: psycopg2.extensions.connection
-    ) -> None:
-        self.__connection = __connection
+    def __init__(self) -> None:
+        self.__connection: Optional[asyncpg.Connection] = None
 
-    @property
-    def connection(self) -> psycopg2.extensions.connection:
-        if self.__connection.closed != 0:
-            Logger.core("[Closed connection] Starting a database reboot")
-            self.__connection = psycopg2.connect(**self.conn_kwargs)
-            self.__connection.autocommit = True
+    async def register_adapter(self) -> None:
+        conn = self.__connection
+        await conn.set_type_codec(
+            'json',
+            encoder=adapt_dict,
+            decoder=decode_dict,
+            schema='pg_catalog'
+        )
+
+    async def get_connection(self) -> asyncpg.Connection:
+        if not self.__connection or self.__connection.is_closed():
+            self.__connection = await asyncpg.connect(**self.conn_kwargs)
+            await self.register_adapter()
         return self.__connection
 
     @classmethod
-    def create_engine(
+    async def create_engine(
         cls,
         host: str,
         port: int,
@@ -34,78 +39,46 @@ class DataBase:
         database: str
     ) -> DataBase:
         Logger.info("Load DataBases")
-        try:
-            connection = psycopg2.connect(
-                host=host,
-                port=port,
-                user=user,
-                password=password,
-                database=database
-            )
-            connection.autocommit = True
-        except Exception as err:
-            Logger.error(err)
-            Logger.error('Failed connection')
-            Logger.critical(
-                'The database could not be loaded and the program is terminated because of this')
+        conn_kwargs = {
+            "host": host,
+            "port": port,
+            "user": user,
+            "password": password,
+            "database": database
+        }
+        self = cls()
+        self.conn_kwargs = conn_kwargs
+        await self.get_connection()
+        return self
 
-            raise
-        else:
-            Logger.success("Successful connection")
-            self = cls(connection)
-            self.conn_kwargs = {
-                "host": host,
-                "port": port,
-                "user": user,
-                "password": password,
-                "database": database
-            }
-            return self
-
-    def execute(
+    async def execute(
         self,
         query: str | bytes,
         vars: Vars = None
     ) -> None:
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, vars)
+        connection = await self.get_connection()
+        connection.execute(query, *vars)
 
-    def fetchall(
+    async def fetchall(
         self,
         query: str | bytes,
         vars: Vars = None
     ) -> list[tuple[Any, ...]]:
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, vars)
-            return cursor.fetchall()
+        connection = await self.get_connection()
+        return await connection.fetch(query, *vars)
 
-    def fetchmany(
-        self,
-        query: str | bytes,
-        vars: Vars = None,
-        size: int | None = None
-    ) -> list[tuple[Any, ...]]:
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, vars)
-            return cursor.fetchmany(size)
-
-    def fetchone(
+    async def fetchone(
         self,
         query: str | bytes,
         vars: Vars = None
     ) -> tuple[Any, ...] | None:
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, vars)
-            return cursor.fetchone()
+        connection = await self.get_connection()
+        return await connection.fetchrow(query, *vars)
 
-    def fetchvalue(
+    async def fetchvalue(
         self,
         query: str | bytes,
         vars: Vars = None
     ) -> Any | None:
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, vars)
-            data = cursor.fetchone()
-        if not data:
-            return None
-        return data[0]
+        connection = await self.get_connection()
+        return await connection.fetchval(query, *vars)

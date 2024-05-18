@@ -6,7 +6,7 @@ import functools
 from typing import Dict, List, Optional, Self, Tuple
 import nextcord
 
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import cut_back
 
@@ -71,7 +71,6 @@ class Logs:
     def __init__(self, guild: nextcord.Guild):
         self.guild = guild
         self.gdb = GuildDateBases(guild.id)
-        self.guild_data: Dict[int, List[LogType]] = self.gdb.get('logs')
 
     @staticmethod
     def on_logs(log_type: int):
@@ -82,7 +81,9 @@ class Logs:
                 if mes is None:
                     return
 
-                for channel_id, logs_types in self.guild_data.items():
+                guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
+
+                for channel_id, logs_types in guild_data.items():
                     if log_type not in logs_types:
                         continue
 
@@ -237,7 +238,7 @@ class Logs:
     @on_logs(LogType.economy)
     async def add_currency(self, member: nextcord.Member, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
         gdb = GuildDateBases(member.guild.id)
-        economy_settings = gdb.get('economic_settings')
+        economy_settings = await gdb.get('economic_settings')
         currency_emoji = economy_settings.get('emoji')
         embed = nextcord.Embed(
             title='Currency received',
@@ -257,7 +258,7 @@ class Logs:
     @on_logs(LogType.economy)
     async def remove_currency(self, member: nextcord.Member, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
         gdb = GuildDateBases(member.guild.id)
-        economy_settings = gdb.get('economic_settings')
+        economy_settings = await gdb.get('economic_settings')
         currency_emoji = economy_settings.get('emoji')
         embed = nextcord.Embed(
             title='Currency was taken',

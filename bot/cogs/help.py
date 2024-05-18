@@ -51,8 +51,6 @@ class Help(commands.Cog):
 
     @commands.command()
     async def help(self, ctx: commands.Context, *, command_name: str = None):
-        self.gdb = GuildDateBases(ctx.guild.id)
-
         if not command_name:
             await self.generate_message(ctx)
             return
@@ -69,8 +67,10 @@ class Help(commands.Cog):
         await self.generate_not_found(ctx)
 
     async def generate_message(self, ctx: commands.Context):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
+        gdb = GuildDateBases(ctx.guild.id)
+
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.title"),
@@ -87,13 +87,15 @@ class Help(commands.Cog):
                 inline=False
             )
 
-        view = HelpView(ctx.guild.id)
+        view = await HelpView(ctx.guild.id)
 
         await ctx.send(embed=embed, view=view)
 
     async def generate_command(self, ctx: commands.Context, command_data: help_info.CommandOption):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
+        gdb = GuildDateBases(ctx.guild.id)
+
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
         aliases = command_data.get('aliases')
 
         embed = nextcord.Embed(
@@ -142,8 +144,10 @@ class Help(commands.Cog):
             await ctx.send(embed=embed)
 
     async def generate_not_found(self, ctx: commands.Context):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
+        gdb = GuildDateBases(ctx.guild.id)
+
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.command-notfound.title"),
@@ -154,8 +158,10 @@ class Help(commands.Cog):
         await ctx.send(embed=embed)
 
     async def generate_not_valid(self, ctx: commands.Context):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
+        gdb = GuildDateBases(ctx.guild.id)
+
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.command-invalid.title"),

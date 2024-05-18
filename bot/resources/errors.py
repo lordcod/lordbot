@@ -52,10 +52,10 @@ class CallbackCommandError:
         self.ctx = ctx
         self.error = error
 
-        self.gdb = GuildDateBases(ctx.guild.id)
-        self.locale = self.gdb.get('language')
-
     async def process(self):
+        self.gdb = GuildDateBases(self.ctx.guild.id)
+        self.locale = await self.gdb.get('language')
+
         for name, item in inspect.getmembers(self):
             allow_errors = getattr(item, "__attachment_errors__", None)
             if allow_errors is None or not iscoroutinefunction(item):
@@ -115,7 +115,7 @@ class CallbackCommandError:
     @attach_exception(commands.BadArgument)
     async def BadArgument(self):
         title = i18n.t(self.locale, 'errors.BadArgument')
-        color = self.gdb.get('color')
+        color = await self.gdb.get('color')
 
         cmd_data = get_command(self.ctx.command.name)
         using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
@@ -143,9 +143,7 @@ class CallbackCommandError:
     @attach_exception(commands.MissingRequiredArgument)
     async def MissingRequiredArgument(self):
         title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
-        color = self.gdb.get('color')
-        
-        self.ctx
+        color = await self.gdb.get('color')
 
         cmd_data = get_command(self.ctx.command.name)
         using = f"`{cmd_data.get('name')}{' '+' '.join([arg.get(self.locale) for arg in cmd_data.get('arguments')]) if cmd_data.get('arguments') else ''}`"
@@ -172,7 +170,7 @@ class CallbackCommandError:
 
     @attach_exception(CommandOnCooldown)
     async def CommandOnCooldown(self):
-        color = self.gdb.get('color')
+        color = await self.gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(self.locale, 'errors.CommandOnCooldown.title'),

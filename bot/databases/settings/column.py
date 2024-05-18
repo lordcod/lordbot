@@ -29,8 +29,8 @@ class Colum:
     def set_engine(self, engine: DataBase):
         self.engine = engine
 
-    def add_colum(self, table_name: str) -> None:
-        self.engine.execute(
+    async def add_colum(self, table_name: str) -> None:
+        await self.engine.execute(
             f"""
                     ALTER TABLE {table_name}
                     ADD {self.name} {self.data_type.value}
@@ -40,34 +40,34 @@ class Colum:
                 """
         )
 
-    def drop_colum(self, table_name: str) -> None:
-        self.engine.execute(
+    async def drop_colum(self, table_name: str) -> None:
+        await self.engine.execute(
             f"""
                     ALTER TABLE {table_name}
                     DROP COLUMN {self.name};
                 """
         )
 
-    def change_name(self, table_name: str, new_name: str) -> None:
+    async def change_name(self, table_name: str, new_name: str) -> None:
         self.name = new_name
-        self.engine.execute(
+        await self.engine.execute(
             f"""
                     ALTER TABLE {table_name}
                     RENAME COLUMN {self.name} TO {new_name};
                 """
         )
 
-    def change_default(self, table_name: str, new_default: str) -> None:
+    async def change_default(self, table_name: str, new_default: str) -> None:
         self.default = new_default
-        self.engine.execute(
+        await self.engine.execute(
             f"""
                     ALTER TABLE {table_name}
                     ALTER COLUMN {self.name} SET DEFAULT '{new_default}';
                 """
         )
 
-    def change_type(self, table_name: str, new_type: PostType) -> None:
-        self.engine.execute(
+    async def change_type(self, table_name: str, new_type: PostType) -> None:
+        await self.engine.execute(
             f"""
                     ALTER TABLE {table_name}
                     ALTER COLUMN {self.name} TYPE {new_type.value};
