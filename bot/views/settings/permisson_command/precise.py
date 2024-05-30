@@ -1,8 +1,10 @@
 import nextcord
 
+from bot.misc.utils import to_async
+
 from .. import permisson_command
-from .distribution.channel import ChannelsView
-from .distribution.role import RolesView
+from .distribution.allow_channel import ChannelsView
+from .distribution.allow_role import RolesView
 from .distribution.cooldown import CooldownsView
 from bot.views.settings._view import DefaultSettingsView
 
@@ -12,8 +14,9 @@ from bot.languages import help as help_info, i18n
 from bot.languages.help import get_command
 
 
-class DropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild_id, command_name) -> None:
+@to_async
+class DistrubDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id, command_name) -> None:
         self.command_name = command_name
 
         options = [
@@ -39,7 +42,7 @@ class DropDown(nextcord.ui.StringSelect):
             'cooldown': CooldownsView
         }
         classification = objections.get(value)
-        view = classification(
+        view = await classification(
             interaction.guild,
             self.command_name
         )
@@ -47,19 +50,20 @@ class DropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class CommandData(DefaultSettingsView):
     embed: nextcord.Embed = None
 
-    def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
+    async def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
         self.command_name = command_name
 
         self.gdb = GuildDateBases(guild.id)
-        color: int = self.gdb.get('color')
-        locale: str = self.gdb.get('language')
+        color: int = await self.gdb.get('color')
+        locale: str = await self.gdb.get('language')
 
         self.cdb = CommandDB(guild.id)
         self.command_data: dict = get_command(command_name)
-        self.command_info: dict = self.cdb.get(command_name, {})
+        self.command_info: dict = await self.cdb.get(command_name, {})
 
         self.operate = self.command_info.get("operate", 1)
 
@@ -77,7 +81,7 @@ class CommandData(DefaultSettingsView):
 
         super().__init__()
 
-        DDD = DropDown(guild.id, command_name)
+        DDD = await DistrubDropDown(guild.id, command_name)
         self.add_item(DDD)
 
         if self.command_data.get("allowed_disabled") is False:
@@ -101,7 +105,7 @@ class CommandData(DefaultSettingsView):
         cat_name = self.command_data.get('category')
         index = list(help_info.categories).index(cat_name)
 
-        view = permisson_command.CommandsDataView(interaction.guild, index)
+        view = await permisson_command.CommandsDataView(interaction.guild, index)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -110,12 +114,9 @@ class CommandData(DefaultSettingsView):
                        button: nextcord.ui.Button,
                        interaction: nextcord.Interaction):
         command_info = self.command_info
-        desperate = 0 if self.operate == 1 else 1
-
+        desperate = 0 if self.operate else 1
         command_info['operate'] = desperate
+        await self.cdb.update(self.command_name, command_info)
 
-        self.cdb.update(self.command_name, command_info)
-
-        view = self.__class__(interaction.guild, self.command_name)
-
+        view = await CommandData(interaction.guild, self.command_name)
         await interaction.response.edit_message(embed=view.embed, view=view)

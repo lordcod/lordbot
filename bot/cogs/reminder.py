@@ -1,5 +1,4 @@
 
-from sqlite3.dbapi2 import _AnyParamWindowAggregateClass
 import time
 import nextcord
 from nextcord.ext import commands

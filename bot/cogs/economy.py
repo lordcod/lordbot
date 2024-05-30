@@ -1,7 +1,7 @@
 
-from ossaudiodev import AFMT_A_LAW
 import nextcord
 from nextcord.ext import commands
+import nextcord.gateway
 from nextcord.utils import escape_markdown
 
 
@@ -18,7 +18,7 @@ from bot.resources import check
 from bot.views.economy_shop import EconomyShopView
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import clamp, randfloat, translate_flags
-from bot.resources.errors import NotActivateEconomy
+from bot.resources.errors import InactiveEconomy
 from bot.resources.ether import Emoji
 from bot.misc.utils import BlackjackGame
 from bot.resources.info import DEFAULT_ECONOMY_THEFT
@@ -151,7 +151,7 @@ class Economy(commands.Cog):
         es = await gdb.get('economic_settings')
         operate = es.get('operate', False)
         if not operate:
-            raise NotActivateEconomy("Economy is disabled on the server")
+            raise InactiveEconomy("Economy is disabled on the server")
         return True
 
     async def handle_rewards(self, ctx: commands.Context):

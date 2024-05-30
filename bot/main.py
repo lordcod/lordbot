@@ -1,4 +1,6 @@
 import sys
+
+import nextcord
 from bot.misc import env
 from bot.misc.lordbot import LordBot
 
@@ -27,7 +29,10 @@ def start_bot():
 
     load_dir("./bot/cogs")
 
-    if token_name := flags.get('token'):
-        bot.run(getattr(env.Tokens, 'token_'+token_name))
-    else:
-        bot.run(env.Tokens.token)
+    try:
+        if token_name := flags.get('token'):
+            bot.run(getattr(env.Tokens, 'token_'+token_name))
+        else:
+            bot.run(env.Tokens.token)
+    except nextcord.HTTPException:
+        return

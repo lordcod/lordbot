@@ -1,4 +1,5 @@
 
+import asyncio
 import nextcord
 from nextcord.ext import commands, application_checks
 
@@ -13,8 +14,8 @@ from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 import io
 import time
 from typing import Optional
-time_now = None
-time_stamp = None
+timenow = None
+timestamp = None
 
 
 class Moderations(commands.Cog):
@@ -24,10 +25,8 @@ class Moderations(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_guild=True)
     async def say(self, ctx: commands.Context, *, message: str):
-        files = []
-        for attach in ctx.message.attachments:
-            data = io.BytesIO(await attach.read())
-            files.append(nextcord.File(data, attach.filename))
+        files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
+                                       for attach in ctx.message.attachments])
 
         res = await utils.generate_message(message)
 
@@ -38,7 +37,7 @@ class Moderations(commands.Cog):
     @commands.command(aliases=["set", "setting"])
     @commands.has_permissions(manage_guild=True)
     async def settings(self, ctx: commands.Context):
-        view = SettingsView(ctx.author)
+        view = await SettingsView(ctx.author)
 
         await ctx.send(embed=view.embed, view=view)
 
@@ -100,7 +99,7 @@ class Moderations(commands.Cog):
     @temp_ban.command(name='list')
     async def temp_ban_list(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         rsdb = BanDateBases(ctx.guild.id)
         datas = await rsdb.get_as_guild()

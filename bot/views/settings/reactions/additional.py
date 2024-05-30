@@ -1,4 +1,7 @@
+from typing import Optional
 import nextcord
+
+from bot.misc.utils import to_async
 
 
 from .modal import ModalBuilder
@@ -9,10 +12,11 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
+@to_async
 class DropDownBuilder(nextcord.ui.ChannelSelect):
-    def __init__(self, guild_id) -> None:
+    async def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
-        locale = self.gdb.get('language')
+        locale = await self.gdb.get('language')
 
         super().__init__(
             placeholder=i18n.t(
@@ -23,8 +27,8 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel: nextcord.TextChannel = self.values[0]
-        reacts: dict = self.gdb.get('reactions')
-        locale: str = self.gdb.get('language')
+        reacts: dict = await self.gdb.get('reactions')
+        locale: str = await self.gdb.get('language')
 
         if channel.id in reacts:
             await interaction.response.send_message(i18n.t(
@@ -32,28 +36,27 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
                 ephemeral=True)
             return
 
-        view = InstallEmojiView(channel.guild.id, channel.id)
-
+        view = await InstallEmojiView(channel.guild.id, channel.id)
         await interaction.response.edit_message(view=view)
 
 
+@to_async
 class InstallEmojiView(DefaultSettingsView):
-    def __init__(self, guild_id: int, channel_id: int = None) -> None:
+    async def __init__(self, guild_id: int, channel_id: Optional[int] = None) -> None:
+        self.channel_id = channel_id
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         super().__init__()
 
         if channel_id is not None:
-            self.channel_id = channel_id
             self.install.disabled = False
 
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.install.label = i18n.t(
             locale, 'settings.reactions.addres.install-emoji')
 
-        DDB = DropDownBuilder(guild_id)
-
+        DDB = await DropDownBuilder(guild_id)
         self.add_item(DDB)
 
     @nextcord.ui.button(label='Back',
@@ -61,16 +64,14 @@ class InstallEmojiView(DefaultSettingsView):
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = reactions.AutoReactions(interaction.guild)
-
+        view = await reactions.AutoReactions(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Install emoji',
+    @nextcord.ui.button(label='Set emoji',
                         style=nextcord.ButtonStyle.blurple,
                         disabled=True)
     async def install(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        modal = ModalBuilder(interaction.guild_id, self.channel_id)
-
+        modal = await ModalBuilder(interaction.guild_id, self.channel_id)
         await interaction.response.send_modal(modal)

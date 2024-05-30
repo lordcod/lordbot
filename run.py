@@ -1,7 +1,7 @@
 import logging
 from bot import main
 
-_log = logging.basicConfig(
+logging.basicConfig(
     filename="bot.log",
     level=logging.DEBUG,
     filemode="w",

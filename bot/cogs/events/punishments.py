@@ -4,6 +4,7 @@ from nextcord.ext import commands
 from typing import Optional
 
 from bot.misc import logstool
+from bot.misc.logger import Logger
 from bot.misc.lordbot import LordBot
 
 

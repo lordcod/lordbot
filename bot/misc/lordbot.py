@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import sys
+import traceback
 import aiohttp
 import nextcord
 import regex
@@ -45,7 +46,7 @@ class LordBot(commands.AutoShardedBot):
         if msg.guild is None:
             return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
         gdb = GuildDateBases(msg.guild.id)
-        prefix = await gdb.get('prefix')
+        prefix = await gdb.get('prefix') or DEFAULT_PREFIX
         return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
     def set_event(self, coro: Coroutine, name: Optional[str] = None) -> None:
@@ -112,7 +113,8 @@ class LordBot(commands.AutoShardedBot):
         try:
             self.engine = engine = await DataBase.create_engine(
                 host, port, user, password, db_name)
-        except Exception:
+        except Exception as exp:
+            traceback.print_exception(exp)
             await self.close()
             return
         establish_connection(engine)

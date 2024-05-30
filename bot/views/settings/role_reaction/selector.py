@@ -8,10 +8,10 @@ from .. import role_reaction
 from .._view import DefaultSettingsView
 
 
+@utils.to_async
 class RoleReactionSelectorChannelDropDown(nextcord.ui.ChannelSelect):
-    def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        role_reaction: ReactionRolePayload = gdb.get('role_reactions')
         super().__init__(channel_types=[
             nextcord.ChannelType.text,
             nextcord.ChannelType.voice,
@@ -23,14 +23,17 @@ class RoleReactionSelectorChannelDropDown(nextcord.ui.ChannelSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
 
-        view = await RoleReactionSelectorView.create(interaction.user.guild, channel)
+        view = await RoleReactionSelectorView(interaction.user.guild, channel)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@utils.to_async
 class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, messages: Optional[List[nextcord.Message]] = None, selected_message_id: Optional[int] = None) -> None:
+    async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, selected_message_id: Optional[int] = None) -> None:
         self.channel = channel
+        if channel:
+            messages = await channel.history(limit=15).flatten()
         if not (channel and messages):
             super().__init__(options=[nextcord.SelectOption(
                 label="SelectOption")], disabled=True)
@@ -63,27 +66,22 @@ class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
             return '[ATTACHMENTS]'
         return None
 
-    @classmethod
-    async def create(cls, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, selected_message_id: Optional[int] = None) -> 'RoleReactionSelectorMessageDropDown':
-        if not channel:
-            return cls(guild)
-        return cls(guild, channel, (await channel.history(limit=15).flatten()), selected_message_id)
-
     async def callback(self, interaction: nextcord.Interaction) -> None:
         message_id = int(self.values[0])
 
-        view = await RoleReactionSelectorView.create(
+        view = await RoleReactionSelectorView(
             interaction.user.guild, self.channel, message_id)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@utils.to_async
 class RoleReactionSelectorView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
-    def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, message_id: Optional[int] = None) -> None:
+    async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, message_id: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         self.channel = channel
         self.message_id = message_id
@@ -96,23 +94,18 @@ class RoleReactionSelectorView(DefaultSettingsView):
 
         super().__init__()
 
-        self.add_item(RoleReactionSelectorChannelDropDown(guild))
+        self.add_item(await RoleReactionSelectorChannelDropDown(guild))
+        self.add_item(
+            await RoleReactionSelectorMessageDropDown(guild, channel, message_id))
         if message_id:
             self.next.disabled = False
-
-    @classmethod
-    async def create(cls, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, message_id: Optional[int] = None):
-        self = cls(guild, channel, message_id)
-        self.add_item(
-            await RoleReactionSelectorMessageDropDown.create(guild, channel, message_id))
-        return self
 
     @nextcord.ui.button(label="Back", style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction
                    ):
-        view = role_reaction.RoleReactionView(interaction.user)
+        view = await role_reaction.RoleReactionView(interaction.user)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -126,7 +119,7 @@ class RoleReactionSelectorView(DefaultSettingsView):
             'reactions': {}
         }
 
-        view = item.RoleReactionItemView(
+        view = await item.RoleReactionItemView(
             interaction.user, self.message_id, self.channel.id, role_reaction)
 
         await interaction.response.edit_message(embed=view.embed, view=view)

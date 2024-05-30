@@ -16,7 +16,6 @@ class Colum:
         primary_key: Optional[bool] = False,
         nullable: Optional[bool] = False
     ) -> None:
-
         data_type = data_type.upper()
 
         self.name = name
@@ -32,46 +31,46 @@ class Colum:
     async def add_colum(self, table_name: str) -> None:
         await self.engine.execute(
             f"""
-                    ALTER TABLE {table_name}
-                    ADD {self.name} {self.data_type.value}
-                    {" PRIMARY KEY" if self.primary_key is True else ""}
-                    {" NOT NULL" if self.nullable is True else ""}
-                    {f" DEFAULT '{self.default}'" if self.default is not None else ""}
-                """
+                ALTER TABLE {table_name}
+                ADD {self.name} {self.data_type.value}
+                {" PRIMARY KEY" if self.primary_key is True else ""}
+                {" NOT NULL" if self.nullable is True else ""}
+                {f" DEFAULT '{self.default}'" if self.default is not None else ""}
+            """
         )
 
     async def drop_colum(self, table_name: str) -> None:
         await self.engine.execute(
             f"""
-                    ALTER TABLE {table_name}
-                    DROP COLUMN {self.name};
-                """
+                ALTER TABLE {table_name}
+                DROP COLUMN {self.name};
+            """
         )
 
     async def change_name(self, table_name: str, new_name: str) -> None:
         self.name = new_name
         await self.engine.execute(
             f"""
-                    ALTER TABLE {table_name}
-                    RENAME COLUMN {self.name} TO {new_name};
-                """
+                ALTER TABLE {table_name}
+                RENAME COLUMN {self.name} TO {new_name};
+            """
         )
 
     async def change_default(self, table_name: str, new_default: str) -> None:
         self.default = new_default
         await self.engine.execute(
             f"""
-                    ALTER TABLE {table_name}
-                    ALTER COLUMN {self.name} SET DEFAULT '{new_default}';
-                """
+                ALTER TABLE {table_name}
+                ALTER COLUMN {self.name} SET DEFAULT '{new_default}';
+            """
         )
 
     async def change_type(self, table_name: str, new_type: PostType) -> None:
         await self.engine.execute(
             f"""
-                    ALTER TABLE {table_name}
-                    ALTER COLUMN {self.name} TYPE {new_type.value};
-                """
+                ALTER TABLE {table_name}
+                ALTER COLUMN {self.name} TYPE {new_type.value};
+            """
         )
 
     def __str__(self) -> str:

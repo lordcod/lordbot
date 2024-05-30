@@ -26,19 +26,19 @@ class MongoDB:
         self.table_name = table_name
 
     @to_task
-    @on_error
+    @on_error()
     async def create(self):
         await engine.execute(
-            "INSERT INTO mongo (name) VALUES (%s)",
+            "INSERT INTO mongo (name) VALUES ($1)",
             (self.table_name, )
         )
 
     @to_task
-    @on_error
+    @on_error()
     async def _check_table(self):
         data = await engine.fetchone(
             """SELECT * FROM mongo 
-                   WHERE name = %s
+                   WHERE name = $1
                 """,
             (self.table_name, )
         )
@@ -56,34 +56,29 @@ class MongoDB:
     @on_error()
     async def get(self, key: str, default: T = None) -> dict | T:
         key = str(key)
-
-        data = engine.fetchone(
+        data = await engine.fetchvalue(
             """
-                    SELECT values ->> %s 
+                    SELECT values ->> $1 
                     FROM mongo 
-                    WHERE name = %s
+                    WHERE name = $2
                 """,
             (key, self.table_name)
         )
 
-        if not data[0]:
+        if data is None:
             return default
-        data_new = Json.loads(data[0])
-        return data_new
+        return data
 
     @to_task
     @check_table
     @on_error()
     async def set(self, key, value):
         key = str(key)
-
-        value = Json.dumps(value)
-
-        engine.execute(
+        await engine.execute(
             """
                     UPDATE mongo
-                    SET values = jsonb_set(values ::jsonb, %s, %s) 
-                    WHERE name = %s
+                    SET values = jsonb_set(values ::jsonb, $1, $2) 
+                    WHERE name = $3
                 """,
             ('{'+key+'}', value, self.table_name, )
         )

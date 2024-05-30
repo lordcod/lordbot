@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 
 import asyncio
 import nextcord
@@ -12,10 +12,10 @@ if TYPE_CHECKING:
 
 
 class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
-    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: GiveawayConfig) -> None:
         self.member = member
         self.giveaway_config = giveaway_config
-        super().__init__(placeholder="Choose a giveaway sponsor")
+        super().__init__("Choose a giveaway sponsor")
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         return interaction.user == self.member
@@ -32,7 +32,7 @@ class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
     def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         self.member = member
         self.giveaway_config = giveaway_config
-        super().__init__(placeholder="Choose a giveaway channel", channel_types=[
+        super().__init__("Choose a giveaway channel", channel_types=[
             nextcord.ChannelType.news, nextcord.ChannelType.text])
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
@@ -61,7 +61,6 @@ class GiveawaySettingsPrizeModal(nextcord.ui.Modal):
         self.quantity = nextcord.ui.TextInput(
             label="Prize",
             max_length=2,
-            required=False,
             default_value="1"
         )
         self.add_item(self.quantity)
@@ -86,7 +85,7 @@ class GiveawaySettingsDescriptionModal(nextcord.ui.Modal):
         super().__init__("Settings Giveaway")
 
         self.description = nextcord.ui.TextInput(
-            label="Prize",
+            label="Description",
             style=nextcord.TextInputStyle.paragraph
         )
         self.add_item(self.description)
@@ -135,8 +134,10 @@ class GiveawaySettingsDateendModal(nextcord.ui.Modal):
 class GiveawaySettingsView(nextcord.ui.View):
     embed: nextcord.Embed
 
-    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: Optional['GiveawayConfig'] = None) -> None:
-        self.giveaway_config = giveaway_config or misc_giveaway.GiveawayConfig()
+    def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: Optional[GiveawayConfig] = None) -> None:
+        if giveaway_config is None:
+            giveaway_config = misc_giveaway.GiveawayConfig()
+        self.giveaway_config = giveaway_config
         self.member = member
         super().__init__()
         self.add_item(GiveawaySettingsChannelDropDown(
@@ -145,15 +146,17 @@ class GiveawaySettingsView(nextcord.ui.View):
             member, guild_id, self.giveaway_config))
 
         self.embed = nextcord.Embed(
-            title=f"Giveaway prize: {self.giveaway_config.quantity if self.giveaway_config.quantity else 1} {self.giveaway_config.prize if self.giveaway_config.prize else 'no prize'}")
+            title="Giveaway")
 
         self.embed.description = self.giveaway_config.description
         self.embed.add_field(
             name="Addtionally information",
             value=(
-                f"Channel: {self.giveaway_config.channel.mention if self.giveaway_config.channel else 'no channel'}\n"
+                f"Prize: {self.giveaway_config.prize if self.giveaway_config.prize else 'not registered'}"
+                f"Quantity: {self.giveaway_config.quantity if self.giveaway_config.quantity else 1}"
+                f"Channel: {self.giveaway_config.channel.mention if self.giveaway_config.channel else 'not registered'}\n"
                 f"Sponsor: {self.giveaway_config.sponsor.mention if self.giveaway_config.sponsor else member.mention}\n"
-                f"Date end: {f'<t:{self.giveaway_config.date_end :.0f}:f>' if self.giveaway_config.date_end else 'no date end'}"
+                f"Date end: {f'<t:{self.giveaway_config.date_end :.0f}:f>' if self.giveaway_config.date_end else 'not registered'}"
             )
         )
 

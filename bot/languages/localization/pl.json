@@ -60,7 +60,7 @@
         "BadArgument": "Wprowadzono nieprawidłowy argument",
         "DisabledCommand": "To polecenie jest wyłączone na serwerze",
         "MissingRequiredArgument": "Nie podałeś wymaganego argumentu",
-        "NotActivateEconomy": "System ekonomiczny jest wyłączony na serwerze",
+        "InactiveEconomy": "System ekonomiczny jest wyłączony na serwerze",
         "OnlyTeamError": "To polecenie może być użyte tylko przez zespół botów",
         "MemberNotFound": "Nie udało się znaleźć uczestnika",
         "CommandOnCooldown": {

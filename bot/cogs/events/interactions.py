@@ -1,27 +1,30 @@
 import nextcord
-import asyncio
 from nextcord.ext import commands
 
 from bot.databases import GuildDateBases
+from bot.misc.logger import Logger
 from bot.misc.lordbot import LordBot
 
 
 class InteractionsEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+        bot.set_event(self.on_item_not_found, name='on_view_not_found')
+        bot.set_event(self.on_item_not_found, name='on_modal_not_found')
         bot.set_event(self.on_interaction)
         super().__init__()
 
-    async def dis_interaction_failed(self, interaction: nextcord.Interaction):
+    async def on_interaction(self, interaction: nextcord.Interaction):
+        Logger.info(
+            f"Process interaction, CI: {interaction.data['custom_id']}")
+        await self.bot.process_application_commands(interaction)
+
+    async def on_item_not_found(self, interaction: nextcord.Interaction):
+        Logger.info(
+            f"Item not found, custom id: {interaction.data['custom_id']}")
+
         gdb = GuildDateBases(interaction.guild_id)
         color = await gdb.get('color')
-
-        if interaction.type not in {2, 3, 5}:
-            return
-
-        await asyncio.sleep(2.5-self.bot.latency)
-        if interaction.response.is_done():
-            return
 
         embed = nextcord.Embed(
             title="The interaction time has expired",
@@ -29,10 +32,6 @@ class InteractionsEvent(commands.Cog):
             color=color
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    async def on_interaction(self, interaction: nextcord.Interaction):
-        self.bot.loop.create_task(self.dis_interaction_failed(interaction))
-        await self.bot.process_application_commands(interaction)
 
 
 def setup(bot):

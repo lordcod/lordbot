@@ -8,8 +8,8 @@ from bot.languages import i18n
 
 
 @to_async
-class SetDropdown(nextcord.ui.Select):
-    def __ainit__(self, guild_id):
+class SetDropdown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
 
@@ -91,17 +91,18 @@ class SetDropdown(nextcord.ui.Select):
 
     async def callback(self, interaction: nextcord.Interaction):
         value = self.values[0]
-        view = moduls[value](interaction.guild)
+        view = await moduls[value](interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class SettingsView(DefaultSettingsView):
     embed: nextcord.Embed
 
-    def __init__(self, member: nextcord.Member) -> None:
+    async def __init__(self, member: nextcord.Member) -> None:
         gdb = GuildDateBases(member.guild.id)
-        color = gdb.get('color')
-        locale = gdb.get('language')
+        color = await gdb.get('color')
+        locale = await gdb.get('language')
 
         self.embed = nextcord.Embed(
             description=i18n.t(locale, 'settings.start.description'),
@@ -112,9 +113,9 @@ class SettingsView(DefaultSettingsView):
         self.embed.set_footer(
             text=i18n.t(locale, 'settings.start.request',
                         name=member.display_name),
-            icon_url=member.avatar)
+            icon_url=member.display_avatar)
 
         super().__init__()
 
-        sd = SetDropdown(member.guild.id)
+        sd = await SetDropdown(member.guild.id)
         self.add_item(sd)

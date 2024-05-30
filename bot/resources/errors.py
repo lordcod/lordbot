@@ -9,32 +9,32 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.languages.help import get_command
 
-from typing import Union
+from typing import TypeVar, Union
 
 
-class DisabledCommand(commands.CommandError):
+class DisabledCommand(commands.CheckFailure):
     pass
 
 
-class OnlyTeamError(commands.CommandError):
+class OnlyTeamError(commands.CheckFailure):
     def __init__(self, author: Union[nextcord.Member, nextcord.User]) -> None:
         self.author: Union[nextcord.Member, nextcord.User] = author
         super().__init__()
 
 
-class NotActivateEconomy(commands.CommandError):
+class InactiveEconomy(commands.CheckFailure):
     pass
 
 
-class MissingRole(commands.CommandError):
+class MissingRole(commands.CheckFailure):
     pass
 
 
-class MissingChannel(commands.CommandError):
+class MissingChannel(commands.CheckFailure):
     pass
 
 
-def attach_exception(*errors: Exception):
+def attach_exception(*errors: BaseException):
     def wrapped(func):
         func.__attachment_errors__ = errors
         return func
@@ -48,9 +48,9 @@ class CommandOnCooldown(commands.CommandError):
 
 
 class CallbackCommandError:
-    def __init__(self, ctx: commands.Context, error) -> None:
+    def __init__(self, ctx: commands.Context, error: BaseException) -> None:
         self.ctx = ctx
-        self.error = error
+        self.error: BaseException = error
 
     async def process(self):
         self.gdb = GuildDateBases(self.ctx.guild.id)
@@ -182,9 +182,9 @@ class CallbackCommandError:
 
         await self.ctx.send(embed=embed, delete_after=5.0)
 
-    @attach_exception(NotActivateEconomy)
-    async def NotActivateEconomy(self):
-        content = i18n.t(self.locale, 'errors.NotActivateEconomy')
+    @attach_exception(InactiveEconomy)
+    async def InactiveEconomy(self):
+        content = i18n.t(self.locale, 'errors.InactiveEconomy')
 
         await self.ctx.send(content)
 

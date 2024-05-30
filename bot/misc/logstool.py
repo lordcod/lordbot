@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import datetime
 from enum import IntEnum
 import functools
-from typing import Dict, List, Optional, Self, Tuple
+from typing import Any, Awaitable, Callable, Coroutine, Dict, List, Optional, Self, Tuple
 import nextcord
 
 from bot.databases import GuildDateBases
@@ -15,6 +15,8 @@ from bot.misc.utils import cut_back
 class Message:
     content: Optional[str] = None
     embed: Optional[nextcord.Embed] = None
+    embeds: Optional[List[nextcord.Embed]] = None
+    file: Optional[nextcord.File] = None
     files: Optional[List[nextcord.File]] = None
 
 
@@ -45,22 +47,25 @@ def filter_bool(texts: list) -> list:
 _message_log: Dict[Tuple[int, int], asyncio.Future] = {}
 
 
-async def pre_message_delete_log(message: nextcord.Message, moderator: Optional[nextcord.Member] = None):
-    if message.id in _message_log:
-        return
+async def pre_message_delete_log(message: nextcord.Message):
+    moderator: Optional[nextcord.Member] = None
     loop = asyncio.get_event_loop()
     future = loop.create_future()
     _message_log[(message.channel.id, message.author.id)] = future
+
     try:
         await asyncio.wait_for(future, timeout=1)
     except asyncio.TimeoutError:
         pass
     else:
         moderator = future.result()
+    finally:
+        _message_log.pop((message.channel.id, message.author.id), None)
+
     await Logs(message.guild).delete_message(message, moderator)
 
 
-async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: int, author_id: int):
+async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: int, author_id: int) -> None:
     try:
         _message_log[(channel_id, author_id)].set_result(moderator)
     except KeyError:
@@ -74,11 +79,12 @@ class Logs:
 
     @staticmethod
     def on_logs(log_type: int):
-        def predicte(coro):
+        def predicte(coro) -> Callable[..., Coroutine[asyncio.Any, asyncio.Any, None]]:
             @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
-                mes: Message = await coro(self, *args, **kwargs)
-                if mes is None:
+                mes: Optional[Message] = await coro(self, *args, **kwargs)
+
+                if mes is None:  # type: ignore
                     return
 
                 guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
@@ -88,7 +94,13 @@ class Logs:
                         continue
 
                     channel = self.guild.get_channel(channel_id)
-                    await channel.send(content=mes.content, embed=mes.embed, files=mes.files)
+                    await channel.send(
+                        content=mes.content,
+                        embed=mes.embed,
+                        embeds=mes.embeds,
+                        file=mes.file,
+                        files=mes.files
+                    )
 
             return wrapped
         return predicte

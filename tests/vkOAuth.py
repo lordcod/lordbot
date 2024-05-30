@@ -1,5 +1,5 @@
 import flask
-from flask import Flask, redirect, request
+from flask import Flask, redirect, render_template, request
 import requests
 from test_vk_api import vk
 
@@ -10,6 +10,7 @@ scope = 'groups.manage'
 redirect_uri = 'https://lordcord.fun/vk-callback'
 display = 'wap'
 version = '5.92'
+localhost = "http://localhost:5000/"
 
 
 @app.route('/')
@@ -18,20 +19,16 @@ def home():
     return redirect(auth_url_template)
 
 
+@app.route('/test')
+def test():
+    return render_template('index.html')
+
+
 @app.route('/vk-callback')
 def vk_callback():
     token = request.args.get('access_token')
     user_id = request.args.get('user_id')
-    responce_url = "https://api.vk.com/method/groups.get?"
-    data = {
-        'access_token': token,
-        'v': '5.101',
-        'filter': 'admin',
-        'extended': '1',
-        'user_id': user_id
-    }
-    responce_url += '&'.join([f'{k}={v}' for k, v in data.items()])
-    return redirect(responce_url)
+    return render_template('index.html', token=token, user_id=user_id)
 
 
 if __name__ == '__main__':

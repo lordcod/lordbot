@@ -7,7 +7,7 @@ from bot.misc.utils import to_async
 
 @to_async
 class HelpDropDown(nextcord.ui.StringSelect):
-    async def __ainit__(self, guild_id: int) -> None:
+    async def __init__(self, guild_id: int) -> None:
         self.gdb = GuildDateBases(guild_id)
         locale = await self.gdb.get('language')
 
@@ -20,9 +20,7 @@ class HelpDropDown(nextcord.ui.StringSelect):
             for category in help_info.categories.keys()
         ]
 
-        super().__init__(
-            options=options
-        )
+        super().__init__(options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         color = await self.gdb.get('color')
@@ -48,7 +46,7 @@ class HelpDropDown(nextcord.ui.StringSelect):
 
 @to_async
 class HelpView(nextcord.ui.View):
-    async def __ainit__(self, guild_id) -> None:
+    async def __init__(self, guild_id) -> None:
         super().__init__()
 
         HDD = await HelpDropDown(guild_id)

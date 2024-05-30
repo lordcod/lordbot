@@ -182,7 +182,7 @@ class Basic(commands.Cog):
         result = translator.translate(
             text=message.content, dest=data.get('google_language'))
 
-        view = TranslateView(inters.guild_id, data.get('google_language'))
+        view = await TranslateView(inters.guild_id, data.get('google_language'))
 
         await inters.response.send_message(content=result.text,
                                            view=view,

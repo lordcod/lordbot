@@ -12,7 +12,7 @@ from bot.databases.varstructs import RoleShopPayload
 
 @to_async
 class ShopAcceptView(nextcord.ui.View):
-    async def __ainit__(
+    async def __init__(
         self,
         guild_id: int,
         index: int,
@@ -189,5 +189,5 @@ class EconomyShopView(menus.Menus):
         return EconomyShopDropdown(self.index, self.value[self.index])
 
     async def callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = self.__class__(interaction.guild, self.index)
+        view = EconomyShopView(interaction.guild, self.index)
         await interaction.response.edit_message(embed=view.embed, view=view)

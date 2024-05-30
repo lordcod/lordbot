@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from string import printable
 import time
+from typing import Callable, TypeVar
 import aiohttp
 import asyncio
 import enum
 
+T1 = TypeVar("T1")
 pintable = True
 loop = asyncio.get_event_loop()
 session = aiohttp.ClientSession()
@@ -84,13 +86,13 @@ class Logger:
         )
         print(text_new)
 
+    @staticmethod
     def on_logs(func):
         @staticmethod
-        def redirect(text: str):
+        def wrapped(text: str):
             data = func(text)
             Logger.callback(text, data)
-            return text
-        return redirect
+        return wrapped
 
     @on_logs
     @staticmethod

@@ -60,7 +60,7 @@
         "BadArgument": "Invalid argument entered",
         "DisabledCommand": "This command is disabled on the server",
         "MissingRequiredArgument": "You didn't enter a required argument",
-        "NotActivateEconomy": "The economy system is disabled on the server",
+        "InactiveEconomy": "The economy system is disabled on the server",
         "OnlyTeamError": "This command can only be used by the bot team",
         "MemberNotFound": "The participant could not be found",
         "CommandOnCooldown": {

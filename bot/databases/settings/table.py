@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 from typing import List
 from nextcord import utils
 import re
@@ -46,7 +47,6 @@ class TableAPI:
         return colums
 
     async def add_colum(self, colum: Colum, colums: List[Colum]) -> None:
-        self.register_colums(colum, *colums)
         if not isinstance(colum, Colum):
             raise TypeError("The argument must match the Column type")
 
@@ -61,7 +61,7 @@ class TableAPI:
                 await colum_with_name.change_type(self.table_name, colum.data_type)
             return
 
-        colum.add_colum(self.table_name)
+        await colum.add_colum(self.table_name)
         colums.append(colum)
 
     async def delete_ofter_colums(
@@ -69,11 +69,12 @@ class TableAPI:
         colums: List[Colum],
         reserved_colums: List[str]
     ) -> None:
-        self.register_colums(*colums)
+        tasks = []
         for colum in colums:
             if colum.name not in reserved_colums:
                 colums.remove(colum)
-                await colum.drop_colum(self.table_name)
+                tasks.append(colum.drop_colum(self.table_name))
+        await asyncio.gather(*tasks)
 
 
 class Table:
@@ -109,6 +110,7 @@ class Table:
         await cls.engine.execute(
             f"CREATE TABLE IF NOT EXISTS {cls.__tablename__} ()")
         cls.colums = await tapi.get_colums()
+        tapi.register_colums(*cls.__columns__)
         for item in cls.__columns__:
             await tapi.add_colum(item, cls.colums)
         if cls.__force_columns__ is True:

@@ -138,8 +138,25 @@ reactions_list = {
     }
 }
 
-AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare', GreedyUser['bite'], 'bleh', 'blush', 'brofist', 'celebrate', 'cheers', 'clap', 'confused', GreedyUser['cool'], 'cry', GreedyUser['cuddle'], 'dance', 'drool', 'evillaugh', 'facepalm', GreedyUser['handhold'], 'happy', 'headbang', GreedyUser['hug'], GreedyUser['kiss'], 'laugh', GreedyUser['lick'], GreedyUser['love'], 'mad', 'nervous', 'no', 'nom', 'nosebleed',  # type: ignore
-                           GreedyUser['nuzzle'], 'nyah', GreedyUser['pat'], 'peek', GreedyUser['pinch'], GreedyUser['poke'], 'pout', GreedyUser['punch'], 'roll', 'run', 'sad', 'scared', 'shout', 'shrug', 'shy', 'sigh', 'sip', 'slap', 'sleep', 'slowclap', GreedyUser['smack'], 'smile', 'smug', 'sneeze', GreedyUser['sorry'], 'stare', 'stop', 'surprised', 'sweat', 'thumbsup', GreedyUser['tickle'], 'tired', GreedyUser['wave'], GreedyUser['wink'], 'woah', 'yawn', 'yay', 'yes']  # type: ignore
+# type: ignore
+AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare',
+                           GreedyUser['bite'], 'clap', GreedyUser['cuddle'],
+                           'bleh', 'blush', 'brofist', 'celebrate', 'cheers',
+                           'confused', GreedyUser['cool'], 'cry',
+                           'dance', 'drool', 'evillaugh', 'facepalm',
+                           GreedyUser['handhold'], GreedyUser['kiss'],
+                           'happy', 'headbang', GreedyUser['hug'],
+                           'laugh', GreedyUser['lick'], GreedyUser['love'],
+                           'nervous', 'no', 'nom', 'nosebleed', 'mad',
+                           GreedyUser['nuzzle'], 'nyah', GreedyUser['pat'],
+                           GreedyUser['pinch'], GreedyUser['poke'], 'pout',
+                           GreedyUser['punch'], 'roll', 'run', 'sad', 'peek',
+                           'scared', 'shout', 'shrug', 'shy', 'sigh', 'sip',
+                           'slap', 'sleep', 'slowclap', GreedyUser['smack'],
+                           'smug', 'sneeze', GreedyUser['sorry'], 'stare',
+                           'surprised', 'sweat', 'thumbsup', GreedyUser['tickle'],
+                           'tired', GreedyUser['wave'], GreedyUser['wink'],
+                           'yawn', 'yay', 'yes', 'smile', 'stop', 'woah']
 
 
 class ReactionsCommand(commands.Cog):

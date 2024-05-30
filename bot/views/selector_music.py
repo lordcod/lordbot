@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 @to_async
 class MusicDropDown(nextcord.ui.Select):
-    def __ainit__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
+    async def __init__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
         self.tracks = tracks
@@ -47,13 +47,14 @@ class MusicDropDown(nextcord.ui.Select):
         await self.player.process(token)
 
 
+@to_async
 class MusicView(nextcord.ui.View):
     embed: nextcord.Embed
 
-    def __init__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
+    async def __init__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
         gdb = GuildDateBases(guild_id)
-        color = gdb.get('color')
-        locale = gdb.get('language')
+        color = await gdb.get('color')
+        locale = await gdb.get('language')
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'music-selector.title'),
             color=color
@@ -61,5 +62,5 @@ class MusicView(nextcord.ui.View):
 
         super().__init__(timeout=None)
 
-        TDD = MusicDropDown(guild_id, queue, player, tracks)
+        TDD = await MusicDropDown(guild_id, queue, player, tracks)
         self.add_item(TDD)

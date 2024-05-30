@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Coroutine
+from typing import TYPE_CHECKING, Any, Coroutine
 import nextcord
 
 from bot.languages import i18n
@@ -10,7 +10,7 @@ from bot.resources.ether import Emoji
 
 @to_async
 class DelCatView(nextcord.ui.View):
-    async def __ainit__(
+    async def __init__(
         self,
         member: nextcord.Member,
         category: nextcord.CategoryChannel
@@ -27,7 +27,7 @@ class DelCatView(nextcord.ui.View):
                                category=self.category.name),
             color=0xED390D
         )
-        super().__init__()
+        super().__init__(timeout=10)
 
     @nextcord.ui.button(label="Accept", style=nextcord.ButtonStyle.blurple)
     async def accept(

@@ -18,7 +18,7 @@ import orjson
 
 from asyncio import TimerHandle
 from collections import namedtuple
-from typing import (Coroutine, Dict,  Optional,  Tuple, Union,
+from typing import (TYPE_CHECKING, Awaitable, Callable, Coroutine, Dict,  Optional,  Tuple, Union,
                     Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
 from typing import Any, Coroutine, Dict, Iterable,  Optional, Self, SupportsIndex,  Tuple, Union, Mapping
 from datetime import datetime
@@ -35,6 +35,7 @@ from bot.resources.ether import Emoji
 
 
 T = TypeVar('T')
+C_co = TypeVar("C_co", bound=type, covariant=True)
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
@@ -393,13 +394,13 @@ class FissionIterator:
         return list(iter(self))
 
 
-def to_async(cls):
+def to_async(cls: type[T]) -> Awaitable[T]:
     @functools.wraps(cls)
-    async def wrapped(*args, **kwargs):
+    async def wrapped(*args, **kwargs) -> T:
         self = cls.__new__(cls)
-        await self.__ainit__(*args, **kwargs)
+        await self.__init__(*args, **kwargs)
         return self
-    wrapped.__init__.__annotations__ = cls.__ainit__.__annotations__
+    wrapped.__default_class__ = cls
     return wrapped
 
 
@@ -457,11 +458,13 @@ class TimeCalculator:
         default_coefficient: int = 60,
         refundable: T = int,
         coefficients: Optional[dict] = None,
-        operatable_time: bool = False
+        operatable_time: bool = False,
+        errorable: bool = True
     ) -> None:
         self.default_coefficient = default_coefficient
         self.refundable = refundable
         self.operatable_time = operatable_time
+        self.errorable = errorable
 
         if coefficients is None:
             self.coefficients = {
@@ -472,6 +475,9 @@ class TimeCalculator:
             }
         else:
             self.coefficients = coefficients
+
+    def __class_getitem__(cls, value: Any) -> Self:
+        return cls(operatable_time=value)
 
     @overload
     def convert(
@@ -489,26 +495,33 @@ class TimeCalculator:
         pass
 
     def convert(self, *args) -> T | Coroutine[Any, Any, T]:
+        if not isinstance(self, TimeCalculator):
+            args = (self,)+args
+            self = TimeCalculator()
+
         try:
             return self.async_convert(*args)
-        except KeyboardInterrupt:
-            raise
         except Exception:
             pass
 
         try:
             return self.basic_convert(*args)
-        except KeyboardInterrupt:
-            raise
         except Exception:
             pass
 
-        raise TypeError
+        if self.errorable:
+            raise TypeError
+        return None
 
     def basic_convert(
         self,
         argument: Any
     ) -> T:
+        try:
+            return int(argument)
+        except ValueError:
+            pass
+
         if not (isinstance(argument, str)
                 and regex.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
             raise TypeError('Format time is not valid!')

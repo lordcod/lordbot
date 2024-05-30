@@ -1,9 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 import nextcord
+
+if TYPE_CHECKING:
+    from bot.misc.tickettools import ModuleTicket
 
 
 class CreateTicketView(nextcord.ui.View):
     def __init__(self,
-                 ticket_module) -> None:
+                 ticket_module: ModuleTicket) -> None:
         self.ticket_module = ticket_module
         super().__init__(timeout=None)
 

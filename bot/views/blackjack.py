@@ -13,9 +13,6 @@ class BlackjackView(nextcord.ui.View):
         self.bjg = bjg
         super().__init__()
 
-    def complete(self) -> None:
-        pass
-
     async def on_timeout(self) -> None:
         self.bjg.complete()
 
