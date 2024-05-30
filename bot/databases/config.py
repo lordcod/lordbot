@@ -11,8 +11,8 @@ user = 'j5191558_temp_test'
 db_name = 'j5191558_temp_test'
 password = 'g!=)<G8y]2>5'
 
-user = 'j5191558_temp_test_2'
-db_name = 'j5191558_temp_test_2'
+# user = 'j5191558_temp_test_2'
+# db_name = 'j5191558_temp_test_2'
 
 # user = 'j5191558_temp_test_3'
 # db_name = 'j5191558_temp_test_3'
