@@ -14,6 +14,14 @@ from bot.languages import i18n
 from bot.views.translate import AutoTranslateView
 
 import googletrans
+import git
+
+
+repo = git.Repo(search_parent_directories=True)
+
+release_sha = repo.head.object.hexsha[:8]
+release_date = repo.head.object.committed_date
+release_tag = repo.tags[-1].name
 
 translator = googletrans.Translator()
 
@@ -117,13 +125,12 @@ class MessageEvent(commands.Cog):
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'bot-info.title',
                              name=self.bot.user.display_name),
-                description=i18n.t(locale, 'bot-info.description'),
+                description=i18n.t(
+                    locale, 'bot-info.description', prefix=prefix),
                 color=color
             )
-            embed.add_field(
-                name=i18n.t(locale, 'bot-info.info-server'),
-                value=i18n.t(locale, 'bot-info.prefix-server', prefix=prefix)
-            )
+            embed.add_field(name='Assembly Information', value=i18n.t(
+                locale, 'bot-info.assembly', version=release_tag, hash=release_sha, time=release_date))
 
             asyncio.create_task(message.channel.send(embed=embed))
 

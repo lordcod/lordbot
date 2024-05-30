@@ -79,7 +79,7 @@ class Logs:
 
     @staticmethod
     def on_logs(log_type: int):
-        def predicte(coro) -> Callable[..., Coroutine[asyncio.Any, asyncio.Any, None]]:
+        def predicte(coro):
             @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
                 mes: Optional[Message] = await coro(self, *args, **kwargs)
