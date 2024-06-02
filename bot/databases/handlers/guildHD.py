@@ -1,11 +1,13 @@
 from __future__ import annotations
 import asyncio
+import logging
 from typing import Any, Optional, Self, Union, TypeVar
 
 from bot.databases.misc.simple_task import to_task
-from bot.misc.logger import Logger
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
+
+_log = logging.getLogger(__name__)
 
 engine: DataBase = None
 reserved: dict = {}
@@ -23,7 +25,7 @@ def check_registration(func):
                 await self._insert(self.guild_id)
             self.__with_reserved__ = False
             self.__required_task__.set_result(None)
-            Logger.info(f"Guild {self.guild_id} registration completed")
+            _log.debug(f"Guild {self.guild_id} registration completed")
         return await func(self, *args, **kwargs)
     return wrapped
 

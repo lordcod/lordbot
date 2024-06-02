@@ -402,26 +402,34 @@ class Economy(commands.Cog):
 
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
-    async def gift(self, ctx: commands.Context, member: Optional[nextcord.Member], amount: int, *, flags: translate_flags = {}):
+    async def gift(self, ctx: commands.Context, member: Optional[Union[nextcord.Member, nextcord.Role]], amount: int, *, flags: translate_flags = {}):
         if not member:
             member = ctx.author
 
         gdb = GuildDateBases(ctx.guild.id)
         economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
-        account = EconomyMemberDB(ctx.guild.id, member.id)
 
         if 0 >= amount:
             await ctx.send("The amount must be positive")
             return
 
-        if flags.get('bank'):
-            await account.increment('bank', amount)
+        if isinstance(member, nextcord.Role):
+            member_ids = [m.id for m in member.members]
+            if flags.get('bank'):
+                await EconomyMemberDB.increment_for_ids(ctx.guild.id, member_ids, 'bank', amount)
+            else:
+                await EconomyMemberDB.increment_for_ids(ctx.guild.id, member_ids, 'balance', amount)
+            await ctx.send(f"You have transferred an amount of **{amount :,}**{currency_emoji} to the account of the players with the role @{member.name}")
+            await logstool.Logs(ctx.guild).add_currency_for_ids(member, amount, moderator=ctx.author)
         else:
-            await account.increment('balance', amount)
-
-        await ctx.send(f"You have transferred the amount of **{amount :,}**{currency_emoji} to {member.display_name}")
-        await logstool.Logs(ctx.guild).add_currency(member, amount, moderator=ctx.author)
+            account = EconomyMemberDB(ctx.guild.id, member.id)
+            if flags.get('bank'):
+                await account.increment('bank', amount)
+            else:
+                await account.increment('balance', amount)
+            await ctx.send(f"You have transferred the amount of **{amount :,}**{currency_emoji} to {member.display_name}")
+            await logstool.Logs(ctx.guild).add_currency(member, amount, moderator=ctx.author)
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
@@ -657,11 +665,12 @@ class Economy(commands.Cog):
         _min_bet = bet_info.get('min')
         _max_bet = bet_info.get('max')
         account = EconomyMemberDB(ctx.guild.id, ctx.author.id)
+        balance = await account.get('balance')
 
         if amount <= 0:
             await ctx.send("Specify the amount more `0`")
             raise TypeError('Planned error(negative amount)')
-        if amount > account['balance']:
+        if amount > balance:
             await ctx.send(f"Not enough funds to check your balance use `{prefix}balance`")
             raise TypeError('Planned error(negative amount)')
         if not _max_bet >= amount >= _min_bet:
@@ -675,7 +684,8 @@ class Economy(commands.Cog):
         await logstool.Logs(ctx.guild).remove_currency(ctx.author, amount, reason='the beginning of the blackjack game')
 
         if bjg.is_avid_winner() is not None:
-            await ctx.send(embed=bjg.completed_embed)
+            embed = await bjg.completed_embed()
+            await ctx.send(embed=embed)
             match bjg.is_avid_winner():
                 case 2:
                     await account.increment("balance", amount)
@@ -686,8 +696,9 @@ class Economy(commands.Cog):
             bjg.complete()
             return
 
+        embed = await bjg.embed()
         view = BlackjackView(bjg)
-        await ctx.send(embed=bjg.embed, view=view)
+        await ctx.send(embed=embed, view=view)
 
     @staticmethod
     def get_slots_embed(member: nextcord.Member, color: int, results: list) -> nextcord.Embed:

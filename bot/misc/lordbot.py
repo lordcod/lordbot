@@ -1,5 +1,7 @@
 from __future__ import annotations
+from bot.resources.info import DEFAULT_PREFIX
 import asyncio
+import logging
 import sys
 import traceback
 import aiohttp
@@ -16,7 +18,7 @@ from bot.databases.db import DataBase, establish_connection
 from bot.databases.config import host, port, user, password, db_name
 from typing import Coroutine, List, Optional, Dict, Any
 
-from bot.resources.info import DEFAULT_PREFIX
+_log = logging.getLogger(__name__)
 
 
 def get_shard_list(shard_ids: str):
@@ -113,8 +115,8 @@ class LordBot(commands.AutoShardedBot):
         try:
             self.engine = engine = await DataBase.create_engine(
                 host, port, user, password, db_name)
-        except Exception as exp:
-            traceback.print_exception(exp)
+        except Exception as exc:
+            _log.error("Couldn't connect to the database", exc_info=exc)
             await self.close()
             return
         establish_connection(engine)

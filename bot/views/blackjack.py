@@ -37,10 +37,10 @@ class BlackjackView(nextcord.ui.View):
 
         match self.bjg.is_winner():
             case 2:
-                self.account.increment("balance", self.bjg.amount)
+                await self.account.increment("balance", self.bjg.amount)
                 await logstool.Logs(self.bjg.member.guild).add_currency(self.bjg.member, self.bjg.amount, reason='draw at blackjack')
             case 1:
-                self.account.increment("balance", 2*self.bjg.amount)
+                await self.account.increment("balance", 2*self.bjg.amount)
                 await logstool.Logs(self.bjg.member.guild).add_currency(self.bjg.member, self.bjg.amount, reason='winning at blackjack')
 
         self.bjg.complete()

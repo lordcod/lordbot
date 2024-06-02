@@ -1,10 +1,11 @@
 from __future__ import annotations
+import logging
 from typing import Any, Mapping, Optional, Sequence
 import asyncpg
 from bot.databases.misc.error_handler import on_error
-from bot.misc.logger import Logger
 from .misc.adapter_dict import adapt_dict, decode_dict
 
+_log = logging.getLogger(__name__)
 
 Vars = Sequence[Any] | Mapping[str, Any] | None
 
@@ -22,9 +23,15 @@ class MyConnection(asyncpg.Connection):
                 decoder=decode_dict,
                 schema='pg_catalog'
             )
+            await self.set_type_codec(
+                'jsonb',
+                encoder=adapt_dict,
+                decoder=decode_dict,
+                schema='pg_catalog'
+            )
             self._codecs_installed = True
         except Exception as e:
-            Logger.error(f'[REGISTER ADAPTER]: {e}')
+            _log.error(f'[REGISTER ADAPTER]: {e}')
 
 
 class DataBase:
@@ -36,7 +43,7 @@ class DataBase:
     async def get_connection(self) -> asyncpg.Pool:
         if not self.__connection or self.__connection.is_closing():
             self.__connection = await asyncpg.create_pool(**self.conn_kwargs, command_timeout=60, connection_class=MyConnection)
-            Logger.info('Database pool connection opened')
+            _log.debug('Database pool connection opened')
         return self.__connection
 
     @classmethod
@@ -48,7 +55,7 @@ class DataBase:
         password: str,
         database: str
     ) -> DataBase:
-        Logger.info("Load DataBases")
+        _log.debug("Load DataBases")
         conn_kwargs = {
             "host": host,
             "port": port,

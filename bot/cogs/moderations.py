@@ -11,7 +11,6 @@ from bot.views.settings_menu import SettingsView
 from bot.views.delcat import DelCatView
 from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
-import io
 import time
 from typing import Optional
 timenow = None

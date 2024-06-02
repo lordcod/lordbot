@@ -1,5 +1,6 @@
 from __future__ import annotations
 import functools
+import logging
 import nextcord
 from nextcord.ext import commands
 
@@ -33,7 +34,7 @@ from cryptography.fernet import Fernet
 
 from bot.resources.ether import Emoji
 
-
+_log = logging.getLogger(__name__)
 T = TypeVar('T')
 C_co = TypeVar("C_co", bound=type, covariant=True)
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
@@ -140,7 +141,7 @@ _blackjack_games = {}
 
 
 class BlackjackGame:
-    cards = {
+    cards: Dict[str, Optional[int]] = {
         '<:hearts_of_ace:1236254919347142688>': None, '<:hearts_of_two:1236254940016545843>': 2, '<:hearts_of_three:1236254938158338088>': 3, '<:hearts_of_four:1236254924757536799>': 4, '<:hearts_of_five:1236254923050586212>': 5, '<:hearts_of_six:1236254934920593438>': 6, '<:hearts_of_seven:1236254933309718641>': 7, '<:hearts_of_eight:1236254921272066078>': 8, '<:hearts_of_nine:1236254929803280394>': 9, '<:hearts_of_ten:1236254936514428948>': 10, '<:hearts_of_jack:1236254926263418932>': 10, '<:hearts_of_queen:1236254931464228905>': 10, '<:hearts_of_king:1236254928104587336>': 10,
         '<:spades_of_ace:1236254941820092506>': None, '<:spades_of_two:1236256183048863836>': 2, '<:spades_of_three:1236256162933112862>': 3, '<:spades_of_four:1236254946454667325>': 4, '<:spades_of_five:1236256181433929768>': 5, '<:spades_of_six:1236256158835277846>': 6, '<:spades_of_seven:1236256156834594836>': 7, '<:spades_of_eight:1236254943632162857>': 8, '<:spades_of_nine:1236254952901316659>': 9, '<:spades_of_ten:1236256161024708619>': 10, '<:spades_of_jack:1236254949072048200>': 10, '<:spades_of_queen:1236254955099262996>': 10, '<:spades_of_king:1236254951001292840>': 10,
         '<:clubs_of_ace:1236254878867918881>': None, '<:clubs_of_two:1236254897243029607>': 2, '<:clubs_of_three:1236254896026812508>': 3, '<:clubs_of_four:1236254884232167474>': 4, '<:clubs_of_five:1236254882533740614>': 5, '<:clubs_of_six:1236254893015175220>': 6, '<:clubs_of_seven:1236254891572334644>': 7, '<:clubs_of_eight:1236254880981586021>': 8, '<:clubs_of_nine:1236254888833581116>': 9, '<:clubs_of_ten:1236254894525120522>': 10, '<:clubs_of_jack:1236254886119739423>': 10, '<:clubs_of_queen:1236254890234347540>': 10, '<:clubs_of_king:1236254887474368533>': 10,
@@ -263,9 +264,20 @@ class BlackjackGame:
     def is_exceeds_dealer(self) -> int:
         return self.dealer_value > 21
 
-    def go_dealer(self) -> int:
-        while 18 > self.dealer_value:
-            self.add_dealer_card()
+    def go_dealer(self) -> None:
+        while True:
+            win_cards = []
+            for card in self.cards:
+                if card in self.your_cards[1:]:
+                    continue
+                res = self.calculate_result(self.dealer_cards + [card])
+                if 21 >= res:
+                    win_cards.append(card)
+            _log.debug('Win cards: %s, Chance: %s', len(win_cards), len(win_cards) / len(self.cards))
+            if len(win_cards) / len(self.cards) >= 0.5:
+                self.add_dealer_card()
+            else:
+                break
 
     def add_dealer_card(self) -> None:
         self.dealer_cards.append(self.get_random_cart())
@@ -277,7 +289,7 @@ class BlackjackGame:
         _blackjack_games.pop(f'{self.member.guild.id}:{self.member.id}', None)
 
     @staticmethod
-    def calculate_result(_cards: List[Optional[int]]) -> int:
+    def calculate_result(_cards: List[str]) -> int:
         result = 0
         count_of_none = 0
         for val in map(BlackjackGame.cards.__getitem__, _cards):

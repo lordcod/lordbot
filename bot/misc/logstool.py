@@ -268,6 +268,26 @@ class Logs:
         return Message(embed=embed)
 
     @on_logs(LogType.economy)
+    async def add_currency_for_ids(self, role: nextcord.Role, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
+        gdb = GuildDateBases(role.guild.id)
+        economy_settings = await gdb.get('economic_settings')
+        currency_emoji = economy_settings.get('emoji')
+        embed = nextcord.Embed(
+            title='Currency received',
+            color=nextcord.Colour.brand_green(),
+            description=(
+                f'Role: {role.mention} ({role.id})\n'
+                f'Amount: {amount :,}{currency_emoji}'
+            )
+        )
+        if moderator:
+            embed.description += f'\nModerator: {moderator} ({moderator.id})'
+        if reason:
+            embed.description += f'\nReason: {reason}'
+        embed.set_thumbnail(role.icon)
+        return Message(embed=embed)
+
+    @on_logs(LogType.economy)
     async def remove_currency(self, member: nextcord.Member, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
         gdb = GuildDateBases(member.guild.id)
         economy_settings = await gdb.get('economic_settings')

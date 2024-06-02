@@ -46,8 +46,9 @@ def register_key(key: int) -> None:
     return wrapped
 
 
+@to_async
 class EconomyLeaderboardView(menus.Menus):
-    async def create(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]) -> Self:
+    async def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]) -> Self:
         self.guild = guild
         self.gdb = GuildDateBases(guild.id)
         self.economy_settings = await self.gdb.get('economic_settings')
@@ -140,7 +141,7 @@ class LeaderboardTypes:
             icon_url=guild.icon
         )
 
-        view = await EconomyLeaderboardView().create(
+        view = await EconomyLeaderboardView(
             guild, embed, fission_leaderboards, leaderboard_indexs)
 
         await message.edit(content="", embed=view.embed, view=view, file=file_pedestal)

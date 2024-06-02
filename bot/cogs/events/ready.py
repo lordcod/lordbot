@@ -1,17 +1,20 @@
+import logging
 from nextcord.ext import commands
 
-from bot.misc.logger import Logger
+from bot.languages.help import get_command
 from bot.databases import RoleDateBases, BanDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
 import time
 import asyncio
+_log = logging.getLogger(__name__)
 
 
 class ReadyEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+        bot.set_event(self.on_disconnect)
         super().__init__()
 
     @commands.Cog.listener()
@@ -21,6 +24,15 @@ class ReadyEvent(commands.Cog):
         except asyncio.TimeoutError:
             return
 
+        cmd_wnf = []
+        for cmd in self.bot.commands:
+            cmd_data = get_command(cmd.qualified_name)
+            if cmd_data is None:
+                cmd_wnf.append(cmd.qualified_name)
+
+        if cmd_wnf:
+            _log.info(f"Was not found command information: {', '.join(cmd_wnf)}")
+
         await self.process_temp_roles()
         await self.process_temp_bans()
 
@@ -28,12 +40,12 @@ class ReadyEvent(commands.Cog):
         self.bot.add_view(await ReactionConfirmView())
         self.bot.add_view(await IdeaView())
 
-        Logger.success(f"The bot is registered as {self.bot.user}")
+        _log.info(f"The bot is registered as {self.bot.user}")
 
-    @commands.Cog.listener()
     async def on_disconnect(self):
         await self.bot.session.close()
-        Logger.core("Bot is disconnect")
+        await self.bot.engine.__connection.close()
+        _log.critical("Bot is disconnect")
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()

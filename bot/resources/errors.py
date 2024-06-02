@@ -1,15 +1,17 @@
 from asyncio import iscoroutinefunction
 import inspect
+import logging
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc.logger import Logger
 from bot.misc.time_transformer import display_time
 from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.languages.help import get_command
 
 from typing import TypeVar, Union
+
+_log = logging.getLogger(__name__)
 
 
 class DisabledCommand(commands.CheckFailure):
@@ -195,4 +197,4 @@ class CallbackCommandError:
         await self.ctx.send(content)
 
     async def OfterError(self):
-        Logger.info(f"[{self.error.__class__.__name__}]: {self.error}")
+        _log.debug(f"[{self.error.__class__.__name__}]: {self.error}")

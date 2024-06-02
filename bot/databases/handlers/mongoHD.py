@@ -82,3 +82,33 @@ class MongoDB:
                 """,
             ('{'+key+'}', value, self.table_name, )
         )
+
+    @to_task
+    @check_table
+    @on_error()
+    async def set_table(self, value):
+        key = str(key)
+        await engine.execute(
+            """
+                    UPDATE mongo
+                    SET values = $1 
+                    WHERE name = $2
+                """,
+            (value, self.table_name, )
+        )
+
+    @check_table
+    @on_error()
+    async def get_table(self) -> dict:
+        data = await engine.fetchvalue(
+            """
+                    SELECT values
+                    FROM mongo 
+                    WHERE name = $1
+                """,
+            (self.table_name)
+        )
+
+        if data is None:
+            return {}
+        return data

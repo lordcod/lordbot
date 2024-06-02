@@ -100,3 +100,19 @@ class EconomyMemberDB:
         data = await self.get_data()
         data[key] -= value
         await self.update(key, data[key])
+
+    @to_task
+    @staticmethod
+    async def increment_for_ids(guild_id, member_ids, key, value):
+        await engine.execute(f"""UPDATE economic SET {key} = {key} + $1 
+                                 WHERE guild_id = $2 
+                                 AND (SELECT ARRAY[member_id] && $3::bigint[])""", (
+            value, guild_id, member_ids))
+
+    @to_task
+    @staticmethod
+    async def decline_for_ids(guild_id, member_ids, key, value):
+        await engine.execute(f"""UPDATE economic SET {key} = {key} - $1 
+                                 WHERE guild_id = $2 
+                                 AND (SELECT ARRAY[member_id] && $3::bigint[])""", (
+            value, guild_id, member_ids))

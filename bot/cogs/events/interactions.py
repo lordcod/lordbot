@@ -1,9 +1,11 @@
+import logging
 import nextcord
 from nextcord.ext import commands
 
 from bot.databases import GuildDateBases
-from bot.misc.logger import Logger
 from bot.misc.lordbot import LordBot
+
+_log = logging.getLogger(__name__)
 
 
 class InteractionsEvent(commands.Cog):
@@ -11,18 +13,9 @@ class InteractionsEvent(commands.Cog):
         self.bot = bot
         bot.set_event(self.on_item_not_found, name='on_view_not_found')
         bot.set_event(self.on_item_not_found, name='on_modal_not_found')
-        bot.set_event(self.on_interaction)
         super().__init__()
 
-    async def on_interaction(self, interaction: nextcord.Interaction):
-        Logger.info(
-            f"Process interaction, CI: {interaction.data['custom_id']}")
-        await self.bot.process_application_commands(interaction)
-
     async def on_item_not_found(self, interaction: nextcord.Interaction):
-        Logger.info(
-            f"Item not found, custom id: {interaction.data['custom_id']}")
-
         gdb = GuildDateBases(interaction.guild_id)
         color = await gdb.get('color')
 
