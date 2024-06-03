@@ -4,11 +4,7 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases
 from bot.misc import utils
 
-import googletrans
-
 from bot.misc.lordbot import LordBot
-
-translator = googletrans.Translator()
 
 
 class ThreadEvent(commands.Cog):

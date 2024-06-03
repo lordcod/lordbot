@@ -3,13 +3,12 @@ from bot.resources.info import DEFAULT_PREFIX
 import asyncio
 import logging
 import sys
-import traceback
 import aiohttp
 import nextcord
 import regex
 from nextcord.ext import commands
 
-from bot.misc.utils import LordTimerHandler, translate_flags
+from bot.misc.utils import LordTimeHandler,  translate_flags
 from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
@@ -107,8 +106,7 @@ class LordBot(commands.AutoShardedBot):
         self.__with_ready__ = loop.create_future()
         self.__with_ready_events__ = []
 
-        self.lord_handler_timer = LordTimerHandler(self.loop)
-        misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)
+        self.lord_handler_timer = LordTimeHandler(loop)
 
         self.add_listener(self.listen_on_ready, 'on_ready')
 

@@ -139,7 +139,7 @@ class CommandEvent(commands.Cog):
 
     async def on_error(self, event, *args, **kwargs):
         _log.error(
-            f"Ignoring exception in {event}", exc_info=sys.exc_info())
+            "Ignoring exception in %s", event, exc_info=sys.exc_info())
 
     async def permission_check(self,  ctx: commands.Context):
         perch = PermissionChecker(ctx)

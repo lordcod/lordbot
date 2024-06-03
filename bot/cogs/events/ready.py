@@ -1,9 +1,15 @@
 import logging
+from typing import Dict
 from nextcord.ext import commands
+from regex import P
 
+from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases.varstructs import GiveawayData
 from bot.languages.help import get_command
 from bot.databases import RoleDateBases, BanDateBases
+from bot.misc.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
+from bot.views.giveaway import GiveawayView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
 import time
@@ -35,10 +41,13 @@ class ReadyEvent(commands.Cog):
 
         await self.process_temp_roles()
         await self.process_temp_bans()
+        await self.process_giveaways()
+        await self.process_guild_delete_tasks()
 
         self.bot.add_view(await ConfirmView())
         self.bot.add_view(await ReactionConfirmView())
         self.bot.add_view(await IdeaView())
+        self.bot.add_view(GiveawayView())
 
         _log.info(f"The bot is registered as {self.bot.user}")
 
@@ -53,7 +62,7 @@ class ReadyEvent(commands.Cog):
 
         for (guild_id, member_id, ban_time) in datas:
             mbrsd = BanDateBases(guild_id, member_id)
-            self.bot.lord_handler_timer.create_timer_handler(
+            self.bot.lord_handler_timer.create(
                 ban_time-time.time(), mbrsd.remove_ban(self.bot._connection), f"ban:{guild_id}:{member_id}")
 
     async def process_temp_roles(self):
@@ -70,8 +79,32 @@ class ReadyEvent(commands.Cog):
 
             mrsdb = RoleDateBases(guild_id, member_id)
 
-            self.bot.lord_handler_timer.create_timer_handler(
+            self.bot.lord_handler_timer.create(
                 role_time-time.time(), mrsdb.remove_role(member, role), f"role:{guild_id}:{member_id}:{role_id}")
+
+    async def process_giveaways(self):
+        for guild in self.bot.guilds:
+            gdb = GuildDateBases(guild.id)
+            giveaways: Dict[int, GiveawayData] = await gdb.get('giveaways', {})
+            for id, data in giveaways.items():
+                if data['completed']:
+                    continue
+                gw = Giveaway(guild, id)
+                gw.giveaway_data = data
+                self.bot.lord_handler_timer.create(
+                    gw.giveaway_data.get('date_end')-time.time(),
+                    gw.complete(),
+                    f'giveaway:{id}'
+                )
+
+    async def process_guild_delete_tasks(self):
+        deleted_tasks = GuildDateBases.get_deleted()
+        for id, delay in deleted_tasks:
+            if self.bot.get_guild(id):
+                continue
+            gdb = GuildDateBases(id)
+            self.bot.lord_handler_timer.create(
+                time.time()-delay, gdb.delete(), f'guild-deleted:{id}')
 
 
 def setup(bot):

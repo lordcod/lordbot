@@ -62,7 +62,7 @@ class Moderations(commands.Cog):
         locale = await gdb.get('language')
         color = await gdb.get('color')
 
-        self.bot.lord_handler_timer.close_as_key(
+        self.bot.lord_handler_timer.close(
             f"ban:{ctx.guild.id}:{member.id}")
 
         embed = nextcord.Embed(
@@ -86,7 +86,7 @@ class Moderations(commands.Cog):
                 inline=False
             )
         if ftime is not None:
-            self.bot.lord_handler_timer.create_timer_handler(
+            self.bot.lord_handler_timer.create(
                 ftime, bsdb.remove_ban(ctx.guild._state), f"ban:{ctx.guild.id}:{member.id}")
 
             bsdb.insert(ftime+time.time())
@@ -133,7 +133,7 @@ class Moderations(commands.Cog):
         _role_time = await rsdb.get_as_role(role.id)
 
         if _role_time is not None:
-            self.bot.lord_handler_timer.close_as_key(
+            self.bot.lord_handler_timer.close(
                 f"role:{ctx.guild.id}:{member.id}:{role.id}")
             embed = nextcord.Embed(
                 title="The duration of the role has been changed",
@@ -165,7 +165,7 @@ class Moderations(commands.Cog):
 
         await rsdb.set_role(role.id, ftime+time.time())
 
-        self.bot.lord_handler_timer.create_timer_handler(
+        self.bot.lord_handler_timer.create(
             ftime, rsdb.remove_role(member, role), f"role:{ctx.guild.id}:{member.id}:{role.id}")
 
         await member.add_roles(role)

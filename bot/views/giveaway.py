@@ -8,6 +8,7 @@ from bot.misc import giveaway as misc_giveaway
 from bot.misc.utils import translate_to_timestamp
 
 if TYPE_CHECKING:
+    from bot.misc.lordbot import LordBot
     from bot.misc.giveaway import GiveawayConfig, Giveaway
 
 
@@ -15,7 +16,7 @@ class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
     def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: GiveawayConfig) -> None:
         self.member = member
         self.giveaway_config = giveaway_config
-        super().__init__("Choose a giveaway sponsor")
+        super().__init__(placeholder="Choose a giveaway sponsor")
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         return interaction.user == self.member
@@ -32,7 +33,7 @@ class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
     def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         self.member = member
         self.giveaway_config = giveaway_config
-        super().__init__("Choose a giveaway channel", channel_types=[
+        super().__init__(placeholder="Choose a giveaway channel", channel_types=[
             nextcord.ChannelType.news, nextcord.ChannelType.text])
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
@@ -152,8 +153,8 @@ class GiveawaySettingsView(nextcord.ui.View):
         self.embed.add_field(
             name="Addtionally information",
             value=(
-                f"Prize: {self.giveaway_config.prize if self.giveaway_config.prize else 'not registered'}"
-                f"Quantity: {self.giveaway_config.quantity if self.giveaway_config.quantity else 1}"
+                f"Prize: {self.giveaway_config.prize if self.giveaway_config.prize else 'not registered'}\n"
+                f"Quantity: {self.giveaway_config.quantity if self.giveaway_config.quantity else 1}\n"
                 f"Channel: {self.giveaway_config.channel.mention if self.giveaway_config.channel else 'not registered'}\n"
                 f"Sponsor: {self.giveaway_config.sponsor.mention if self.giveaway_config.sponsor else member.mention}\n"
                 f"Date end: {f'<t:{self.giveaway_config.date_end :.0f}:f>' if self.giveaway_config.date_end else 'not registered'}"
@@ -171,7 +172,7 @@ class GiveawaySettingsView(nextcord.ui.View):
         return interaction.user == self.member
 
     @nextcord.ui.button(label="Create giveaway", style=nextcord.ButtonStyle.success)
-    async def create(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def create(self, button: nextcord.ui.Button, interaction: nextcord.Interaction[LordBot]):
         if not (self.giveaway_config.prize
                 and self.giveaway_config.date_end
                 and self.giveaway_config.channel):
@@ -180,9 +181,10 @@ class GiveawaySettingsView(nextcord.ui.View):
             return
         if not self.giveaway_config.sponsor:
             self.giveaway_config.sponsor = interaction.user
-        asyncio.create_task(interaction.delete_original_message())
+        asyncio.create_task(interaction.delete_original_message(), name=f'giveaway:delete:{interaction.message.id}')
         giveaway = await misc_giveaway.Giveaway.create_as_config(interaction.guild, self.giveaway_config)
-        giveaway.lord_handler_timer.create_timer_handler(
+        await giveaway.fetch_giveaway_data()
+        interaction.client.lord_handler_timer.create(
             giveaway.giveaway_data.get('date_end')-time.time(),
             giveaway.complete(),
             f'giveaway:{giveaway.message_id}'
@@ -221,12 +223,12 @@ class GiveawayView(nextcord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
 
-    @nextcord.ui.button(emoji="🎉", custom_id="giveaway", style=nextcord.ButtonStyle.blurple)
+    @nextcord.ui.button(emoji="🎉", custom_id="giveaway:participate", style=nextcord.ButtonStyle.blurple)
     async def participate(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         giveaway = misc_giveaway.Giveaway(
             interaction.guild, interaction.message.id)
 
-        if giveaway.check_participation(interaction.user.id):
+        if await giveaway.check_participation(interaction.user.id):
             await interaction.response.send_message(content="Are you sure you want to leave giveaway?",
                                                     view=GiveawayConfirmView(
                                                         giveaway),

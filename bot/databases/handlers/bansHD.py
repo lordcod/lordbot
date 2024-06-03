@@ -23,9 +23,6 @@ class BanDateBases:
     @on_error()
     async def get_all(self):
         datas = await engine.fetchall('SELECT guild_id, member_id, time FROM bans')
-
-        datas = Json.loads(datas)
-
         return datas
 
     @on_error()
