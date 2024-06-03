@@ -2,7 +2,7 @@ import time
 import nextcord
 
 import enum
-from typing import Union
+from typing import Optional, Union
 
 
 data = {}
@@ -30,7 +30,7 @@ class CooldownGuild:
         data.setdefault(self.guild_id, {})
         data[self.guild_id].setdefault(self.command_name, {})
 
-    def get(self) -> Union[None, float]:
+    def get(self) -> Optional[float]:
         cooldata: dict = data[self.guild_id][self.command_name]
 
         regular_rate: int = self.command_data.get('rate')
@@ -69,7 +69,7 @@ class CooldownGuild:
         rate: int = cooldata.get('rate', 0)
         per: float = cooldata.get('per', 0)
 
-        datarate = 0 if 0 >= (rate-1) else rate-1
+        datarate = 0 if 0 >= rate-1 else rate-1
 
         data[self.guild_id][self.command_name] = {
             'rate': datarate,
@@ -183,9 +183,8 @@ class Cooldown:
                 command_data,
                 message.guild.id
             )
-        else:
-            raise ValueError()
+        raise ValueError("cooltype %s was not found" % cooltype)
 
 
 def reset_cooldown(guild_id: int, command_name: str) -> None:
-    data.get(guild_id, {}).pop(command_name)
+    data.get(guild_id, {}).pop(command_name, None)

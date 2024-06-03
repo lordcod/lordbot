@@ -1,35 +1,46 @@
 import asyncio
 import nextcord
-from typing import List, Coroutine, Any
+from typing import Coroutine, Any, Dict
 from bot.databases import localdb
+from bot.databases.handlers.economyHD import EconomyMemberDB
 from bot.databases.varstructs import GiveawayData
+from bot.databases import GuildDateBases
 from bot.misc import utils
 from bot.views import giveaway as views_giveaway
 
-GIVEAWAY_DB = localdb.get_table('giveaway')
+VOICE_STATE_DB = localdb.get_table('voice_state')
+SCORE_STATE_DB = localdb.get_table('score')
 
 
 class GiveawayTypesChecker:
-    def __init__(self, types: List[int]) -> None:
+    def __init__(self, types: Dict[int, Any], giveaway: 'GiveawayData', member: nextcord.Member) -> None:
+        self.member = member
+        self.giveaway_data = giveaway
         self.types = types
 
-    def check_count_invites(): ...
+    def check_count_invites(self):
+        return True
 
-    def check_date_join(): ...
+    def check_date_join(self):
+        return self.member.joined_at.timestamp() >= self.types[1]
 
-    def check_min_balance(): ...
+    def check_min_balance(self):
+        emdb = EconomyMemberDB(self.member.guild.id, self.member.id)
+        balance = emdb.get('balance')
+        bank = emdb.get('bank')
+        return balance + bank >= self.types[2]
 
-    def check_guild_connect(): ...
+    def check_guild_connect(self):
+        ofter_guild = self.member._state._get_guild(self.types[3])
+        return True if ofter_guild.get_member(self.member.id) else False
 
-    def check_voice_connect(): ...
+    def check_voice_connect(self):
+        return True if self.member.voice else False
 
-    def check_voice_connect_latest(): ...
+    def check_min_voice_time(self):
+        return VOICE_STATE_DB.get(self.member.id) >= self.types[5]
 
-    def check_min_voice_time(): ...
-
-    def check_min_voice_time_gap(): ...
-
-    def check_min_level(): ...
+    def check_min_level(self): ...
 
     types_function = {
         0: check_count_invites,
@@ -37,10 +48,8 @@ class GiveawayTypesChecker:
         2: check_min_balance,
         3: check_guild_connect,
         4: check_voice_connect,
-        5: check_voice_connect_latest,
-        6: check_min_voice_time,
-        7: check_min_voice_time_gap,
-        8: check_min_level
+        5: check_min_voice_time,
+        6: check_min_level
     }
 
 
@@ -61,15 +70,21 @@ class Giveaway:
         guild: nextcord.Guild,
         message_id: int
     ) -> None:
-        if message_id not in GIVEAWAY_DB:
-            raise TypeError
-
         self.guild = guild
         self.message_id = message_id
-        self.giveaway_data = GIVEAWAY_DB.get(message_id)
+        self.gdb = GuildDateBases(guild.id)
+
+    async def fetch_giveaway_data(self) -> None:
+        self.giveaways = await self.gdb.get('giveaways')
+        self.giveaway_data = self.giveaways.get(self.message_id)
+
+    async def update_giveaway_data(self, giveaway_data: GiveawayData) -> None:
+        self.giveaways = await self.gdb.get('giveaways')
+        self.giveaways[self.message_id] = giveaway_data
+        await self.gdb.set('giveaways', self.giveaways)
 
     @classmethod
-    def set_lord_timer_handler(cls, lord_handler_timer):
+    def set_lord_timer_handler(cls, lord_handler_timer) -> None:
         cls.lord_handler_timer = lord_handler_timer
 
     @classmethod
@@ -83,6 +98,8 @@ class Giveaway:
         quantity: int,
         date_end: int
     ) -> 'Giveaway':
+        gdb = GuildDateBases(guild.id)
+        giveaways = gdb.get('giveaways')
         key, token = utils.generate_random_token()
 
         giveaway_data = {
@@ -102,10 +119,10 @@ class Giveaway:
         }
 
         embed = cls.get_embed(giveaway_data)
-
         message = await channel.send(embed=embed, view=views_giveaway.GiveawayView())
 
-        GIVEAWAY_DB[message.id] = giveaway_data
+        giveaways[message.id] = giveaway_data
+        await gdb.set('giveaways', giveaways)
 
         return cls(guild, message.id)
 
@@ -126,7 +143,7 @@ class Giveaway:
         )
 
     async def complete(self) -> None:
-        self.update_giveaway_data()
+        await self.fetch_giveaway_data()
 
         winner_number = utils.decrypt_token(
             self.giveaway_data.get('key'), self.giveaway_data.get('token'))
@@ -142,18 +159,19 @@ class Giveaway:
 
         self.giveaway_data['winners'] = winner_ids
         self.giveaway_data['completed'] = True
-        GIVEAWAY_DB[self.message_id] = self.giveaway_data
+        await self.update_giveaway_data(self.giveaway_data)
 
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
+        gw_message = channel.get_partial_message(self.message_id)
 
         asyncio.create_task(self.update_message())
         asyncio.create_task(channel.send(
-            f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the {self.giveaway_data['prize']}!"))
-
-    def update_giveaway_data(self) -> None:
-        self.giveaway_data = GIVEAWAY_DB[self.message_id]
+            f"Congratulations {', '.join([wu.mention for wu in winners])}! You won the {self.giveaway_data['prize']}!",
+            reference=gw_message))
 
     async def update_message(self) -> None:
+        await self.fetch_giveaway_data()
+
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
         message = channel.get_partial_message(self.message_id)
         embed = self.get_completed_embed() if self.giveaway_data.get(
@@ -177,9 +195,6 @@ class Giveaway:
                 f"Winners: **{giveaway_data.get('quantity')}**"
             )
         )
-        embed.set_footer(
-            text=f"Key: {giveaway_data.get('key')}"
-        )
 
         return embed
 
@@ -202,11 +217,16 @@ class Giveaway:
 
         return embed
 
-    def check_participation(self, member_id: int) -> bool:
+    async def check_participation(self, member_id: int) -> bool:
+        await self.fetch_giveaway_data()
         return member_id in self.giveaway_data.get('entries_ids')
 
-    def promote_participant(self, member_id: int) -> None:
+    async def promote_participant(self, member_id: int) -> None:
+        await self.fetch_giveaway_data()
         self.giveaway_data.get('entries_ids').append(member_id)
+        await self.update_giveaway_data(self.giveaway_data)
 
-    def demote_participant(self, member_id: int) -> None:
+    async def demote_participant(self, member_id: int) -> None:
+        await self.fetch_giveaway_data()
         self.giveaway_data.get('entries_ids').remove(member_id)
+        await self.update_giveaway_data(self.giveaway_data)

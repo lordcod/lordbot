@@ -11,7 +11,7 @@ from bot.misc.lordbot import LordBot
 translator = googletrans.Translator()
 
 
-class thread_event(commands.Cog):
+class ThreadEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
@@ -19,7 +19,7 @@ class thread_event(commands.Cog):
     @commands.Cog.listener()
     async def on_thread_create(self, thread: nextcord.Thread):
         guild_data = GuildDateBases(thread.guild.id)
-        afm = guild_data.get('thread_messages')
+        afm = await guild_data.get('thread_messages')
         thread_data = afm.get(thread.parent_id)
 
         if not thread_data:
@@ -30,4 +30,4 @@ class thread_event(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(thread_event(bot))
+    bot.add_cog(ThreadEvent(bot))

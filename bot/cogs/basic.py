@@ -1,12 +1,10 @@
 
-import time
 import nextcord
 from nextcord.ext import commands, application_checks
 from nextcord.utils import oauth_url
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
-from bot.misc.utils import TimeCalculator
 from bot.views.giveaway import GiveawaySettingsView
 from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
@@ -25,7 +23,7 @@ from typing import Callable
 translator = googletrans.Translator()
 
 
-class basic(commands.Cog):
+class Basic(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
@@ -34,7 +32,7 @@ class basic(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
 
         stime = timeit.default_timer()
-        color = gdb.get('color')
+        color = await gdb.get('color')
         ftime = timeit.default_timer()
 
         discord_latency_ms = round(self.bot.latency*100, 2)
@@ -48,7 +46,7 @@ class basic(commands.Cog):
                 f"Discord latency: {discord_latency_ms}ms\n"
                 f"Databases latency: {databases_latency_ms}ms\n"
                 f"Command processing latency: {command_latency_ms}ms\n"
-                f"Shard ID: {((ctx.guild.id >> 22) % self.bot.shard_count) + 1}/{self.bot.shard_count}"
+                f"Shard id: 1"
             ),
             color=color
         )
@@ -56,17 +54,24 @@ class basic(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_guild=True)
     async def giveaway(self, ctx: commands.Context):
         view = GiveawaySettingsView(ctx.author, ctx.guild.id)
         await ctx.send(embed=view.embed, view=view)
 
     @commands.command()
+    async def avatar(self, ctx: commands.Context, member: nextcord.Member) -> None:
+        embed = nextcord.Embed(
+            title=f"Avatar of the {member.display_name} member")
+        embed.set_image(member.display_avatar.url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
     async def invite(self, ctx: commands.Context):
         invite_link = oauth_url(
             client_id=self.bot.user.id,
-            permissions=nextcord.Permissions.all(),
-            redirect_uri=info.site_link,
+            permissions=nextcord.Permissions(administrator=True),
             scopes=("bot", "applications.commands"),
         )
 
@@ -75,7 +80,7 @@ class basic(commands.Cog):
     @commands.command()
     async def captcha(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
-        lang = gdb.get('language')
+        lang = await gdb.get('language')
         data, code = await utils.generator_captcha(random.randint(3, 7))
         image_file = nextcord.File(
             data, filename="captcha.png", description="Captcha", spoiler=True)
@@ -120,8 +125,8 @@ class basic(commands.Cog):
         ),
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        lang = gdb.get('language')
-        color = gdb.get('color')
+        lang = await gdb.get('language')
+        color = await gdb.get('color')
 
         activiti: dict = jmespath.search(
             f"[?label=='{act}']|[0]", info.activities_list)
@@ -138,7 +143,7 @@ class basic(commands.Cog):
 
         view = nextcord.ui.View(timeout=None)
         view.add_item(nextcord.ui.Button(
-            label="Activiti", emoji=Emoji.roketa, url=inv.url))
+            label="Activiti", emoji=Emoji.rocket, url=inv.url))
 
         embed = nextcord.Embed(
             title=i18n.t(lang, 'activiti.embed.title'),
@@ -164,7 +169,7 @@ class basic(commands.Cog):
         message: nextcord.Message
     ):
         gdb = GuildDateBases(inters.guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         if not message.content:
             await inters.response.send_message(i18n.t(locale, 'translate.failed'),
@@ -177,7 +182,7 @@ class basic(commands.Cog):
         result = translator.translate(
             text=message.content, dest=data.get('google_language'))
 
-        view = TranslateView(inters.guild_id, data.get('google_language'))
+        view = await TranslateView(inters.guild_id, data.get('google_language'))
 
         await inters.response.send_message(content=result.text,
                                            view=view,
@@ -185,4 +190,4 @@ class basic(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(basic(bot))
+    bot.add_cog(Basic(bot))

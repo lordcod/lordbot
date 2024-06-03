@@ -1,4 +1,6 @@
+import math
 import re
+from typing import Iterable
 import nextcord
 from nextcord.ext import commands
 
@@ -12,53 +14,63 @@ from bot.views.help import HelpView
 REGEXP_COMMAND_NAME = re.compile(r'([ _\-\.a-zA-Z0-9]+)')
 
 
-def bool_to_str_by_command(value: bool) -> str:
-    if value:
-        return "1"
-    return "0"
-
-
 def get_disable_command_value(
     locale: str,
     command: help_info.CommandOption
 ) -> str:
     return i18n.t(locale,
-                  f"help.command-embed.connection_disabled.{str(int(command.get('allowed_disabled')))}")
+                  f"help.command-embed.connection_disabled.{int(command.get('allowed_disabled'))}")
 
 
 def get_using(
     locale: str,
     command: help_info.CommandOption
 ) -> str:
-    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join([arg.get(locale) for arg in command.get('arguments')]) if command.get('arguments') else ''}")
+    _arguments = command.get('arguments')
+    arguments = []
+    for arg in _arguments:
+        if isinstance(arg, dict):
+            arguments.append(arg.get(locale))
+        else:
+            arguments.append(arg)
+    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(arguments) if arguments else ''}")
 
 
-class help(commands.Cog):
+def divise_list(iterable: Iterable, count: int) -> list:
+    iterable = list(iterable)
+    ret = []
+    score = math.ceil(len(iterable)/count)
+    for i in range(count):
+        ret.append(iterable[score*i:score*(i+1)])
+    return ret
+
+
+class Help(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
     @commands.command()
     async def help(self, ctx: commands.Context, *, command_name: str = None):
-        self.gdb = GuildDateBases(ctx.guild.id)
-
         if not command_name:
-            await self.generate_message(ctx)
+            await self.send_message(ctx)
             return
 
         if not REGEXP_COMMAND_NAME.fullmatch(command_name):
-            await self.generate_not_valid(ctx)
+            await self.send_message(ctx)
             return
 
         command_data = get_command(command_name)
         if command_data:
-            await self.generate_command(ctx, command_data)
+            await self.send_command(ctx, command_data)
             return
 
-        await self.generate_not_found(ctx)
+        await self.send_not_found(ctx)
 
-    async def generate_message(self, ctx: commands.Context):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
+    async def send_message(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.title"),
@@ -75,13 +87,15 @@ class help(commands.Cog):
                 inline=False
             )
 
-        view = HelpView(ctx.guild.id)
+        view = await HelpView(ctx.guild.id)
 
         await ctx.send(embed=embed, view=view)
 
-    async def generate_command(self, ctx: commands.Context, command_data: help_info.CommandOption):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
+    async def send_command(self, ctx: commands.Context, command_data: help_info.CommandOption):
+        gdb = GuildDateBases(ctx.guild.id)
+
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
         aliases = command_data.get('aliases')
 
         embed = nextcord.Embed(
@@ -113,11 +127,27 @@ class help(commands.Cog):
                     inline=False
                 )
 
-        await ctx.send(embed=embed)
+        if reactions := command_data.get('reactions'):
+            react_embed = nextcord.Embed(
+                title="Reactions",
+                color=color
+            )
+            for num, reacts in enumerate(divise_list(reactions.items(), count=3), start=1):
+                react_embed.add_field(
+                    name=num,
+                    value='\n'.join([
+                        f"{name} - {react.get(locale)}" for name, react in reacts])
+                )
 
-    async def generate_not_found(self, ctx: commands.Context):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
+            await ctx.send(embeds=[embed, react_embed])
+        else:
+            await ctx.send(embed=embed)
+
+    async def send_not_found(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.command-notfound.title"),
@@ -127,18 +157,6 @@ class help(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    async def generate_not_valid(self, ctx: commands.Context):
-        locale = self.gdb.get('language')
-        color = self.gdb.get('color')
-
-        embed = nextcord.Embed(
-            title=i18n.t(locale, "help.command-invalid.title"),
-            description=i18n.t(locale, "help.command-invalid.description"),
-            color=color
-        )
-
-        await ctx.send(embed=embed)
-
 
 def setup(bot):
-    bot.add_cog(help(bot))
+    bot.add_cog(Help(bot))

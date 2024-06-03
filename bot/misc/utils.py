@@ -1,24 +1,27 @@
 from __future__ import annotations
-import asyncio
-from collections import namedtuple
-import time
-from typing import Any, TypeVar, overload
-import emoji
-
+import functools
+import logging
 import nextcord
 from nextcord.ext import commands
 
 
 import inspect
+import nextcord.types
+import nextcord.types.message
 import regex
 import string
 import random
 import aiohttp
+import asyncio
+import time
+import emoji
 import orjson
-import threading
 
 from asyncio import TimerHandle
-from typing import Coroutine, Dict,  Optional,  Tuple, Union, Mapping
+from collections import namedtuple
+from typing import (TYPE_CHECKING, Awaitable, Callable, Coroutine, Dict,  Optional,  Tuple, Union,
+                    Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
+from typing import Any, Coroutine, Dict, Iterable,  Optional, Self, SupportsIndex,  Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -26,15 +29,20 @@ from functools import lru_cache
 from dataclasses import dataclass, field
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
+
+from bot.databases import GuildDateBases
 from cryptography.fernet import Fernet
 
+from bot.resources.ether import Emoji
 
+_log = logging.getLogger(__name__)
 T = TypeVar('T')
+C_co = TypeVar("C_co", bound=type, covariant=True)
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
     "None": wel_mes("None", None, None),
-    "my-image": wel_mes("My image", "Nope", "You will be able to enter a link to an image."),
+    "my-image": wel_mes("My image", ..., "You will be able to enter a link to an image."),
     "view-from-mountain": wel_mes("View from mountain", "https://i.postimg.cc/Hnpz0ycb/view-from-mountain.jpg", "Summer vibes, mountain views, sunset - all adds charm."),
     "autumn-street": wel_mes("Autumn street", "https://i.postimg.cc/sXnQ8QHY/autumn-street.jpg", "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn."),
     "winter-day": wel_mes("Winter day", "https://i.postimg.cc/qBhyYQ0g/winter-day.jpg", "Dazzling winter day, majestic mountain, small buildings, sparkling highway, snow-white covers."),
@@ -102,21 +110,6 @@ class MemberPayload(TempletePayload):
         return self.tag
 
 
-class StoppableThread(threading.Thread):
-    """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition."""
-
-    def __init__(self,  *args, **kwargs):
-        super(StoppableThread, self).__init__(*args, **kwargs)
-        self._stop_event = threading.Event()
-
-    def stop(self):
-        self._stop_event.set()
-
-    def stopped(self):
-        return self._stop_event.is_set()
-
-
 class __LordFormatingTemplate(string.Template):
     pattern = r"""
         \{(\s*)(?:
@@ -145,6 +138,181 @@ class Tokenizer:
         return Fernet.generate_key()
 
 
+_blackjack_games = {}
+
+
+class BlackjackGame:
+    cards: Dict[str, Optional[int]] = {
+        '<:hearts_of_ace:1236254919347142688>': None, '<:hearts_of_two:1236254940016545843>': 2, '<:hearts_of_three:1236254938158338088>': 3, '<:hearts_of_four:1236254924757536799>': 4, '<:hearts_of_five:1236254923050586212>': 5, '<:hearts_of_six:1236254934920593438>': 6, '<:hearts_of_seven:1236254933309718641>': 7, '<:hearts_of_eight:1236254921272066078>': 8, '<:hearts_of_nine:1236254929803280394>': 9, '<:hearts_of_ten:1236254936514428948>': 10, '<:hearts_of_jack:1236254926263418932>': 10, '<:hearts_of_queen:1236254931464228905>': 10, '<:hearts_of_king:1236254928104587336>': 10,
+        '<:spades_of_ace:1236254941820092506>': None, '<:spades_of_two:1236256183048863836>': 2, '<:spades_of_three:1236256162933112862>': 3, '<:spades_of_four:1236254946454667325>': 4, '<:spades_of_five:1236256181433929768>': 5, '<:spades_of_six:1236256158835277846>': 6, '<:spades_of_seven:1236256156834594836>': 7, '<:spades_of_eight:1236254943632162857>': 8, '<:spades_of_nine:1236254952901316659>': 9, '<:spades_of_ten:1236256161024708619>': 10, '<:spades_of_jack:1236254949072048200>': 10, '<:spades_of_queen:1236254955099262996>': 10, '<:spades_of_king:1236254951001292840>': 10,
+        '<:clubs_of_ace:1236254878867918881>': None, '<:clubs_of_two:1236254897243029607>': 2, '<:clubs_of_three:1236254896026812508>': 3, '<:clubs_of_four:1236254884232167474>': 4, '<:clubs_of_five:1236254882533740614>': 5, '<:clubs_of_six:1236254893015175220>': 6, '<:clubs_of_seven:1236254891572334644>': 7, '<:clubs_of_eight:1236254880981586021>': 8, '<:clubs_of_nine:1236254888833581116>': 9, '<:clubs_of_ten:1236254894525120522>': 10, '<:clubs_of_jack:1236254886119739423>': 10, '<:clubs_of_queen:1236254890234347540>': 10, '<:clubs_of_king:1236254887474368533>': 10,
+        '<:diamonds_of_ace:1236254898799247441>': None, '<:diamonds_of_two:1236254917266636912>': 2, '<:diamonds_of_three:1236254916394225696>': 3, '<:diamonds_of_four:1236254903140220988>': 4, '<:diamonds_of_five:1236254901835661333>': 5, '<:diamonds_of_six:1236254913412202496>': 6, '<:diamonds_of_seven:1236254911797268500>': 7, '<:diamonds_of_eight:1236254900338430042>': 8, '<:diamonds_of_nine:1236254908164870164>': 9, '<:diamonds_of_ten:1236254914867626064>': 10, '<:diamonds_of_jack:1236254904931061800>': 10, '<:diamonds_of_queen:1236254909813358602>': 10, '<:diamonds_of_king:1236254906562777191>': 10
+    }
+
+    def __init__(self, member: nextcord.Member, amount: int) -> None:
+        if _blackjack_games.get(f'{member.guild.id}:{member.id}'):
+            raise TypeError
+
+        _blackjack_games[f'{member.guild.id}:{member.id}'] = self
+        self.member = member
+        self.amount = amount
+
+        self.cards = self.cards.copy()
+        self.your_cards = [self.get_random_cart() for _ in range(2)]
+        self.dealer_cards = [self.get_random_cart() for _ in range(2)]
+
+        self.gid = randquan(9)
+
+    @property
+    def your_value(self) -> int:
+        return self.calculate_result(self.your_cards)
+
+    @property
+    def dealer_value(self) -> int:
+        return self.calculate_result(self.dealer_cards)
+
+    async def completed_embed(self) -> nextcord.Embed:
+        gdb = GuildDateBases(self.member.guild.id)
+        color = await gdb.get('color')
+
+        embed = nextcord.Embed(
+            title="Blackjack",
+            description=f"Result: {await self.get_winner_title()}",
+            color=color
+        )
+        embed.add_field(
+            name="Your Hand",
+            value=(
+                f"{' '.join(self.your_cards)}\n\n"
+                f"Value: {self.your_value}"
+            )
+        )
+        embed.add_field(
+            name="Dealer Hand",
+            value=(
+                f"{' '.join(self.dealer_cards)}\n\n"
+                f"Value: {self.dealer_value}"
+            )
+        )
+        return embed
+
+    async def embed(self) -> nextcord.Embed:
+        gdb = GuildDateBases(self.member.guild.id)
+        color = await gdb.get('color')
+        economic_settings: dict = await gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+
+        embed = nextcord.Embed(
+            title="Blackjack",
+            description=f"Bet: {self.amount}{currency_emoji}",
+            color=color
+        )
+        embed.add_field(
+            name="Your Hand",
+            value=(
+                f"{' '.join(self.your_cards)}\n\n"
+                f"Value: {self.your_value}"
+            )
+        )
+        embed.add_field(
+            name="Dealer Hand",
+            value=(
+                f"{self.dealer_cards[0]} {Emoji.empty_card}\n\n"
+                f"Value: {self.calculate_result(self.dealer_cards[0:1])}"
+            )
+        )
+        return embed
+
+    def is_avid_winner(self) -> Optional[int]:
+        if (self.your_value == 21
+                and self.dealer_value == 21
+                and 2 == len(self.your_cards)
+                and 2 == len(self.dealer_cards)):
+            return 2
+        elif self.your_value == 21 and 2 == len(self.your_cards):
+            return 1
+        elif self.dealer_value == 21 and 2 == len(self.dealer_cards):
+            return 0
+        return None
+
+    def is_winner(self) -> int:
+        if self.is_exceeds_dealer():
+            return 1
+        if self.is_exceeds_your():
+            return 0
+
+        if self.your_value == self.dealer_value:
+            return 2
+        if self.your_value > self.dealer_value:
+            return 1
+        if self.dealer_value > self.your_value:
+            return 0
+
+    async def get_winner_title(self) -> int:
+        gdb = GuildDateBases(self.member.guild.id)
+        economic_settings: dict = await gdb.get('economic_settings')
+        currency_emoji = economic_settings.get('emoji')
+
+        match self.is_winner():
+            case 2:
+                return f"Draw {self.amount :,}{currency_emoji}"
+            case 1:
+                return f"Won {1.5*self.amount :,.0f}{currency_emoji}" if self.is_avid_winner() == 1 else f"Won {self.amount :,}{currency_emoji}"
+            case 0:
+                return f"Loss -{self.amount :,}{currency_emoji}"
+
+    def is_exceeds_your(self) -> int:
+        return self.your_value > 21
+
+    def is_exceeds_dealer(self) -> int:
+        return self.dealer_value > 21
+
+    def go_dealer(self) -> None:
+        while True:
+            win_cards = []
+            for card in self.cards:
+                # if card in self.your_cards[1:]:
+                #     continue
+                res = self.calculate_result(self.dealer_cards + [card])
+                if 21 >= res:
+                    win_cards.append(card)
+            _log.debug('Win cards: %s, Chance: %s', len(win_cards), len(win_cards) / len(self.cards))
+            if len(win_cards) / len(self.cards) >= 0.5:
+                self.add_dealer_card()
+            else:
+                break
+
+    def add_dealer_card(self) -> None:
+        self.dealer_cards.append(self.get_random_cart())
+
+    def add_your_card(self) -> None:
+        self.your_cards.append(self.get_random_cart())
+
+    def complete(self) -> None:
+        _blackjack_games.pop(f'{self.member.guild.id}:{self.member.id}', None)
+
+    @staticmethod
+    def calculate_result(_cards: List[str]) -> int:
+        result = 0
+        count_of_none = 0
+        for val in map(BlackjackGame.cards.__getitem__, _cards):
+            if val is None:
+                count_of_none += 1
+            else:
+                result += val
+        for _ in range(count_of_none):
+            if result+11 > 21:
+                result += 1
+            else:
+                result += 11
+        return result
+
+    def get_random_cart(self) -> str:
+        val = random.choice(list(self.cards))
+        self.cards.pop(val)
+        return val
+
+
 def lord_format(
     __value: object,
     __mapping: Mapping[str, object]
@@ -152,18 +320,25 @@ def lord_format(
     return __LordFormatingTemplate(__value).format(__mapping)
 
 
+def translate_flags(text: str) -> dict:
+    if not text:
+        return {}
+    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)){1,}", text):
+        raise TypeError("Not a flag.")
+    return dict(map(
+        lambda item: (item[0], item[1]) if item[1] else (item[0], True),
+        regex.findall(
+            r"\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)",
+            text
+        )
+    ))
+
+
 async def clone_message(message: nextcord.Message) -> dict:
     content = message.content
     embeds = message.embeds
-    files = []
-    for attach in message.attachments:
-        filebytes = await attach.read()
-        files.append(nextcord.File(
-            fp=filebytes,
-            filename=attach.filename,
-            description=attach.description,
-            spoiler=attach.is_spoiler()
-        ))
+    files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
+                                   for attach in message.attachments])
 
     return {
         "content": content,
@@ -185,6 +360,7 @@ class LordTimerHandler:
     ):
         th = self.loop.call_later(delay,  self.loop.create_task, coro)
         if key is not None:
+            print(f"Create new timer handle {coro.__name__}(ID:{key})")
             self.data[key] = th
 
     def close_as_key(self, key: Union[str, int]):
@@ -202,12 +378,45 @@ class LordTimerHandler:
             arg.close()
         th.cancel()
 
-    def call_as_key(self, key: Union[str, int]):
-        th = self.data.get(key)
-        if th is None:
-            return
-        th._run()
-        self.close_as_th(th)
+
+class FissionIterator:
+    def __init__(self, iterable: Iterable[Any], count: int) -> None:
+        self.iterable = list(iterable)
+        self.count = count
+        self.value = 0
+        self.max_value = False
+
+    def __iter__(self) -> Self:
+        return self
+
+    def __next__(self) -> Any:
+        if self.max_value:
+            raise StopIteration
+        items = []
+        stop = self.value+self.count
+        if stop >= len(self.iterable):
+            stop = len(self.iterable)
+            self.max_value = True
+        for item in self.iterable[self.value:stop]:
+            items.append(item)
+        self.value = stop
+        return items
+
+    def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
+        return list(iter(self))[__value]
+
+    def to_list(self):
+        return list(iter(self))
+
+
+def to_async(cls: type[T]) -> Awaitable[T]:
+    @functools.wraps(cls)
+    async def wrapped(*args, **kwargs) -> T:
+        self = cls.__new__(cls)
+        await self.__init__(*args, **kwargs)
+        return self
+    wrapped.__default_class__ = cls
+    return wrapped
 
 
 @dataclass
@@ -266,13 +475,20 @@ def clamp(val: Union[int, float],
     return min(maxv, max(minv, val))
 
 
-def is_emoji(text: str) -> bool:
+def is_default_emoji(text: str) -> bool:
     text = text.strip()
-    if regex.fullmatch(r'<a?:.+?:\d{18}>', text):
-        return True
-    if text in emoji.EMOJI_DATA:
+    return text in emoji.EMOJI_DATA
+
+
+def is_custom_emoji(text: str) -> bool:
+    text = text.strip()
+    if regex.fullmatch(r'<a?:.+?:\d{18,}>', text):
         return True
     return False
+
+
+def is_emoji(text: str) -> bool:
+    return is_default_emoji(text) or is_custom_emoji(text)
 
 
 def randquan(quan: int) -> int:
@@ -293,7 +509,7 @@ def decrypt_token(key: str, token: str) -> int:
     return int.from_bytes(res)
 
 
-async def getRandomQuote(lang: str = 'en'):
+async def get_random_quote(lang: str = 'en'):
     url = f"https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang={lang}"
     async with aiohttp.ClientSession() as session:
         async with session.post(url) as responce:
@@ -307,11 +523,13 @@ class TimeCalculator:
         default_coefficient: int = 60,
         refundable: T = int,
         coefficients: Optional[dict] = None,
-        operatable_time: bool = False
+        operatable_time: bool = False,
+        errorable: bool = True
     ) -> None:
         self.default_coefficient = default_coefficient
         self.refundable = refundable
         self.operatable_time = operatable_time
+        self.errorable = errorable
 
         if coefficients is None:
             self.coefficients = {
@@ -322,6 +540,9 @@ class TimeCalculator:
             }
         else:
             self.coefficients = coefficients
+
+    def __class_getitem__(cls, value: Any) -> Self:
+        return cls(operatable_time=value)
 
     @overload
     def convert(
@@ -339,6 +560,10 @@ class TimeCalculator:
         pass
 
     def convert(self, *args) -> T | Coroutine[Any, Any, T]:
+        if not isinstance(self, TimeCalculator):
+            args = (self,)+args
+            self = TimeCalculator()
+
         try:
             return self.async_convert(*args)
         except Exception:
@@ -349,12 +574,19 @@ class TimeCalculator:
         except Exception:
             pass
 
-        raise TypeError
+        if self.errorable:
+            raise TypeError
+        return None
 
     def basic_convert(
         self,
         argument: Any
     ) -> T:
+        try:
+            return int(argument)
+        except ValueError:
+            pass
+
         if not (isinstance(argument, str)
                 and regex.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
             raise TypeError('Format time is not valid!')
@@ -385,7 +617,7 @@ class TimeCalculator:
         return self.basic_convert(argument)
 
 
-def traslate_to_timestamp(arg: str) -> int | None:
+def translate_to_timestamp(arg: str) -> int | None:
     try:
         tdt = datetime.strptime(arg, '%H:%M')
         return datetime(
@@ -469,6 +701,10 @@ def get_award(number):
     }
     award = awards.get(number, number)
     return award
+
+
+def randfloat(a: float | int, b: float | int, scope: int = 14) -> float:
+    return random.randint(int(a*10**scope), int(b*10**scope)) / 10**scope
 
 
 async def generate_message(content: str) -> dict:
@@ -591,12 +827,12 @@ def add_gradient(
 
 
 async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
-    background_image = await load_image_async(background_link)
+    background_image = await load_image_async(background_link, session=member._state.http.__session)
     background = Editor(background_image).resize((800, 450))
 
     profile_image = await load_image_async(
         member.display_avatar.with_size(128).url)
-    profile = Editor(profile_image).resize((150, 150)).circle_image()\
+    profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     nunito = Font("assets/Nunito-ExtraBold.ttf", 40)
     nunito_small = Font("assets/Nunito-Black.ttf", 25)
@@ -616,7 +852,7 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
     background.text(
         (400, 320),
         member.display_name,
-        color=0xff0000,
+        color="#ff00a6",
         font=nunito_small,
         align="center"
     )

@@ -15,7 +15,7 @@ def _load_file(filename: str) -> bytes:
         return f.read()
 
 
-def _parse_json(content: str) -> dict | list:
+def _parse_json(content: str) -> dict:
     return orjson.loads(content)
 
 
@@ -33,7 +33,10 @@ def add_res_translation(key: str, value: str, locale: str):
 
 
 def add_translation(
-    key: str, value: str, locale: Optional[str] = None, loadable: bool = False
+    key: str,
+    value: str,
+    locale: Optional[str] = None,
+    loadable: bool = False
 ) -> None:
     locale = locale or config.get("locale")
     memoization_dict.setdefault(locale, {})
@@ -100,8 +103,6 @@ def to_any_locales() -> dict:
 
 def to_i18n_translation(data: dict, path: Optional[str] = None) -> None:
     for key, value in data.items():
-        if not isinstance(value, dict):
-            raise ValueError("Use another method")
         if set(default_languages) & set(value.keys()):
             add_dict_translations(f"{path+'.' if path else ''}{key}", value)
         else:
@@ -150,38 +151,47 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
     else:
         data = memoization_dict[locale][path]
 
-    return data.format_map(kwargs)
+    return data.format(**kwargs)
 
 
 if __name__ == "__main__":
-    from_folder("./bot/languages/localization")
+    # from_folder("./bot/languages/localization")
+
+    # with open('temp_loc.json', 'wb') as file:
+    #     file.write(orjson.dumps(memoization_dict))
+
+    with open('bot/languages/temp_loc.json', 'rb') as file:
+        dataloc = orjson.loads(file.read())
+        for loc, data in dataloc.items():
+            parser(data, loc, loadable=False)
 
     # Translation dict
-    for lang in default_languages:
-        if lang == "en":
-            continue
-        print(lang)
-        trd = translate_dict(
-            "en", lang, resource_dict['en']['delcat'])
-        print(trd)
-        parser(trd, lang, "delcat", loadable=False)
+    # for lang in default_languages:
+    #     if lang == "en":
+    #         continue
+    #     print(lang)
+    #     trd = translate_dict(
+    #         "en", lang, resource_dict['en']['delcat'])
+    #     print(trd)
+    #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
     # data = translation_with_languages(
-    #     "en", "Delete reaction", default_languages)
+    #     "en", "<time>", default_languages)
+    # print(data)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(
-    #     "delcat.accept.title", translation_with_languages("en", " #{self.category.name} Category Deleted", default_languages))
+    #     "settings.module-name.role-reactions", translation_with_languages("en", "Reaction Roles", default_languages))
 
     # To any locales format
     # data = to_any_locales()
-    # with open("bot/languages/any_localization.json", "+wb") as file:
+    # with open("test_loc.json", "+wb") as file:
     #     jsondata = orjson.dumps(data)
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    # to_i18n_translation(_parse_json(_load_file("bot/languages/any_localization.json")))
+    # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
     to_folder("./bot/languages/localization")

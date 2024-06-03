@@ -1,8 +1,15 @@
+from __future__ import annotations
 from typing import (
+    TYPE_CHECKING,
     Optional,
     List,
-    TypedDict
+    TypedDict,
+    Dict,
+    Tuple,
 )
+
+if TYPE_CHECKING:
+    from bot.misc.logstool import LogType
 
 
 class GiveawayData(TypedDict):
@@ -21,18 +28,41 @@ class GiveawayData(TypedDict):
     token: str
 
 
-IdeasPayload = TypedDict(
-    'IdeasPayload',
-    {
-        "enabled": Optional[bool],
-        "cooldown": Optional[int],
+class PartialIdeasPayload(TypedDict):
+    enabled: bool
+    channel_suggest_id: int
+    message_suggest_id: int
+    channel_offers_id: int
 
-        "channel-suggest-id": int,
-        "message-suggest-id": int,
 
-        "channel-offers-id": int,
-        "channel-approved-id": int,
+class IdeasPayload(PartialIdeasPayload, total=True):
+    cooldown: Optional[int]
+    channel_approved_id: Optional[int]
+    moderation_role_ids: Optional[List[int]]
+    reaction_system: Optional[int]
+    thread_delete: Optional[bool]
+    allow_image: Optional[bool]
+    # User id,  moderator_id, reason
+    ban_users: Optional[List[Tuple[int, int, str]]]
+    # User id, moderator_id, Timestamp, reason
+    muted_users: Optional[List[Tuple[int, int, float, str]]]
 
-        "moderation-role-ids": List[int]
-    }
-)
+
+class RoleShopPayload(TypedDict):
+    role_id: int
+    amount: int
+    limit: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    using_limit: Optional[int]
+
+
+LogsPayload = Dict[int, List['LogType']]
+
+
+class ReactionRoleItemPayload(TypedDict):
+    reactions: Dict[str, int]
+    channel_id: int
+
+
+ReactionRolePayload = Dict[int, ReactionRoleItemPayload]

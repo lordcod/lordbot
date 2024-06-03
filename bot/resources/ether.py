@@ -49,7 +49,7 @@ class Emoji(StrEnum):
     cooldown = '<:cooldown:1185277451295793192>'
     lightbulb = '<:lightbulb:1191467123462119554>'
     congratulation = '<a:congratulation:1165684808844845176>'
-    roketa = '<a:rocketa:1165684783754522704>'
+    rocket = '<a:rocketa:1165684783754522704>'
 
     undo = '<:undo:1191377269143388250>'
     redo = '<:redo:1191377267574710372>'
@@ -59,6 +59,8 @@ class Emoji(StrEnum):
 
     success = '<a:success:1165684794361917611>'
     warn = '<a:warn:1165684798686244874>'
+
+    empty_card = '<:empty_card:1239171805885894717>'
 
 
 channel_types_emoji = {
@@ -74,5 +76,5 @@ channel_types_emoji = {
     13: Emoji.channel_stage,
     14: Emoji.category,
     15: Emoji.channel_forum,
-    16: Emoji.channel_forum,
+    16: Emoji.channel_forum
 }

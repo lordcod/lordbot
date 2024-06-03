@@ -1,40 +1,42 @@
 from asyncio import iscoroutinefunction
 import inspect
+import logging
 import nextcord
 from nextcord.ext import commands
 
-from bot.misc.logger import Logger
 from bot.misc.time_transformer import display_time
 from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.languages.help import get_command
 
-from typing import Union
+from typing import TypeVar, Union
+
+_log = logging.getLogger(__name__)
 
 
-class DisabledCommand(commands.CommandError):
+class DisabledCommand(commands.CheckFailure):
     pass
 
 
-class OnlyTeamError(commands.CommandError):
+class OnlyTeamError(commands.CheckFailure):
     def __init__(self, author: Union[nextcord.Member, nextcord.User]) -> None:
         self.author: Union[nextcord.Member, nextcord.User] = author
         super().__init__()
 
 
-class NotActivateEconomy(commands.CommandError):
+class InactiveEconomy(commands.CheckFailure):
     pass
 
 
-class MissingRole(commands.CommandError):
+class MissingRole(commands.CheckFailure):
     pass
 
 
-class MissingChannel(commands.CommandError):
+class MissingChannel(commands.CheckFailure):
     pass
 
 
-def attach_exception(*errors: Exception):
+def attach_exception(*errors: BaseException):
     def wrapped(func):
         func.__attachment_errors__ = errors
         return func
@@ -48,14 +50,14 @@ class CommandOnCooldown(commands.CommandError):
 
 
 class CallbackCommandError:
-    def __init__(self, ctx: commands.Context, error) -> None:
+    def __init__(self, ctx: commands.Context, error: BaseException) -> None:
         self.ctx = ctx
-        self.error = error
-
-        self.gdb = GuildDateBases(ctx.guild.id)
-        self.locale = self.gdb.get('language')
+        self.error: BaseException = error
 
     async def process(self):
+        self.gdb = GuildDateBases(self.ctx.guild.id)
+        self.locale = await self.gdb.get('language')
+
         for name, item in inspect.getmembers(self):
             allow_errors = getattr(item, "__attachment_errors__", None)
             if allow_errors is None or not iscoroutinefunction(item):
@@ -65,7 +67,7 @@ class CallbackCommandError:
                 await item()
                 break
         else:
-            await self.OfterError()
+            raise self.error
 
     @attach_exception(commands.MissingPermissions)
     async def MissingPermissions(self):
@@ -115,35 +117,7 @@ class CallbackCommandError:
     @attach_exception(commands.BadArgument)
     async def BadArgument(self):
         title = i18n.t(self.locale, 'errors.BadArgument')
-        color = self.gdb.get('color')
-
-        cmd_data = get_command(self.ctx.command.name)
-        using = f"`{cmd_data.get('name')}{' '+' '.join([arg.get(self.locale) for arg in cmd_data.get('arguments')]) if cmd_data.get('arguments') else ''}`"
-
-        embed = nextcord.Embed(
-            title=title,
-            description=i18n.t(
-                self.locale, "help.command-embed.using_command", using=using),
-            color=color
-        )
-        embed.set_footer(text=i18n.t(
-            self.locale, "help.arguments"))
-
-        if examples := cmd_data.get('examples'):
-            for num, (excmd, descript) in enumerate(examples, start=1):
-                embed.add_field(
-                    name=i18n.t(
-                        self.locale, 'help.command-embed.example', number=num),
-                    value=f"`{excmd}`\n{descript.get(self.locale)}",
-                    inline=False
-                )
-
-        await self.ctx.send(embed=embed)
-
-    @attach_exception(commands.MissingRequiredArgument)
-    async def MissingRequiredArgument(self):
-        title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
-        color = self.gdb.get('color')
+        color = await self.gdb.get('color')
 
         cmd_data = get_command(self.ctx.command.name)
         using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
@@ -168,9 +142,37 @@ class CallbackCommandError:
 
         await self.ctx.send(embed=embed)
 
+    @attach_exception(commands.MissingRequiredArgument)
+    async def MissingRequiredArgument(self):
+        title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
+        color = await self.gdb.get('color')
+
+        cmd_data = get_command(self.ctx.command.name)
+        using = f"`{cmd_data.get('name')}{' '+' '.join([arg.get(self.locale) for arg in cmd_data.get('arguments')]) if cmd_data.get('arguments') else ''}`"
+
+        embed = nextcord.Embed(
+            title=title,
+            description=i18n.t(
+                self.locale, "help.command-embed.using_command", using=using),
+            color=color
+        )
+        embed.set_footer(text=i18n.t(
+            self.locale, "help.arguments"))
+
+        if examples := cmd_data.get('examples'):
+            for num, (excmd, descript) in enumerate(examples, start=1):
+                embed.add_field(
+                    name=i18n.t(
+                        self.locale, 'help.command-embed.example', number=num),
+                    value=f"`{excmd}`\n{descript.get(self.locale)}",
+                    inline=False
+                )
+
+        await self.ctx.send(embed=embed)
+
     @attach_exception(CommandOnCooldown)
     async def CommandOnCooldown(self):
-        color = self.gdb.get('color')
+        color = await self.gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(self.locale, 'errors.CommandOnCooldown.title'),
@@ -182,9 +184,9 @@ class CallbackCommandError:
 
         await self.ctx.send(embed=embed, delete_after=5.0)
 
-    @attach_exception(NotActivateEconomy)
-    async def NotActivateEconomy(self):
-        content = i18n.t(self.locale, 'errors.NotActivateEconomy')
+    @attach_exception(InactiveEconomy)
+    async def InactiveEconomy(self):
+        content = i18n.t(self.locale, 'errors.InactiveEconomy')
 
         await self.ctx.send(content)
 
@@ -195,4 +197,4 @@ class CallbackCommandError:
         await self.ctx.send(content)
 
     async def OfterError(self):
-        Logger.info(f"[{self.error.__class__.__name__}]: {self.error}")
+        _log.debug(f"[{self.error.__class__.__name__}]: {self.error}")

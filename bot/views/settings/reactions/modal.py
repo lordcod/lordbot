@@ -1,6 +1,6 @@
 import nextcord
 
-from bot.misc.utils import is_emoji
+from bot.misc.utils import is_emoji, to_async
 
 from .. import reactions
 
@@ -8,10 +8,11 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
+@to_async
 class ModalBuilder(nextcord.ui.Modal):
-    def __init__(self, guild_id, channel_id) -> None:
+    async def __init__(self, guild_id, channel_id) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         self.channel_id = channel_id
         super().__init__(i18n.t(
@@ -49,7 +50,8 @@ class ModalBuilder(nextcord.ui.Modal):
         reacts: dict = gdb.get('reactions')
         emojis = list(filter(
             lambda item: item,
-            [self.emoji_1.value, self.emoji_2.value, self.emoji_3.value]
+            [item.value for _, item in self.__dict__.items()
+             if isinstance(item, nextcord.ui.TextInput)]
         ))
 
         for num, emo in enumerate(emojis, start=1):
@@ -61,7 +63,7 @@ class ModalBuilder(nextcord.ui.Modal):
         channel_id = self.channel_id
         reacts[channel_id] = emojis
 
-        gdb.set('reactions', reacts)
+        await gdb.set('reactions', reacts)
 
-        view = reactions.AutoReactions(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        view = await reactions.AutoReactions(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)

@@ -1,8 +1,8 @@
 from __future__ import annotations
+from typing import Optional, TypeVar, overload
 from ..db_engine import DataBase
-from ..misc.error_handler import on_error
-from ..misc.utils import Json
 
+T = TypeVar('T')
 engine: DataBase = None
 
 
@@ -10,27 +10,28 @@ class CommandDB:
     def __init__(self, guild_id: int) -> None:
         self.guild_id = guild_id
 
-    @on_error()
-    def get(self, command, default=None) -> dict:
-        data = engine.fetchone(
-            "SELECT command_permissions ->> %s FROM guilds WHERE id = %s",
+    @overload
+    async def get(self, command: str) -> Optional[dict]: ...
+
+    @overload
+    async def get(self, command: str, default: T) -> T: ...
+
+    async def get(self, command: str, default: T = None) -> dict | T:
+        data = await engine.fetchvalue(
+            "SELECT command_permissions ->> $1 FROM guilds WHERE id = $2",
             (command, self.guild_id,)
         )
 
-        if not data[0]:
+        if not data:
             return default
-        data_new = Json.loads(data[0])
-        return data_new
+        return data
 
-    @on_error()
-    def update(self, key, value):
-        value = Json.dumps(value)
-
-        engine.execute(
+    async def update(self, key: str, value: dict) -> None:
+        await engine.execute(
             """
                 UPDATE guilds 
-                SET command_permissions = jsonb_set(command_permissions::jsonb, %s, %s) 
-                WHERE id = %s
+                SET command_permissions = jsonb_set(command_permissions::jsonb, $1, $2) 
+                WHERE id = $3
             """,
             ('{'+key+'}', value, self.guild_id, )
         )

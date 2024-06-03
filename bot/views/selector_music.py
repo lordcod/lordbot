@@ -1,17 +1,24 @@
+from __future__ import annotations
 import nextcord
 from nextcord import utils
 
 from bot.databases import GuildDateBases
-from yandex_music_api.datas import Track
+from yandex_music_api.track import Track
 from bot.languages import i18n
 
-from typing import List
+from typing import List, TYPE_CHECKING
+
+from bot.misc.utils import to_async
+
+if TYPE_CHECKING:
+    from bot.misc.voice import Queue, MusicPlayer
 
 
+@to_async
 class MusicDropDown(nextcord.ui.Select):
-    def __init__(self, guild_id, queue, player, tracks: List[Track]) -> None:
+    async def __init__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
         self.tracks = tracks
         self.queue = queue
         self.player = player
@@ -29,24 +36,25 @@ class MusicDropDown(nextcord.ui.Select):
             ]
         )
 
-    async def callback(self, inter: nextcord.Interaction):
+    async def callback(self, interaction: nextcord.Interaction):
         track_id = int(self.values[0])
         track = utils.get(self.tracks, id=track_id)
 
         token = self.queue.add(
-            inter.guild_id,
+            interaction.guild_id,
             track
         )
         await self.player.process(token)
 
 
+@to_async
 class MusicView(nextcord.ui.View):
     embed: nextcord.Embed
 
-    def __init__(self, guild_id, queue, player, tracks: List[Track]) -> None:
+    async def __init__(self, guild_id: int, queue: Queue, player: MusicPlayer, tracks: List[Track]) -> None:
         gdb = GuildDateBases(guild_id)
-        color = gdb.get('color')
-        locale = gdb.get('language')
+        color = await gdb.get('color')
+        locale = await gdb.get('language')
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'music-selector.title'),
             color=color
@@ -54,5 +62,5 @@ class MusicView(nextcord.ui.View):
 
         super().__init__(timeout=None)
 
-        TDD = MusicDropDown(guild_id, queue, player, tracks)
+        TDD = await MusicDropDown(guild_id, queue, player, tracks)
         self.add_item(TDD)

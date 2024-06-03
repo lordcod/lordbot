@@ -1,20 +1,22 @@
-from typing import Any, Coroutine
-import nextcord
 import asyncio
+from typing import TYPE_CHECKING, Any, Coroutine
+import nextcord
 
 from bot.languages import i18n
 from bot.databases import GuildDateBases
+from bot.misc.utils import to_async
 from bot.resources.ether import Emoji
 
 
+@to_async
 class DelCatView(nextcord.ui.View):
-    def __init__(
+    async def __init__(
         self,
         member: nextcord.Member,
         category: nextcord.CategoryChannel
     ) -> None:
         gdb = GuildDateBases(member.guild.id)
-        self.locale = gdb.get('language')
+        self.locale = await gdb.get('language')
 
         self.member = member
         self.category = category
@@ -25,7 +27,7 @@ class DelCatView(nextcord.ui.View):
                                category=self.category.name),
             color=0xED390D
         )
-        super().__init__()
+        super().__init__(timeout=10)
 
     @nextcord.ui.button(label="Accept", style=nextcord.ButtonStyle.blurple)
     async def accept(
@@ -45,7 +47,12 @@ class DelCatView(nextcord.ui.View):
                 self.locale, "delcat.accept.description", count=len(self.category.channels)),
             color=0x57F287
         )
-        await interaction.message.edit(embed=embed, view=None)
+
+        for channel in self.category.channels:
+            asyncio.create_task(channel.delete())
+        await self.category.delete()
+
+        await interaction.response.edit_message(embed=embed, view=None)
 
     @ nextcord.ui.button(label="Cancel", style=nextcord.ButtonStyle.red)
     async def cancel(
@@ -59,7 +66,7 @@ class DelCatView(nextcord.ui.View):
             color=0x57F287
         )
 
-        await interaction.message.edit(embed=embed, view=None)
+        await interaction.response.edit_message(embed=embed, view=None)
 
     async def interaction_check(
         self,

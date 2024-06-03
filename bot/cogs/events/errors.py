@@ -1,10 +1,11 @@
-
+import logging
+import sys
 import nextcord
 from nextcord.ext import commands
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
-from bot.misc.logger import Logger
 from bot.resources import errors
 from bot.databases import CommandDB
 from bot.resources.errors import (CallbackCommandError,
@@ -12,8 +13,7 @@ from bot.resources.errors import (CallbackCommandError,
                                   MissingChannel,
                                   CommandOnCooldown)
 
-TrueType = type(True)
-NumberType = (int, float)
+_log = logging.getLogger(__name__)
 
 
 class PermissionChecker:
@@ -21,13 +21,10 @@ class PermissionChecker:
         self.ctx = ctx
 
     async def process(self) -> bool:
-        if self.ctx.guild is None:
-            return True
-
         ctx = self.ctx
         command_name = ctx.command.qualified_name
         cdb = CommandDB(ctx.guild.id)
-        self.command_permissions = cdb.get(command_name, {})
+        self.command_permissions = await cdb.get(command_name, {})
 
         enabled = await self.is_enabled()
         allowed = await self.is_allowed()
@@ -101,19 +98,19 @@ class PermissionChecker:
             raise TypeError(retry)
 
     allowed_types = {
-        'allow-roles': _is_allowed_role,
-        'allow-channels': _is_allowed_channel,
+        'allow-role': _is_allowed_role,
+        'allow-channel': _is_allowed_channel,
         'cooldown': _is_cooldown
     }
 
 
-class command_event(commands.Cog):
+class CommandEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
-        # bot.set_event(self.on_error)
+        bot.set_event(self.on_error)
         bot.set_event(self.on_command_error)
         bot.set_event(self.on_application_error)
 
@@ -121,14 +118,28 @@ class command_event(commands.Cog):
 
     async def on_application_error(
             self, interaction: nextcord.Interaction, error: Exception):
-        pass
+        if interaction.response.is_done():
+            return
+
+        gdb = GuildDateBases(interaction.guild_id)
+        color = await gdb.get('color')
+
+        embed = nextcord.Embed(
+            title="The interaction time has expired",
+            description="A critical error occurred while processing the command",
+            color=color
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        _log.error('Application error', exc_info=error)
 
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx, error)
         await CommandError.process()
 
     async def on_error(self, event, *args, **kwargs):
-        Logger.error(event)
+        _log.error(
+            f"Ignoring exception in {event}", exc_info=sys.exc_info())
 
     async def permission_check(self,  ctx: commands.Context):
         perch = PermissionChecker(ctx)
@@ -137,9 +148,9 @@ class command_event(commands.Cog):
         return answer
 
     async def after_invoke(self, ctx: commands.Context) -> None:
-        if hasattr(ctx, 'cooldown'):
-            ctx.cooldown.add()
+        if cooldown := getattr(ctx, 'cooldown', None):
+            cooldown.add()
 
 
 def setup(bot):
-    bot.add_cog(command_event(bot))
+    bot.add_cog(CommandEvent(bot))

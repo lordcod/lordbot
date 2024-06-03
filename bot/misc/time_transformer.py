@@ -5,7 +5,8 @@ class DatePluralRussia:
         idx = None
         if numbers % 10 == 1 and numbers % 100 != 11:
             idx = 0
-        elif numbers % 10 >= 2 and numbers % 10 <= 4 and (numbers % 100 < 10 or numbers % 100 >= 20):
+        elif numbers % 10 >= 2 and numbers % 10 <= 4 and (
+                numbers % 100 < 10 or numbers % 100 >= 20):
             idx = 1
         else:
             idx = 2
@@ -46,7 +47,7 @@ class DatePluralRussia:
         return method(timestamp)
 
 
-def DataPluralEnglish(timestamp: int, great: str):
+def convert_dataplural_english(timestamp: int, great: str):
     if timestamp == 1:
         return f"{timestamp} {great.rstrip('s')}"
     return f"{timestamp} {great}"
@@ -54,23 +55,24 @@ def DataPluralEnglish(timestamp: int, great: str):
 
 distributing = {
     'ru': DatePluralRussia.convertor,
-    'en': DataPluralEnglish
+    'en': convert_dataplural_english
 }
 
 
 def time_convert(timestamp: (int | float)) -> dict[str, int]:
     return {
-        "months": round(timestamp / 2_631_600 % 12),
-        "days": round(timestamp / 86_400 % 30),
-        "hours": round(timestamp / 3_600 % 24),
-        "minutes": round(timestamp / 60 % 60),
-        "seconds": round(timestamp % 60)
+        "years": int(timestamp / 31_579_200),
+        "months": int(timestamp / 2_631_600 % 12),
+        "days": int(timestamp / 86_400 % 30),
+        "hours": int(timestamp / 3_600 % 24),
+        "minutes": int(timestamp / 60 % 60),
+        "seconds": int(timestamp % 60)
     }
 
 
-def display_time(number: int, lang: str = "en") -> str:
-    distributing.get(lang, distributing['en'])
+def display_time(number: int, lang: str = "en", max_items: int = 3) -> str:
+    func = distributing.get(lang, distributing['en'])
     current_time = time_convert(number)
-    time_strings = [distributing[lang](num, key)
+    time_strings = [func(num, key)
                     for key, num in current_time.items() if num != 0]
-    return ", ".join(time_strings)
+    return ", ".join(time_strings[:max_items])
