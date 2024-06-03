@@ -1,9 +1,7 @@
-
-from logging.config import valid_ident
 from typing import Optional
 import nextcord
 from bot.databases import GuildDateBases
-from bot.misc.utils import TimeCalculator
+from bot.misc.utils import TimeCalculator, to_async
 from bot.resources.info import DEFAULT_ECONOMY_SETTINGS
 from .. import economy
 from .._view import DefaultSettingsView
@@ -16,10 +14,11 @@ reward_names = {
 }
 
 
+@to_async
 class RewardBonusModal(nextcord.ui.Modal):
-    def __init__(self, guild: nextcord.Guild, value: str) -> None:
+    async def __init__(self, guild: nextcord.Guild, value: str) -> None:
         self.gdb = GuildDateBases(guild.id)
-        self.economy_settings = self.gdb.get('economic_settings', {})
+        self.economy_settings = await self.gdb.get('economic_settings', {})
         self.value = value
         previous = self.economy_settings.get(value)
         super().__init__(reward_names[value], timeout=300)
@@ -32,25 +31,23 @@ class RewardBonusModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        economy_settings = gdb.get('economic_settings')
         bonus = self.bonus.value
 
         if not bonus.isdigit():
             return
 
-        economy_settings[self.value] = int(bonus)
+        gdb.set_on_json('economic_settings', self.value, int(bonus))
 
-        gdb.set('economic_settings', economy_settings)
-
-        view = BonusView(interaction.guild)
+        view = await BonusView(interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)
 
 
+@to_async
 class WorkBonusModal(nextcord.ui.Modal):
-    def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild) -> None:
         super().__init__('Work', timeout=300)
         self.gdb = GuildDateBases(guild.id)
-        self.economy_settings = self.gdb.get('economic_settings', {})
+        self.economy_settings = await self.gdb.get('economic_settings', {})
         work_data = self.economy_settings.get('work')
         _min_work_previous = work_data.get('min')
         _max_work_previous = work_data.get('max')
@@ -97,7 +94,7 @@ class WorkBonusModal(nextcord.ui.Modal):
                 await interaction.response.send_message("Incorrect time format", ephemeral=True)
                 return
 
-        economy_settings = gdb.get('economic_settings')
+        economy_settings = await gdb.get('economic_settings')
         work_data = self.economy_settings.get('work')
 
         if self.min_work.value:
@@ -108,17 +105,18 @@ class WorkBonusModal(nextcord.ui.Modal):
             work_data['cooldown'] = cooldown
 
         economy_settings['work'] = work_data
-        gdb.set('economic_settings', economy_settings)
+        await gdb.set('economic_settings', economy_settings)
 
         view = BonusView(interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)
 
 
+@to_async
 class BetBonusModal(nextcord.ui.Modal):
-    def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild) -> None:
         super().__init__('Bet', timeout=300)
         self.gdb = GuildDateBases(guild.id)
-        self.economy_settings = self.gdb.get('economic_settings', {})
+        self.economy_settings = await self.gdb.get('economic_settings', {})
         work_data = self.economy_settings.get('bet')
         _min_bet_previous = work_data.get('min')
         _max_bet_previous = work_data.get('max')
@@ -149,7 +147,7 @@ class BetBonusModal(nextcord.ui.Modal):
             await interaction.response.send_message("The value must be an integer number", ephemeral=True)
             return
 
-        economy_settings = gdb.get('economic_settings')
+        economy_settings = await gdb.get('economic_settings')
         bet_data = self.economy_settings.get('bet')
         if self.min_bet.value:
             bet_data['min'] = int(self.min_bet.value)
@@ -157,16 +155,17 @@ class BetBonusModal(nextcord.ui.Modal):
             bet_data['max'] = int(self.max_bet.value)
         economy_settings['bet'] = bet_data
 
-        gdb.set('economic_settings', economy_settings)
+        await gdb.set('economic_settings', economy_settings)
 
         view = BonusView(interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)
 
 
+@to_async
 class BonusDropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild_id: int, selected_value: Optional[str] = None):
+    async def __init__(self, guild_id: int, selected_value: Optional[str] = None):
         self.gdb = GuildDateBases(guild_id)
-        self.economy_settings = self.gdb.get('economic_settings', {})
+        self.economy_settings = await self.gdb.get('economic_settings', {})
         options = [
             nextcord.SelectOption(
                 label='Daily reward',
@@ -204,30 +203,30 @@ class BonusDropDown(nextcord.ui.StringSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
-        view = BonusView(interaction.guild, value)
+        view = await BonusView(interaction.guild, value)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class BonusView(DefaultSettingsView):
     embed: nextcord.Embed
 
-    def __init__(self, guild: nextcord.Guild, value: Optional[str] = None) -> None:
+    async def __init__(self, guild: nextcord.Guild, value: Optional[str] = None) -> None:
         self.value = value
-        self.embed = economy.Economy(guild).embed
+        self.embed = (await economy.Economy(guild)).embed
 
         super().__init__()
 
         if value:
             self.edit.disabled = False
             self.reset.disabled = False
-        self.add_item(BonusDropDown(guild.id, value))
+        self.add_item(await BonusDropDown(guild.id, value))
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = economy.Economy(interaction.guild)
-
+        view = await economy.Economy(interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.success, disabled=True)
@@ -235,11 +234,11 @@ class BonusView(DefaultSettingsView):
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
         if self.value in reward_names:
-            modal = RewardBonusModal(interaction.guild, self.value)
+            modal = await RewardBonusModal(interaction.guild, self.value)
         if self.value == 'work':
-            modal = WorkBonusModal(interaction.guild)
+            modal = await WorkBonusModal(interaction.guild)
         if self.value == 'bet':
-            modal = BetBonusModal(interaction.guild)
+            modal = await BetBonusModal(interaction.guild)
         await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.blurple, disabled=True)
@@ -247,10 +246,7 @@ class BonusView(DefaultSettingsView):
                     button: nextcord.ui.Button,
                     interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
+        await gdb.set_on_json('economic_settings', self.value, DEFAULT_ECONOMY_SETTINGS[self.value])
 
-        economy_settings = gdb.get('economic_settings')
-        economy_settings[self.value] = DEFAULT_ECONOMY_SETTINGS[self.value]
-        gdb.set('economic_settings', economy_settings)
-
-        view = BonusView(interaction.guild, self.value)
+        view = await BonusView(interaction.guild, self.value)
         await interaction.message.edit(embed=view.embed, view=view)

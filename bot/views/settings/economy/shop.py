@@ -1,10 +1,12 @@
-from discord import Interaction
+
 import nextcord
 import jmespath
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import RoleShopPayload
 from typing import List, Optional
 from copy import deepcopy
+
+from bot.misc.utils import to_async
 from .. import economy
 from .._view import DefaultSettingsView
 
@@ -18,8 +20,9 @@ def update_role_data(
     role_data: RoleShopPayload,
     roles: List[RoleShopPayload]
 ) -> List[RoleShopPayload]:
-    new_roles = deepcopy(roles) or []
-    for index, rd in enumerate(roles or []):
+    roles = roles or []
+    new_roles = deepcopy(roles)
+    for index, rd in enumerate(roles):
         if rd.get('role_id') != role_data.get('role_id'):
             continue
         new_roles[index] = role_data
@@ -29,11 +32,12 @@ def update_role_data(
     return new_roles
 
 
+@to_async
 class ShopModal(nextcord.ui.Modal):
-    def __init__(self, guild_id: int, role_id: int) -> None:
+    async def __init__(self, guild_id: int, role_id: int) -> None:
         self.role_id = role_id
         self.gdb = GuildDateBases(guild_id)
-        economy_settings = self.gdb.get('economic_settings', {})
+        economy_settings = await self.gdb.get('economic_settings', {})
         shop_info = economy_settings.get('shop')
         self.role_data = role_data = get_role_data(role_id, shop_info) or {}
 
@@ -78,13 +82,13 @@ class ShopModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         if not self.amount.value.isdigit():
-            interaction.response.send_message("Amout is invalid format!")
+            await interaction.response.send_message("Amout is invalid format!")
             return
         if self.limit.value and not self.limit.value.isdigit():
-            interaction.response.send_message("Limit is invalid format!")
+            await interaction.response.send_message("Limit is invalid format!")
             return
 
-        economy_settings = self.gdb.get('economic_settings', {})
+        economy_settings = await self.gdb.get('economic_settings', {})
         shop_info = economy_settings.get('shop')
 
         if not self.role_data:
@@ -106,15 +110,16 @@ class ShopModal(nextcord.ui.Modal):
             }
         shop_info = update_role_data(self.role_data, shop_info)
         economy_settings['shop'] = shop_info
-        self.gdb.set('economic_settings', economy_settings)
+        await self.gdb.set('economic_settings', economy_settings)
 
-        view = ShopView(interaction.guild,
-                        interaction.guild.get_role(self.role_id))
+        view = await ShopView(interaction.guild,
+                              interaction.guild.get_role(self.role_id))
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class ShopDropDown(nextcord.ui.RoleSelect):
-    def __init__(self, guild_id):
+    async def __init__(self, guild_id):
         self.gdb = GuildDateBases(guild_id)
         super().__init__(
             placeholder="Setting up shop roles",
@@ -145,20 +150,23 @@ class ShopDropDown(nextcord.ui.RoleSelect):
                 ephemeral=True
             )
         else:
-            view = ShopView(interaction.guild, role)
+            view = await ShopView(interaction.guild, role)
             await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class ShopView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
-    def __init__(self, guild: nextcord.Guild, selected_role: Optional[nextcord.Role] = None) -> None:
+    async def __init__(self, guild: nextcord.Guild, selected_role: Optional[nextcord.Role] = None) -> None:
         self.selected_role = selected_role
         self.gdb = GuildDateBases(guild.id)
-        economy_settings = self.gdb.get('economic_settings')
+        economy_settings = await self.gdb.get('economic_settings')
         shop_info = economy_settings.get('shop', [])
         super().__init__()
-        self.add_item(ShopDropDown(guild.id))
+
+        dd = await ShopDropDown(guild.id)
+        self.add_item(dd)
 
         if selected_role and (data := get_role_data(selected_role.id, shop_info)):
             role_description = data.get(
@@ -178,14 +186,12 @@ class ShopView(DefaultSettingsView):
             self.delete.disabled = False
         if selected_role and not get_role_data(selected_role.id, shop_info):
             self.create.disabled = False
-        if not selected_role:
-            pass
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = economy.Economy(interaction.guild)
+        view = await economy.Economy(interaction.guild)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -193,13 +199,15 @@ class ShopView(DefaultSettingsView):
     async def create(self,
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
-        await interaction.response.send_modal(ShopModal(interaction.guild_id, self.selected_role.id))
+        modal = await ShopModal(interaction.guild_id, self.selected_role.id)
+        await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label="Edit", style=nextcord.ButtonStyle.blurple, disabled=True)
     async def edit(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        await interaction.response.send_modal(ShopModal(interaction.guild_id, self.selected_role.id))
+        modal = await ShopModal(interaction.guild_id, self.selected_role.id)
+        await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label="Delete", style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self,
@@ -208,10 +216,9 @@ class ShopView(DefaultSettingsView):
         economy_settings = self.gdb.get('economic_settings')
         shop_info: list = economy_settings.get('shop', [])
         role_data = get_role_data(self.selected_role.id, shop_info)
-
         shop_info.remove(role_data)
         economy_settings['shop'] = shop_info
         self.gdb.set('economic_settings', economy_settings)
 
-        view = ShopView(interaction.guild)
+        view = await ShopView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

@@ -16,17 +16,17 @@ class Polls(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
-    @nextcord.slash_command(name="poll", guild_ids=[1179069504186232852])
+    @nextcord.slash_command(name="poll")
     async def poll(self, interaction: nextcord.Interaction):
         await interaction.response.send_modal(CreatePoll())
 
-    @nextcord.message_command("Finish Poll", guild_ids=[1179069504186232852])
+    @nextcord.message_command("Finish Poll")
     async def finish_poll(self, interaction: nextcord.Interaction, message: nextcord.Message):
         await interaction.response.defer(ephemeral=True, with_message=False)
 
         gdb = GuildDateBases(interaction.guild_id)
-        polls = gdb.get('polls')
-        color = gdb.get('color')
+        polls = await gdb.get('polls')
+        color = await gdb.get('color')
         poll_data: dict = polls.get(message.id, {})
 
         user_id = poll_data.get('user_id')

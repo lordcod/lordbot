@@ -3,10 +3,10 @@ from dataclasses import dataclass
 import datetime
 from enum import IntEnum
 import functools
-from typing import Dict, List, Optional, Self, Tuple
+from typing import Any, Awaitable, Callable, Coroutine, Dict, List, Optional, Self, Tuple
 import nextcord
 
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import cut_back
 
@@ -15,6 +15,8 @@ from bot.misc.utils import cut_back
 class Message:
     content: Optional[str] = None
     embed: Optional[nextcord.Embed] = None
+    embeds: Optional[List[nextcord.Embed]] = None
+    file: Optional[nextcord.File] = None
     files: Optional[List[nextcord.File]] = None
 
 
@@ -45,22 +47,25 @@ def filter_bool(texts: list) -> list:
 _message_log: Dict[Tuple[int, int], asyncio.Future] = {}
 
 
-async def pre_message_delete_log(message: nextcord.Message, moderator: Optional[nextcord.Member] = None):
-    if message.id in _message_log:
-        return
+async def pre_message_delete_log(message: nextcord.Message):
+    moderator: Optional[nextcord.Member] = None
     loop = asyncio.get_event_loop()
     future = loop.create_future()
     _message_log[(message.channel.id, message.author.id)] = future
+
     try:
         await asyncio.wait_for(future, timeout=1)
     except asyncio.TimeoutError:
         pass
     else:
         moderator = future.result()
+    finally:
+        _message_log.pop((message.channel.id, message.author.id), None)
+
     await Logs(message.guild).delete_message(message, moderator)
 
 
-async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: int, author_id: int):
+async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: int, author_id: int) -> None:
     try:
         _message_log[(channel_id, author_id)].set_result(moderator)
     except KeyError:
@@ -71,23 +76,31 @@ class Logs:
     def __init__(self, guild: nextcord.Guild):
         self.guild = guild
         self.gdb = GuildDateBases(guild.id)
-        self.guild_data: Dict[int, List[LogType]] = self.gdb.get('logs')
 
     @staticmethod
     def on_logs(log_type: int):
         def predicte(coro):
             @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
-                mes: Message = await coro(self, *args, **kwargs)
-                if mes is None:
+                mes: Optional[Message] = await coro(self, *args, **kwargs)
+
+                if mes is None:  # type: ignore
                     return
 
-                for channel_id, logs_types in self.guild_data.items():
+                guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
+
+                for channel_id, logs_types in guild_data.items():
                     if log_type not in logs_types:
                         continue
 
                     channel = self.guild.get_channel(channel_id)
-                    await channel.send(content=mes.content, embed=mes.embed, files=mes.files)
+                    await channel.send(
+                        content=mes.content,
+                        embed=mes.embed,
+                        embeds=mes.embeds,
+                        file=mes.file,
+                        files=mes.files
+                    )
 
             return wrapped
         return predicte
@@ -237,7 +250,7 @@ class Logs:
     @on_logs(LogType.economy)
     async def add_currency(self, member: nextcord.Member, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
         gdb = GuildDateBases(member.guild.id)
-        economy_settings = gdb.get('economic_settings')
+        economy_settings = await gdb.get('economic_settings')
         currency_emoji = economy_settings.get('emoji')
         embed = nextcord.Embed(
             title='Currency received',
@@ -255,9 +268,29 @@ class Logs:
         return Message(embed=embed)
 
     @on_logs(LogType.economy)
+    async def add_currency_for_ids(self, role: nextcord.Role, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
+        gdb = GuildDateBases(role.guild.id)
+        economy_settings = await gdb.get('economic_settings')
+        currency_emoji = economy_settings.get('emoji')
+        embed = nextcord.Embed(
+            title='Currency received',
+            color=nextcord.Colour.brand_green(),
+            description=(
+                f'Role: {role.mention} ({role.id})\n'
+                f'Amount: {amount :,}{currency_emoji}'
+            )
+        )
+        if moderator:
+            embed.description += f'\nModerator: {moderator} ({moderator.id})'
+        if reason:
+            embed.description += f'\nReason: {reason}'
+        embed.set_thumbnail(role.icon)
+        return Message(embed=embed)
+
+    @on_logs(LogType.economy)
     async def remove_currency(self, member: nextcord.Member, amount: int, moderator: Optional[nextcord.Member] = None, reason: Optional[str] = None):
         gdb = GuildDateBases(member.guild.id)
-        economy_settings = gdb.get('economic_settings')
+        economy_settings = await gdb.get('economic_settings')
         currency_emoji = economy_settings.get('emoji')
         embed = nextcord.Embed(
             title='Currency was taken',

@@ -73,16 +73,15 @@ class Giveaway:
         self.guild = guild
         self.message_id = message_id
         self.gdb = GuildDateBases(guild.id)
-        self.fetch_giveaway_data()
 
-    def fetch_giveaway_data(self) -> None:
-        self.giveaways = self.gdb.get('giveaways')
+    async def fetch_giveaway_data(self) -> None:
+        self.giveaways = await self.gdb.get('giveaways')
         self.giveaway_data = self.giveaways.get(self.message_id)
 
-    def update_giveaway_data(self, giveaway_data: GiveawayData) -> None:
-        self.giveaways = self.gdb.get('giveaways')
+    async def update_giveaway_data(self, giveaway_data: GiveawayData) -> None:
+        self.giveaways = await self.gdb.get('giveaways')
         self.giveaways[self.message_id] = giveaway_data
-        self.gdb.set('giveaways', self.giveaways)
+        await self.gdb.set('giveaways', self.giveaways)
 
     @classmethod
     def set_lord_timer_handler(cls, lord_handler_timer) -> None:
@@ -123,7 +122,7 @@ class Giveaway:
         message = await channel.send(embed=embed, view=views_giveaway.GiveawayView())
 
         giveaways[message.id] = giveaway_data
-        gdb.set('giveaways', giveaways)
+        await gdb.set('giveaways', giveaways)
 
         return cls(guild, message.id)
 
@@ -144,7 +143,7 @@ class Giveaway:
         )
 
     async def complete(self) -> None:
-        self.fetch_giveaway_data()
+        await self.fetch_giveaway_data()
 
         winner_number = utils.decrypt_token(
             self.giveaway_data.get('key'), self.giveaway_data.get('token'))
@@ -160,7 +159,7 @@ class Giveaway:
 
         self.giveaway_data['winners'] = winner_ids
         self.giveaway_data['completed'] = True
-        self.update_giveaway_data(self.giveaway_data)
+        await self.update_giveaway_data(self.giveaway_data)
 
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
         gw_message = channel.get_partial_message(self.message_id)
@@ -171,7 +170,7 @@ class Giveaway:
             reference=gw_message))
 
     async def update_message(self) -> None:
-        self.fetch_giveaway_data()
+        await self.fetch_giveaway_data()
 
         channel = self.guild.get_channel(self.giveaway_data.get('channel_id'))
         message = channel.get_partial_message(self.message_id)
@@ -218,16 +217,16 @@ class Giveaway:
 
         return embed
 
-    def check_participation(self, member_id: int) -> bool:
-        self.fetch_giveaway_data()
+    async def check_participation(self, member_id: int) -> bool:
+        await self.fetch_giveaway_data()
         return member_id in self.giveaway_data.get('entries_ids')
 
-    def promote_participant(self, member_id: int) -> None:
-        self.fetch_giveaway_data()
+    async def promote_participant(self, member_id: int) -> None:
+        await self.fetch_giveaway_data()
         self.giveaway_data.get('entries_ids').append(member_id)
-        self.update_giveaway_data(self.giveaway_data)
+        await self.update_giveaway_data(self.giveaway_data)
 
-    def demote_participant(self, member_id: int) -> None:
-        self.fetch_giveaway_data()
+    async def demote_participant(self, member_id: int) -> None:
+        await self.fetch_giveaway_data()
         self.giveaway_data.get('entries_ids').remove(member_id)
-        self.update_giveaway_data(self.giveaway_data)
+        await self.update_giveaway_data(self.giveaway_data)

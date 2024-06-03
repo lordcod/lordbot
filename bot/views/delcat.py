@@ -1,21 +1,22 @@
 import asyncio
-from typing import Any, Coroutine
+from typing import TYPE_CHECKING, Any, Coroutine
 import nextcord
-import asyncio
 
 from bot.languages import i18n
 from bot.databases import GuildDateBases
+from bot.misc.utils import to_async
 from bot.resources.ether import Emoji
 
 
+@to_async
 class DelCatView(nextcord.ui.View):
-    def __init__(
+    async def __init__(
         self,
         member: nextcord.Member,
         category: nextcord.CategoryChannel
     ) -> None:
         gdb = GuildDateBases(member.guild.id)
-        self.locale = gdb.get('language')
+        self.locale = await gdb.get('language')
 
         self.member = member
         self.category = category
@@ -26,7 +27,7 @@ class DelCatView(nextcord.ui.View):
                                category=self.category.name),
             color=0xED390D
         )
-        super().__init__()
+        super().__init__(timeout=10)
 
     @nextcord.ui.button(label="Accept", style=nextcord.ButtonStyle.blurple)
     async def accept(

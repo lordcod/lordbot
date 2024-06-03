@@ -14,6 +14,14 @@ from bot.languages import i18n
 from bot.views.translate import AutoTranslateView
 
 import googletrans
+import git
+
+
+repo = git.Repo(search_parent_directories=True)
+
+release_sha = repo.head.object.hexsha[:8]
+release_date = repo.head.object.committed_date
+release_tag = repo.tags[-1].name
 
 translator = googletrans.Translator()
 
@@ -67,7 +75,7 @@ class MessageEvent(commands.Cog):
     @disable
     async def process_auto_translation(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
-        auto_translation = gdb.get('auto_translate')
+        auto_translation = await gdb.get('auto_translate')
 
         if not (message.channel.id in auto_translation
                 and message.content) or message.author.bot:
@@ -76,9 +84,8 @@ class MessageEvent(commands.Cog):
         webhooks = await message.channel.webhooks()
         for wh in webhooks:
             if wh.user != self.bot.user:
-                continue
-            bot_wh = wh
-            break
+                bot_wh = wh
+                break
         else:
             bot_wh = await message.channel.create_webhook(name=self.bot.user.display_name,
                                                           avatar=self.bot.user.display_avatar)
@@ -99,7 +106,7 @@ class MessageEvent(commands.Cog):
     async def add_reactions(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
 
-        if (reactions := gdb.get('reactions', {})) and (
+        if (reactions := await gdb.get('reactions', {})) and (
                 data_reactions := reactions.get(message.channel.id)):
             for reat in data_reactions:
                 if not is_emoji(reat):
@@ -110,21 +117,20 @@ class MessageEvent(commands.Cog):
     async def process_mention(self, message: nextcord.Message) -> None:
         gdb = GuildDateBases(message.guild.id)
 
-        color = gdb.get('color')
-        locale = gdb.get('language')
-        prefix = gdb.get('prefix')
+        color = await gdb.get('color')
+        locale = await gdb.get('language')
+        prefix = await gdb.get('prefix')
 
         if message.content.strip() == self.bot.user.mention:
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'bot-info.title',
                              name=self.bot.user.display_name),
-                description=i18n.t(locale, 'bot-info.description'),
+                description=i18n.t(
+                    locale, 'bot-info.description', prefix=prefix),
                 color=color
             )
-            embed.add_field(
-                name=i18n.t(locale, 'bot-info.info-server'),
-                value=i18n.t(locale, 'bot-info.prefix-server', prefix=prefix)
-            )
+            embed.add_field(name='Assembly Information', value=i18n.t(
+                locale, 'bot-info.assembly', version=release_tag, hash=release_sha, time=release_date))
 
             asyncio.create_task(message.channel.send(embed=embed))
 

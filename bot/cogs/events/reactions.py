@@ -21,7 +21,7 @@ class ReactionsEvent(commands.Cog):
 
         guild = self.bot.get_guild(payload.guild_id)
         gdb = GuildDateBases(payload.guild_id)
-        role_reaction = gdb.get('role_reactions')
+        role_reaction = await gdb.get('role_reactions')
 
         try:
             role_id = role_reaction[payload.message_id]['reactions'][str(
@@ -54,7 +54,7 @@ class ReactionsEvent(commands.Cog):
 
         guild = self.bot.get_guild(payload.guild_id)
         gdb = GuildDateBases(payload.guild_id)
-        role_reaction = gdb.get('role_reactions')
+        role_reaction = await gdb.get('role_reactions')
 
         try:
             if payload.emoji.id is not None:

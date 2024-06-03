@@ -1,18 +1,9 @@
-from ast import List
-from psycopg2.extensions import register_adapter
-
-
 from .handlers import establish_connection
-from .misc.adapter_dict import adapt_dict, adapt_list
 from .settings import Table, Colum, PostType
 from .db_engine import DataBase
 from .config import (host, port, user, password, db_name)
 
 from bot.resources import info
-
-
-register_adapter(dict, adapt_dict)
-register_adapter(list, adapt_list)
 
 
 class GuildsDB(Table):

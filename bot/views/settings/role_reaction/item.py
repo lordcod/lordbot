@@ -4,41 +4,10 @@ from typing import Optional
 import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import ReactionRoleItemPayload
-from bot.misc.utils import is_custom_emoji, is_emoji
+from bot.misc.utils import to_async
 from .._view import DefaultSettingsView
 from .. import role_reaction
-
-
-class RoleReactionItemModal(nextcord.ui.Modal):
-    def __init__(self, guild: nextcord.Guild, future: asyncio.Future) -> None:
-        self.future = future
-
-        super().__init__("Emoji")
-
-        self.emoji = nextcord.ui.TextInput(label="Emoji")
-        self.add_item(self.emoji)
-
-    async def callback(self, interaction: nextcord.Interaction) -> None:
-        value = self.emoji.value
-
-        if not is_emoji(value):
-            await interaction.response.send_message("You have entered an incorrect emoji", ephemeral=True)
-            return
-
-        self.future.set_result(value)
-
-
-class ReactionUsingModal(nextcord.ui.View):
-    def __init__(self, future: asyncio.Future) -> None:
-        self.future = future
-        super().__init__()
-
-    @nextcord.ui.button(label="Use modal", style=nextcord.ButtonStyle.blurple)
-    async def use_modal(self,
-                        button: nextcord.ui.Button,
-                        interaction: nextcord.Interaction
-                        ):
-        await interaction.response.send_modal(RoleReactionItemModal(interaction.guild, self.future))
+from ..set_reaction import fetch_reaction
 
 
 class RoleReactionRegisterItemDropDown(nextcord.ui.StringSelect):
@@ -110,15 +79,16 @@ class RoleReactionItemDropDown(nextcord.ui.RoleSelect):
             )
             return
 
-        view = RoleReactionItemView(
+        view = await RoleReactionItemView(
             interaction.guild, self.message_id, self.channel_id, self.role_reaction, role)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class RoleReactionItemView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
-    def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload, selected_role: Optional[nextcord.Role] = None):
+    async def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload, selected_role: Optional[nextcord.Role] = None):
         gdb = GuildDateBases(guild.id)
         color = gdb.get('color')
 
@@ -157,7 +127,7 @@ class RoleReactionItemView(DefaultSettingsView):
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction
                    ):
-        view = role_reaction.RoleReactionView(interaction.guild)
+        view = await role_reaction.RoleReactionView(interaction.guild)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -173,9 +143,7 @@ class RoleReactionItemView(DefaultSettingsView):
             asyncio.create_task(message.add_reaction(react))
 
         gdb = GuildDateBases(interaction.guild.id)
-        all_role_reaction = gdb.get('role_reactions')
-        all_role_reaction[self.message_id] = self.role_reaction
-        gdb.set('role_reactions', all_role_reaction)
+        await gdb.set_on_json('role_reactions', self.message_id, self.role_reaction)
 
         await self.back.callback(interaction)
 
@@ -184,45 +152,16 @@ class RoleReactionItemView(DefaultSettingsView):
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction
                      ):
-        future = interaction._state.loop.create_future()
-        view = ReactionUsingModal(future)
         message = await interaction.response.send_message(f"Send a reaction for role {self.selected_role.mention} by message", view=view, ephemeral=True)
 
-        def check(message: nextcord.Message):
-            return message.author == interaction.user and message.channel == interaction.channel and is_emoji(message.content)
-
-        try:
-            listeners = interaction.client._listeners['message']
-        except KeyError:
-            listeners = []
-            interaction.client._listeners['message'] = listeners
-        finally:
-            listeners.append((future, check))
-
-        try:
-            done = await asyncio.wait_for(future, timeout=30)
-        except asyncio.TimeoutError:
-            await message.edit("You didn't have time to specify the emoji, use the interaction for", view=None)
-            return
-        else:
-            if isinstance(done, nextcord.Message):
-                value = done.content
-                await done.delete()
-            else:
-                value = done
-            await message.delete()
-
-        allowed_emoji = list(map(str, interaction.client.emojis))
-        if is_custom_emoji(value) and value not in allowed_emoji:
-            await message.edit("Unfortunately I can't use this emoji check that I am on the server where this emoji is located", view=None)
-            return
+        value = await fetch_reaction(interaction, message)
 
         for _emoji, _role_id in list(self.role_reaction['reactions'].items()):
             if _role_id == self.selected_role.id:
                 self.role_reaction['reactions'].pop(_emoji)
         self.role_reaction['reactions'][value] = self.selected_role.id
 
-        view = RoleReactionItemView(
+        view = await RoleReactionItemView(
             interaction.guild, self.message_id, self.channel_id, self.role_reaction, self.selected_role)
         await interaction.message.edit(embed=view.embed, view=view)
 

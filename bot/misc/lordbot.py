@@ -1,10 +1,11 @@
 from __future__ import annotations
+from bot.resources.info import DEFAULT_PREFIX
 import asyncio
 import logging
 import sys
+import traceback
 import aiohttp
 import nextcord
-import psycopg2
 import regex
 from nextcord.ext import commands
 
@@ -17,7 +18,7 @@ from bot.databases.db import DataBase, establish_connection
 from bot.databases.config import host, port, user, password, db_name
 from typing import Coroutine, List, Optional, Dict, Any
 
-from bot.resources.info import DEFAULT_PREFIX
+_log = logging.getLogger(__name__)
 
 
 def get_shard_list(shard_ids: str):
@@ -47,7 +48,7 @@ class LordBot(commands.AutoShardedBot):
         if msg.guild is None:
             return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
         gdb = GuildDateBases(msg.guild.id)
-        prefix = gdb.get('prefix')
+        prefix = await gdb.get('prefix') or DEFAULT_PREFIX
         return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
     def set_event(self, coro: Coroutine, name: Optional[str] = None) -> None:
@@ -104,6 +105,7 @@ class LordBot(commands.AutoShardedBot):
         self.session = aiohttp.ClientSession()
 
         self.__with_ready__ = loop.create_future()
+        self.__with_ready_events__ = []
 
         self.lord_handler_timer = LordTimerHandler(self.loop)
         misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)
@@ -112,18 +114,24 @@ class LordBot(commands.AutoShardedBot):
 
     async def listen_on_ready(self) -> None:
         try:
-            self.engine = engine = DataBase.create_engine(
+            self.engine = engine = await DataBase.create_engine(
                 host, port, user, password, db_name)
-        except psycopg2.OperationalError:
+        except Exception as exc:
+            _log.error("Couldn't connect to the database", exc_info=exc)
             await self.close()
             return
         establish_connection(engine)
         for t in db._tables:
             t.set_engine(engine)
-            t.create()
+            await t.create()
         self.__with_ready__.set_result(None)
+
+        for event_data in self.__with_ready_events__:
+            self.dispatch(event_data[0], *event_data[1], **event_data[2])
 
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         if not self.__with_ready__.done() and event_name.lower() != 'ready':
+            self.__with_ready_events__.append((event_name, args, kwargs))
+            _log.trace('Postponed event %s', event_name)
             return
         return super().dispatch(event_name, *args, **kwargs)

@@ -10,10 +10,10 @@ import jmespath
 translator = googletrans.Translator()
 
 
-class TranslateDropDown(nextcord.ui.Select):
-    def __init__(self, guild_id: int, dest: Optional[str] = None) -> None:
+class TranslateDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id: int, dest: Optional[str] = None) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         super().__init__(
             placeholder=i18n.t(locale, 'translate.placeholder'),
@@ -41,9 +41,10 @@ class TranslateDropDown(nextcord.ui.Select):
 
 
 class TranslateView(nextcord.ui.View):
-    def __init__(self, guild_id: int, dest: Optional[str] = None) -> None:
+    async def __init__(self, guild_id: int, dest: Optional[str] = None) -> None:
         super().__init__(timeout=None)
-        self.add_item(TranslateDropDown(guild_id, dest))
+        tdd = await TranslateDropDown(guild_id, dest)
+        self.add_item(tdd)
 
 
 class AutoTranslateView(nextcord.ui.View):
@@ -58,7 +59,7 @@ class AutoTranslateView(nextcord.ui.View):
         result = translator.translate(
             text=interaction.message.content, dest=data.get('google_language'))
 
-        view = TranslateView(interaction.guild_id, data.get('google_language'))
+        view = await TranslateView(interaction.guild_id, data.get('google_language'))
 
         await interaction.response.send_message(content=result.text,
                                                 view=view,

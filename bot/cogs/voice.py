@@ -75,7 +75,7 @@ class Voice(commands.Cog):
             print(repr(track))
         else:
             tracks = await self.yandex_client.search(request)
-            view = MusicView(ctx.guild.id, queue, MusicPlayer(
+            view = await MusicView(ctx.guild.id, queue, MusicPlayer(
                 voice, mes, ctx.guild.id), tracks)
 
             await mes.edit(content=None, embed=view.embed, view=view)

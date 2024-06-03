@@ -1,4 +1,3 @@
-from typing import Coroutine, Any
 import nextcord
 
 from bot.databases.handlers.economyHD import EconomyMemberDB
@@ -14,9 +13,6 @@ class BlackjackView(nextcord.ui.View):
         self.bjg = bjg
         super().__init__()
 
-    def complete(self) -> None:
-        pass
-
     async def on_timeout(self) -> None:
         self.bjg.complete()
 
@@ -25,23 +21,26 @@ class BlackjackView(nextcord.ui.View):
         self.bjg.add_your_card()
 
         if self.bjg.is_exceeds_your():
-            await interaction.response.edit_message(embed=self.bjg.completed_embed, view=None)
+            embed = await self.bjg.completed_embed()
+            await interaction.response.edit_message(embed=embed, view=None)
             self.bjg.complete()
         else:
-            await interaction.response.edit_message(embed=self.bjg.embed, view=self)
+            embed = await self.bjg.embed()
+            await interaction.response.edit_message(embed=embed, view=self)
 
     @nextcord.ui.button(label="Stand", style=nextcord.ButtonStyle.green)
     async def stand(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         self.bjg.go_dealer()
 
-        await interaction.response.edit_message(embed=self.bjg.completed_embed, view=None)
+        embed = await self.bjg.completed_embed()
+        await interaction.response.edit_message(embed=embed, view=None)
 
         match self.bjg.is_winner():
             case 2:
-                self.account["balance"] += self.bjg.amount
+                await self.account.increment("balance", self.bjg.amount)
                 await logstool.Logs(self.bjg.member.guild).add_currency(self.bjg.member, self.bjg.amount, reason='draw at blackjack')
             case 1:
-                self.account["balance"] += 2*self.bjg.amount
+                await self.account.increment("balance", 2*self.bjg.amount)
                 await logstool.Logs(self.bjg.member.guild).add_currency(self.bjg.member, self.bjg.amount, reason='winning at blackjack')
 
         self.bjg.complete()

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 from typing import List
 from nextcord import utils
 import re
@@ -24,15 +25,15 @@ class TableAPI:
         for c in columns:
             c.set_engine(self.engine)
 
-    def get_colums(self) -> List[Colum]:
+    async def get_colums(self) -> List[Colum]:
         colums = []
-        results = self.engine.fetchall("""
+        results = await self.engine.fetchall("""
                     SELECT c.column_name, c.data_type, c.column_default, is_nullable::bool,
                     CASE WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.constraint_column_usage k 
                         WHERE c.table_name = k.table_name and k.column_name = c.column_name) 
                         THEN true ELSE false END as primary_key
                     FROM INFORMATION_SCHEMA.COLUMNS c 
-                    WHERE c.table_name=%s;
+                    WHERE c.table_name=$1;
                 """, (self.table_name,))
         for res in results:
             colums.append(Colum(
@@ -45,8 +46,7 @@ class TableAPI:
         self.register_colums(*colums)
         return colums
 
-    def add_colum(self, colum: Colum, colums: List[Colum]) -> None:
-        self.register_colums(colum, *colums)
+    async def add_colum(self, colum: Colum, colums: List[Colum]) -> None:
         if not isinstance(colum, Colum):
             raise TypeError("The argument must match the Column type")
 
@@ -55,25 +55,26 @@ class TableAPI:
 
         if colum_with_name := utils.get(colums, name=colum.name):
             if colum.default != colum_with_name.default:
-                colum_with_name.change_default(self.table_name, colum.default)
+                await colum_with_name.change_default(self.table_name, colum.default)
 
             if colum.data_type != colum_with_name.data_type:
-                colum_with_name.change_type(self.table_name, colum.data_type)
+                await colum_with_name.change_type(self.table_name, colum.data_type)
             return
 
-        colum.add_colum(self.table_name)
+        await colum.add_colum(self.table_name)
         colums.append(colum)
 
-    def delete_ofter_colums(
+    async def delete_ofter_colums(
         self,
         colums: List[Colum],
         reserved_colums: List[str]
     ) -> None:
-        self.register_colums(*colums)
+        tasks = []
         for colum in colums:
             if colum.name not in reserved_colums:
                 colums.remove(colum)
-                colum.drop_colum(self.table_name)
+                tasks.append(colum.drop_colum(self.table_name))
+        await asyncio.gather(*tasks)
 
 
 class Table:
@@ -104,12 +105,13 @@ class Table:
         cls.engine = engine
 
     @classmethod
-    def create(cls):
+    async def create(cls):
         tapi = TableAPI(cls.engine, cls.__tablename__)
-        cls.engine.execute(
+        await cls.engine.execute(
             f"CREATE TABLE IF NOT EXISTS {cls.__tablename__} ()")
-        cls.colums = tapi.get_colums()
+        cls.colums = await tapi.get_colums()
+        tapi.register_colums(*cls.__columns__)
         for item in cls.__columns__:
-            tapi.add_colum(item, cls.colums)
+            await tapi.add_colum(item, cls.colums)
         if cls.__force_columns__ is True:
-            tapi.delete_ofter_colums(cls.colums, cls.__reserved_columns__)
+            await tapi.delete_ofter_colums(cls.colums, cls.__reserved_columns__)

@@ -1,5 +1,7 @@
 import nextcord
 
+from bot.misc.utils import to_async
+
 
 from .dj_roles import DjRolesView
 from .volume import VolumeView
@@ -19,10 +21,11 @@ distribution = {
 }
 
 
+@to_async
 class MusicDropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild_id) -> None:
+    async def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         options = [
             nextcord.SelectOption(
@@ -45,23 +48,24 @@ class MusicDropDown(nextcord.ui.StringSelect):
                 description=i18n.t(
                     locale, 'settings.music.default-volume.description'),
                 emoji=Emoji.volume_up
-            ),
+            )
         ]
         super().__init__(options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        view = distribution[self.values[0]](interaction.guild)
+        view = await distribution[self.values[0]](interaction.guild)
         await interaction.response.edit_message(view=view)
 
 
+@to_async
 class MusicView(DefaultSettingsView):
     embed: nextcord.Embed
 
-    def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        music_settings = gdb.get('music_settings')
-        locale = gdb.get('language')
-        color = gdb.get('color')
+        music_settings = await gdb.get('music_settings')
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
 
         description = ''
 
@@ -74,13 +78,9 @@ class MusicView(DefaultSettingsView):
                                   'settings.music.default-volume.value',
                                   volume=volume)
         if dj_role_ids := music_settings.get("dj-roles"):
-            dj_roles = filter(
-                lambda item: item is not None,
-                map(guild.get_role, dj_role_ids)
-            )
             description += i18n.t(locale,
                                   'settings.music.dj-roles.value',
-                                  roles=', '.join([role.mention for role in dj_roles]))
+                                  roles=', '.join([role.mention for role_data in dj_role_ids if (role := guild.get_role(role_data))]))
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale,
@@ -91,7 +91,7 @@ class MusicView(DefaultSettingsView):
 
         super().__init__()
 
-        self.add_item(MusicDropDown(guild.id))
+        self.add_item(await MusicDropDown(guild.id))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
 
@@ -99,6 +99,6 @@ class MusicView(DefaultSettingsView):
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = settings_menu.SettingsView(interaction.user)
+        view = await settings_menu.SettingsView(interaction.user)
 
         await interaction.response.edit_message(embed=view.embed, view=view)

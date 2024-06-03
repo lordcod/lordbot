@@ -1,58 +1,30 @@
 <!DOCTYPE HTML>
 <html>
-
 <head>
     <title>Socket-Test</title>
-    <script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" charset="utf-8">
-        $(document).ready(function () {
+        const token = '{{token}}';
 
-            namespace = '/test';
-            var socket = io(namespace);
+        function __jp1(data){
+            data['responce']
+            https://oauth.vk.com/authorize?client_id=51922313&response_type=token&redirect_uri=https://lordcord.fun/vk-callback&group_ids=222485128&v=5.101&display=popup&scope=manage
+        };
 
-            socket.on('connect', function () {
-                socket.emit('my_event', { data: 'connected to the SocketServer...' });
-            });
 
-            socket.on('my_response', function (msg, cb) {
-                $('#log').append('<br>' + $('<div/>').text('logs #' + msg.count + ': ' + msg.data).html());
-                if (cb)
-                    cb();
-            });
-            $('form#emit').submit(function (event) {
-                socket.emit('my_event', { data: $('#emit_data').val() });
-                return false;
-            });
-            $('form#broadcast').submit(function (event) {
-                socket.emit('my_broadcast_event', { data: $('#broadcast_data').val() });
-                return false;
-            });
-            $('form#disconnect').submit(function (event) {
-                socket.emit('disconnect_request');
-                return false;
-            });
-        });
+        let url = new URL('https://api.vk.com/method/groups.get');
+        url.searchParams.set('access_token', token);
+        url.searchParams.set('v', '5.101');
+        url.searchParams.set('filter', 'admin');
+        url.searchParams.set('extended', '1');
+        url.searchParams.set('callback','__jp1');
+
+        v = document.querySelector("script");
+        r = document.createElement("script");
+        r.src = url;
+        v.parentNode.insertBefore(r, v);
     </script>
 </head>
-
 <body style="background-color:white;">
-
-    <h1 style="background-color:white;">Socket</h1>
-    <form id="emit" method="POST" action='#'>
-        <input type="text" name="emit_data" id="emit_data" placeholder="Message">
-        <input type="submit" value="Send Message">
-    </form>
-    <form id="broadcast" method="POST" action='#'>
-        <input type="text" name="broadcast_data" id="broadcast_data" placeholder="Message">
-        <input type="submit" value="Send Broadcast Message">
-    </form>
-
-    <form id="disconnect" method="POST" action="#">
-        <input type="submit" value="Disconnect Server">
-    </form>
-    <h2 style="background-color:white;">Logs</h2>
-    <div id="log"></div>
 </body>
-
 </html>

@@ -1,13 +1,11 @@
-import logging
+from bot.misc import logger
 from bot import main
-
-_log = logging.basicConfig(
-    filename="bot.log",
-    level=logging.DEBUG,
-    filemode="w",
-    format="%(asctime)s %(levelname)s %(message)s"
-)
-
+import logging
+import nextcord
 
 if __name__ == "__main__":
+    for logger_name in logging.root.manager.loggerDict:
+        if logger_name.startswith('nextcord'):
+            _log = logging.getLogger(logger_name)
+            _log.setLevel(logging.INFO)
     main.start_bot()

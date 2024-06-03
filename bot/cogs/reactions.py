@@ -2,7 +2,7 @@ from typing import Literal, Optional
 import typing
 import nextcord
 from nextcord.ext import commands
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 
@@ -138,8 +138,25 @@ reactions_list = {
     }
 }
 
-AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare', GreedyUser['bite'], 'bleh', 'blush', 'brofist', 'celebrate', 'cheers', 'clap', 'confused', GreedyUser['cool'], 'cry', GreedyUser['cuddle'], 'dance', 'drool', 'evillaugh', 'facepalm', GreedyUser['handhold'], 'happy', 'headbang', GreedyUser['hug'], GreedyUser['kiss'], 'laugh', GreedyUser['lick'], GreedyUser['love'], 'mad', 'nervous', 'no', 'nom', 'nosebleed',  # type: ignore
-                           GreedyUser['nuzzle'], 'nyah', GreedyUser['pat'], 'peek', GreedyUser['pinch'], GreedyUser['poke'], 'pout', GreedyUser['punch'], 'roll', 'run', 'sad', 'scared', 'shout', 'shrug', 'shy', 'sigh', 'sip', 'slap', 'sleep', 'slowclap', GreedyUser['smack'], 'smile', 'smug', 'sneeze', GreedyUser['sorry'], 'stare', 'stop', 'surprised', 'sweat', 'thumbsup', GreedyUser['tickle'], 'tired', GreedyUser['wave'], GreedyUser['wink'], 'woah', 'yawn', 'yay', 'yes']  # type: ignore
+# type: ignore
+AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare',
+                           GreedyUser['bite'], 'clap', GreedyUser['cuddle'],
+                           'bleh', 'blush', 'brofist', 'celebrate', 'cheers',
+                           'confused', GreedyUser['cool'], 'cry',
+                           'dance', 'drool', 'evillaugh', 'facepalm',
+                           GreedyUser['handhold'], GreedyUser['kiss'],
+                           'happy', 'headbang', GreedyUser['hug'],
+                           'laugh', GreedyUser['lick'], GreedyUser['love'],
+                           'nervous', 'no', 'nom', 'nosebleed', 'mad',
+                           GreedyUser['nuzzle'], 'nyah', GreedyUser['pat'],
+                           GreedyUser['pinch'], GreedyUser['poke'], 'pout',
+                           GreedyUser['punch'], 'roll', 'run', 'sad', 'peek',
+                           'scared', 'shout', 'shrug', 'shy', 'sigh', 'sip',
+                           'slap', 'sleep', 'slowclap', GreedyUser['smack'],
+                           'smug', 'sneeze', GreedyUser['sorry'], 'stare',
+                           'surprised', 'sweat', 'thumbsup', GreedyUser['tickle'],
+                           'tired', GreedyUser['wave'], GreedyUser['wink'],
+                           'yawn', 'yay', 'yes', 'smile', 'stop', 'woah']
 
 
 class ReactionsCommand(commands.Cog):
@@ -168,7 +185,7 @@ class ReactionsCommand(commands.Cog):
     @commands.command()
     async def reactions(self, ctx: commands.Context, react_type: AllReactionsType, user: Optional[nextcord.Member] = None, *, comment: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         if user is None and isinstance(react_type, GreedyUser):
             await ctx.send("You must specify the user")

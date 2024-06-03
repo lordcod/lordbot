@@ -439,7 +439,7 @@
             "ru": "Вы не ввели обязательный аргумент",
             "tr": "Gerekli bir argüman girmediniz"
         },
-        "NotActivateEconomy": {
+        "InactiveEconomy": {
             "da": "Økonomisystemet er deaktiveret på serveren",
             "de": "Das Sparsystem ist auf dem Server deaktiviert",
             "en": "The economy system is disabled on the server",
