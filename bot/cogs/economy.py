@@ -163,11 +163,12 @@ class Economy(commands.Cog):
         economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
         award = economic_settings.get(ctx.command.name, 0)
+        reward_time = await account.get(ctx.command.name, 0)
 
         if award <= 0:
             await ctx.send("Unfortunately this reward is not available if you are the server administrator change the reward")
             return
-        if loctime > account.get(ctx.command.name, 0):
+        if loctime > reward_time:
             wait_long = loctime+timeout_rewards.get(ctx.command.name)
 
             embed = nextcord.Embed(
@@ -179,7 +180,6 @@ class Economy(commands.Cog):
             await account.increment('balance', award)
             await logstool.Logs(ctx.guild).add_currency(ctx.author, award, reason=f'{ctx.command.name} reward')
         else:
-            reward_time = await account.get(ctx.command.name)
             embed = nextcord.Embed(
                 title="The reward is not available",
                 description=f'Try again after <t:{reward_time :.0f}:R>',
@@ -260,11 +260,11 @@ class Economy(commands.Cog):
         bank = await account.get('bank', 0)
 
         description = ""
-        if account.get('daily', 0) < loctime:
+        if await account.get('daily', 0) < loctime:
             description += f"— Daily Bonus ({prefix}daily)\n"
-        if account.get('weekly', 0) < loctime:
+        if await account.get('weekly', 0) < loctime:
             description += f"— Weekly Bonus ({prefix}weekly)\n"
-        if account.get('monthly', 0) < loctime:
+        if await account.get('monthly', 0) < loctime:
             description += f"— Monthly Bonus ({prefix}monthly)\n"
         if description:
             description = f"{Emoji.award} Available Rewards:\n{description}"

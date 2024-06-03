@@ -16,16 +16,7 @@ T = TypeVar("T")
 
 def check_registration(func):
     async def wrapped(self: GuildDateBases, *args, **kwargs):
-        if self.__required_task__:
-            await asyncio.wait_for(self.__required_task__, timeout=None)
-        if self.__with_reserved__:
-            loop = asyncio.get_event_loop()
-            self.__required_task__ = loop.create_future()
-            if not await self._get(self.guild_id):
-                await self._insert(self.guild_id)
-            self.__with_reserved__ = False
-            self.__required_task__.set_result(None)
-            _log.debug(f"Guild {self.guild_id} registration completed")
+        await self.register()
         return await func(self, *args, **kwargs)
     return wrapped
 
@@ -46,6 +37,19 @@ class GuildDateBases:
 
     def __init__(self, guild_id: int) -> None:
         self.guild_id = guild_id
+
+    @on_error()
+    async def register(self):
+        if self.__required_task__:
+            await asyncio.wait_for(self.__required_task__, timeout=None)
+        if self.__with_reserved__:
+            loop = asyncio.get_event_loop()
+            self.__required_task__ = loop.create_future()
+            if not await self._get(self.guild_id):
+                await self._insert(self.guild_id)
+            self.__with_reserved__ = False
+            self.__required_task__.set_result(None)
+            _log.trace(f"Guild {self.guild_id} registration completed")
 
     @on_error()
     async def _get(self, guild_id):

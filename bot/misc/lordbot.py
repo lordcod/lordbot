@@ -105,6 +105,7 @@ class LordBot(commands.AutoShardedBot):
         self.session = aiohttp.ClientSession()
 
         self.__with_ready__ = loop.create_future()
+        self.__with_ready_events__ = []
 
         self.lord_handler_timer = LordTimerHandler(self.loop)
         misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)
@@ -125,7 +126,12 @@ class LordBot(commands.AutoShardedBot):
             await t.create()
         self.__with_ready__.set_result(None)
 
+        for event_data in self.__with_ready_events__:
+            self.dispatch(event_data[0], *event_data[1], **event_data[2])
+
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         if not self.__with_ready__.done() and event_name.lower() != 'ready':
+            self.__with_ready_events__.append((event_name, args, kwargs))
+            _log.trace('Postponed event %s', event_name)
             return
         return super().dispatch(event_name, *args, **kwargs)

@@ -160,6 +160,8 @@ class BlackjackGame:
         self.your_cards = [self.get_random_cart() for _ in range(2)]
         self.dealer_cards = [self.get_random_cart() for _ in range(2)]
 
+        self.gid = randquan(9)
+
     @property
     def your_value(self) -> int:
         return self.calculate_result(self.your_cards)
@@ -268,8 +270,8 @@ class BlackjackGame:
         while True:
             win_cards = []
             for card in self.cards:
-                if card in self.your_cards[1:]:
-                    continue
+                # if card in self.your_cards[1:]:
+                #     continue
                 res = self.calculate_result(self.dealer_cards + [card])
                 if 21 >= res:
                     win_cards.append(card)

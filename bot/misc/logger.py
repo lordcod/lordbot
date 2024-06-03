@@ -3,13 +3,18 @@ import logging
 import os
 import aiohttp
 import asyncio
-from nextcord import Webhook
 from datetime import datetime
 from pytz import timezone
 
 log_webhook = os.environ.get('log_webhook')
 loop = asyncio.get_event_loop()
 
+
+TRACE = logging.DEBUG - 5
+CORE = logging.INFO + 5
+
+DEFAULT_LOG = TRACE
+DEFAULT_DISCORD_LOG = logging.INFO
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -26,12 +31,13 @@ COLORS = {
     'INFO': GREEN,
     'DEBUG': BLUE,
     'CRITICAL': YELLOW,
-    'ERROR': RED
+    'ERROR': RED,
+    'TRACE': CYAN,
+    'CORE': MAGENTA
 }
 
 
 tasks = []
-_futures_hooks = {}
 
 
 def formatter_message(message, use_color=True):
@@ -51,6 +57,8 @@ def formatter_discord_message(message, use_color=True):
 
 
 async def post_mes(webhook_url: str, text: str) -> None:
+    from nextcord import Webhook
+
     async with aiohttp.ClientSession() as session:
         webhook = Webhook.from_url(webhook_url, session=session)
         await webhook.send('```ansi\n' + text + '```')
@@ -97,17 +105,17 @@ class DiscordHandler(logging.Handler):
             task = loop.create_task(post_mes(self.webhook_url, msg))
             tasks.append(task)
             self.flush()
-        except RecursionError:  # See issue 36272
+        except RecursionError:
             raise
         except Exception:
             self.handleError(record)
 
 
 class LordLogger(logging.Logger):
-    FORMAT = "[$BOLD%(asctime)s$RESET][$BOLD%(name)s$RESET][%(levelname)s]  %(message)s ($BOLD%(filename)s$RESET: %(lineno)d)"
+    FORMAT = "[$BOLD%(asctime)s$RESET][$BOLD%(name)s$RESET][%(levelname)s]  %(message)s ($BOLD%(filename)s$RESET:%(lineno)d)"
     COLOR_FORMAT = formatter_message(FORMAT, True)
 
-    def __init__(self, name: str, level: int = logging.DEBUG):
+    def __init__(self, name: str, level: int = DEFAULT_LOG):
         logging.Logger.__init__(self, name, level)
 
         color_formatter = ColoredFormatter(self.COLOR_FORMAT)
@@ -118,7 +126,19 @@ class LordLogger(logging.Logger):
         color_formatter = DiscordColoredFormatter(self.COLOR_FORMAT)
         self.discord_handler = DiscordHandler(log_webhook)
         self.discord_handler.setFormatter(color_formatter)
+        self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
         self.addHandler(self.discord_handler)
+
+    def trace(self, msg, *args, **kwargs):
+        if self.isEnabledFor(TRACE):
+            self._log(TRACE, msg, args, **kwargs)
+
+    def core(self, msg, *args, **kwargs):
+        if self.isEnabledFor(CORE):
+            self._log(CORE, msg, args, **kwargs)
 
 
 logging.setLoggerClass(LordLogger)
+
+logging.addLevelName(TRACE, 'TRACE')
+logging.addLevelName(CORE, 'CORE')

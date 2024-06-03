@@ -8,7 +8,6 @@ import os
 
 from bot.misc.utils import translate_flags
 
-
 bot = LordBot()
 
 

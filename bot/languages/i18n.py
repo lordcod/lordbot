@@ -33,7 +33,10 @@ def add_res_translation(key: str, value: str, locale: str):
 
 
 def add_translation(
-    key: str, value: str, locale: Optional[str] = None, loadable: bool = False
+    key: str,
+    value: str,
+    locale: Optional[str] = None,
+    loadable: bool = False
 ) -> None:
     locale = locale or config.get("locale")
     memoization_dict.setdefault(locale, {})

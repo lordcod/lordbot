@@ -1,8 +1,11 @@
+import logging
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import GuildDateBases
+from bot.databases import GuildDateBases, EconomyMemberDB
 from bot.misc.lordbot import LordBot
+
+_log = logging.getLogger(__name__)
 
 
 class GuildsEvent(commands.Cog):
@@ -11,9 +14,16 @@ class GuildsEvent(commands.Cog):
         super().__init__()
 
     @commands.Cog.listener()
+    async def on_guild_available(self, guild: nextcord.Guild):
+        _log.trace('Guild available %s (%d), Member count: %d', guild.name, guild.id, guild.member_count)
+        await GuildDateBases(guild.id).register()
+        async for member in guild.fetch_members(limit=None):
+            await EconomyMemberDB(guild.id, member.id).get_data()
+
+    @commands.Cog.listener()
     async def on_guild_join(self, guild: nextcord.Guild):
         self.bot.lord_handler_timer.close_as_key(f'guild-deleted:{guild.id}')
-        GuildDateBases(guild.id)
+        await GuildDateBases(guild.id).register()
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: nextcord.Guild):

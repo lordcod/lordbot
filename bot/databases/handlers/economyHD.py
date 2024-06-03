@@ -1,7 +1,5 @@
 from __future__ import annotations
-from typing import Optional
 
-import asyncpg
 
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
@@ -14,13 +12,11 @@ class EconomyMemberDB:
     def __init__(self, guild_id: int, member_id: int = None) -> None:
         self.guild_id = guild_id
         self.member_id = member_id
-        self.data: Optional[dict] = None
 
     async def get_data(self) -> dict:
-        if self.data is None:
-            asyncpg.Connection.fetch
-            self.data = dict(await self._get())
-        return self.data
+        res = await self._get()
+        data = dict(res)
+        return data
 
     @on_error()
     async def get_leaderboards(self):
@@ -65,7 +61,7 @@ class EconomyMemberDB:
             [f"{a} = ${n}" for n, a in enumerate(args.keys(), start=1)])
         values = [*args.values(), self.guild_id, self.member_id]
         await engine.execute(
-            f'UPDATE economic SET {keys} WHERE guild_id = $1 AND member_id = $2', values)
+            f'UPDATE economic SET {keys} WHERE guild_id = ${len(keys)+1} AND member_id = ${len(keys)+2}', values)
 
     @to_task
     @on_error()
