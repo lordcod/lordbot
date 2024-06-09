@@ -9,6 +9,7 @@ from bot.views.giveaway import GiveawaySettingsView
 from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
 from bot.resources import info
+from bot.views.tic_tac_toe import TicTacToe
 from bot.views.translate import TranslateView
 from bot.languages import i18n
 from bot.languages import data as lang_data
@@ -189,6 +190,10 @@ class Basic(commands.Cog):
         await inters.response.send_message(content=result.text,
                                            view=view,
                                            ephemeral=True)
+
+    @commands.command()
+    async def tic(ctx: commands.Context):
+        await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe())
 
 
 def setup(bot):

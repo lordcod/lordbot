@@ -40,9 +40,6 @@ COLORS = {
 }
 
 
-tasks = []
-
-
 def currentframe(): return sys._getframe(3)
 
 
@@ -93,7 +90,6 @@ class StandartFormatter(logging.Formatter):
         return tzinfo.localize(dt)
 
     def formatTime(self, record, datefmt=None):
-        record.lineno
         dt = self.converter(record.created)
         datefmt = self.datefmt
         if datefmt:
@@ -141,7 +137,7 @@ class DiscordHandler(logging.Handler):
         try:
             msg = self.format(record)
             task = loop.create_task(post_mes(self.webhook_url, msg))
-            tasks.append(task)
+            posters_tasks.append(task)
             self.flush()
         except RecursionError:
             raise
