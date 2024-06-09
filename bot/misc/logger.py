@@ -40,13 +40,6 @@ COLORS = {
 tasks = []
 
 
-def tz_convert(*args):
-    tz = timezone('Europe/Moscow')
-    data = datetime.now(tz).timetuple()
-    print(args, tz, data)
-    return data
-
-
 def formatter_message(message, use_color=True):
     if use_color:
         message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
@@ -71,12 +64,27 @@ async def post_mes(webhook_url: str, text: str) -> None:
         await webhook.send('```ansi\n' + text + '```')
 
 
-logging.Formatter.convert = tz_convert
+class StandartFormatter(logging.Formatter):
+    """override logging.Formatter to use an aware datetime object"""
+
+    def converter(self, timestamp):
+        dt = datetime.fromtimestamp(timestamp)
+        tzinfo = timezone('Europe/Moscow')
+        return tzinfo.localize(dt)
+
+    def formatTime(self, record, datefmt=None):
+        dt = self.converter(record.created)
+        if datefmt:
+            s = dt.strftime(datefmt)
+        else:
+            try:
+                s = dt.isoformat(timespec='milliseconds')
+            except TypeError:
+                s = dt.isoformat()
+        return s
 
 
-class DiscordColoredFormatter(logging.Formatter):
-    convert = tz_convert
-
+class DiscordColoredFormatter(StandartFormatter):
     def __init__(self, msg, use_color=True):
         logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
         self.use_color = use_color
@@ -89,9 +97,7 @@ class DiscordColoredFormatter(logging.Formatter):
         return logging.Formatter.format(self, record)
 
 
-class ColoredFormatter(logging.Formatter):
-    convert = tz_convert
-
+class ColoredFormatter(StandartFormatter):
     def __init__(self, msg, use_color=True):
         logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
         self.use_color = use_color
