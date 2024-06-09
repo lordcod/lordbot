@@ -69,6 +69,8 @@ logging.Formatter.convert = lambda *args: datetime.now(tz).timetuple()
 
 
 class DiscordColoredFormatter(logging.Formatter):
+    convert = lambda *args: datetime.now(tz).timetuple()
+
     def __init__(self, msg, use_color=True):
         logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
         self.use_color = use_color
@@ -82,6 +84,8 @@ class DiscordColoredFormatter(logging.Formatter):
 
 
 class ColoredFormatter(logging.Formatter):
+    convert = lambda *args: datetime.now(tz).timetuple()
+
     def __init__(self, msg, use_color=True):
         logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
         self.use_color = use_color
