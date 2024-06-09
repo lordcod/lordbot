@@ -74,6 +74,7 @@ class StandartFormatter(logging.Formatter):
         return tzinfo.localize(dt)
 
     def formatTime(self, record, datefmt=None):
+        record.lineno
         dt = self.converter(record.created)
         datefmt = self.datefmt
         if datefmt:
@@ -148,12 +149,10 @@ class LordLogger(logging.Logger):
         self.addHandler(self.discord_handler)
 
     def trace(self, msg, *args, **kwargs):
-        if self.isEnabledFor(TRACE):
-            self._log(TRACE, msg, args, **kwargs)
+        self.log(TRACE, msg, args, **kwargs)
 
     def core(self, msg, *args, **kwargs):
-        if self.isEnabledFor(CORE):
-            self._log(CORE, msg, args, **kwargs)
+        self.log(CORE, msg, args, **kwargs)
 
 
 logging.setLoggerClass(LordLogger)
