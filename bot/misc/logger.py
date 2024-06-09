@@ -5,7 +5,6 @@ from logging import _srcfile
 import os
 import sys
 import traceback
-from typing import Optional
 import aiohttp
 import asyncio
 from datetime import datetime
@@ -71,12 +70,18 @@ def formatter_discord_message(message, use_color=True):
     return message
 
 
-async def post_mes(webhook_url: str, text: str) -> None:
-    from nextcord import Webhook
+posters_tasks = []
+task_lock = asyncio.Lock()
 
-    async with aiohttp.ClientSession() as session:
-        webhook = Webhook.from_url(webhook_url, session=session)
-        await webhook.send('```ansi\n' + text + '```')
+
+async def post_mes(webhook_url: str, text: str) -> None:
+    async with task_lock:
+        async with aiohttp.ClientSession() as session:
+            data = {
+                'content': '```ansi\n' + text + '```'
+            }
+            async with session.post(webhook_url, data=data):
+                pass
 
 
 class StandartFormatter(logging.Formatter):
