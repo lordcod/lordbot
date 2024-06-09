@@ -14,6 +14,7 @@ class Teams(commands.Cog):
     @check.team_only()
     async def shutdown(self, ctx: commands.Context):
         await ctx.send("The bot has activated the completion process!")
+        self.bot.dispatch('disconnect')
         await self.bot.close()
 
     @commands.command()

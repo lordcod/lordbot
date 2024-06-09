@@ -19,6 +19,8 @@ _log = logging.getLogger(__name__)
 class ReadyEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+        bot.set_event(self.on_shard_disconnect)
+        bot.set_event(self.on_disconnect)
         super().__init__()
 
     @commands.Cog.listener()
@@ -49,7 +51,11 @@ class ReadyEvent(commands.Cog):
 
         _log.info(f"The bot is registered as {self.bot.user}")
 
-    @commands.Cog.listener()
+    async def on_disconnect(self):
+        await self.bot.session.close()
+        await self.bot.engine._DataBase__connection.close()
+        _log.critical("Bot is disconnect")
+
     async def on_shard_disconnect(self, shard_id: int):
         await self.bot.session.close()
         await self.bot.engine._DataBase__connection.close()
@@ -99,12 +105,11 @@ class ReadyEvent(commands.Cog):
     async def process_guild_delete_tasks(self):
         deleted_tasks = await GuildDateBases.get_deleted()
         for id, delay in deleted_tasks:
-            if self.bot.get_guild(id):
+            if self.bot.get_guild(id) or not delay:
                 continue
-            _log.trace('For task on on_ready %s', delay)
             gdb = GuildDateBases(id)
             self.bot.lord_handler_timer.create(
-                time.time()-delay, gdb.delete(), f'guild-deleted:{id}')
+                delay-time.time(), gdb.delete(), f'guild-deleted:{id}')
 
 
 def setup(bot):

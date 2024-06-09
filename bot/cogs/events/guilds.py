@@ -34,7 +34,6 @@ class GuildsEvent(commands.Cog):
         gdb = GuildDateBases(guild.id)
         delay = 60 * 60 * 24 * 3
         gdb.set('delete_task', int(time.time()+delay))
-        _log.trace('For task on on_guild_remove')
         self.bot.lord_handler_timer.create(
             delay, gdb.delete(), f'guild-deleted:{guild.id}')
 
