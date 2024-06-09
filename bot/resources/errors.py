@@ -1,6 +1,7 @@
 from asyncio import iscoroutinefunction
 import inspect
 import logging
+import sys
 import nextcord
 from nextcord.ext import commands
 
@@ -67,7 +68,7 @@ class CallbackCommandError:
                 await item()
                 break
         else:
-            raise self.error
+            await self.OfterError()
 
     @attach_exception(commands.MissingPermissions)
     async def MissingPermissions(self):
@@ -197,4 +198,5 @@ class CallbackCommandError:
         await self.ctx.send(content)
 
     async def OfterError(self):
-        _log.debug(f"[{self.error.__class__.__name__}]: {self.error}")
+        _log.error(
+            "Ignoring exception in command %s", self.ctx.command, exc_info=sys.exc_info())

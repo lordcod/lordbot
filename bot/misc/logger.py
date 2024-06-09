@@ -1,7 +1,11 @@
 
+import io
 import logging
+from logging import _srcfile
 import os
-import time
+import sys
+import traceback
+from typing import Optional
 import aiohttp
 import asyncio
 from datetime import datetime
@@ -9,7 +13,6 @@ from pytz import timezone
 
 log_webhook = os.environ.get('log_webhook')
 loop = asyncio.get_event_loop()
-
 
 TRACE = logging.DEBUG - 5
 CORE = logging.INFO + 5
@@ -39,6 +42,17 @@ COLORS = {
 
 
 tasks = []
+
+
+def currentframe(): return sys._getframe(3)
+
+
+def _is_internal_frame(frame):
+    """Signal whether the frame is a CPython or logging module internal."""
+    filename = os.path.normcase(frame.f_code.co_filename)
+    return filename == _srcfile or (
+        "importlib" in filename and "_bootstrap" in filename
+    )
 
 
 def formatter_message(message, use_color=True):
@@ -148,11 +162,90 @@ class LordLogger(logging.Logger):
         self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
         self.addHandler(self.discord_handler)
 
+    def _findCaller(self, stack_info=False, stacklevel=1):
+        """
+        Find the stack frame of the caller so that we can note the source
+        file name, line number and function name.
+        """
+        # On some versions of IronPython, currentframe() returns None if
+        # IronPython isn't run with -X:Frames.
+        f = currentframe()
+        if f is None:
+            return "(unknown file)", 0, "(unknown function)", None
+        while stacklevel > 0:
+            next_f = f.f_back
+            if next_f is None:
+                # We've got options here.
+                # If we want to use the last (deepest) frame:
+                break
+                # If we want to mimic the warnings module:
+                # return ("sys", 1, "(unknown function)", None)
+                # If we want to be pedantic:
+                # raise ValueError("call stack is not deep enough")
+            f = next_f
+            if not _is_internal_frame(f):
+                stacklevel -= 1
+        co = f.f_code
+        sinfo = None
+        if stack_info:
+            with io.StringIO() as sio:
+                sio.write("Stack (most recent call last):\n")
+                traceback.print_stack(f, file=sio)
+                sinfo = sio.getvalue()
+                if sinfo[-1] == '\n':
+                    sinfo = sinfo[:-1]
+        return co.co_filename, f.f_lineno, co.co_name, sinfo
+
+    def _adt_log(self, level, msg, *args, exc_info=None, extra=None, stack_info=False,
+                 stacklevel=1):
+        """
+        Low-level logging routine which creates a LogRecord and then calls
+        all the handlers of this logger to handle the record.
+        """
+        sinfo = None
+        if _srcfile:
+            # IronPython doesn't track Python frames, so findCaller raises an
+            # exception on some versions of IronPython. We trap it here so that
+            # IronPython can use logging.
+            try:
+                fn, lno, func, sinfo = self._findCaller(stack_info, stacklevel)
+            except ValueError:  # pragma: no cover
+                fn, lno, func = "(unknown file)", 0, "(unknown function)"
+        else:  # pragma: no cover
+            fn, lno, func = "(unknown file)", 0, "(unknown function)"
+        if exc_info:
+            if isinstance(exc_info, BaseException):
+                exc_info = (type(exc_info), exc_info, exc_info.__traceback__)
+            elif not isinstance(exc_info, tuple):
+                exc_info = sys.exc_info()
+        record = self.makeRecord(self.name, level, fn, lno, msg, args,
+                                 exc_info, func, extra, sinfo)
+        self.handle(record)
+
     def trace(self, msg, *args, **kwargs):
-        self.log(TRACE, msg, args, **kwargs)
+        """
+        Log 'msg % args' with severity 'TRACE'.
+
+        To pass exception information, use the keyword argument exc_info with
+        a true value, e.g.
+
+        logger.trace("Houston, we have a %s", "interesting problem", exc_info=1)
+        """
+        if self.isEnabledFor(TRACE):
+            self._adt_log(TRACE, msg, *args, **kwargs)
 
     def core(self, msg, *args, **kwargs):
-        self.log(CORE, msg, args, **kwargs)
+        """
+        Log 'msg % args' with severity 'CORE'.
+
+        To pass exception information, use the keyword argument exc_info with
+        a true value, e.g.
+
+        logger.core("Houston, we have a %s", "interesting problem", exc_info=1)
+        """
+
+        if self.isEnabledFor(CORE):
+            self._adt_log(CORE, msg, *args, **kwargs)
 
 
 logging.setLoggerClass(LordLogger)

@@ -1,5 +1,7 @@
 import logging
 import sys
+import traceback
+from types import TracebackType
 import nextcord
 from nextcord.ext import commands
 from bot.databases import GuildDateBases
@@ -112,26 +114,35 @@ class CommandEvent(commands.Cog):
         bot.after_invoke(self.after_invoke)
         bot.set_event(self.on_error)
         bot.set_event(self.on_command_error)
-        bot.set_event(self.on_application_error)
+        bot.set_event(self.on_application_command_error)
 
         bot.add_check(self.permission_check)
 
-    async def on_application_error(
-            self, interaction: nextcord.Interaction, error: Exception):
-        if interaction.response.is_done():
+    async def on_application_command_error(
+        self,
+        interaction: nextcord.Interaction,
+        exception: nextcord.ApplicationError
+    ) -> None:
+        """|coro|
+
+        The default application command error handler provided by the bot.
+
+        By default this prints to :data:`~sys.stderr` however it could be
+        overridden to have a different implementation.
+
+        This only fires if you do not specify any listeners for command error.
+        """
+        if interaction.application_command is None:
+            return  # Not supposed to ever happen
+
+        if interaction.application_command.has_error_handler():
             return
 
-        gdb = GuildDateBases(interaction.guild_id)
-        color = await gdb.get('color')
+        cog = interaction.application_command.parent_cog
+        if cog and cog.has_application_command_error_handler():
+            return
 
-        embed = nextcord.Embed(
-            title="The interaction time has expired",
-            description="A critical error occurred while processing the command",
-            color=color
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-        _log.error('Application error', exc_info=error)
+        _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=sys.exc_info())
 
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx, error)
@@ -139,9 +150,9 @@ class CommandEvent(commands.Cog):
 
     async def on_error(self, event, *args, **kwargs):
         _log.error(
-            "Ignoring exception in %s", event, exc_info=sys.exc_info())
+            "Ignoring exception in event %s", event, exc_info=sys.exc_info())
 
-    async def permission_check(self,  ctx: commands.Context):
+    async def permission_check(self, ctx: commands.Context):
         perch = PermissionChecker(ctx)
         answer = await perch.process()
 
