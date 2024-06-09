@@ -98,7 +98,7 @@ class ReadyEvent(commands.Cog):
                 )
 
     async def process_guild_delete_tasks(self):
-        deleted_tasks = GuildDateBases.get_deleted()
+        deleted_tasks = await GuildDateBases.get_deleted()
         for id, delay in deleted_tasks:
             if self.bot.get_guild(id):
                 continue
