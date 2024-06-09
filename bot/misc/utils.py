@@ -451,20 +451,30 @@ class LordTimeHandler:
     def complete(self, ilth: ItemLordTimeHandler) -> None:
         _log.trace('Complete temp task %s (%s)', ilth.coro.__name__, ilth.key)
         self.loop.create_task(ilth.coro, name=ilth.key)
-        self.data.pop(ilth.key)
+        self.data.pop(ilth.key, None)
 
     def close(self, key: Union[str, int]) -> ItemLordTimeHandler:
-        ilth = self.data.pop(key)
+        ilth = self.data.pop(key, None)
+
+        if ilth is None:
+            return
+
         ilth.th.cancel()
         return ilth
 
     def call(self, key: Union[str, int]) -> None:
-        ilth = self.data[key]
+        ilth = self.get(key)
+
+        if ilth is None:
+            return
+
         ilth.th._run()
         self.close(key)
 
     def increment(self, delay: Union[float, int], key: Union[str, int]) -> None:
         ilth = self.close(key)
+        if ilth is None:
+            return
         ilth.delay = delay
         th = self.loop.call_later(delay, self.complete, ilth)
         ilth.th = th
