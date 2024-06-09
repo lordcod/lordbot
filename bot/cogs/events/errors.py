@@ -142,7 +142,7 @@ class CommandEvent(commands.Cog):
         if cog and cog.has_application_command_error_handler():
             return
 
-        _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=sys.exc_info())
+        _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=exception)
 
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx, error)

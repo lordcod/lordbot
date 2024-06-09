@@ -19,7 +19,7 @@ import timeit
 import googletrans
 import asyncio
 import random
-from typing import Callable
+from typing import Callable, Optional
 
 translator = googletrans.Translator()
 
@@ -192,8 +192,8 @@ class Basic(commands.Cog):
                                            ephemeral=True)
 
     @commands.command()
-    async def tic(ctx: commands.Context):
-        await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe())
+    async def tic(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
+        await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe(ctx.author, member))
 
 
 def setup(bot):

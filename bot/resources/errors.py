@@ -199,4 +199,4 @@ class CallbackCommandError:
 
     async def OfterError(self):
         _log.error(
-            "Ignoring exception in command %s", self.ctx.command, exc_info=sys.exc_info())
+            "Ignoring exception in command %s", self.ctx.command, exc_info=self.error)
