@@ -40,13 +40,15 @@ class Basic(commands.Cog):
         command_latency_ms = round(
             (discord_latency_ms*2)+(databases_latency_ms*10), 2)
 
+        shard_id = (ctx.guild.id >> 22) % self.bot.shard_count
+
         embed = nextcord.Embed(
             title="Pong!🏓🎉",
             description=(
                 f"Discord latency: {discord_latency_ms}ms\n"
                 f"Databases latency: {databases_latency_ms}ms\n"
                 f"Command processing latency: {command_latency_ms}ms\n"
-                f"Shard id: 1"
+                f"Shard id: {shard_id}"
             ),
             color=color
         )
