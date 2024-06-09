@@ -81,6 +81,7 @@ class StandartFormatter(logging.Formatter):
                 s = dt.isoformat(timespec='milliseconds')
             except TypeError:
                 s = dt.isoformat()
+        print(dt, s)
         return s
 
 
