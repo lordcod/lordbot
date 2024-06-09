@@ -3,7 +3,7 @@ from typing import Optional
 import nextcord
 import jmespath
 from nextcord.ext import commands
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
@@ -36,7 +36,7 @@ class ideas_mod(commands.Cog):
     async def ban(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')
-        ideas: IdeasPayload = gdb.get('ideas')
+        ideas: IdeasPayload = await gdb.get('ideas')
         ban_users = ideas.get('ban_users', [])
 
         if data_ban := self.get_ban(ideas, member.id):
@@ -55,7 +55,7 @@ class ideas_mod(commands.Cog):
 
         ban_users.append([member.id, ctx.author.id, reason])
         ideas['ban_users'] = ban_users
-        gdb.set('ideas', ideas)
+        await gdb.set('ideas', ideas)
 
         embed = nextcord.Embed(
             title="Ban in ideas",
@@ -71,8 +71,8 @@ class ideas_mod(commands.Cog):
     @ideas.command()
     async def unban(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
-        ideas: IdeasPayload = gdb.get('ideas')
+        color = await gdb.get('color')
+        ideas: IdeasPayload = await gdb.get('ideas')
         ban_users = ideas.get('ban_users', [])
         data_ban = self.get_ban(ideas, member.id)
 
@@ -87,7 +87,7 @@ class ideas_mod(commands.Cog):
 
         ban_users.remove(data_ban)
         ideas['ban_users'] = ban_users
-        gdb.set('ideas', ideas)
+        await gdb.set('ideas', ideas)
 
         embed = nextcord.Embed(
             title="Unban in ideas",
@@ -103,8 +103,8 @@ class ideas_mod(commands.Cog):
     @ideas.command()
     async def mute(self, ctx: commands.Context, member: nextcord.Member, timestamp: TimeCalculator, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
-        ideas: IdeasPayload = gdb.get('ideas')
+        color = await gdb.get('color')
+        ideas: IdeasPayload = await gdb.get('ideas')
         muted_users = ideas.get('muted_users', [])
 
         if data_mute := self.get_mute(ideas, member.id):
@@ -125,7 +125,7 @@ class ideas_mod(commands.Cog):
         muted_users.append(
             [member.id, ctx.author.id, timestamp + time.time(), reason])
         ideas['muted_users'] = muted_users
-        gdb.set('ideas', ideas)
+        await gdb.set('ideas', ideas)
 
         embed = nextcord.Embed(
             title="Mute in ideas",
@@ -142,8 +142,8 @@ class ideas_mod(commands.Cog):
     @ideas.command()
     async def unmute(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
-        ideas: IdeasPayload = gdb.get('ideas')
+        color = await gdb.get('color')
+        ideas: IdeasPayload = await gdb.get('ideas')
         muted_users = ideas.get('muted_users', [])
         data_mute = self.get_mute(ideas, member.id)
 
@@ -158,7 +158,7 @@ class ideas_mod(commands.Cog):
 
         muted_users.remove(data_mute)
         ideas['muted_users'] = muted_users
-        gdb.set('ideas', ideas)
+        await gdb.set('ideas', ideas)
 
         embed = nextcord.Embed(
             title="Unmute in ideas",

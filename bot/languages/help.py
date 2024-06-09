@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Tuple, TypedDict, Union
+from typing import List, Dict, Tuple, TypedDict, Union, NotRequired
 import googletrans
 import jmespath
 import orjson
@@ -9,11 +9,13 @@ class CommandOption(TypedDict):
     category: str
     aliases: List[str]
     arguments: List[Union[Dict[str, str], str]]
-    examples: Optional[List[Tuple[str, Dict[str, str]]]]
+    examples: NotRequired[List[Tuple[str, Dict[str, str]]]]
     descriptrion: Dict[str, str]
     brief_descriptrion: Dict[str, str]
     allowed_disabled: bool
-    reactions: Optional[Dict[str, Dict[str, str]]]
+    reactions: NotRequired[Dict[str, Dict[str, str]]]
+    with_group: NotRequired[bool]
+    commands_group: NotRequired[List[str]]
 
 
 class CommandsPayload(TypedDict):

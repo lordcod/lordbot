@@ -1,11 +1,12 @@
 import nextcord
 import inspect
+import aiocache
 from nextcord.ext import commands
 
-from typing import List, Tuple, TypeVar
+from typing import List, Self, Tuple, TypeVar
 
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import get_award, FissionIterator
+from bot.misc.utils import get_award, FissionIterator, to_async
 from bot.misc.time_transformer import display_time
 from bot.views import menus
 from bot.databases import GuildDateBases, EconomyMemberDB
@@ -30,7 +31,7 @@ def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
 
 def clear_empty_ofter_leaderboard(guild: nextcord.Guild, leaderboard: list):
     for member_id, value in leaderboard.copy():
-        member = guild._state.get_user(member_id)
+        member = guild.get_member(member_id)
         if not member:
             leaderboard.remove((member_id, value))
 
@@ -46,16 +47,17 @@ def register_key(key: int) -> None:
     return wrapped
 
 
+@to_async
 class EconomyLeaderboardView(menus.Menus):
-    def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]):
+    async def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]) -> Self:
         self.guild = guild
         self.gdb = GuildDateBases(guild.id)
-        self.economy_settings = self.gdb.get('economic_settings')
+        self.economy_settings = await self.gdb.get('economic_settings')
         self.currency_emoji = self.economy_settings.get("emoji")
         self.leaderboard_indexs = leaderboard_indexs
         self._embed = embed
 
-        super().__init__(leaderboards, timeout=600)
+        super().__init__(leaderboards, timeout=300)
 
         self.handler_disable()
 
@@ -64,7 +66,9 @@ class EconomyLeaderboardView(menus.Menus):
 
         self.add_item(LeaderboardDropDown(guild.id))
 
-    @ property
+        return self
+
+    @property
     def embed(self) -> nextcord.Embed:
         self._embed.clear_fields()
         for (member_id, balance, bank, total) in self.value[self.index]:
@@ -112,10 +116,10 @@ class LeaderboardTypes:
     @register_key(0)
     async def set_balance_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
         gdb = GuildDateBases(guild.id)
-        color = gdb.get("color")
+        color = await gdb.get("color")
 
         emdb = EconomyMemberDB(guild.id, member.id)
-        leaderboard = emdb.get_leaderboards()
+        leaderboard = await emdb.get_leaderboards()
         clear_empty_leaderboard(guild, leaderboard)
         fission_leaderboards = FissionIterator(leaderboard, 6).to_list()
         leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
@@ -138,7 +142,7 @@ class LeaderboardTypes:
             icon_url=guild.icon
         )
 
-        view = EconomyLeaderboardView(
+        view = await EconomyLeaderboardView(
             guild, embed, fission_leaderboards, leaderboard_indexs)
 
         await message.edit(content="", embed=view.embed, view=view, file=file_pedestal)
@@ -147,8 +151,8 @@ class LeaderboardTypes:
     @register_key(1)
     async def set_voicetime_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
         gdb = GuildDateBases(guild.id)
-        color = gdb.get("color")
-        locale = gdb.get('language')
+        color = await gdb.get("color")
+        locale = await gdb.get('language')
         leaderboard = sorted(VOICE_STATE_DB.items(),
                              key=get_item_param, reverse=True)
         clear_empty_ofter_leaderboard(guild, leaderboard)
@@ -187,8 +191,8 @@ class LeaderboardTypes:
     @register_key(2)
     async def set_messages_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
         gdb = GuildDateBases(guild.id)
-        color = gdb.get("color")
-        locale = gdb.get('language')
+        color = await gdb.get("color")
+        locale = await gdb.get('language')
         leaderboard = sorted(MESSAGE_STATE_DB.items(),
                              key=get_item_param, reverse=True)
         clear_empty_ofter_leaderboard(guild, leaderboard)
@@ -227,8 +231,8 @@ class LeaderboardTypes:
     @register_key(3)
     async def set_score_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
         gdb = GuildDateBases(guild.id)
-        color = gdb.get("color")
-        locale = gdb.get('language')
+        color = await gdb.get("color")
+        locale = await gdb.get('language')
         leaderboard = sorted(SCORE_STATE_DB.items(),
                              key=get_item_param, reverse=True)
         clear_empty_ofter_leaderboard(guild, leaderboard)
@@ -279,7 +283,7 @@ class Leaderboards(commands.Cog):
     @commands.command(name="leaderboard", aliases=["lb", "leaders", "top"])
     async def leaderboard(self, ctx: commands.Context):
         message = await ctx.send("Uploading data...")
-        await LeaderboardTypes.set_score_lb(ctx.author, ctx.guild, message)
+        await LeaderboardTypes.set_balance_lb(ctx.author, ctx.guild, message)
 
 
 def setup(bot):

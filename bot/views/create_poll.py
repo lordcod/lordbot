@@ -36,8 +36,8 @@ class CreatePoll(nextcord.ui.Modal):
         await interaction.response.defer()
 
         gdb = GuildDateBases(interaction.guild_id)
-        color = gdb.get('color')
-        polls = gdb.get('polls')
+        color = await gdb.get('color')
+        polls = await gdb.get('polls')
 
         question = self.question.value
         choices = self.choices.value.split('\n')[:len(alphabet)]
@@ -75,4 +75,4 @@ class CreatePoll(nextcord.ui.Modal):
         }
         polls[message.id] = poll_data
 
-        gdb.set('polls', polls)
+        await gdb.set('polls', polls)

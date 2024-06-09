@@ -2,7 +2,7 @@ import time
 import nextcord
 
 import enum
-from typing import Union
+from typing import Optional, Union
 
 
 data = {}
@@ -30,7 +30,7 @@ class CooldownGuild:
         data.setdefault(self.guild_id, {})
         data[self.guild_id].setdefault(self.command_name, {})
 
-    def get(self) -> Union[None, float]:
+    def get(self) -> Optional[float]:
         cooldata: dict = data[self.guild_id][self.command_name]
 
         regular_rate: int = self.command_data.get('rate')

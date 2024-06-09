@@ -3,7 +3,7 @@ import nextcord
 from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
 
-from bot.misc.utils import TimeCalculator
+from bot.misc.utils import TimeCalculator, to_async
 from bot.misc.time_transformer import display_time
 from bot.misc.ratelimit import BucketType, reset_cooldown
 from bot.databases import GuildDateBases, CommandDB
@@ -14,8 +14,9 @@ cd_types = {
 }
 
 
+@to_async
 class CoolModal(nextcord.ui.Modal):
-    def __init__(
+    async def __init__(
         self,
         cooltype: int,
         command_name: str,
@@ -51,32 +52,26 @@ class CoolModal(nextcord.ui.Modal):
 
         if not (per and rate):
             raise TypeError
-            await interaction.response.send_message("Error #1", ephemeral=True)
-            return
 
         cdb = CommandDB(interaction.guild.id)
-        command_data = cdb.get(self.command_name, {})
+        command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
-
         command_data["distribution"]["cooldown"] = {
             "type": self.type,
             "rate": rate,
             "per": per
         }
+        await cdb.update(self.command_name, command_data)
 
-        cdb.update(self.command_name, command_data)
-
-        view = CooldownsView(
+        view = await CooldownsView(
             interaction.guild,
             self.command_name
         )
-
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class CooltypeDropDown(nextcord.ui.StringSelect):
-    current_disabled = False
-
     def __init__(
         self,
         guild_id: int,
@@ -101,48 +96,45 @@ class CooltypeDropDown(nextcord.ui.StringSelect):
         cooltype = int(self.values[0])
 
         cdb = CommandDB(interaction.guild.id)
-        command_data = cdb.get(self.command_name, {})
+        command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
         command_data["distribution"].setdefault("cooldown", {})
         cooldata = command_data["distribution"]["cooldown"]
 
         if cooldata.get('rate') and cooldata.get('per'):
-            cooldata.update({
-                'type': cooltype
-            })
-            cdb.update(self.command_name, command_data)
+            cooldata.update({'type': cooltype})
+            await cdb.update(self.command_name, command_data)
 
-            view = CooldownsView(
+            view = await CooldownsView(
                 interaction.guild,
                 self.command_name
             )
             await interaction.response.edit_message(embed=view.embed, view=view)
-
             return
 
-        modal = CoolModal(cooltype, self.command_name)
-
+        modal = await CoolModal(cooltype, self.command_name)
         await interaction.response.send_modal(modal)
 
 
+@to_async
 class CooldownsView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
-    def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
+    async def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
         self.command_name = command_name
 
         gdb = GuildDateBases(guild.id)
-        lang = gdb.get('language')
-        color = gdb.get('color')
+        lang = await gdb.get('language')
+        color = await gdb.get('color')
 
         cdb = CommandDB(guild.id)
-        command_data = cdb.get(command_name, {})
+        command_data = await cdb.get(command_name, {})
         distribution = command_data.get("distribution", {})
         self.cooldate = cooldate = distribution.get("cooldown", None)
 
         super().__init__()
 
-        if isinstance(cooldate, dict):
+        if cooldate:
             description = (
                 "The current delay for the command\n"
                 f"Type: **{cd_types.get(cooldate.get('type'))}**\n"
@@ -159,7 +151,7 @@ class CooldownsView(DefaultSettingsView):
             color=color
         )
 
-        cdd = CooltypeDropDown(
+        cdd = await CooltypeDropDown(
             guild.id,
             command_name
         )
@@ -167,36 +159,31 @@ class CooldownsView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = permisson_command.precise.CommandData(
+        view = await permisson_command.precise.CommandData(
             interaction.guild,
             self.command_name
         )
-
         await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         cooltype = self.cooldate.get('type')
 
-        modal = CoolModal(cooltype, self.command_name)
-
+        modal = await CoolModal(cooltype, self.command_name)
         await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         cdb = CommandDB(interaction.guild.id)
-
-        command_data = cdb.get(self.command_name, {})
+        command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
         command_data["distribution"].pop("cooldown", None)
-
-        cdb.update(self.command_name, command_data)
+        await cdb.update(self.command_name, command_data)
 
         reset_cooldown(interaction.guild_id, self.command_name)
 
-        view = CooldownsView(
+        view = await CooldownsView(
             interaction.guild,
             self.command_name
         )
-
         await interaction.response.edit_message(embed=view.embed, view=view)

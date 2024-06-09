@@ -2,16 +2,18 @@ from typing import Optional
 import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import ReactionRolePayload
+from bot.misc.utils import to_async
 from . import item
 from .selector import RoleReactionSelectorView
 from bot.views import settings_menu
 from .._view import DefaultSettingsView
 
 
+@to_async
 class RoleReactionDropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild: nextcord.Guild, selected_message_id: Optional[int] = None) -> None:
+    async def __init__(self, guild: nextcord.Guild, selected_message_id: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild.id)
-        role_reaction: ReactionRolePayload = gdb.get('role_reactions')
+        role_reaction: ReactionRolePayload = await gdb.get('role_reactions')
         options = []
         for message_id, payload in role_reaction.items():
             channel = guild.get_channel(payload['channel_id'])
@@ -20,7 +22,6 @@ class RoleReactionDropDown(nextcord.ui.StringSelect):
                 label=channel.name,
                 description=f'MSG ID: {message_id}',
                 value=str(message_id),
-
                 default=message_id == selected_message_id
             ))
 
@@ -34,18 +35,19 @@ class RoleReactionDropDown(nextcord.ui.StringSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         message_id = int(self.values[0])
 
-        view = RoleReactionView(interaction.user.guild, message_id)
+        view = await RoleReactionView(interaction.user.guild, message_id)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@to_async
 class RoleReactionView(DefaultSettingsView):
-    embed: nextcord.Embed = None
+    embed: nextcord.Embed
 
-    def __init__(self, guild: nextcord.Guild, message_id: Optional[int] = None) -> None:
+    async def __init__(self, guild: nextcord.Guild, message_id: Optional[int] = None) -> None:
         self.message_id = message_id
         gdb = GuildDateBases(guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         self.embed = nextcord.Embed(
             title="Roles for reactions",
@@ -55,7 +57,7 @@ class RoleReactionView(DefaultSettingsView):
 
         super().__init__()
 
-        self.add_item(RoleReactionDropDown(guild, message_id))
+        self.add_item(await RoleReactionDropDown(guild, message_id))
 
         if message_id:
             self.edit.disabled = False
@@ -66,7 +68,7 @@ class RoleReactionView(DefaultSettingsView):
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction
                    ):
-        view = settings_menu.SettingsView(interaction.user)
+        view = await settings_menu.SettingsView(interaction.user)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -75,7 +77,7 @@ class RoleReactionView(DefaultSettingsView):
                   button: nextcord.ui.Button,
                   interaction: nextcord.Interaction
                   ):
-        view = await RoleReactionSelectorView.create(interaction.guild)
+        view = await RoleReactionSelectorView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label="Edit", style=nextcord.ButtonStyle.blurple, disabled=True)
@@ -84,10 +86,10 @@ class RoleReactionView(DefaultSettingsView):
                    interaction: nextcord.Interaction
                    ):
         gdb = GuildDateBases(interaction.guild_id)
-        all_role_reaction = gdb.get('role_reactions')
+        all_role_reaction = await gdb.get('role_reactions')
         role_reaction = all_role_reaction[self.message_id]
 
-        view = item.RoleReactionItemView(
+        view = await item.RoleReactionItemView(
             interaction.guild, self.message_id, role_reaction['channel_id'], role_reaction)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -97,10 +99,10 @@ class RoleReactionView(DefaultSettingsView):
                      interaction: nextcord.Interaction
                      ):
         gdb = GuildDateBases(interaction.guild.id)
-        role_reaction: ReactionRolePayload = gdb.get(
+        role_reaction: ReactionRolePayload = await gdb.get(
             'role_reactions')
         role_reaction.pop(self.message_id, None)
-        gdb.set('role_reactions', role_reaction)
+        await gdb.set('role_reactions', role_reaction)
 
-        view = RoleReactionView(interaction.guild)
+        view = await RoleReactionView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

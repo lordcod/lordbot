@@ -1,18 +1,9 @@
-from ast import List
-from psycopg2.extensions import register_adapter
-
-
 from .handlers import establish_connection
-from .misc.adapter_dict import adapt_dict, adapt_list
 from .settings import Table, Colum, PostType
 from .db_engine import DataBase
 from .config import (host, port, user, password, db_name)
 
 from bot.resources import info
-
-
-register_adapter(dict, adapt_dict)
-register_adapter(list, adapt_list)
 
 
 class GuildsDB(Table):
@@ -40,6 +31,7 @@ class GuildsDB(Table):
     ideas = Colum(data_type=PostType.JSON, default="{}")
     logs = Colum(data_type=PostType.JSON, default="{}")
     role_reactions = Colum(data_type=PostType.JSON, default="{}")
+    delete_task = Colum(data_type=PostType.BIGINT, default="0")
     # message_state = Colum(data_type=PostType.JSON, default="{}")
     # voice_time_state = Colum(data_type=PostType.JSON, default="{}")
     # score_state = Colum(data_type=PostType.JSON, default="{}")

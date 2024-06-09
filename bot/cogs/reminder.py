@@ -4,13 +4,13 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases import localdb
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import translate_to_timestamp, randquan
 
 
-REMINDER_DB = localdb.get_table('')
+REMINDER_DB = localdb.get_table('reminder_state')
 
 
 class Reminder(commands.Cog):
@@ -22,7 +22,7 @@ class Reminder(commands.Cog):
         if time.time() > time_now:
             await ctx.send("You must specify a time that is later than the current time.")
             return
-        self.bot.lord_handler_timer.create_timer_handler(
+        self.bot.lord_handler_timer.create(
             time_now-time.time(),
             self.process_reminder(time.time(), ctx.author, ctx.channel, text),
             f"reminder:{ctx.guild.id}:{ctx.author.id}:{time_now :.0f}:{randquan(17)}"
@@ -31,7 +31,7 @@ class Reminder(commands.Cog):
 
     async def process_reminder(self, time_old: float, member: nextcord.Member, channel: nextcord.TextChannel, text: str) -> None:
         gdb = GuildDateBases(channel.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
         embed = nextcord.Embed(
             title="🛎️ Reminder",
             description=f"{display_time(time.time()-time_old)} ago you asked me to remind you",

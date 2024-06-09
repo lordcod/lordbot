@@ -1,149 +1,144 @@
-from dataclasses import dataclass
-from string import printable
-import time
+
+import logging
+import os
 import aiohttp
 import asyncio
-import enum
+from datetime import datetime
+from pytz import timezone
 
-pintable = True
+log_webhook = os.environ.get('log_webhook')
 loop = asyncio.get_event_loop()
-session = aiohttp.ClientSession()
 
 
-class TextColors(enum.Enum):
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    OBLIQUE = '\033[3m'
+TRACE = logging.DEBUG - 5
+CORE = logging.INFO + 5
 
-    GREY = '\033[90m'
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    VIOLET = '\033[95m'
-    CYAN = '\033[96m'
+DEFAULT_LOG = TRACE
+DEFAULT_DISCORD_LOG = logging.INFO
 
-    def __str__(self) -> str:
-        return self.value
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
+RESET_SEQ = "\033[0m"
+COLOR_SEQ = "\033[1;%dm"
+BOLD_SEQ = "\033[1m"
 
-class DiscordTextColors(enum.Enum):
-    RESET = '[0m'
+RESET_SEQD = '[0m'
+COLOR_SEQD = '[2;%dm'
+BOLD_SEQD = '[2;1m'
 
-    GREY = '[2;30m'
-    RED = '[2;31m'
-    GREEN = '[2;32m'
-    YELLOW = '[2;33m'
-    BLUE = '[2;34m'
-    VIOLET = '[2;35m'
-    CYAN = '[2;36m'
-
-    def __str__(self) -> str:
-        return self.value
+COLORS = {
+    'WARNING': YELLOW,
+    'INFO': GREEN,
+    'DEBUG': BLUE,
+    'CRITICAL': YELLOW,
+    'ERROR': RED,
+    'TRACE': CYAN,
+    'CORE': MAGENTA
+}
 
 
-@dataclass
-class LogInfo:
-    color: TextColors
-    discord_color: DiscordTextColors
-    service: str
+tasks = []
 
 
-async def post_mes(text: str, data: LogInfo, time_string: str) -> None:
-    url = "https://discord.com/api/webhooks/1202680614772285450/GL1vm6jvvoaNLxb3hXeECOfGH2NuMdjB34h7SBazhDDYK18OMy-x_WV0sIEbRZ0r1BBj"
-    data = {
-        "content": (
-            "```ansi\n"
-            f"{data.discord_color}"
-            f"[{time_string}][{data.service}]: {text}"
-            f"{DiscordTextColors.RESET}"
-            "```"
-        )
-    }
-
-    async with session.post(url, data=data):
-        pass
+def formatter_message(message, use_color=True):
+    if use_color:
+        message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
+    else:
+        message = message.replace("$RESET", "").replace("$BOLD", "")
+    return message
 
 
-class Logger:
-    @staticmethod
-    def callback(text: str, data: LogInfo):
-        named_tuple = time.localtime()
-        time_string = time.strftime("%m-%d-%Y %H:%M:%S", named_tuple)
+def formatter_discord_message(message, use_color=True):
+    if use_color:
+        message = message.replace("$RESET", RESET_SEQD).replace("$BOLD", BOLD_SEQD)
+    else:
+        message = message.replace("$RESET", "").replace("$BOLD", "")
+    return message
 
-        loop.create_task(post_mes(text, data, time_string))
 
-        if not printable:
-            return
+async def post_mes(webhook_url: str, text: str) -> None:
+    from nextcord import Webhook
 
-        text_new = (
-            f"{data.color}"
-            f"[{time_string}][{data.service}]: {text}"
-            f"{TextColors.RESET}"
-        )
-        print(text_new)
+    async with aiohttp.ClientSession() as session:
+        webhook = Webhook.from_url(webhook_url, session=session)
+        await webhook.send('```ansi\n' + text + '```')
 
-    def on_logs(func):
-        @staticmethod
-        def redirect(text: str):
-            data = func(text)
-            Logger.callback(text, data)
-            return text
-        return redirect
 
-    @on_logs
-    @staticmethod
-    def info(text):
-        color = TextColors.GREY
-        discord_color = DiscordTextColors.GREY
-        service = 'INFO'
-        return LogInfo(color, discord_color, service)
+tz = timezone('Europe/Moscow')
+logging.Formatter.convert = lambda *args: datetime.now(tz).timetuple()
 
-    @on_logs
-    @staticmethod
-    def warn(text):
-        color = TextColors.YELLOW
-        discord_color = DiscordTextColors.YELLOW
-        service = 'WARN'
-        return LogInfo(color, discord_color, service)
 
-    @on_logs
-    @staticmethod
-    def error(text):
-        color = TextColors.RED
-        discord_color = DiscordTextColors.RED
-        service = 'ERROR'
-        return LogInfo(color, discord_color, service)
+class DiscordColoredFormatter(logging.Formatter):
+    def __init__(self, msg, use_color=True):
+        logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
+        self.use_color = use_color
 
-    @on_logs
-    @staticmethod
-    def critical(text):
-        color = TextColors.VIOLET
-        discord_color = DiscordTextColors.VIOLET
-        service = 'CRITICAL'
-        return LogInfo(color, discord_color, service)
+    def format(self, record):
+        levelname = record.levelname
+        if self.use_color and levelname in COLORS:
+            levelname_color = COLOR_SEQD % (30 + COLORS[levelname]) + levelname + RESET_SEQD
+            record.levelname = levelname_color
+        return logging.Formatter.format(self, record)
 
-    @on_logs
-    @staticmethod
-    def success(text):
-        color = TextColors.GREEN
-        discord_color = DiscordTextColors.GREEN
-        service = 'SUCCESS'
-        return LogInfo(color, discord_color, service)
 
-    @on_logs
-    @staticmethod
-    def inportent(text):
-        color = TextColors.BLUE
-        discord_color = DiscordTextColors.BLUE
-        service = 'IMPORTENT'
-        return LogInfo(color, discord_color, service)
+class ColoredFormatter(logging.Formatter):
+    def __init__(self, msg, use_color=True):
+        logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
+        self.use_color = use_color
 
-    @on_logs
-    @staticmethod
-    def core(text):
-        color = TextColors.CYAN
-        discord_color = DiscordTextColors.CYAN
-        service = 'CORE'
-        return LogInfo(color, discord_color, service)
+    def format(self, record):
+        levelname = record.levelname
+        if self.use_color and levelname in COLORS:
+            levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
+            record.levelname = levelname_color
+        return logging.Formatter.format(self, record)
+
+
+class DiscordHandler(logging.Handler):
+    def __init__(self, webhook_url: str) -> None:
+        self.webhook_url = webhook_url
+        super().__init__()
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            msg = self.format(record)
+            task = loop.create_task(post_mes(self.webhook_url, msg))
+            tasks.append(task)
+            self.flush()
+        except RecursionError:
+            raise
+        except Exception:
+            self.handleError(record)
+
+
+class LordLogger(logging.Logger):
+    FORMAT = "[$BOLD%(asctime)s$RESET][$BOLD%(name)s$RESET][%(levelname)s]  %(message)s ($BOLD%(filename)s$RESET:%(lineno)d)"
+    COLOR_FORMAT = formatter_message(FORMAT, True)
+
+    def __init__(self, name: str, level: int = DEFAULT_LOG):
+        logging.Logger.__init__(self, name, level)
+
+        color_formatter = ColoredFormatter(self.COLOR_FORMAT)
+        self.console = logging.StreamHandler()
+        self.console.setFormatter(color_formatter)
+        self.addHandler(self.console)
+
+        color_formatter = DiscordColoredFormatter(self.COLOR_FORMAT)
+        self.discord_handler = DiscordHandler(log_webhook)
+        self.discord_handler.setFormatter(color_formatter)
+        self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
+        self.addHandler(self.discord_handler)
+
+    def trace(self, msg, *args, **kwargs):
+        if self.isEnabledFor(TRACE):
+            self._log(TRACE, msg, args, **kwargs)
+
+    def core(self, msg, *args, **kwargs):
+        if self.isEnabledFor(CORE):
+            self._log(CORE, msg, args, **kwargs)
+
+
+logging.setLoggerClass(LordLogger)
+
+logging.addLevelName(TRACE, 'TRACE')
+logging.addLevelName(CORE, 'CORE')

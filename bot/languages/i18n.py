@@ -33,7 +33,10 @@ def add_res_translation(key: str, value: str, locale: str):
 
 
 def add_translation(
-    key: str, value: str, locale: Optional[str] = None, loadable: bool = False
+    key: str,
+    value: str,
+    locale: Optional[str] = None,
+    loadable: bool = False
 ) -> None:
     locale = locale or config.get("locale")
     memoization_dict.setdefault(locale, {})
@@ -100,8 +103,6 @@ def to_any_locales() -> dict:
 
 def to_i18n_translation(data: dict, path: Optional[str] = None) -> None:
     for key, value in data.items():
-        if not isinstance(value, dict):
-            raise ValueError("Use another method")
         if set(default_languages) & set(value.keys()):
             add_dict_translations(f"{path+'.' if path else ''}{key}", value)
         else:
@@ -150,11 +151,19 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
     else:
         data = memoization_dict[locale][path]
 
-    return data.format_map(kwargs)
+    return data.format(**kwargs)
 
 
 if __name__ == "__main__":
-    from_folder("./bot/languages/localization")
+    # from_folder("./bot/languages/localization")
+
+    # with open('temp_loc.json', 'wb') as file:
+    #     file.write(orjson.dumps(memoization_dict))
+
+    with open('bot/languages/temp_loc.json', 'rb') as file:
+        dataloc = orjson.loads(file.read())
+        for loc, data in dataloc.items():
+            parser(data, loc, loadable=False)
 
     # Translation dict
     # for lang in default_languages:
@@ -185,4 +194,4 @@ if __name__ == "__main__":
     # To i18n format as any locales format
     # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    # to_folder("./bot/languages/localization")
+    to_folder("./bot/languages/localization")

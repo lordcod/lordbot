@@ -1,3 +1,4 @@
+import functools
 import nextcord
 from nextcord.ext import commands
 
@@ -10,6 +11,13 @@ import time
 from typing import Optional
 
 from bot.misc.lordbot import LordBot
+
+
+def disable(func):
+    @functools.wraps(func)
+    async def wrapped(*args, **kwargs):
+        return None
+    return wrapped
 
 
 class MembersEvent(commands.Cog):
@@ -28,7 +36,7 @@ class MembersEvent(commands.Cog):
         )
 
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
-        roles_ids = gdb.get('auto_roles')
+        roles_ids = await gdb.get('auto_roles')
 
         if not roles_ids:
             return
@@ -40,7 +48,7 @@ class MembersEvent(commands.Cog):
 
     async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
         guild = member.guild
-        greeting_message: dict = gdb.get('greeting_message', {})
+        greeting_message: dict = await gdb.get('greeting_message', {})
 
         if not (channel := guild.get_channel(greeting_message.get("channel_id"))):
             return
@@ -61,6 +69,7 @@ class MembersEvent(commands.Cog):
 
         await channel.send(**message_data)
 
+    @disable
     async def process_invites(self, member: nextcord.Member, gdb: GuildDateBases) -> nextcord.Invite | None:
         old_invites = self.bot.invites_data.get(member.guild.id, [])
         new_invites = await member.guild.invites()
@@ -77,14 +86,15 @@ class MembersEvent(commands.Cog):
         if invite is None:
             return
 
-        invites = gdb.get('invites', [])
+        invites = await gdb.get('invites', [])
         invites.append((member.id, invite.inviter.id,
                        time.time(), invite.code))
-        gdb.set('invites', invites)
+        await gdb.set('invites', invites)
 
         return invite
 
-    @ commands.command()
+    @commands.command()
+    @disable
     async def invites(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
         gdb = GuildDateBases(ctx.guild.id)
         color = gdb.get('color')

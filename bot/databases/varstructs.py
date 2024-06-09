@@ -6,8 +6,6 @@ from typing import (
     TypedDict,
     Dict,
     Tuple,
-    TypedDict,
-    Dict
 )
 
 if TYPE_CHECKING:

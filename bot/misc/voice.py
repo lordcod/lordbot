@@ -126,7 +126,7 @@ class MusicPlayer:
         queue.remove(self.guild_id, self.data.id)
         current_players.pop(self.guild_id)
 
-        player = self.__class__(self.voice, self.message, self.guild_id)
+        player = MusicPlayer(self.voice, self.message, self.guild_id)
         await player.process()
 
     async def move_to(self, index: int) -> None:

@@ -2,7 +2,17 @@ from typing import Literal, Optional
 import typing
 import nextcord
 from nextcord.ext import commands
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
+
+
+class GreedyUser(str):
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}['{self}']"
+
+    def __class_getitem__(cls, param: str) -> 'GreedyUser':
+        return cls(param)
+
 
 reactions_list = {
     "with_user": {
@@ -126,30 +136,43 @@ reactions_list = {
         "yay": "{author} восклицает 'Ура!'",
         "yes": "{author} утвердительно кивает головой."
     }
-
-
-
 }
-all_reactions_type = Literal["airkiss", "angrystare", "bite", "bleh", "blush", "brofist", "celebrate", "cheers", "clap", "confused", "cool", "cry", "cuddle", "dance", "drool", "evillaugh", "facepalm", "handhold", "happy", "headbang", "hug", "kiss", "laugh", "lick", "love", "mad", "nervous", "no", "nom", "nosebleed", "nuzzle",
-                             "nyah", "pat", "peek", "pinch", "poke", "pout", "punch", "roll", "run", "sad", "scared", "shout", "shrug", "shy", "sigh", "sip", "slap", "sleep", "slowclap", "smack", "smile", "smug", "sneeze", "sorry", "stare", "stop", "surprised", "sweat", "thumbsup", "tickle", "tired", "wave", "wink", "woah", "yawn", "yay", "yes"]
-required_reactions_type = ['airkiss', 'bite', 'cool', 'cuddle', 'hug', 'handhold', 'kiss', 'love',
-                           'lick', 'nuzzle', 'pinch', 'pat', 'poke', 'punch', 'smack', 'sorry', 'tickle', 'wave', 'wink']
+
+# type: ignore
+AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare',
+                           GreedyUser['bite'], 'clap', GreedyUser['cuddle'],
+                           'bleh', 'blush', 'brofist', 'celebrate', 'cheers',
+                           'confused', GreedyUser['cool'], 'cry',
+                           'dance', 'drool', 'evillaugh', 'facepalm',
+                           GreedyUser['handhold'], GreedyUser['kiss'],
+                           'happy', 'headbang', GreedyUser['hug'],
+                           'laugh', GreedyUser['lick'], GreedyUser['love'],
+                           'nervous', 'no', 'nom', 'nosebleed', 'mad',
+                           GreedyUser['nuzzle'], 'nyah', GreedyUser['pat'],
+                           GreedyUser['pinch'], GreedyUser['poke'], 'pout',
+                           GreedyUser['punch'], 'roll', 'run', 'sad', 'peek',
+                           'scared', 'shout', 'shrug', 'shy', 'sigh', 'sip',
+                           'slap', 'sleep', 'slowclap', GreedyUser['smack'],
+                           'smug', 'sneeze', GreedyUser['sorry'], 'stare',
+                           'surprised', 'sweat', 'thumbsup', GreedyUser['tickle'],
+                           'tired', GreedyUser['wave'], GreedyUser['wink'],
+                           'yawn', 'yay', 'yes', 'smile', 'stop', 'woah']
 
 
 class ReactionsCommand(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
-        for react_type in typing.get_args(all_reactions_type):
+        for react_type in typing.get_args(AllReactionsType):
             self.register_command(react_type)
 
-    def register_command(self, react_type: all_reactions_type) -> None:
+    def register_command(self, react_type: AllReactionsType) -> None:
         @commands.command(name=react_type)
         async def _react_type_callback(ctx: commands.Context, user: Optional[nextcord.Member] = None, *, comment: Optional[str] = None):
             await self.reactions(ctx, react_type, user, comment=comment)
         self.bot.add_command(_react_type_callback)
 
-    async def get_gif_with_react(self, react_type: all_reactions_type) -> str:
+    async def get_gif_with_react(self, react_type: AllReactionsType) -> str:
         params = {
             'reaction': react_type,
             'format': 'gif'
@@ -160,8 +183,11 @@ class ReactionsCommand(commands.Cog):
             return json['url']
 
     @commands.command()
-    async def reactions(self, ctx: commands.Context, react_type: all_reactions_type, user: Optional[nextcord.Member] = None, *, comment: Optional[str] = None) -> None:
-        if user is None and react_type in required_reactions_type:
+    async def reactions(self, ctx: commands.Context, react_type: AllReactionsType, user: Optional[nextcord.Member] = None, *, comment: Optional[str] = None) -> None:
+        gdb = GuildDateBases(ctx.guild.id)
+        color = await gdb.get('color')
+
+        if user is None and isinstance(react_type, GreedyUser):
             await ctx.send("You must specify the user")
             return
 
@@ -169,11 +195,13 @@ class ReactionsCommand(commands.Cog):
             embed = nextcord.Embed(
                 description=reactions_list['no_user'].get(react_type).format(
                     author=ctx.author.mention),
+                color=color
             )
         else:
             embed = nextcord.Embed(
                 description=reactions_list['with_user'].get(react_type).format(
                     author=ctx.author.mention, user=user.mention),
+                color=color
             )
         if comment:
             embed.add_field(

@@ -3,15 +3,16 @@ from typing import List, Optional
 import nextcord
 import jmespath
 from bot.resources.info import COUNT_ROLES_PAGE
-from bot.misc.utils import FissionIterator
+from bot.misc.utils import FissionIterator, to_async
 from bot.databases import GuildDateBases
 from bot.databases import EconomyMemberDB
 from bot.views import menus
 from bot.databases.varstructs import RoleShopPayload
 
 
+@to_async
 class ShopAcceptView(nextcord.ui.View):
-    def __init__(
+    async def __init__(
         self,
         guild_id: int,
         index: int,
@@ -20,7 +21,7 @@ class ShopAcceptView(nextcord.ui.View):
         super().__init__(timeout=None)
 
         self.gdb = GuildDateBases(guild_id)
-        economy_settings = self.gdb.get('economic_settings')
+        economy_settings = await self.gdb.get('economic_settings')
         shop_info = economy_settings.get('shop', [])
         self.role_index = index
         self.data = data
@@ -46,7 +47,7 @@ class ShopAcceptView(nextcord.ui.View):
 
     @nextcord.ui.button(label="Accept", style=nextcord.ButtonStyle.green)
     async def accept(self, button: nextcord.ui.Button, interaction: nextcord.Interaction) -> None:
-        economy_settings = self.gdb.get('economic_settings')
+        economy_settings = await self.gdb.get('economic_settings')
         shop_info = economy_settings.get(
             'shop', [])
         emdb = EconomyMemberDB(interaction.guild_id, interaction.user.id)
@@ -80,7 +81,7 @@ class ShopAcceptView(nextcord.ui.View):
                 rd['using_limit'] = rd.get('using_limit', 0) + 1
         economy_settings['shop'] = shop_info
         self.gdb.set('economic_settings', economy_settings)
-        emdb['balance'] -= self.data.get('amount')
+        emdb.decline('balance', self.data.get('amount'))
 
         await interaction.response.send_message(f"You have completed the purchase of the role <@&{self.data.get('role_id')}>",
                                                 ephemeral=True)
@@ -115,7 +116,7 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        economy_settings = gdb.get('economic_settings')
+        economy_settings = await gdb.get('economic_settings')
         emdb = EconomyMemberDB(interaction.guild_id, interaction.user.id)
         role_id = int(self.values[0])
         role_data: RoleShopPayload = jmespath.search(
@@ -188,5 +189,5 @@ class EconomyShopView(menus.Menus):
         return EconomyShopDropdown(self.index, self.value[self.index])
 
     async def callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = self.__class__(interaction.guild, self.index)
+        view = EconomyShopView(interaction.guild, self.index)
         await interaction.response.edit_message(embed=view.embed, view=view)

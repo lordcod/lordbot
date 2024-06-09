@@ -4,11 +4,7 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases
 from bot.misc import utils
 
-import googletrans
-
 from bot.misc.lordbot import LordBot
-
-translator = googletrans.Translator()
 
 
 class ThreadEvent(commands.Cog):
@@ -19,7 +15,7 @@ class ThreadEvent(commands.Cog):
     @commands.Cog.listener()
     async def on_thread_create(self, thread: nextcord.Thread):
         guild_data = GuildDateBases(thread.guild.id)
-        afm = guild_data.get('thread_messages')
+        afm = await guild_data.get('thread_messages')
         thread_data = afm.get(thread.parent_id)
 
         if not thread_data:

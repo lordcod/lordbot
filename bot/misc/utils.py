@@ -1,4 +1,6 @@
 from __future__ import annotations
+import functools
+import logging
 import nextcord
 from nextcord.ext import commands
 
@@ -17,23 +19,25 @@ import orjson
 
 from asyncio import TimerHandle
 from collections import namedtuple
-from typing import (Coroutine, Dict,  Optional,  Tuple, Union,
+from typing import (TYPE_CHECKING, Awaitable, Callable, Coroutine, Dict,  Optional,  Tuple, Union,
                     Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
 from typing import Any, Coroutine, Dict, Iterable,  Optional, Self, SupportsIndex,  Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 from functools import lru_cache
+from dataclasses import dataclass, field
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
 
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from cryptography.fernet import Fernet
 
 from bot.resources.ether import Emoji
 
-
+_log = logging.getLogger(__name__)
 T = TypeVar('T')
+C_co = TypeVar("C_co", bound=type, covariant=True)
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 welcome_message_items = {
@@ -138,7 +142,7 @@ _blackjack_games = {}
 
 
 class BlackjackGame:
-    cards = {
+    cards: Dict[str, Optional[int]] = {
         '<:hearts_of_ace:1236254919347142688>': None, '<:hearts_of_two:1236254940016545843>': 2, '<:hearts_of_three:1236254938158338088>': 3, '<:hearts_of_four:1236254924757536799>': 4, '<:hearts_of_five:1236254923050586212>': 5, '<:hearts_of_six:1236254934920593438>': 6, '<:hearts_of_seven:1236254933309718641>': 7, '<:hearts_of_eight:1236254921272066078>': 8, '<:hearts_of_nine:1236254929803280394>': 9, '<:hearts_of_ten:1236254936514428948>': 10, '<:hearts_of_jack:1236254926263418932>': 10, '<:hearts_of_queen:1236254931464228905>': 10, '<:hearts_of_king:1236254928104587336>': 10,
         '<:spades_of_ace:1236254941820092506>': None, '<:spades_of_two:1236256183048863836>': 2, '<:spades_of_three:1236256162933112862>': 3, '<:spades_of_four:1236254946454667325>': 4, '<:spades_of_five:1236256181433929768>': 5, '<:spades_of_six:1236256158835277846>': 6, '<:spades_of_seven:1236256156834594836>': 7, '<:spades_of_eight:1236254943632162857>': 8, '<:spades_of_nine:1236254952901316659>': 9, '<:spades_of_ten:1236256161024708619>': 10, '<:spades_of_jack:1236254949072048200>': 10, '<:spades_of_queen:1236254955099262996>': 10, '<:spades_of_king:1236254951001292840>': 10,
         '<:clubs_of_ace:1236254878867918881>': None, '<:clubs_of_two:1236254897243029607>': 2, '<:clubs_of_three:1236254896026812508>': 3, '<:clubs_of_four:1236254884232167474>': 4, '<:clubs_of_five:1236254882533740614>': 5, '<:clubs_of_six:1236254893015175220>': 6, '<:clubs_of_seven:1236254891572334644>': 7, '<:clubs_of_eight:1236254880981586021>': 8, '<:clubs_of_nine:1236254888833581116>': 9, '<:clubs_of_ten:1236254894525120522>': 10, '<:clubs_of_jack:1236254886119739423>': 10, '<:clubs_of_queen:1236254890234347540>': 10, '<:clubs_of_king:1236254887474368533>': 10,
@@ -157,6 +161,8 @@ class BlackjackGame:
         self.your_cards = [self.get_random_cart() for _ in range(2)]
         self.dealer_cards = [self.get_random_cart() for _ in range(2)]
 
+        self.gid = randquan(9)
+
     @property
     def your_value(self) -> int:
         return self.calculate_result(self.your_cards)
@@ -165,14 +171,13 @@ class BlackjackGame:
     def dealer_value(self) -> int:
         return self.calculate_result(self.dealer_cards)
 
-    @property
-    def completed_embed(self) -> nextcord.Embed:
+    async def completed_embed(self) -> nextcord.Embed:
         gdb = GuildDateBases(self.member.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title="Blackjack",
-            description=f"Result: {self.get_winner_title()}",
+            description=f"Result: {await self.get_winner_title()}",
             color=color
         )
         embed.add_field(
@@ -191,11 +196,10 @@ class BlackjackGame:
         )
         return embed
 
-    @property
-    def embed(self) -> nextcord.Embed:
+    async def embed(self) -> nextcord.Embed:
         gdb = GuildDateBases(self.member.guild.id)
-        color = gdb.get('color')
-        economic_settings: dict = gdb.get('economic_settings')
+        color = await gdb.get('color')
+        economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
 
         embed = nextcord.Embed(
@@ -244,9 +248,9 @@ class BlackjackGame:
         if self.dealer_value > self.your_value:
             return 0
 
-    def get_winner_title(self) -> int:
+    async def get_winner_title(self) -> int:
         gdb = GuildDateBases(self.member.guild.id)
-        economic_settings: dict = gdb.get('economic_settings')
+        economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
 
         match self.is_winner():
@@ -263,9 +267,20 @@ class BlackjackGame:
     def is_exceeds_dealer(self) -> int:
         return self.dealer_value > 21
 
-    def go_dealer(self) -> int:
-        while 18 > self.dealer_value:
-            self.add_dealer_card()
+    def go_dealer(self) -> None:
+        while True:
+            win_cards = []
+            for card in self.cards:
+                # if card in self.your_cards[1:]:
+                #     continue
+                res = self.calculate_result(self.dealer_cards + [card])
+                if 21 >= res:
+                    win_cards.append(card)
+            _log.debug('Win cards: %s, Chance: %s', len(win_cards), len(win_cards) / len(self.cards))
+            if len(win_cards) / len(self.cards) >= 0.5:
+                self.add_dealer_card()
+            else:
+                break
 
     def add_dealer_card(self) -> None:
         self.dealer_cards.append(self.get_random_cart())
@@ -277,7 +292,7 @@ class BlackjackGame:
         _blackjack_games.pop(f'{self.member.guild.id}:{self.member.id}', None)
 
     @staticmethod
-    def calculate_result(_cards: List[Optional[int]]) -> int:
+    def calculate_result(_cards: List[str]) -> int:
         result = 0
         count_of_none = 0
         for val in map(BlackjackGame.cards.__getitem__, _cards):
@@ -308,12 +323,12 @@ def lord_format(
 def translate_flags(text: str) -> dict:
     if not text:
         return {}
-    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-\s]+)?(\s|$)){1,}", text):
+    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)){1,}", text):
         raise TypeError("Not a flag.")
     return dict(map(
         lambda item: (item[0], item[1]) if item[1] else (item[0], True),
         regex.findall(
-            r"\-\-([a-zA-Z0-9\_\-]+)=?([a-zA-Z0-9\_\-]+)?(\s|$)",
+            r"\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)",
             text
         )
     ))
@@ -394,6 +409,71 @@ class FissionIterator:
         return list(iter(self))
 
 
+def to_async(cls: type[T]) -> Awaitable[T]:
+    @functools.wraps(cls)
+    async def wrapped(*args, **kwargs) -> T:
+        self = cls.__new__(cls)
+        await self.__init__(*args, **kwargs)
+        return self
+    wrapped.__default_class__ = cls
+    return wrapped
+
+
+@dataclass
+class ItemLordTimeHandler:
+    delay: Union[int, float]
+    coro: Coroutine
+    key: Union[str, int]
+    th: TimerHandle = field(init=False)
+
+
+class LordTimeHandler:
+    def __init__(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+        if loop is None:
+            loop = asyncio.get_event_loop()
+
+        self.loop = loop
+        self.data: Dict[Union[str, int], ItemLordTimeHandler] = {}
+
+    def create(
+        self,
+        delay: float,
+        coro: Coroutine,
+        key: Union[str, int]
+    ) -> ItemLordTimeHandler:
+        _log.trace('Create new temp task %s (%s)', coro.__name__, key)
+        ilth = ItemLordTimeHandler(delay, coro, key)
+        th = self.loop.call_later(delay, self.complete, ilth)
+        ilth.th = th
+        self.data[key] = ilth
+        return ItemLordTimeHandler
+
+    def complete(self, ilth: ItemLordTimeHandler) -> None:
+        _log.trace('Complete temp task %s (%s)', ilth.coro.__name__, ilth.key)
+        self.loop.create_task(ilth.coro, name=ilth.key)
+        self.data.pop(ilth.key)
+
+    def close(self, key: Union[str, int]) -> ItemLordTimeHandler:
+        ilth = self.data.pop(key)
+        ilth.th.cancel()
+        return ilth
+
+    def call(self, key: Union[str, int]) -> None:
+        ilth = self.data[key]
+        ilth.th._run()
+        self.close(key)
+
+    def increment(self, delay: Union[float, int], key: Union[str, int]) -> None:
+        ilth = self.close(key)
+        ilth.delay = delay
+        th = self.loop.call_later(delay, self.complete, ilth)
+        ilth.th = th
+        self.data[key] = ilth
+
+    def get(self, key: Union[str, int]) -> Optional[ItemLordTimeHandler]:
+        return self.data.get(key)
+
+
 def clamp(val: Union[int, float],
           minv: Union[int, float],
           maxv: Union[int, float]) -> Union[int, float]:
@@ -448,11 +528,13 @@ class TimeCalculator:
         default_coefficient: int = 60,
         refundable: T = int,
         coefficients: Optional[dict] = None,
-        operatable_time: bool = False
+        operatable_time: bool = False,
+        errorable: bool = True
     ) -> None:
         self.default_coefficient = default_coefficient
         self.refundable = refundable
         self.operatable_time = operatable_time
+        self.errorable = errorable
 
         if coefficients is None:
             self.coefficients = {
@@ -463,6 +545,9 @@ class TimeCalculator:
             }
         else:
             self.coefficients = coefficients
+
+    def __class_getitem__(cls, value: Any) -> Self:
+        return cls(operatable_time=value)
 
     @overload
     def convert(
@@ -480,26 +565,33 @@ class TimeCalculator:
         pass
 
     def convert(self, *args) -> T | Coroutine[Any, Any, T]:
+        if not isinstance(self, TimeCalculator):
+            args = (self,)+args
+            self = TimeCalculator()
+
         try:
             return self.async_convert(*args)
-        except KeyboardInterrupt:
-            raise
         except Exception:
             pass
 
         try:
             return self.basic_convert(*args)
-        except KeyboardInterrupt:
-            raise
         except Exception:
             pass
 
-        raise TypeError
+        if self.errorable:
+            raise TypeError
+        return None
 
     def basic_convert(
         self,
         argument: Any
     ) -> T:
+        try:
+            return int(argument)
+        except ValueError:
+            pass
+
         if not (isinstance(argument, str)
                 and regex.fullmatch(r'\s*(\d+[a-zA-Z\s]+){1,}', argument)):
             raise TypeError('Format time is not valid!')

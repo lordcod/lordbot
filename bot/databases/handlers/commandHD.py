@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Optional, TypeVar, overload
 from ..db_engine import DataBase
-from ..misc.adapter_dict import Json
 
 T = TypeVar('T')
 engine: DataBase = None
@@ -12,27 +11,27 @@ class CommandDB:
         self.guild_id = guild_id
 
     @overload
-    def get(self, command: str) -> Optional[dict]: ...
+    async def get(self, command: str) -> Optional[dict]: ...
 
     @overload
-    def get(self, command: str, default: T) -> dict | T: ...
+    async def get(self, command: str, default: T) -> T: ...
 
-    def get(self, command: str, default: T = None) -> dict | T:
-        data = engine.fetchvalue(
-            "SELECT command_permissions ->> %s FROM guilds WHERE id = %s",
+    async def get(self, command: str, default: T = None) -> dict | T:
+        data = await engine.fetchvalue(
+            "SELECT command_permissions ->> $1 FROM guilds WHERE id = $2",
             (command, self.guild_id,)
         )
 
         if not data:
             return default
-        return Json.loads(data)
+        return data
 
-    def update(self, key: str, value: dict) -> None:
-        engine.execute(
+    async def update(self, key: str, value: dict) -> None:
+        await engine.execute(
             """
                 UPDATE guilds 
-                SET command_permissions = jsonb_set(command_permissions::jsonb, %s, %s) 
-                WHERE id = %s
+                SET command_permissions = jsonb_set(command_permissions::jsonb, $1, $2) 
+                WHERE id = $3
             """,
             ('{'+key+'}', value, self.guild_id, )
         )

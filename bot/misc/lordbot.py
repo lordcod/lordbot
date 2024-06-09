@@ -1,12 +1,14 @@
 from __future__ import annotations
+from bot.resources.info import DEFAULT_PREFIX
 import asyncio
 import logging
+import sys
 import aiohttp
 import nextcord
 import regex
 from nextcord.ext import commands
 
-from bot.misc.utils import LordTimerHandler
+from bot.misc.utils import LordTimeHandler,  translate_flags
 from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
@@ -15,7 +17,7 @@ from bot.databases.db import DataBase, establish_connection
 from bot.databases.config import host, port, user, password, db_name
 from typing import Coroutine, List, Optional, Dict, Any
 
-from bot.resources.info import DEFAULT_PREFIX
+_log = logging.getLogger(__name__)
 
 
 def get_shard_list(shard_ids: str):
@@ -45,7 +47,7 @@ class LordBot(commands.AutoShardedBot):
         if msg.guild is None:
             return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
         gdb = GuildDateBases(msg.guild.id)
-        prefix = gdb.get('prefix')
+        prefix = await gdb.get('prefix') or DEFAULT_PREFIX
         return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
     def set_event(self, coro: Coroutine, name: Optional[str] = None) -> None:
@@ -80,7 +82,9 @@ class LordBot(commands.AutoShardedBot):
         setattr(self, name, coro)
 
     def __init__(self) -> None:
-        shard_ids, shard_count = input("Shared info: ").split("/")
+        flags = translate_flags(' '.join(sys.argv[1:]))
+        shard_ids, shard_count = (flags.get(
+            'shards') or input("Shared info: ")).split("/")
         shard_count = int(shard_count)
         shard_ids = get_shard_list(shard_ids)
 
@@ -91,25 +95,41 @@ class LordBot(commands.AutoShardedBot):
             shard_ids=shard_ids,
             shard_count=shard_count
         )
+
         loop = asyncio.get_event_loop()
+
         i18n.from_folder("./bot/languages/localization")
         i18n.config['locale'] = 'en'
+
         self.session = aiohttp.ClientSession()
+
         self.__with_ready__ = loop.create_future()
-        self.lord_handler_timer = LordTimerHandler(self.loop)
-        misc_giveaway.Giveaway.set_lord_timer_handler(self.lord_handler_timer)
+        self.__with_ready_events__ = []
+
+        self.lord_handler_timer = LordTimeHandler(loop)
+
         self.add_listener(self.listen_on_ready, 'on_ready')
 
     async def listen_on_ready(self) -> None:
-        self.engine = engine = DataBase.create_engine(
-            host, port, user, password, db_name)
+        try:
+            self.engine = engine = await DataBase.create_engine(
+                host, port, user, password, db_name)
+        except Exception as exc:
+            _log.error("Couldn't connect to the database", exc_info=exc)
+            await self.close()
+            return
         establish_connection(engine)
         for t in db._tables:
             t.set_engine(engine)
-            t.create()
+            await t.create()
         self.__with_ready__.set_result(None)
+
+        for event_data in self.__with_ready_events__:
+            self.dispatch(event_data[0], *event_data[1], **event_data[2])
 
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         if not self.__with_ready__.done() and event_name.lower() != 'ready':
+            self.__with_ready_events__.append((event_name, args, kwargs))
+            _log.trace('Postponed event %s', event_name)
             return
         return super().dispatch(event_name, *args, **kwargs)

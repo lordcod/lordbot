@@ -1,19 +1,19 @@
-import traceback
+import logging
+import sys
 import nextcord
-import random
-import string
 from nextcord.ext import commands
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
-from bot.misc.logger import Logger
 from bot.resources import errors
 from bot.databases import CommandDB
 from bot.resources.errors import (CallbackCommandError,
                                   MissingRole,
                                   MissingChannel,
                                   CommandOnCooldown)
+
+_log = logging.getLogger(__name__)
 
 
 class PermissionChecker:
@@ -24,7 +24,7 @@ class PermissionChecker:
         ctx = self.ctx
         command_name = ctx.command.qualified_name
         cdb = CommandDB(ctx.guild.id)
-        self.command_permissions = cdb.get(command_name, {})
+        self.command_permissions = await cdb.get(command_name, {})
 
         enabled = await self.is_enabled()
         allowed = await self.is_allowed()
@@ -122,34 +122,24 @@ class CommandEvent(commands.Cog):
             return
 
         gdb = GuildDateBases(interaction.guild_id)
-        color = gdb.get('color')
-
-        random_hex_key = ''.join(
-            [random.choice(string.hexdigits) for _ in range(10)])
+        color = await gdb.get('color')
 
         embed = nextcord.Embed(
             title="The interaction time has expired",
-            description=(
-                "A critical error occurred while processing the command\n"
-                f"Error key: **{random_hex_key}**"
-            ),
+            description="A critical error occurred while processing the command",
             color=color
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        Logger.error(
-            f"[{type(error).__name__}] Application error: {error}\n"
-            f"Error key: {random_hex_key}"
-            f"{traceback.format_exc()}")
+        _log.error('Application error', exc_info=error)
 
     async def on_command_error(self, ctx: commands.Context, error):
         CommandError = CallbackCommandError(ctx, error)
         await CommandError.process()
 
     async def on_error(self, event, *args, **kwargs):
-        Logger.error(
-            f"Ignoring exception in {event}\n"
-            f"{traceback.format_exc()}")
+        _log.error(
+            "Ignoring exception in %s", event, exc_info=sys.exc_info())
 
     async def permission_check(self,  ctx: commands.Context):
         perch = PermissionChecker(ctx)

@@ -1,6 +1,5 @@
 
 from enum import StrEnum
-from psycopg2.extensions import AsIs
 import orjson
 from typing import Any, Dict, Union
 
@@ -80,9 +79,20 @@ class NumberFormating:
 def adapt_dict(dict_var):
     data = NumberFormating.dumps(dict_var)
     data = Json.dumps(data)
-    return AsIs("'" + data + "'")
+    return data
 
 
 def adapt_list(list_var):
     data = Json.dumps(list_var)
-    return AsIs("'" + data + "'")
+    return data
+
+
+def decode_dict(dict_var):
+    data = Json.loads(dict_var)
+    data = NumberFormating.loads(data)
+    return data
+
+
+def decode_list(dict_var):
+    data = Json.loads(dict_var)
+    return data
