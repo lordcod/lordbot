@@ -1,6 +1,7 @@
 
 import logging
 import os
+import time
 import aiohttp
 import asyncio
 from datetime import datetime
@@ -68,6 +69,7 @@ class StandartFormatter(logging.Formatter):
     """override logging.Formatter to use an aware datetime object"""
 
     def converter(self, timestamp):
+        print(timestamp, time.time())
         dt = datetime.fromtimestamp(timestamp)
         tzinfo = timezone('Europe/Moscow')
         return tzinfo.localize(dt)
