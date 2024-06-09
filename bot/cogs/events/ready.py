@@ -53,7 +53,7 @@ class ReadyEvent(commands.Cog):
 
     async def on_disconnect(self):
         await self.bot.session.close()
-        await self.bot.engine.__connection.close()
+        await self.bot.engine._DataBase__connection.close()
         _log.critical("Bot is disconnect")
 
     async def process_temp_bans(self):
@@ -102,6 +102,7 @@ class ReadyEvent(commands.Cog):
         for id, delay in deleted_tasks:
             if self.bot.get_guild(id):
                 continue
+            _log.trace('For task on on_ready %s', delay)
             gdb = GuildDateBases(id)
             self.bot.lord_handler_timer.create(
                 time.time()-delay, gdb.delete(), f'guild-deleted:{id}')

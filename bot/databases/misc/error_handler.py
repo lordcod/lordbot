@@ -1,4 +1,5 @@
 
+import functools
 import logging
 import traceback
 from typing import Any, Callable
@@ -10,6 +11,7 @@ _log = logging.getLogger(__name__)
 
 def on_error():
     def wrapped(func: Callable) -> Any:
+        @functools.wraps(func)
         async def inner(*args, **kwargs):
             for i in range(3):
                 try:

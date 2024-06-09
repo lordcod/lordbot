@@ -473,8 +473,7 @@ class LordTimeHandler:
 
     def increment(self, delay: Union[float, int], key: Union[str, int]) -> None:
         ilth = self.close(key)
-        if ilth is None:
-            return
+
         ilth.delay = delay
         th = self.loop.call_later(delay, self.complete, ilth)
         ilth.th = th
