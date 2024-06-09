@@ -76,6 +76,7 @@ class StandartFormatter(logging.Formatter):
 
     def formatTime(self, record, datefmt=None):
         dt = self.converter(record.created)
+        datefmt = self.datefmt
         if datefmt:
             s = dt.strftime(datefmt)
         else:
