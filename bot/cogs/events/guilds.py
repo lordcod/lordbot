@@ -1,4 +1,5 @@
 import logging
+import time
 import nextcord
 from nextcord.ext import commands
 
@@ -16,20 +17,24 @@ class GuildsEvent(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_available(self, guild: nextcord.Guild):
         _log.trace('Guild available %s (%d), Member count: %d', guild.name, guild.id, guild.member_count)
-        await GuildDateBases(guild.id).register()
+        gdb = GuildDateBases(guild.id)
+        await gdb.set('delete_task', None)
+        self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
         async for member in guild.fetch_members(limit=None):
             await EconomyMemberDB(guild.id, member.id).get_data()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: nextcord.Guild):
-        self.bot.lord_handler_timer.close_as_key(f'guild-deleted:{guild.id}')
-        await GuildDateBases(guild.id).register()
+        self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
+        gdb = GuildDateBases(guild.id)
+        await gdb.set('delete_task', None)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
         delay = 60 * 60 * 24 * 3
-        self.bot.lord_handler_timer.create_timer_handler(
+        gdb.set('delete_task', int(time.time()+delay))
+        self.bot.lord_handler_timer.create(
             delay, gdb.delete(), f'guild-deleted:{guild.id}')
 
 

@@ -26,6 +26,7 @@ from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
 from functools import lru_cache
+from dataclasses import dataclass, field
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
 
@@ -416,6 +417,61 @@ def to_async(cls: type[T]) -> Awaitable[T]:
         return self
     wrapped.__default_class__ = cls
     return wrapped
+
+
+@dataclass
+class ItemLordTimeHandler:
+    delay: Union[int, float]
+    coro: Coroutine
+    key: Union[str, int]
+    th: TimerHandle = field(init=False)
+
+
+class LordTimeHandler:
+    def __init__(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+        if loop is None:
+            loop = asyncio.get_event_loop()
+
+        self.loop = loop
+        self.data: Dict[Union[str, int], ItemLordTimeHandler] = {}
+
+    def create(
+        self,
+        delay: float,
+        coro: Coroutine,
+        key: Union[str, int]
+    ) -> ItemLordTimeHandler:
+        _log.trace('Create new temp task %s (%s)', coro.__name__, key)
+        ilth = ItemLordTimeHandler(delay, coro, key)
+        th = self.loop.call_later(delay, self.complete, ilth)
+        ilth.th = th
+        self.data[key] = ilth
+        return ItemLordTimeHandler
+
+    def complete(self, ilth: ItemLordTimeHandler) -> None:
+        _log.trace('Complete temp task %s (%s)', ilth.coro.__name__, ilth.key)
+        self.loop.create_task(ilth.coro, name=ilth.key)
+        self.data.pop(ilth.key)
+
+    def close(self, key: Union[str, int]) -> ItemLordTimeHandler:
+        ilth = self.data.pop(key)
+        ilth.th.cancel()
+        return ilth
+
+    def call(self, key: Union[str, int]) -> None:
+        ilth = self.data[key]
+        ilth.th._run()
+        self.close(key)
+
+    def increment(self, delay: Union[float, int], key: Union[str, int]) -> None:
+        ilth = self.close(key)
+        ilth.delay = delay
+        th = self.loop.call_later(delay, self.complete, ilth)
+        ilth.th = th
+        self.data[key] = ilth
+
+    def get(self, key: Union[str, int]) -> Optional[ItemLordTimeHandler]:
+        return self.data.get(key)
 
 
 def clamp(val: Union[int, float],

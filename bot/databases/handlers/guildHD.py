@@ -116,3 +116,8 @@ class GuildDateBases:
 
         await engine.execute('DELETE FROM guilds WHERE id = $1',
                              (self.guild_id,))
+
+    @on_error()
+    @staticmethod
+    async def get_deleted():
+        return await engine.fetchall('SELECT id, delete_task FROM guilds WHERE delete_task IS NOT NULL')

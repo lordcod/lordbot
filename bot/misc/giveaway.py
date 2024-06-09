@@ -84,10 +84,6 @@ class Giveaway:
         await self.gdb.set('giveaways', self.giveaways)
 
     @classmethod
-    def set_lord_timer_handler(cls, lord_handler_timer) -> None:
-        cls.lord_handler_timer = lord_handler_timer
-
-    @classmethod
     async def create(
         cls,
         guild: nextcord.Guild,
@@ -99,7 +95,7 @@ class Giveaway:
         date_end: int
     ) -> 'Giveaway':
         gdb = GuildDateBases(guild.id)
-        giveaways = gdb.get('giveaways')
+        giveaways = await gdb.get('giveaways')
         key, token = utils.generate_random_token()
 
         giveaway_data = {
@@ -149,6 +145,9 @@ class Giveaway:
             self.giveaway_data.get('key'), self.giveaway_data.get('token'))
         winner_ids = []
         entries_ids = self.giveaway_data.get('entries_ids').copy()
+
+        if not entries_ids:
+            return
 
         for _ in range(self.giveaway_data.get('quantity')):
             win = entries_ids.pop(winner_number % len(entries_ids))

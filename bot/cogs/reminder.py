@@ -22,7 +22,7 @@ class Reminder(commands.Cog):
         if time.time() > time_now:
             await ctx.send("You must specify a time that is later than the current time.")
             return
-        self.bot.lord_handler_timer.create_timer_handler(
+        self.bot.lord_handler_timer.create(
             time_now-time.time(),
             self.process_reminder(time.time(), ctx.author, ctx.channel, text),
             f"reminder:{ctx.guild.id}:{ctx.author.id}:{time_now :.0f}:{randquan(17)}"
