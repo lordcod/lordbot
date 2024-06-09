@@ -1,7 +1,6 @@
 import logging
 from typing import Dict
 from nextcord.ext import commands
-from regex import P
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import GiveawayData
@@ -20,7 +19,6 @@ _log = logging.getLogger(__name__)
 class ReadyEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
-        bot.set_event(self.on_disconnect)
         super().__init__()
 
     @commands.Cog.listener()
@@ -51,10 +49,11 @@ class ReadyEvent(commands.Cog):
 
         _log.info(f"The bot is registered as {self.bot.user}")
 
-    async def on_disconnect(self):
+    @commands.Cog.listener()
+    async def on_shard_disconnect(self, shard_id: int):
         await self.bot.session.close()
         await self.bot.engine._DataBase__connection.close()
-        _log.critical("Bot is disconnect")
+        _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
