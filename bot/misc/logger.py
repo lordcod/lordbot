@@ -69,7 +69,6 @@ class StandartFormatter(logging.Formatter):
     """override logging.Formatter to use an aware datetime object"""
 
     def converter(self, timestamp):
-        print(timestamp, time.time())
         dt = datetime.fromtimestamp(timestamp)
         tzinfo = timezone('Europe/Moscow')
         return tzinfo.localize(dt)
@@ -84,7 +83,6 @@ class StandartFormatter(logging.Formatter):
                 s = dt.isoformat(timespec='milliseconds')
             except TypeError:
                 s = dt.isoformat()
-        print(dt, s)
         return s
 
 
