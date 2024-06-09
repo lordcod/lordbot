@@ -40,6 +40,13 @@ COLORS = {
 tasks = []
 
 
+def tz_convert(*args):
+    tz = timezone('Europe/Moscow')
+    data = datetime.now(tz).timetuple()
+    print(args, tz, data)
+    return data
+
+
 def formatter_message(message, use_color=True):
     if use_color:
         message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
@@ -64,12 +71,11 @@ async def post_mes(webhook_url: str, text: str) -> None:
         await webhook.send('```ansi\n' + text + '```')
 
 
-tz = timezone('Europe/Moscow')
-logging.Formatter.convert = lambda *args: datetime.now(tz).timetuple()
+logging.Formatter.convert = tz_convert
 
 
 class DiscordColoredFormatter(logging.Formatter):
-    convert = lambda *args: datetime.now(tz).timetuple()
+    convert = tz_convert
 
     def __init__(self, msg, use_color=True):
         logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
@@ -84,7 +90,7 @@ class DiscordColoredFormatter(logging.Formatter):
 
 
 class ColoredFormatter(logging.Formatter):
-    convert = lambda *args: datetime.now(tz).timetuple()
+    convert = tz_convert
 
     def __init__(self, msg, use_color=True):
         logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
