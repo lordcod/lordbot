@@ -29,9 +29,9 @@ class Modal(nextcord.ui.Modal):
     async def callback(self, interaction: nextcord.Interaction):
         prefix = self.prefix.value
         gdb = GuildDateBases(interaction.guild_id)
-        gdb.set('prefix', prefix)
+        await gdb.set('prefix', prefix)
 
-        view = PrefixView(interaction.guild)
+        view = await PrefixView(interaction.guild)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 

@@ -9,7 +9,6 @@ import regex
 from nextcord.ext import commands
 
 from bot.misc.utils import LordTimeHandler,  translate_flags
-from bot.misc import giveaway as misc_giveaway
 from bot.languages import i18n
 from bot.databases import GuildDateBases
 from bot.databases import db

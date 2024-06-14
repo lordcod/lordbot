@@ -428,10 +428,14 @@ class ItemLordTimeHandler:
 
 
 class LordTimeHandler:
-    def __init__(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
-        if loop is None:
-            loop = asyncio.get_event_loop()
+    __instance = None
 
+    def __new__(cls, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+        return cls.__instance
+
+    def __init__(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
         self.loop = loop
         self.data: Dict[Union[str, int], ItemLordTimeHandler] = {}
 

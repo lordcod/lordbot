@@ -5,7 +5,7 @@ from bot.views.settings._view import DefaultSettingsView
 
 from bot.misc.utils import TimeCalculator, to_async
 from bot.misc.time_transformer import display_time
-from bot.misc.ratelimit import BucketType, reset_cooldown
+from bot.misc.ratelimit import BucketType
 from bot.databases import GuildDateBases, CommandDB
 
 cd_types = {
@@ -179,8 +179,6 @@ class CooldownsView(DefaultSettingsView):
         command_data.setdefault("distribution", {})
         command_data["distribution"].pop("cooldown", None)
         await cdb.update(self.command_name, command_data)
-
-        reset_cooldown(interaction.guild_id, self.command_name)
 
         view = await CooldownsView(
             interaction.guild,

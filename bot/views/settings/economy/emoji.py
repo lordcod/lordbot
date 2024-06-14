@@ -67,7 +67,7 @@ class EmojiView(DefaultSettingsView):
                     button: nextcord.ui.Button,
                     interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        gdb.set_on_json('economic_settings', 'emoji', DEFAULT_EMOJI)
+        await gdb.set_on_json('economic_settings', 'emoji', DEFAULT_EMOJI)
 
         view = await EmojiView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

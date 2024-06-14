@@ -33,7 +33,7 @@ class GuildsEvent(commands.Cog):
     async def on_guild_remove(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
         delay = 60 * 60 * 24 * 3
-        gdb.set('delete_task', int(time.time()+delay))
+        await gdb.set('delete_task', int(time.time()+delay))
         self.bot.lord_handler_timer.create(
             delay, gdb.delete(), f'guild-deleted:{guild.id}')
 

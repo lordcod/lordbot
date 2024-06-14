@@ -21,7 +21,7 @@ class DropDown(nextcord.ui.StringSelect):
                 emoji=data.get('flag', None),
                 default=locale == data.get('locale')
             )
-            for data in languages.current[:25]
+            for data in languages.current
         ]
 
         super().__init__(
@@ -60,7 +60,7 @@ class Languages(DefaultSettingsView):
 
         self.back.label = i18n.t(locale, 'settings.button.back')
 
-        lang = DropDown(guild.id)
+        lang = await DropDown(guild.id)
         self.add_item(lang)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)

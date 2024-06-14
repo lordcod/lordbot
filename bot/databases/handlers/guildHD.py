@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import functools
 import logging
 from typing import Any, Optional, Self, Union, TypeVar
 
@@ -15,6 +16,7 @@ T = TypeVar("T")
 
 
 def check_registration(func):
+    @functools.wraps(func)
     async def wrapped(self: GuildDateBases, *args, **kwargs):
         await self.register()
         return await func(self, *args, **kwargs)
