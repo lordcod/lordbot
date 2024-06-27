@@ -229,8 +229,8 @@ class Economy(commands.Cog):
                 name="",
                 value=f"Come to work through <t:{loctime+work_info['cooldown'] :.0f}:R>"
             )
-            account.set('work', loctime)
-            account.increment('balance', amount)
+            await account.set('work', loctime)
+            await account.increment('balance', amount)
         else:
             embed = nextcord.Embed(
                 title="It's too early to work",
@@ -416,7 +416,6 @@ class Economy(commands.Cog):
 
         if isinstance(member, nextcord.Role):
             member_ids = [m.id for m in member.members]
-            print(member_ids)
             if flags.get('bank'):
                 await EconomyMemberDB.increment_for_ids(ctx.guild.id, member_ids, 'bank', amount)
             else:

@@ -38,6 +38,7 @@ class PartialIdeasPayload(TypedDict):
 class IdeasPayload(PartialIdeasPayload, total=True):
     cooldown: Optional[int]
     channel_approved_id: Optional[int]
+    channel_denied_id: Optional[int]
     moderation_role_ids: Optional[List[int]]
     reaction_system: Optional[int]
     thread_delete: Optional[bool]

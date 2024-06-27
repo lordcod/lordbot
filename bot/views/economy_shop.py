@@ -51,6 +51,7 @@ class ShopAcceptView(nextcord.ui.View):
         shop_info = economy_settings.get(
             'shop', [])
         emdb = EconomyMemberDB(interaction.guild_id, interaction.user.id)
+        balance = await emdb.get('balance')
 
         if self.data.get('role_id') in interaction.user._roles:
             await interaction.response.send_message(
@@ -60,7 +61,7 @@ class ShopAcceptView(nextcord.ui.View):
             await interaction.response.send_message(
                 "The entire limit is exhausted!", ephemeral=True)
             return
-        if self.data.get('amount') > emdb.get('balance'):
+        if self.data.get('amount') > balance:
             await interaction.response.send_message(
                 f"Your balance must be more than {self.data.get('amount')}{economy_settings.get('emoji')}",
                 ephemeral=True)
@@ -80,7 +81,7 @@ class ShopAcceptView(nextcord.ui.View):
             if rd.get('role_id') == self.data.get('role_id'):
                 rd['using_limit'] = rd.get('using_limit', 0) + 1
         economy_settings['shop'] = shop_info
-        self.gdb.set('economic_settings', economy_settings)
+        await self.gdb.set('economic_settings', economy_settings)
         emdb.decline('balance', self.data.get('amount'))
 
         await interaction.response.send_message(f"You have completed the purchase of the role <@&{self.data.get('role_id')}>",
@@ -121,6 +122,7 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
         role_id = int(self.values[0])
         role_data: RoleShopPayload = jmespath.search(
             f'[?role_id==`{role_id}`]|[0]', self.data)
+        balance = await emdb.get('balance')
 
         if role_id in interaction.user._roles:
             await interaction.response.send_message(
@@ -130,7 +132,7 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
             await interaction.response.send_message(
                 "The entire limit is exhausted!", ephemeral=True)
             return
-        if role_data.get('amount') > emdb.get('balance'):
+        if role_data.get('amount') > balance:
             await interaction.response.send_message(
                 f"Your balance must be more than {role_data.get('amount') :,}{economy_settings.get('emoji')}",
                 ephemeral=True)

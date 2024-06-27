@@ -47,7 +47,7 @@ class ModalBuilder(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        reacts: dict = gdb.get('reactions')
+        reacts: dict = await gdb.get('reactions')
         emojis = list(filter(
             lambda item: item,
             [item.value for _, item in self.__dict__.items()

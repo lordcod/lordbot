@@ -3,7 +3,7 @@ from enum import IntEnum
 import nextcord
 import time
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import re
 import jmespath
@@ -41,19 +41,22 @@ class ReactionSystemType(IntEnum):
 
 
 class Timeout:
-    @staticmethod
-    def get(guild_id: int, member_id: int) -> Optional[float]:
-        timeout_data.setdefault(guild_id, {})
-        return timeout_data[guild_id].get(member_id)
+    def __init__(self, guild_id: int, member_id: int) -> None:
+        self.guild_id = guild_id
+        self.member_id = member_id
 
-    @staticmethod
-    def set(guild_id: int, member_id: int, delay: float) -> None:
-        timeout_data.setdefault(guild_id, {})
-        timeout_data[guild_id][member_id] = time.time() + delay
+    def get(self) -> Optional[float]:
+        timeout_data.setdefault(self.guild_id, {})
+        return timeout_data[self.guild_id].get(self.member_id)
 
-    @staticmethod
-    def check_usage(guild_id: int, member_id: int) -> bool:
-        return time.time() > Timeout.get(guild_id, member_id)
+    def set(self, delay: float) -> None:
+        timeout_data.setdefault(self.guild_id, {})
+        timeout_data[self.guild_id][self.member_id] = time.time() + delay
+
+    def check_usage(self) -> bool:
+        if not self.get():
+            return True
+        return time.time() > self.get()
 
 
 @to_async
@@ -125,8 +128,16 @@ class ConfirmModal(nextcord.ui.Modal):
 
         await interaction.message.edit(content=content, embed=embed, view=view)
 
+        await logstool.Logs(interaction.guild).approve_idea(interaction.user, idea_author, idea_content, reason, idea_image)
+
         if ideas_data.get('thread_delete') and (thread := interaction.message.thread):
             await thread.delete()
+
+        if denrd_msg_id := idea_data.get('denied_message_id'):
+            try:
+                await interaction._state.http.delete_message(ideas_data['channel_denied_id'], denrd_msg_id)
+            except (KeyError, nextcord.NotFound):
+                pass
 
         if channel_approved_id is None:
             return
@@ -138,8 +149,10 @@ class ConfirmModal(nextcord.ui.Modal):
             icon_url=idea_author.display_avatar
         )
 
-        await approved_channel.send(embed=embed)
-        await logstool.Logs(interaction.guild).approve_idea(interaction.user, idea_author, idea_content, reason, idea_image)
+        apprd_msg = await approved_channel.send(embed=embed)
+
+        idea_data['approved_message_id'] = apprd_msg.id
+        await mdb.set(interaction.message.id, idea_data)
 
 
 @to_async
@@ -167,6 +180,7 @@ class DenyModal(nextcord.ui.Modal):
         locale = await gdb.get('language')
         ideas_settings: IdeasPayload = await gdb.get('ideas')
         idea_type_reaction = ideas_settings.get('reaction_system', 0)
+        channel_denied_id = ideas_settings.get('channel_denied_id')
 
         mdb = MongoDB('ideas')
         idea_data = await mdb.get(interaction.message.id)
@@ -178,10 +192,6 @@ class DenyModal(nextcord.ui.Modal):
         embed = nextcord.Embed(
             title=i18n.t(locale, 'ideas.confirm-view.title'),
             color=nextcord.Color.red()
-        )
-        embed.set_author(
-            name=idea_author.display_name,
-            icon_url=idea_author.display_avatar
         )
         embed.add_field(name=i18n.t(
             locale, 'ideas.confirm-view.idea'), value=idea_content)
@@ -208,10 +218,30 @@ class DenyModal(nextcord.ui.Modal):
             view.demote.disabled = True
         view.deny.disabled = True
 
+        await interaction.message.edit(content=content, embed=embed, view=view)
+
         if ideas_settings.get('thread_delete') and (thread := interaction.message.thread):
             await thread.delete()
 
-        await interaction.message.edit(content=content, embed=embed, view=view)
+        if apprd_msg_id := idea_data.get('approved_message_id'):
+            try:
+                await interaction._state.http.delete_message(ideas_settings['channel_approved_id'], apprd_msg_id)
+            except (KeyError, nextcord.NotFound):
+                pass
+
+        if channel_denied_id is None:
+            return
+
+        channel_denied = interaction.guild.get_channel(channel_denied_id)
+
+        embed.set_author(
+            name=idea_author.display_name,
+            icon_url=idea_author.display_avatar
+        )
+
+        denrd_msg = await channel_denied.send(embed=embed)
+        idea_data['denied_message_id'] = denrd_msg.id
+        await mdb.set(interaction.message.id, idea_data)
 
 
 @to_async
@@ -291,7 +321,7 @@ class ReactionConfirmView(nextcord.ui.View):
         custom_id = interaction.data['custom_id']
         if custom_id.startswith("reactions-ideas-confirm:"):
             return True
-        return await ConfirmView.interaction_check(self, interaction)
+        return await ConfirmView.__default_class__.interaction_check(self, interaction)
 
     def change_votes(self) -> None:
         self.promote.label = str(len(self.promoted_data))
@@ -453,8 +483,8 @@ class IdeaModal(nextcord.ui.Modal):
         mdb = MongoDB('ideas')
         await mdb.set(mes.id, idea_data)
 
-        Timeout.set(interaction.guild_id,
-                    interaction.user.id, time.time()+cooldown)
+        Timeout(interaction.guild_id,
+                interaction.user.id).set(time.time()+cooldown)
         await logstool.Logs(interaction.guild).create_idea(interaction.user, idea, image)
 
 
@@ -499,7 +529,7 @@ class IdeaView(nextcord.ui.View):
         enabled: bool = ideas_data.get('enabled', False)
         ban_data = get_ban(ideas_data, interaction.user.id)
         mute_data = get_mute(ideas_data, interaction.user.id)
-        user_timeout = Timeout.get(interaction.guild_id, interaction.user.id)
+        user_timeout = Timeout(interaction.guild_id, interaction.user.id).get()
 
         if not enabled:
             await interaction.response.send_message(i18n.t(locale, 'ideas.globals.ideas-disabled'), ephemeral=True)

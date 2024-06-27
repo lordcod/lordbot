@@ -360,7 +360,7 @@ class LordTimerHandler:
     ):
         th = self.loop.call_later(delay,  self.loop.create_task, coro)
         if key is not None:
-            print(f"Create new timer handle {coro.__name__}(ID:{key})")
+            print(f"Create new timer handle {coro.__name__} (ID:{key})")
             self.data[key] = th
 
     def close_as_key(self, key: Union[str, int]):

@@ -4,7 +4,7 @@ from typing import TypeVar, overload
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
-from ..misc.adapter_dict import Json
+from ..misc.adapter_dict import adapt_dict, decode_dict
 
 T = TypeVar("T")
 engine: DataBase = None
@@ -58,7 +58,7 @@ class MongoDB:
         key = str(key)
         data = await engine.fetchvalue(
             """
-                    SELECT values ->> %s 
+                    SELECT values ->> %s
                     FROM mongo 
                     WHERE name = %s
                 """,
@@ -67,17 +67,19 @@ class MongoDB:
 
         if data is None:
             return default
-        return data
+
+        return decode_dict(data)
 
     @to_task
     @check_table
     @on_error()
     async def set(self, key, value):
         key = str(key)
+        value = adapt_dict(value)
         await engine.execute(
             """
                     UPDATE mongo
-                    SET values = jsonb_set(values ::jsonb, %s, %s) 
+                    SET values = jsonb_set(values::jsonb, %s, %s) 
                     WHERE name = %s
                 """,
             ('{'+key+'}', value, self.table_name, )
@@ -87,7 +89,6 @@ class MongoDB:
     @check_table
     @on_error()
     async def set_table(self, value):
-        key = str(key)
         await engine.execute(
             """
                     UPDATE mongo

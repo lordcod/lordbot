@@ -72,7 +72,6 @@ class Voice(commands.Cog):
         if finder := YANDEX_MUSIC_SEARCH.fullmatch(request):
             found = finder.group(2)
             track = await self.yandex_client.get_track(found, with_only_result=True)
-            print(repr(track))
         else:
             tracks = await self.yandex_client.search(request)
             view = await MusicView(ctx.guild.id, queue, MusicPlayer(

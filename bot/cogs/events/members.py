@@ -97,8 +97,8 @@ class MembersEvent(commands.Cog):
     @disable
     async def invites(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
-        invites = gdb.get('invites', [])
+        color = await gdb.get('color')
+        invites = await gdb.get('invites', [])
 
         if member is None:
             embed = nextcord.Embed(

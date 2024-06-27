@@ -27,7 +27,10 @@ class QuotedJson():
         qs = QuotedString(s)
         if self._conn is not None:
             qs.prepare(self._conn)
-        return qs.getquoted()
+        try:
+            return qs.getquoted()
+        except Exception as exc:
+            print(s, qs, exc, sep='\n\n')
 
     def __str__(self):
         return self.getquoted().decode('ascii', 'replace')

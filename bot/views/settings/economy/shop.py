@@ -213,7 +213,7 @@ class ShopView(DefaultSettingsView):
     async def delete(self,
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
-        economy_settings = self.gdb.get('economic_settings')
+        economy_settings = await self.gdb.get('economic_settings')
         shop_info: list = economy_settings.get('shop', [])
         role_data = get_role_data(self.selected_role.id, shop_info)
         shop_info.remove(role_data)

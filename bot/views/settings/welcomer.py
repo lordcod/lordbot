@@ -88,11 +88,11 @@ class MessageModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         message = self.message.value
-        greeting_message: dict = self.gdb.get('greeting_message')
+        greeting_message: dict = await self.gdb.get('greeting_message')
         greeting_message['message'] = message
-        self.gdb.set('greeting_message', greeting_message)
+        await self.gdb.set('greeting_message', greeting_message)
 
-        view = WelcomerView(interaction.guild)
+        view = await WelcomerView(interaction.guild)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -114,11 +114,11 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         channel = self.values[0]
 
         self.gdb = GuildDateBases(interaction.guild_id)
-        greeting_message: dict = self.gdb.get('greeting_message')
+        greeting_message: dict = await self.gdb.get('greeting_message')
         greeting_message['channel_id'] = channel.id
-        self.gdb.set('greeting_message', greeting_message)
+        await self.gdb.set('greeting_message', greeting_message)
 
-        view = WelcomerView(interaction.guild)
+        view = await WelcomerView(interaction.guild)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
@@ -183,7 +183,7 @@ class WelcomerView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.success)
     async def install(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        modal = MessageModal(interaction.guild)
+        modal = await MessageModal(interaction.guild)
 
         await interaction.response.send_modal(modal)
 
@@ -193,7 +193,7 @@ class WelcomerView(DefaultSettingsView):
 
         greeting_message: dict = await self.gdb.get('greeting_message')
 
-        content: str = await greeting_message.get('message')
+        content: str = greeting_message.get('message')
 
         guild_payload = utils.GuildPayload(interaction.guild).to_dict()
         member_payload = utils.MemberPayload(interaction.user).to_dict()
@@ -214,6 +214,6 @@ class WelcomerView(DefaultSettingsView):
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.gdb.set('greeting_message', {})
 
-        view = WelcomerView_(interaction.guild)
+        view = await WelcomerView(interaction.guild)
 
         await interaction.response.edit_message(embed=view.embed, view=view)

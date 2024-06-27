@@ -35,7 +35,7 @@ class ideas_mod(commands.Cog):
     @ideas.command()
     async def ban(self, ctx: commands.Context, member: nextcord.Member, *, reason: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
         ideas: IdeasPayload = await gdb.get('ideas')
         ban_users = ideas.get('ban_users', [])
 
