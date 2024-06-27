@@ -21,8 +21,6 @@ class GuildsEvent(commands.Cog):
         gdb = GuildDateBases(guild.id)
         await gdb.set('delete_task', None)
         self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
-        async for member in guild.fetch_members(limit=None):
-            await EconomyMemberDB(guild.id, member.id).get_data()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: nextcord.Guild):

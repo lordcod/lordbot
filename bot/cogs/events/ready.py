@@ -53,7 +53,7 @@ class ReadyEvent(commands.Cog):
 
     async def on_disconnect(self):
         await self.bot.session.close()
-        await self.bot.engine.get_connection().close()
+        self.bot.engine.get_connection().close()
         _log.critical("Bot is disconnect")
 
     async def on_shard_disconnect(self, shard_id: int):
