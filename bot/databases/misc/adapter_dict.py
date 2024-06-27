@@ -104,16 +104,10 @@ def adapt_dict(dict_var):
     data = NumberFormating.dumps(dict_var)
     data = Json.dumps(data)
     qj = QuotedJson(data)
-
-    print('adapt dict res', qj)
-
     return qj
 
 
 def decode_dict(dict_var):
     data = Json.loads(dict_var)
     data = NumberFormating.loads(data)
-
-    print('decode dict res', data)
-
     return data
