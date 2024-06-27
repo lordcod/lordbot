@@ -116,12 +116,17 @@ class LordBot(commands.AutoShardedBot):
         except Exception as exc:
             _log.error("Couldn't connect to the database", exc_info=exc)
             await self.close()
+            await self.session.close()
             return
+
         establish_connection(engine)
+
         for t in db._tables:
             t.set_engine(engine)
             await t.create()
-        self.__with_ready__.set_result(None)
+
+        if not self.__with_ready__.done():
+            self.__with_ready__.set_result(None)
 
         for event_data in self.__with_ready_events__:
             self.dispatch(event_data[0], *event_data[1], **event_data[2])

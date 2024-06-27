@@ -53,12 +53,10 @@ class ReadyEvent(commands.Cog):
 
     async def on_disconnect(self):
         await self.bot.session.close()
-        await self.bot.engine._DataBase__connection.close()
+        await self.bot.engine.get_connection().close()
         _log.critical("Bot is disconnect")
 
     async def on_shard_disconnect(self, shard_id: int):
-        await self.bot.session.close()
-        await self.bot.engine._DataBase__connection.close()
         _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
 
     async def process_temp_bans(self):
