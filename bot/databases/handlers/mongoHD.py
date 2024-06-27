@@ -29,7 +29,7 @@ class MongoDB:
     @on_error()
     async def create(self):
         await engine.execute(
-            "INSERT INTO mongo (name) VALUES ($1)",
+            "INSERT INTO mongo (name) VALUES (%s)",
             (self.table_name, )
         )
 
@@ -38,7 +38,7 @@ class MongoDB:
     async def _check_table(self):
         data = await engine.fetchone(
             """SELECT * FROM mongo 
-                   WHERE name = $1
+                   WHERE name = %s
                 """,
             (self.table_name, )
         )
@@ -58,9 +58,9 @@ class MongoDB:
         key = str(key)
         data = await engine.fetchvalue(
             """
-                    SELECT values ->> $1 
+                    SELECT values ->> %s 
                     FROM mongo 
-                    WHERE name = $2
+                    WHERE name = %s
                 """,
             (key, self.table_name)
         )
@@ -77,8 +77,8 @@ class MongoDB:
         await engine.execute(
             """
                     UPDATE mongo
-                    SET values = jsonb_set(values ::jsonb, $1, $2) 
-                    WHERE name = $3
+                    SET values = jsonb_set(values ::jsonb, %s, %s) 
+                    WHERE name = %s
                 """,
             ('{'+key+'}', value, self.table_name, )
         )
@@ -91,8 +91,8 @@ class MongoDB:
         await engine.execute(
             """
                     UPDATE mongo
-                    SET values = $1 
-                    WHERE name = $2
+                    SET values = %s 
+                    WHERE name = %s
                 """,
             (value, self.table_name, )
         )
@@ -104,7 +104,7 @@ class MongoDB:
             """
                     SELECT values
                     FROM mongo 
-                    WHERE name = $1
+                    WHERE name = %s
                 """,
             (self.table_name)
         )

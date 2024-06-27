@@ -18,11 +18,11 @@ class CommandDB:
 
     async def get(self, command: str, default: T = None) -> dict | T:
         data = await engine.fetchvalue(
-            "SELECT command_permissions ->> $1 FROM guilds WHERE id = $2",
+            "SELECT command_permissions ->> %s FROM guilds WHERE id = %s",
             (command, self.guild_id,)
         )
 
-        if not data:
+        if data is None:
             return default
         return data
 
@@ -30,8 +30,8 @@ class CommandDB:
         await engine.execute(
             """
                 UPDATE guilds 
-                SET command_permissions = jsonb_set(command_permissions::jsonb, $1, $2) 
-                WHERE id = $3
+                SET command_permissions = jsonb_set(command_permissions::jsonb, %s, %s) 
+                WHERE id = %s
             """,
             ('{'+key+'}', value, self.guild_id, )
         )

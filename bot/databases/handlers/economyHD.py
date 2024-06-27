@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
@@ -14,8 +13,7 @@ class EconomyMemberDB:
         self.member_id = member_id
 
     async def get_data(self) -> dict:
-        res = await self._get()
-        data = dict(res)
+        data = await self._get()
         return data
 
     @on_error()
@@ -23,7 +21,7 @@ class EconomyMemberDB:
         leaderboard = await engine.fetchall(
             """SELECT member_id, balance, bank, balance+bank as total
                 FROM economic
-                WHERE guild_id = $1
+                WHERE guild_id = %s
                 ORDER BY total DESC""",
             (self.guild_id,)
         )
@@ -32,48 +30,47 @@ class EconomyMemberDB:
 
     @on_error()
     async def _get(self):
-        data = await engine.fetchone(
-            'SELECT * FROM economic WHERE guild_id = $1 AND member_id = $2',
+        data = await engine.fetchone_dict(
+            'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
             (self.guild_id, self.member_id))
 
-        if not data:
+        if data is None:
             await self.insert()
             data = await self._get()
 
         return data
 
-    @to_task
     @on_error()
     async def insert(self):
         await engine.execute(
-            'INSERT INTO economic (guild_id, member_id) VALUES ($1, $2)', (self.guild_id, self.member_id))
+            'INSERT INTO economic (guild_id, member_id) VALUES (%s, %s)', (self.guild_id, self.member_id))
 
     @to_task
     @on_error()
     async def update(self, arg, value):
-        await engine.execute(f'UPDATE economic SET {arg} = $1 WHERE guild_id = $2 AND member_id = $3', (
+        await engine.execute(f'UPDATE economic SET {arg} = %s WHERE guild_id = %s AND member_id = %s', (
             value, self.guild_id, self.member_id))
 
     @to_task
     @on_error()
     async def update_list(self, args: dict):
         keys = ', '.join(
-            [f"{a} = ${n}" for n, a in enumerate(args.keys(), start=1)])
+            [f"{a} = %s" for a in args.keys()])
         values = [*args.values(), self.guild_id, self.member_id]
         await engine.execute(
-            f'UPDATE economic SET {keys} WHERE guild_id = ${len(keys)+1} AND member_id = ${len(keys)+2}', values)
+            f'UPDATE economic SET {keys} WHERE guild_id = %s AND member_id = %s', values)
 
     @to_task
     @on_error()
     async def delete(self):
         await engine.execute(
-            'DELETE FROM economic WHERE guild_id = $1 AND member_id = $2', (self.guild_id, self.member_id))
+            'DELETE FROM economic WHERE guild_id = %s AND member_id = %s', (self.guild_id, self.member_id))
 
     @to_task
     @on_error()
     async def delete_guild(self):
         await engine.execute(
-            'DELETE FROM economic WHERE guild_id = $1', (self.guild_id,))
+            'DELETE FROM economic WHERE guild_id = %s', (self.guild_id,))
 
     async def get(self, __name, __default=None):
         data = await self.get_data()
@@ -98,17 +95,19 @@ class EconomyMemberDB:
         await self.update(key, data[key])
 
     @to_task
+    @on_error()
     @staticmethod
     async def increment_for_ids(guild_id, member_ids, key, value):
-        await engine.execute(f"""UPDATE economic SET {key} = {key} + $1 
-                                 WHERE guild_id = $2 
-                                 AND (SELECT ARRAY[member_id] && $3::bigint[])""", (
+        await engine.execute(f"""UPDATE economic SET {key} = {key} + %s
+                                 WHERE guild_id = %s
+                                 AND (SELECT ARRAY[member_id] && %s)""", (
             value, guild_id, member_ids))
 
     @to_task
+    @on_error()
     @staticmethod
     async def decline_for_ids(guild_id, member_ids, key, value):
-        await engine.execute(f"""UPDATE economic SET {key} = {key} - $1 
-                                 WHERE guild_id = $2 
-                                 AND (SELECT ARRAY[member_id] && $3::bigint[])""", (
+        await engine.execute(f"""UPDATE economic SET {key} = {key} - %s
+                                 WHERE guild_id = %s
+                                 AND (SELECT ARRAY[member_id] && %s::bigint[])""", (
             value, guild_id, member_ids))

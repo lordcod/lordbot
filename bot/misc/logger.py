@@ -84,23 +84,6 @@ async def post_mes(webhook_url: str, text: str) -> None:
 class StandartFormatter(logging.Formatter):
     """override logging.Formatter to use an aware datetime object"""
 
-    def converter(self, timestamp):
-        dt = datetime.fromtimestamp(timestamp)
-        tzinfo = timezone('Europe/Moscow')
-        return tzinfo.localize(dt)
-
-    def formatTime(self, record, datefmt=None):
-        dt = self.converter(record.created)
-        datefmt = self.datefmt
-        if datefmt:
-            s = dt.strftime(datefmt)
-        else:
-            try:
-                s = dt.isoformat(timespec='milliseconds')
-            except TypeError:
-                s = dt.isoformat()
-        return s
-
 
 class DiscordColoredFormatter(StandartFormatter):
     def __init__(self, msg, use_color=True):

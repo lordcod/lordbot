@@ -56,21 +56,21 @@ class GuildDateBases:
     @on_error()
     async def _get(self, guild_id):
         guild = await engine.fetchone(
-            'SELECT * FROM guilds WHERE id = $1', (guild_id,))
+            'SELECT * FROM guilds WHERE id = %s', (guild_id,))
 
         return guild
 
     @on_error()
     async def _get_service(self, guild_id, arg):
         value = await engine.fetchvalue(
-            'SELECT ' + arg + ' FROM guilds WHERE id = $1', (guild_id,))
+            'SELECT ' + arg + ' FROM guilds WHERE id = %s', (guild_id,))
 
         return value
 
     @to_task
     @on_error()
     async def _insert(self, guild_id):
-        await engine.execute('INSERT INTO guilds (id) VALUES ($1)', (guild_id,))
+        await engine.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
 
     @check_registration
     @on_error()
@@ -86,7 +86,7 @@ class GuildDateBases:
     @on_error()
     async def set(self, service, value):
         await engine.execute(
-            'UPDATE guilds SET ' + service + ' = $1 WHERE id = $2', (value,
+            'UPDATE guilds SET ' + service + ' = %s WHERE id = %s', (value,
                                                                      self.guild_id))
 
     @check_registration
@@ -116,7 +116,7 @@ class GuildDateBases:
     async def delete(self):
         reserved.remove(self.guild_id)
 
-        await engine.execute('DELETE FROM guilds WHERE id = $1',
+        await engine.execute('DELETE FROM guilds WHERE id = %s',
                              (self.guild_id,))
 
     @on_error()

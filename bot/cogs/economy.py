@@ -416,6 +416,7 @@ class Economy(commands.Cog):
 
         if isinstance(member, nextcord.Role):
             member_ids = [m.id for m in member.members]
+            print(member_ids)
             if flags.get('bank'):
                 await EconomyMemberDB.increment_for_ids(ctx.guild.id, member_ids, 'bank', amount)
             else:
