@@ -53,6 +53,7 @@ welcome_message_items = {
 
 class TempletePayload:
     _prefix = None
+    _as_prefix: bool = False
 
     def to_dict(self):
         if self._prefix is not None:
@@ -61,6 +62,9 @@ class TempletePayload:
             prefix = self.__class__.__name__
 
         base = {}
+
+        if self._as_prefix:
+            base[prefix] = str(self)
 
         for name, arg in inspect.getmembers(self):
             if name.startswith("_") or name == "to_dict":
@@ -151,7 +155,7 @@ class BlackjackGame:
 
     def __init__(self, member: nextcord.Member, amount: int) -> None:
         if _blackjack_games.get(f'{member.guild.id}:{member.id}'):
-            raise TypeError
+            raise TypeError('Game is started')
 
         _blackjack_games[f'{member.guild.id}:{member.id}'] = self
         self.member = member
@@ -845,11 +849,14 @@ def add_gradient(
 
 
 async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
-    background_image = await load_image_async(background_link, session=member._state.http.__session)
+    bot = member._state._get_client()
+    session = bot.session
+
+    background_image = await load_image_async(background_link, session=session)
     background = Editor(background_image).resize((800, 450))
 
     profile_image = await load_image_async(
-        member.display_avatar.with_size(128).url)
+        member.display_avatar.with_size(128).url, session=session)
     profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     nunito = Font("assets/Nunito-ExtraBold.ttf", 40)

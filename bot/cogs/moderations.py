@@ -13,6 +13,8 @@ from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
 import time
 from typing import Optional
+
+
 timenow = None
 timestamp = None
 
@@ -23,6 +25,7 @@ class Moderations(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
+    @commands.bot_has_permissions(send_messages=True)
     async def say(self, ctx: commands.Context, *, message: str):
         files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
                                        for attach in ctx.message.attachments])
@@ -106,7 +109,7 @@ class Moderations(commands.Cog):
         message = ""
 
         for quantity, (member_id, ban_time) in enumerate(datas):
-            message += f"{quantity}. <@{member_id}>(<t:{ban_time}:R>)\n"
+            message += f"{quantity}. <@{member_id}> (<t:{ban_time}:R>)\n"
 
         message = message or "There are no registered temporary roles on this server"
         embed = nextcord.Embed(
@@ -208,13 +211,13 @@ class Moderations(commands.Cog):
         name='clone',
         default_member_permissions=268435456
     )
-    async def clone(
+    async def cmd_clone(
         self,
         interaction: nextcord.Interaction
     ) -> None:
         pass
 
-    @clone.subcommand(
+    @cmd_clone.subcommand(
         name='role',
         description='If you want to copy the role but still keep the rights, then this is the command for you'
     )

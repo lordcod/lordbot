@@ -72,12 +72,7 @@ class Basic(commands.Cog):
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
-        invite_link = oauth_url(
-            client_id=self.bot.user.id,
-            permissions=nextcord.Permissions(administrator=True),
-            scopes=("bot", "applications.commands"),
-        )
-
+        invite_link = oauth_url(client_id=self.bot.user.id)
         await ctx.send(f"[**Click to add to your server**]({invite_link})")
 
     @commands.command()
