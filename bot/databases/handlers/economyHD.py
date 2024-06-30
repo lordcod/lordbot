@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from bot.databases.misc.adapter_dict import adapt_array
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
@@ -98,16 +99,18 @@ class EconomyMemberDB:
     @on_error()
     @staticmethod
     async def increment_for_ids(guild_id, member_ids, key, value):
+        dmis = adapt_array(member_ids)
         await engine.execute(f"""UPDATE economic SET {key} = {key} + %s
                                  WHERE guild_id = %s
-                                 AND (SELECT ARRAY[member_id] && %s)""", (
-            value, guild_id, member_ids))
+                                 AND (SELECT ARRAY[member_id] && %s::bigint[])""", (
+            value, guild_id, dmis))
 
     @to_task
     @on_error()
     @staticmethod
     async def decline_for_ids(guild_id, member_ids, key, value):
+        dmis = adapt_array(member_ids)
         await engine.execute(f"""UPDATE economic SET {key} = {key} - %s
                                  WHERE guild_id = %s
                                  AND (SELECT ARRAY[member_id] && %s::bigint[])""", (
-            value, guild_id, member_ids))
+            value, guild_id, dmis))

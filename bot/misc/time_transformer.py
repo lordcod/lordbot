@@ -42,6 +42,7 @@ class DatePluralRussia:
         forms = ['секунда', 'секунды', 'секунд']
         return DatePluralRussia.plural(timestamp, forms)
 
+    @staticmethod
     def convertor(timestamp: int, great: str):
         method = getattr(DatePluralRussia, great)
         return method(timestamp)

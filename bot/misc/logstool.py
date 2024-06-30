@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import datetime
 from enum import IntEnum
 import functools
-from typing import Any, Awaitable, Callable, Coroutine, Dict, List, Optional, Self, Tuple
+from typing import Dict, List, Optional, Self, Tuple
 import nextcord
 
 from bot.databases import GuildDateBases

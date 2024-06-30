@@ -1,4 +1,5 @@
 from __future__ import annotations
+from bot.misc.ipc_handlers import get_handlers
 from bot.resources.info import DEFAULT_PREFIX
 import asyncio
 import logging
@@ -6,7 +7,8 @@ import sys
 import aiohttp
 import nextcord
 import regex
-from nextcord.ext import commands
+
+from nextcord.ext import commands, ipc
 
 from bot.misc.utils import LordTimeHandler,  translate_flags
 from bot.languages import i18n
@@ -101,6 +103,8 @@ class LordBot(commands.AutoShardedBot):
         i18n.config['locale'] = 'en'
 
         self.session = aiohttp.ClientSession()
+        self.ipc = ipc.Server(self, host="localhost",
+                              secret_key="my_secret_key")
 
         self.__with_ready__ = loop.create_future()
         self.__with_ready_events__ = []
@@ -124,6 +128,10 @@ class LordBot(commands.AutoShardedBot):
         for t in db._tables:
             t.set_engine(engine)
             await t.create()
+
+        for hand in get_handlers(self):
+            self.ipc.route()(hand)
+        print(self.ipc.endpoints)
 
         if not self.__with_ready__.done():
             self.__with_ready__.set_result(None)

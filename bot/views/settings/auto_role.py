@@ -49,7 +49,6 @@ class RolesDropDown(nextcord.ui.RoleSelect):
                 continue
             break
         else:
-            await interaction.response.defer()
             await self.gdb.set('auto_roles', self.values.ids)
 
             view = await AutoRoleView(interaction.guild)
