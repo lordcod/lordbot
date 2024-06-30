@@ -1,5 +1,6 @@
 import logging
 import time
+from token import RPAR
 import nextcord
 from nextcord.ext import commands
 
@@ -20,8 +21,6 @@ class GuildsEvent(commands.Cog):
         gdb = GuildDateBases(guild.id)
         await gdb.set('delete_task', None)
         self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
-        async for member in guild.fetch_members(limit=None):
-            await EconomyMemberDB(guild.id, member.id).get_data()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: nextcord.Guild):
@@ -33,7 +32,7 @@ class GuildsEvent(commands.Cog):
     async def on_guild_remove(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
         delay = 60 * 60 * 24 * 3
-        gdb.set('delete_task', int(time.time()+delay))
+        await gdb.set('delete_task', int(time.time()+delay))
         self.bot.lord_handler_timer.create(
             delay, gdb.delete(), f'guild-deleted:{guild.id}')
 

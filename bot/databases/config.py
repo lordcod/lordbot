@@ -4,12 +4,12 @@ user = 'j5191558_cord'
 db_name = 'j5191558_main'
 password = 'fd5-DVv-pf5-6bx'
 
-user = 'j5191558_test'
-db_name = 'j5191558_test'
+# user = 'j5191558_test'
+# db_name = 'j5191558_test'
 
-user = 'j5191558_temp_test'
-db_name = 'j5191558_temp_test'
-password = 'g!=)<G8y]2>5'
+# user = 'j5191558_temp_test'
+# db_name = 'j5191558_temp_test'
+# password = 'g!=)<G8y]2>5'
 
 # user = 'j5191558_temp_test_2'
 # db_name = 'j5191558_temp_test_2'

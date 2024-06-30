@@ -156,7 +156,7 @@ AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare',
                            'smug', 'sneeze', GreedyUser['sorry'], 'stare',
                            'surprised', 'sweat', 'thumbsup', GreedyUser['tickle'],
                            'tired', GreedyUser['wave'], GreedyUser['wink'],
-                           'yawn', 'yay', 'yes', 'smile', 'stop', 'woah']
+                           'yawn', 'yay', 'yes', 'smile', 'woah']
 
 
 class ReactionsCommand(commands.Cog):

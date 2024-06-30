@@ -53,6 +53,7 @@ welcome_message_items = {
 
 class TempletePayload:
     _prefix = None
+    _as_prefix: bool = False
 
     def to_dict(self):
         if self._prefix is not None:
@@ -61,6 +62,9 @@ class TempletePayload:
             prefix = self.__class__.__name__
 
         base = {}
+
+        if self._as_prefix:
+            base[prefix] = str(self)
 
         for name, arg in inspect.getmembers(self):
             if name.startswith("_") or name == "to_dict":
@@ -151,7 +155,7 @@ class BlackjackGame:
 
     def __init__(self, member: nextcord.Member, amount: int) -> None:
         if _blackjack_games.get(f'{member.guild.id}:{member.id}'):
-            raise TypeError
+            raise TypeError('Game is started')
 
         _blackjack_games[f'{member.guild.id}:{member.id}'] = self
         self.member = member
@@ -360,7 +364,7 @@ class LordTimerHandler:
     ):
         th = self.loop.call_later(delay,  self.loop.create_task, coro)
         if key is not None:
-            print(f"Create new timer handle {coro.__name__}(ID:{key})")
+            print(f"Create new timer handle {coro.__name__} (ID:{key})")
             self.data[key] = th
 
     def close_as_key(self, key: Union[str, int]):
@@ -428,10 +432,14 @@ class ItemLordTimeHandler:
 
 
 class LordTimeHandler:
-    def __init__(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
-        if loop is None:
-            loop = asyncio.get_event_loop()
+    __instance = None
 
+    def __new__(cls, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+        return cls.__instance
+
+    def __init__(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
         self.loop = loop
         self.data: Dict[Union[str, int], ItemLordTimeHandler] = {}
 
@@ -451,20 +459,29 @@ class LordTimeHandler:
     def complete(self, ilth: ItemLordTimeHandler) -> None:
         _log.trace('Complete temp task %s (%s)', ilth.coro.__name__, ilth.key)
         self.loop.create_task(ilth.coro, name=ilth.key)
-        self.data.pop(ilth.key)
+        self.data.pop(ilth.key, None)
 
     def close(self, key: Union[str, int]) -> ItemLordTimeHandler:
-        ilth = self.data.pop(key)
+        ilth = self.data.pop(key, None)
+
+        if ilth is None:
+            return
+
         ilth.th.cancel()
         return ilth
 
     def call(self, key: Union[str, int]) -> None:
-        ilth = self.data[key]
+        ilth = self.get(key)
+
+        if ilth is None:
+            return
+
         ilth.th._run()
         self.close(key)
 
     def increment(self, delay: Union[float, int], key: Union[str, int]) -> None:
         ilth = self.close(key)
+
         ilth.delay = delay
         th = self.loop.call_later(delay, self.complete, ilth)
         ilth.th = th
@@ -832,11 +849,14 @@ def add_gradient(
 
 
 async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
-    background_image = await load_image_async(background_link, session=member._state.http.__session)
+    bot = member._state._get_client()
+    session = bot.session
+
+    background_image = await load_image_async(background_link, session=session)
     background = Editor(background_image).resize((800, 450))
 
     profile_image = await load_image_async(
-        member.display_avatar.with_size(128).url)
+        member.display_avatar.with_size(128).url, session=session)
     profile = Editor(profile_image).resize((150, 150)).circle_image()
 
     nunito = Font("assets/Nunito-ExtraBold.ttf", 40)

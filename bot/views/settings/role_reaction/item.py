@@ -90,7 +90,7 @@ class RoleReactionItemView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload, selected_role: Optional[nextcord.Role] = None):
         gdb = GuildDateBases(guild.id)
-        color = gdb.get('color')
+        color = await gdb.get('color')
 
         self.selected_role = selected_role
         self.role_reaction = role_reaction
@@ -152,9 +152,7 @@ class RoleReactionItemView(DefaultSettingsView):
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction
                      ):
-        message = await interaction.response.send_message(f"Send a reaction for role {self.selected_role.mention} by message", view=view, ephemeral=True)
-
-        value = await fetch_reaction(interaction, message)
+        value = await fetch_reaction(interaction, content=f"Send a reaction for role {self.selected_role.mention} by message")
 
         for _emoji, _role_id in list(self.role_reaction['reactions'].items()):
             if _role_id == self.selected_role.id:

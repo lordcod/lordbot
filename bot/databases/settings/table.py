@@ -33,7 +33,7 @@ class TableAPI:
                         WHERE c.table_name = k.table_name and k.column_name = c.column_name) 
                         THEN true ELSE false END as primary_key
                     FROM INFORMATION_SCHEMA.COLUMNS c 
-                    WHERE c.table_name=$1;
+                    WHERE c.table_name=%s;
                 """, (self.table_name,))
         for res in results:
             colums.append(Colum(

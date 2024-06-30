@@ -9,6 +9,7 @@ from bot.views.giveaway import GiveawaySettingsView
 from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
 from bot.resources import info
+from bot.views.tic_tac_toe import TicTacToe
 from bot.views.translate import TranslateView
 from bot.languages import i18n
 from bot.languages import data as lang_data
@@ -18,7 +19,7 @@ import timeit
 import googletrans
 import asyncio
 import random
-from typing import Callable
+from typing import Callable, Optional
 
 translator = googletrans.Translator()
 
@@ -40,13 +41,15 @@ class Basic(commands.Cog):
         command_latency_ms = round(
             (discord_latency_ms*2)+(databases_latency_ms*10), 2)
 
+        shard_id = (ctx.guild.id >> 22) % self.bot.shard_count
+
         embed = nextcord.Embed(
             title="Pong!🏓🎉",
             description=(
                 f"Discord latency: {discord_latency_ms}ms\n"
                 f"Databases latency: {databases_latency_ms}ms\n"
                 f"Command processing latency: {command_latency_ms}ms\n"
-                f"Shard id: 1"
+                f"Shard id: {shard_id}"
             ),
             color=color
         )
@@ -69,12 +72,7 @@ class Basic(commands.Cog):
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
-        invite_link = oauth_url(
-            client_id=self.bot.user.id,
-            permissions=nextcord.Permissions(administrator=True),
-            scopes=("bot", "applications.commands"),
-        )
-
+        invite_link = oauth_url(client_id=self.bot.user.id)
         await ctx.send(f"[**Click to add to your server**]({invite_link})")
 
     @commands.command()
@@ -187,6 +185,10 @@ class Basic(commands.Cog):
         await inters.response.send_message(content=result.text,
                                            view=view,
                                            ephemeral=True)
+
+    @commands.command()
+    async def tic(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
+        await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe(ctx.author, member))
 
 
 def setup(bot):

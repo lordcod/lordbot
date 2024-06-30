@@ -1,7 +1,6 @@
 import logging
 from typing import Dict
 from nextcord.ext import commands
-from regex import P
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import GiveawayData
@@ -20,6 +19,7 @@ _log = logging.getLogger(__name__)
 class ReadyEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+        bot.set_event(self.on_shard_disconnect)
         bot.set_event(self.on_disconnect)
         super().__init__()
 
@@ -53,8 +53,11 @@ class ReadyEvent(commands.Cog):
 
     async def on_disconnect(self):
         await self.bot.session.close()
-        await self.bot.engine.__connection.close()
+        self.bot.engine.get_connection().close()
         _log.critical("Bot is disconnect")
+
+    async def on_shard_disconnect(self, shard_id: int):
+        _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
@@ -98,13 +101,13 @@ class ReadyEvent(commands.Cog):
                 )
 
     async def process_guild_delete_tasks(self):
-        deleted_tasks = GuildDateBases.get_deleted()
+        deleted_tasks = await GuildDateBases.get_deleted()
         for id, delay in deleted_tasks:
-            if self.bot.get_guild(id):
+            if self.bot.get_guild(id) or not delay:
                 continue
             gdb = GuildDateBases(id)
             self.bot.lord_handler_timer.create(
-                time.time()-delay, gdb.delete(), f'guild-deleted:{id}')
+                delay-time.time(), gdb.delete(), f'guild-deleted:{id}')
 
 
 def setup(bot):

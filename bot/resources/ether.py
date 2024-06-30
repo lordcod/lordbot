@@ -55,12 +55,15 @@ class Emoji(StrEnum):
     redo = '<:redo:1191377267574710372>'
 
     tickmark = '<a:tickmark:1165684814557495326>'
-    cross = '<a:cross:1165684812250611732>'
-
     success = '<a:success:1165684794361917611>'
-    warn = '<a:warn:1165684798686244874>'
+    check = '<a:check:1248999718823137422>'
+    loading = '<a:loading:1249000397142626396>'
+    cross = '<a:crossed:1248999695867707402>'
+    warn = '<a:warning:1248999707963822150>'
 
     empty_card = '<:empty_card:1239171805885894717>'
+    tic_tac_x = '<:tic_tac_x:1249468200626819133>'
+    tic_tac_o = '<:tic_tac_o:1249468198869405726>'
 
 
 channel_types_emoji = {

@@ -21,7 +21,7 @@ class ModuleTicket:
         self.category = category
         self.ticket_data = ticket_data
 
-        self.loop = asyncio.get_event_loop()
+        self.loop = guild._state.loop
 
     async def create(self, member: nextcord.Member):
         self.ticket_channel = await self.guild.create_text_channel(

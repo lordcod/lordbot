@@ -27,7 +27,7 @@ class RoleDateBases:
     async def get_as_guild(self):
         data = await engine.fetchall(
             ('SELECT member_id, role_id, time '
-             'FROM roles WHERE guild_id = $1'),
+             'FROM roles WHERE guild_id = %s'),
             [self.guild_id])
 
         return data
@@ -36,7 +36,7 @@ class RoleDateBases:
     async def get_as_member(self):
         data = await engine.fetchall(
             ('SELECT member_id, role_id, time FROM roles '
-             'WHERE guild_id = $1 AND member_id = $2'),
+             'WHERE guild_id = %s AND member_id = %s'),
             (self.guild_id, self.member_id)
         )
 
@@ -46,7 +46,7 @@ class RoleDateBases:
     async def get_as_role(self, role_id: int):
         data = await engine.fetchone(
             ('SELECT time FROM roles '
-             'WHERE guild_id = $1 AND member_id = $2 AND role_id = $3'),
+             'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
             (self.guild_id, self.member_id, role_id)
         )
 
@@ -58,7 +58,7 @@ class RoleDateBases:
         await engine.execute(
             ('INSERT INTO roles '
              '(guild_id, member_id, role_id, time) '
-             'VALUES ($1, $2, $3, $4)'),
+             'VALUES (%s, %s, %s, %s)'),
             (self.guild_id, self.member_id, role_id, time)
         )
 
@@ -67,8 +67,8 @@ class RoleDateBases:
     async def update(self, role_id: int, time: int):
         await engine.execute(
             ('UPDATE roles '
-             'SET time = $1 '
-             'WHERE guild_id = $2 AND member_id = $3 AND role_id = $4'),
+             'SET time = %s '
+             'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
             (time, self.guild_id, self.member_id, role_id)
         )
 
@@ -77,7 +77,7 @@ class RoleDateBases:
     async def delete(self, role_id: int):
         await engine.execute(
             ('DELETE FROM roles '
-             'WHERE guild_id = $1 AND member_id = $2 AND role_id = $3'),
+             'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
             (self.guild_id, self.member_id, role_id)
         )
 

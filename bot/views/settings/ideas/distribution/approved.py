@@ -35,7 +35,7 @@ class ApprovedView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
-        self.idea_data: IdeasPayload = self.gdb.get('ideas')
+        self.idea_data: IdeasPayload = await self.gdb.get('ideas')
         channel_approved_id = self.idea_data.get('channel_approved_id')
 
         super().__init__()

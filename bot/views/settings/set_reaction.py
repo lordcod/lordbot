@@ -4,6 +4,7 @@ from typing import Optional
 import nextcord
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import is_custom_emoji, is_emoji
+from nextcord.utils import MISSING
 
 
 class RoleReactionItemModal(nextcord.ui.Modal):
@@ -40,13 +41,16 @@ class ReactionUsingModal(nextcord.ui.View):
 
 async def fetch_reaction(
     interaction: nextcord.Interaction[LordBot],
-    message: Optional[nextcord.Message]
+    message: Optional[nextcord.Message] = None,
+    content: Optional[str] = MISSING
 ) -> str:
     future = interaction._state.loop.create_future()
     view = ReactionUsingModal(future)
 
     if message is None:
-        message = await interaction.response.send_message("Send a reaction", view=view, ephemeral=True)
+        if content is MISSING:
+            content = "Send a reaction"
+        message = await interaction.response.send_message(content, view=view, ephemeral=True)
 
     def check(message: nextcord.Message):
         return message.author == interaction.user and message.channel == interaction.channel and is_emoji(message.content)

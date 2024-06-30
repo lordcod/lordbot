@@ -4,7 +4,7 @@ from typing import TypeVar, overload
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
-from ..misc.adapter_dict import Json
+from ..misc.adapter_dict import adapt_dict, decode_dict
 
 T = TypeVar("T")
 engine: DataBase = None
@@ -29,7 +29,7 @@ class MongoDB:
     @on_error()
     async def create(self):
         await engine.execute(
-            "INSERT INTO mongo (name) VALUES ($1)",
+            "INSERT INTO mongo (name) VALUES (%s)",
             (self.table_name, )
         )
 
@@ -38,7 +38,7 @@ class MongoDB:
     async def _check_table(self):
         data = await engine.fetchone(
             """SELECT * FROM mongo 
-                   WHERE name = $1
+                   WHERE name = %s
                 """,
             (self.table_name, )
         )
@@ -58,27 +58,29 @@ class MongoDB:
         key = str(key)
         data = await engine.fetchvalue(
             """
-                    SELECT values ->> $1 
+                    SELECT values ->> %s
                     FROM mongo 
-                    WHERE name = $2
+                    WHERE name = %s
                 """,
             (key, self.table_name)
         )
 
         if data is None:
             return default
-        return data
+
+        return decode_dict(data)
 
     @to_task
     @check_table
     @on_error()
     async def set(self, key, value):
         key = str(key)
+        value = adapt_dict(value)
         await engine.execute(
             """
                     UPDATE mongo
-                    SET values = jsonb_set(values ::jsonb, $1, $2) 
-                    WHERE name = $3
+                    SET values = jsonb_set(values::jsonb, %s, %s) 
+                    WHERE name = %s
                 """,
             ('{'+key+'}', value, self.table_name, )
         )
@@ -87,12 +89,11 @@ class MongoDB:
     @check_table
     @on_error()
     async def set_table(self, value):
-        key = str(key)
         await engine.execute(
             """
                     UPDATE mongo
-                    SET values = $1 
-                    WHERE name = $2
+                    SET values = %s 
+                    WHERE name = %s
                 """,
             (value, self.table_name, )
         )
@@ -104,7 +105,7 @@ class MongoDB:
             """
                     SELECT values
                     FROM mongo 
-                    WHERE name = $1
+                    WHERE name = %s
                 """,
             (self.table_name)
         )

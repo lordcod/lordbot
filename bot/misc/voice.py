@@ -3,25 +3,25 @@ import nextcord
 from yandex_music_api.track import Track
 
 import random
-from typing import List, Union, Optional, Dict
+from typing import Any, List, Union, Optional, Dict
 
 ffmpeg_path = "ffmpeg"
 initally_num = 10
 
 
-def addtional_convert(timestamp: int):
-    if 10 > timestamp:
-        return f"0{timestamp}"
-    return str(timestamp)
-
-
-def convertor_time(timestamp: Union[int, float]):
+def convertor_time(timestamp: Any):
     timestamp = int(timestamp)
 
-    seconds = addtional_convert(timestamp % 60)
-    minutes = addtional_convert(timestamp // 60)
+    seconds = timestamp % 60
+    minutes = timestamp // 60
 
-    return f"{minutes}:{seconds}"
+    if minutes < 60:
+        return f"{minutes:0>2}:{seconds:0>2}"
+    else:
+        seconds = timestamp % 60
+        minutes = timestamp / 60 % 60
+        hours = timestamp // (60 * 60)
+        return f"{hours:0>2.0f}:{minutes:0>2.0f}:{seconds:0>2.0f}"
 
 
 class Queue:

@@ -229,8 +229,8 @@ class Economy(commands.Cog):
                 name="",
                 value=f"Come to work through <t:{loctime+work_info['cooldown'] :.0f}:R>"
             )
-            account.set('work', loctime)
-            account.increment('balance', amount)
+            await account.set('work', loctime)
+            await account.increment('balance', amount)
         else:
             embed = nextcord.Embed(
                 title="It's too early to work",

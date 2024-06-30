@@ -36,7 +36,7 @@ class RewardBonusModal(nextcord.ui.Modal):
         if not bonus.isdigit():
             return
 
-        gdb.set_on_json('economic_settings', self.value, int(bonus))
+        await gdb.set_on_json('economic_settings', self.value, int(bonus))
 
         view = await BonusView(interaction.guild)
         await interaction.message.edit(embed=view.embed, view=view)

@@ -29,7 +29,7 @@ class BanDateBases:
     async def get_as_guild(self):
         datas = engine.fetchall(
             ('SELECT member_id, time FROM bans '
-             'WHERE guild_id = $1'),
+             'WHERE guild_id = %s'),
             [self.guild_id])
 
         return datas
@@ -38,7 +38,7 @@ class BanDateBases:
     async def get_as_member(self):
         data = await engine.fetchone(
             ('SELECT time FROM bans '
-             'WHERE guild_id = $1 AND member_id = $2'),
+             'WHERE guild_id = %s AND member_id = %s'),
             (self.guild_id, self.member_id)
         )
 
@@ -50,7 +50,7 @@ class BanDateBases:
         await engine.execute(
             ('INSERT INTO bans '
              '(guild_id, member_id, time) '
-             'VALUES ($1, $2, $3)'),
+             'VALUES (%s, %s, %s)'),
             (self.guild_id, self.member_id, time)
         )
 
@@ -59,8 +59,8 @@ class BanDateBases:
     async def update(self, new_time: int):
         await engine.execute(
             ('UPDATE bans '
-             'SET time = $1 '
-             'WHERE guild_id = $2 AND member_id = $3'),
+             'SET time = %s '
+             'WHERE guild_id = %s AND member_id = %s'),
             (new_time, self.guild_id, self.member_id)
         )
 
@@ -69,7 +69,7 @@ class BanDateBases:
     async def delete(self):
         await engine.execute(
             ('DELETE FROM bans '
-             'WHERE guild_id = $1 AND member_id = %s'),
+             'WHERE guild_id = %s AND member_id = %s'),
             (self.guild_id, self.member_id)
         )
 
