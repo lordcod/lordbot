@@ -106,6 +106,9 @@ class NumberFormating:
 
 
 def adapt_dict(dict_var):
+    if isinstance(dict_var, list):
+        print(dict_var)
+
     data = NumberFormating.dumps(dict_var)
     data = Json.dumps(data)
     qj = QuotedJson(data)

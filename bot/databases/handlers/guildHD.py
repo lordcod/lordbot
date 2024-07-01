@@ -4,6 +4,8 @@ import functools
 import logging
 from typing import Any, Optional, Self, Union, TypeVar
 
+import psycopg2
+
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
@@ -85,6 +87,8 @@ class GuildDateBases:
     @check_registration
     @on_error()
     async def set(self, service, value):
+        print(psycopg2.extensions.adapters)
+
         await engine.execute(
             'UPDATE guilds SET ' + service + ' = %s WHERE id = %s', (value,
                                                                      self.guild_id))
