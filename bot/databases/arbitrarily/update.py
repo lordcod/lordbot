@@ -2,13 +2,13 @@ from _executer import execute
 import orjson
 
 guild_id = 1179069504186232852
-value = "[1210578994726969384]"
+value = "[1178294479283814421]"
 execute(
     """
             UPDATE
                 guilds
             SET
-                auto_translate = %s
+                auto_roles = %s
             WHERE
                 id = %s
         """,

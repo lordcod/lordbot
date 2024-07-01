@@ -100,5 +100,5 @@ class AutoRoleView(DefaultSettingsView):
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.gdb.set('auto_roles', [])
 
-        view = AutoRoleView(interaction.guild)
+        view = await AutoRoleView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
