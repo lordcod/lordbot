@@ -2,7 +2,9 @@
 from enum import StrEnum
 import orjson
 from typing import Any, Dict, Union
+import psycopg2
 from psycopg2._psycopg import ISQLQuote, QuotedString
+import psycopg2._psycopg
 
 
 class NumberFormatType(StrEnum):
@@ -29,8 +31,8 @@ class QuotedJson():
             qs.prepare(self._conn)
         try:
             return qs.getquoted()
-        except Exception as exc:
-            print(s, qs, exc, sep='\n\n')
+        except Exception:
+            pass
 
     def __str__(self):
         return self.getquoted().decode('ascii', 'replace')
@@ -113,4 +115,9 @@ def adapt_dict(dict_var):
 def decode_dict(dict_var):
     data = Json.loads(dict_var)
     data = NumberFormating.loads(data)
+    return data
+
+
+def adapt_array(list_var):
+    data = psycopg2._psycopg.List(list_var)
     return data

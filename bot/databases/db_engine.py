@@ -16,6 +16,7 @@ _log = logging.getLogger(__name__)
 Vars = Sequence[Any] | Mapping[str, Any] | None
 
 psycopg2.extensions.register_adapter(dict, adapt_dict)
+psycopg2.extensions.register_adapter(list, adapt_dict)
 psycopg2._json.register_default_json(loads=decode_dict)
 psycopg2._json.register_default_jsonb(loads=decode_dict)
 

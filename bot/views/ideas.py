@@ -500,16 +500,27 @@ class IdeaView(nextcord.ui.View):
         locale = await gdb.get('language')
         color = await gdb.get('color')
 
-        self.embed = nextcord.Embed(
-            title="Ideas",
-            description=(
-                "Do you have a good idea?\n"
-                "And you are sure that everyone will like it!\n"
-                "Before you write it, make sure that there have "
-                "been no such ideas yet!"
-            ),
-            color=color
-        )
+        if locale == 'ru':
+            self.embed = nextcord.Embed(
+                title="Идеи",
+                description=(
+                    'У вас есть хорошая идея?\n'
+                    'И вы уверены, что она всем понравится!\n '
+                    'Прежде чем писать, убедитесь, что таких идей еще не было!'
+                ),
+                color=color
+            )
+        else:
+            self.embed = nextcord.Embed(
+                title="Ideas",
+                description=(
+                    "Do you have a good idea?\n"
+                    "And you are sure that everyone will like it!\n"
+                    "Before you write it, make sure that there have "
+                    "been no such ideas yet!"
+                ),
+                color=color
+            )
 
         self.suggest.label = i18n.t(locale, 'ideas.globals.title')
 

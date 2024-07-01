@@ -17,7 +17,5 @@ def on_error():
                     return result
                 except Exception as exc:
                     _log.error(f"[ON_ERROR][{func.__name__}][{exc.__class__.__name__}]: Attempt: {i+1}/3", exc_info=exc)
-            _log.debug(
-                f"[ON_ERROR][ADDITIONALLY INFO]: {', '.join(map(str, args + tuple(f'{k}-{v}' for k,v in kwargs.items())))}")
         return inner
     return wrapped
