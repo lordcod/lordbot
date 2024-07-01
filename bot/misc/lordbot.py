@@ -39,6 +39,43 @@ class LordBot(commands.AutoShardedBot):
     timeouts = {}
     guild_timer_handlers = {}
 
+    def __init__(self) -> None:
+        flags = translate_flags(' '.join(sys.argv[1:]))
+        shard_ids, shard_count = (flags.get(
+            'shards') or input("Shared info: ")).split("/")
+        shard_count = int(shard_count)
+        shard_ids = get_shard_list(shard_ids)
+
+        super().__init__(
+            command_prefix=self.get_command_prefixs,
+            intents=nextcord.Intents.all(),
+            help_command=None,
+            shard_ids=shard_ids,
+            shard_count=shard_count
+        )
+
+        loop = asyncio.get_event_loop()
+
+        i18n.from_folder("./bot/languages/localization")
+        i18n.config['locale'] = 'en'
+
+        self.__session = None
+        self.ipc = ipc.Server(self, host="localhost",
+                              secret_key="my_secret_key")
+
+        self.__with_ready__ = loop.create_future()
+        self.__with_ready_events__ = []
+
+        self.lord_handler_timer = LordTimeHandler(loop)
+
+        self.add_listener(self.listen_on_ready, 'on_ready')
+
+    @property
+    def session(self) -> aiohttp.ClientSession:
+        if self.__session is None or self.__session.closed:
+            self.__session = aiohttp.ClientSession()
+        return self.__session
+
     @staticmethod
     async def get_command_prefixs(
         bot: commands.Bot,
@@ -81,37 +118,6 @@ class LordBot(commands.AutoShardedBot):
         name = name or coro.__name__
 
         setattr(self, name, coro)
-
-    def __init__(self) -> None:
-        flags = translate_flags(' '.join(sys.argv[1:]))
-        shard_ids, shard_count = (flags.get(
-            'shards') or input("Shared info: ")).split("/")
-        shard_count = int(shard_count)
-        shard_ids = get_shard_list(shard_ids)
-
-        super().__init__(
-            command_prefix=self.get_command_prefixs,
-            intents=nextcord.Intents.all(),
-            help_command=None,
-            shard_ids=shard_ids,
-            shard_count=shard_count
-        )
-
-        loop = asyncio.get_event_loop()
-
-        i18n.from_folder("./bot/languages/localization")
-        i18n.config['locale'] = 'en'
-
-        self.session = aiohttp.ClientSession()
-        self.ipc = ipc.Server(self, host="localhost",
-                              secret_key="my_secret_key")
-
-        self.__with_ready__ = loop.create_future()
-        self.__with_ready_events__ = []
-
-        self.lord_handler_timer = LordTimeHandler(loop)
-
-        self.add_listener(self.listen_on_ready, 'on_ready')
 
     async def listen_on_ready(self) -> None:
         try:

@@ -87,8 +87,6 @@ class GuildDateBases:
     @check_registration
     @on_error()
     async def set(self, service, value):
-        print(psycopg2.extensions.adapters)
-
         await engine.execute(
             'UPDATE guilds SET ' + service + ' = %s WHERE id = %s', (value,
                                                                      self.guild_id))
