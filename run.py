@@ -8,4 +8,7 @@ if __name__ == "__main__":
         if logger_name.startswith('nextcord'):
             _log = logging.getLogger(logger_name)
             _log.setLevel(logging.INFO)
+        if logger_name.startswith('pyngrok'):
+            _log = logging.getLogger(logger_name)
+            _log.setLevel(logging.ERROR)
     main.start_bot()

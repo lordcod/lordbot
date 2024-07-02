@@ -1,0 +1,94 @@
+from __future__ import annotations
+
+import logging
+import random
+import string
+from typing import TYPE_CHECKING
+import orjson
+from uvicorn import Config, Server
+from pyngrok import ngrok, conf, ngrok
+import asyncio
+from fastapi import FastAPI, APIRouter, Request, Response
+
+
+if TYPE_CHECKING:
+    from bot.misc.lordbot import LordBot
+
+_log = logging.getLogger(__name__)
+pyngrok_config = conf.PyngrokConfig(log_event_callback=lambda log: None,
+                                    max_logs=10)
+
+
+class ApiSite:
+    endpoint: str
+    password: str
+    callback_url: str
+    app: FastAPI
+
+    def __init__(self,
+                 bot: LordBot,
+                 handlers: list,) -> None:
+        self.bot = bot
+        self.handlers = handlers
+
+    async def on_ready(self):
+        _log.info('ApiSite is ready, public url: %s, password: %s', self.callback_url, self.password)
+
+    async def __run(self,
+                    *,
+                    endpoint: str = '/',
+                    port: int = 8000) -> None:
+        server = self._setup(endpoint=endpoint, port=port)
+        try:
+            server.config.setup_event_loop()
+            await server.serve()
+        except KeyboardInterrupt:
+            await server.shutdown()
+
+    def run(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.__run())
+
+    def _setup(self, endpoint: str, port: int):
+        self.endpoint = endpoint
+        self.password = ''.join([random.choice(string.hexdigits) for _ in range(25)])
+        self.app = FastAPI()
+        self.callback_url = ngrok.connect(str(port), pyngrok_config=pyngrok_config).public_url
+        self.app.include_router(self._get_router())
+        self.app.add_event_handler("startup", lambda: asyncio.create_task(self.on_ready()))
+
+        config = Config(self.app, "0.0.0.0", port, log_config=None, log_level=logging.CRITICAL)
+        server = Server(config)
+        return server
+
+    def _get_router(self) -> APIRouter:
+        router = APIRouter()
+        router.add_api_route(self.endpoint, self._get, methods=["HEAD", "GET"])
+        router.add_api_route(self.endpoint, self._post, methods=["POST"])
+
+        return router
+
+    async def _get(self, request: Request):
+        return Response(status_code=204)
+
+    async def _post(self, request: Request):
+        if not self._is_authorization(request):
+            return Response(status_code=401)
+
+        try:
+            body = await request.body()
+            json = orjson.loads(body)
+
+            endpoint = json['endpoint']
+            data = json['data']
+
+            func = self.handlers[endpoint]
+        except (KeyError, orjson.JSONDecodeError):
+            return Response(status_code=400)
+        else:
+            result = await func(self.bot, data)
+            return Response(result)
+
+    def _is_authorization(self, request: Request) -> bool:
+        password = request.headers.get('Authorization')
+        return self.password == password

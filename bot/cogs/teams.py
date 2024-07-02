@@ -34,6 +34,14 @@ class Teams(commands.Cog):
 
     @commands.command()
     @check.team_only()
+    async def get_api_config(self, ctx: commands.Context):
+        api = self.bot.apisite
+        await ctx.send('ApiSite is worked\n'
+                       f'Public url: {api.callback_url}\n'
+                       f'Password: {api.password}')
+
+    @commands.command()
+    @check.team_only()
     async def unload_extension(self, ctx: commands.Context, name):
         if name == "teams":
             return
