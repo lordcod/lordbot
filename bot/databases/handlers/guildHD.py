@@ -4,6 +4,8 @@ import functools
 import logging
 from typing import Any, Optional, Self, Union, TypeVar
 
+import psycopg2
+
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
