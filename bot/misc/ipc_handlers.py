@@ -1,37 +1,35 @@
+from __future__ import annotations
 
-
-from typing import TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Optional
 import orjson
 from bot.languages.help import commands
-from nextcord.ext.ipc.server import IpcServerResponse
+
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
-    bot: LordBot
-else:
-    bot = None
 
 
-handlers = []
+handlers = {}
 
 
-def ipc_route(func):
-    handlers.append(func)
-    return func
+def ipc_route(name: Optional[str] = None):
+    def wrapped(func):
+        _name = name or func.__name__
+        handlers[_name] = func
+        return func
+    return wrapped
 
 
-def get_handlers(_bot):
-    global bot
-    bot = _bot
-    return handlers
+@ipc_route()
+async def get_guilds_count(bot: LordBot, data: dict):
+    return str(len(bot.guilds))
 
 
-@ipc_route
-async def get_guilds_count(data: IpcServerResponse):
-    return len(bot.guilds)
+@ipc_route()
+async def get_members_count(bot: LordBot, data: dict):
+    return str(len(list(bot.get_all_members())))
 
 
-@ipc_route
-async def get_command_data(data: IpcServerResponse):
-    return commands
+@ipc_route()
+async def get_command_data(bot: LordBot, data: dict):
+    return orjson.dumps(commands).decode()

@@ -1,7 +1,6 @@
 import hmac
 from http import HTTPStatus
 from pyexpat import ExpatError
-from attr import s
 from uvicorn import Config, Server
 from pyngrok import ngrok
 import asyncio

@@ -1,5 +1,6 @@
 from __future__ import annotations
-from bot.misc.ipc_handlers import get_handlers
+from bot.misc.api_site import ApiSite
+from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
 import asyncio
 import logging
@@ -8,7 +9,7 @@ import aiohttp
 import nextcord
 import regex
 
-from nextcord.ext import commands, ipc
+from nextcord.ext import commands
 
 from bot.misc.utils import LordTimeHandler,  translate_flags
 from bot.languages import i18n
@@ -60,8 +61,7 @@ class LordBot(commands.AutoShardedBot):
         i18n.config['locale'] = 'en'
 
         self.__session = None
-        self.ipc = ipc.Server(self, host="localhost",
-                              secret_key="my_secret_key")
+        self.apisite = ApiSite(self, handlers)
 
         self.__with_ready__ = loop.create_future()
         self.__with_ready_events__ = []
@@ -69,6 +69,7 @@ class LordBot(commands.AutoShardedBot):
         self.lord_handler_timer = LordTimeHandler(loop)
 
         self.add_listener(self.listen_on_ready, 'on_ready')
+        self.add_listener(self.apisite._ApiSite__run, 'on_ready')
 
     @property
     def session(self) -> aiohttp.ClientSession:
@@ -134,10 +135,6 @@ class LordBot(commands.AutoShardedBot):
         for t in db._tables:
             t.set_engine(engine)
             await t.create()
-
-        for hand in get_handlers(self):
-            self.ipc.route()(hand)
-        print(self.ipc.endpoints)
 
         if not self.__with_ready__.done():
             self.__with_ready__.set_result(None)
