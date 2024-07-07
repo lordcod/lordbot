@@ -11,8 +11,6 @@ import time
 import orjson
 from typing import Callable, Dict, List, Optional, Tuple, TypedDict, Union, Literal
 
-from sqlalchemy import desc
-
 
 from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.languages import i18n
