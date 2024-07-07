@@ -7,8 +7,6 @@ import sys
 import traceback
 import aiohttp
 import asyncio
-from datetime import datetime
-from pytz import timezone
 
 log_webhook = os.environ.get('log_webhook')
 loop = asyncio.get_event_loop()

@@ -4,6 +4,7 @@ import nextcord
 from nextcord.ext import commands
 from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
+from bot.resources.ether import Emoji
 
 
 class GreedyUser(str):
@@ -188,7 +189,7 @@ class ReactionsCommand(commands.Cog):
         color = await gdb.get('color')
 
         if user is None and isinstance(react_type, GreedyUser):
-            await ctx.send("You must specify the user")
+            await ctx.send(f"{Emoji.cross} You must specify the user")
             return
 
         if user is None:

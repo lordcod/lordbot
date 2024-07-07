@@ -3,6 +3,7 @@ import asyncio
 import nextcord
 from nextcord.ext import commands, application_checks
 
+from bot.languages import i18n
 from bot.misc import utils
 from bot.misc.utils import TimeCalculator
 from bot.misc.lordbot import LordBot
@@ -12,11 +13,17 @@ from bot.views.delcat import DelCatView
 from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
 import time
-from typing import Optional
+from typing import List, Optional
 
 
 timenow = None
 timestamp = None
+
+
+async def _single_delete(messages: List[nextcord.Message]):
+    return
+    for msg in messages:
+        await msg.delete()
 
 
 class Moderations(commands.Cog):
@@ -69,22 +76,19 @@ class Moderations(commands.Cog):
             f"ban:{ctx.guild.id}:{member.id}")
 
         embed = nextcord.Embed(
-            title="Temporary ban granted!",
-            description=(
-                f"Banned: {member.name}({member.id})\n"
-                f"Moderator: {ctx.author.name}({ctx.author.id})"
-            ),
+            title=i18n.t(locale, 'tempban.title'),
+            description=i18n.t(locale, 'tempban.description', member=member.name, member_id=member.id, author=ctx.author, author_id=ctx.author.id),
             color=color
         )
         if ftime is not None:
             embed.add_field(
-                name="Time of action",
+                name=i18n.t(locale, 'tempban.description.field.time'),
                 value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime, locale)})",
                 inline=False
             )
         if reason is not None:
             embed.add_field(
-                name='Reason',
+                name=i18n.t(locale, 'tempban.description.field.reason'),
                 value=reason,
                 inline=False
             )
@@ -102,6 +106,7 @@ class Moderations(commands.Cog):
     async def temp_ban_list(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
         color = await gdb.get('color')
+        locale = await gdb.get('language')
 
         rsdb = BanDateBases(ctx.guild.id)
         datas = await rsdb.get_as_guild()
@@ -111,9 +116,9 @@ class Moderations(commands.Cog):
         for quantity, (member_id, ban_time) in enumerate(datas):
             message += f"{quantity}. <@{member_id}> (<t:{ban_time}:R>)\n"
 
-        message = message or "There are no registered temporary roles on this server"
+        message = message or i18n.t(locale, 'tempban.list.nf')
         embed = nextcord.Embed(
-            title="Temp Bans",
+            title=i18n.t(locale, 'tempban.list.title'),
             description=message,
             color=color
         )
@@ -139,21 +144,21 @@ class Moderations(commands.Cog):
             self.bot.lord_handler_timer.close(
                 f"role:{ctx.guild.id}:{member.id}:{role.id}")
             embed = nextcord.Embed(
-                title="The duration of the role has been changed",
+                title=i18n.t(locale, 'temprole.change.title'),
                 color=color)
             embed.add_field(
-                name='Role',
+                name=i18n.t(locale, 'temprole.change.role'),
                 value=f'{member.mention} → {role.mention} (ROLE ID: {role.id})',
                 inline=False
             )
             embed.add_field(
-                name='New time of action',
+                name=i18n.t(locale, 'temprole.global.action'),
                 value=f'<t:{_role_time[0]}:f> → <t:{ftime+time.time() :.0f}:f> ({display_time(ftime, locale)})',
                 inline=False
             )
         else:
             embed = nextcord.Embed(
-                title="Temporary role granted!",
+                title=i18n.t(locale, 'temprole.created.title'),
                 color=color)
             embed.add_field(
                 name="Role",
@@ -161,7 +166,7 @@ class Moderations(commands.Cog):
                 inline=False
             )
             embed.add_field(
-                name="Time of action",
+                name=i18n.t(locale, 'temprole.global.action'),
                 value=f"<t:{ftime+time.time() :.0f}:f> ({display_time(ftime)})",
                 inline=False
             )
@@ -179,6 +184,7 @@ class Moderations(commands.Cog):
     async def temp_role_list(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
         gdb = GuildDateBases(ctx.guild.id)
         color = await gdb.get('color')
+        locale = await gdb.get('language')
 
         if member is not None:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
@@ -198,9 +204,9 @@ class Moderations(commands.Cog):
 
             message += f"{quantity}. {member.mention} → {role.mention} (<t:{role_time}:R>)\n"
 
-        message = message or "There are no registered temporary roles on this server"
+        message = message or i18n.t(locale, 'temprole.list.nf')
         embed = nextcord.Embed(
-            title="Temp Roles",
+            title=i18n.t(locale, 'temprole.list.title'),
             description=message,
             color=color
         )
@@ -235,8 +241,10 @@ class Moderations(commands.Cog):
             required=False
         )
     ) -> None:
-        role_name = name or role.name
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = gdb.get('language')
 
+        role_name = name or role.name
         new_role = await interaction.guild.create_role(
             reason="Copying a role with rights",
             name=role_name,
@@ -247,96 +255,158 @@ class Moderations(commands.Cog):
             icon=role.icon
         )
 
-        await interaction.response.send_message(f'Successfully created a new role - {new_role.mention}', ephemeral=True)
+        await interaction.response.send_message(i18n.t(locale, 'clone-role.success', role=new_role.mention), ephemeral=True)
 
     @commands.group(invoke_without_command=True, aliases=["clear", "clean"])
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx: commands.Context, limit: int):
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
         if limit > 250:
-            raise commands.CommandError(
-                "The maximum number of messages to delete is `250`")
+            await ctx.send(i18n.t(locale, 'purge.error.limit'))
+            return
 
-        deleted = await ctx.channel.purge(limit=limit)
-        await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5.0)
+        iterator = ctx.channel.history(limit=limit)
+        deleted = []
+        count = 0
+        strategy = ctx.channel.delete_messages
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        ctx.channel.purge
+        async for message in iterator:
+            if count == 100:
+                to_delete = deleted[-100:]
+                await strategy(to_delete)
+                count = 0
+                await asyncio.sleep(1)
+
+            if message.id < minimum_time:
+                to_delete = deleted[-count:]
+                await strategy(to_delete)
+                count = 0
+                strategy = _single_delete
+
+            count += 1
+            deleted.append(message)
+
+        to_delete = deleted[-count:]
+        await strategy(to_delete)
+
+        await ctx.send(i18n.t(locale, 'purge.success', lenght=len(deleted)), delete_after=5.0)
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
     async def user(self, ctx: commands.Context, member: nextcord.Member, limit: int):
-        if limit > 100:
-            raise commands.CommandError(
-                "The maximum number of messages to delete is `100`")
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+        if limit > 250:
+            await ctx.send(i18n.t(locale, 'purge.error.limit'))
+            return
 
-        messages = []
-
+        iterator = ctx.channel.history(limit=1000)
+        count = 0
+        deleted = []
+        strategy = ctx.channel.delete_messages
         minimum_time = int((time.time() - 14 * 24 * 60 * 60)
                            * 1000.0 - 1420070400000) << 22
 
-        async for message in ctx.channel.history(limit=250):
-            if len(messages) >= limit:
+        async for message in iterator:
+            if len(deleted) >= limit:
                 break
-            if message.author == member:
-                messages.append(message)
-
+            if count == 100:
+                to_delete = deleted[-100:]
+                await strategy(to_delete)
+                count = 0
+                await asyncio.sleep(1)
             if message.id < minimum_time:
-                break
+                to_delete = deleted[-count:]
+                await strategy(to_delete)
+                count = 0
+                strategy = _single_delete
+            if message.author == member:
+                count += 1
+                deleted.append(message)
 
-        await ctx.channel.delete_messages(messages)
+        to_delete = deleted[-count:]
+        await strategy(to_delete)
 
-        await ctx.send(f'Deleted {len(messages)} message(s)', delete_after=5.0)
+        await ctx.send(i18n.t(locale, 'purge.success', lenght=len(deleted)), delete_after=5.0)
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
     async def between(self, ctx: commands.Context,
                       message_start: nextcord.Message,
-                      messsage_finish: nextcord.Message):
-        if message_start.channel != messsage_finish.channel:
-            raise commands.CommandError("Channel error")
+                      message_finish: nextcord.Message):
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+        if message_start.channel != message_finish.channel:
+            await ctx.send(i18n.t(locale, 'purge.error.channel'))
+            return
 
-        messages = []
-        finder = False
+        iterator = message_start.channel.history(limit=1000)
+        count = 0
+        deleted = []
+        strategy = message_start.channel.delete_messages
         minimum_time = int((time.time() - 14 * 24 * 60 * 60)
                            * 1000.0 - 1420070400000) << 22
 
-        async for message in message_start.channel.history(limit=100):
-            if message == messsage_finish:
-                finder = True
-
-            if finder:
-                messages.append(message)
-
-            if message == message_start or len(messages) >= 50 or message.id < minimum_time:
+        async for message in iterator:
+            if count == 100:
+                to_delete = deleted[-100:]
+                await strategy(to_delete)
+                count = 0
+                await asyncio.sleep(1)
+            if message.id < minimum_time:
+                to_delete = deleted[-count:]
+                await strategy(to_delete)
+                count = 0
+                strategy = _single_delete
+            if message_finish.created_at > message.created_at:
+                count += 1
+                deleted.append(message)
+            if message_start.created_at >= message.created_at or len(deleted) >= 250:
                 break
 
-        await ctx.channel.delete_messages(messages)
+        to_delete = deleted[-count:]
+        await strategy(to_delete)
 
-        await ctx.send(f'Deleted {len(messages)} message(s)', delete_after=5.0)
+        await ctx.send(i18n.t(locale, 'purge.success', lenght=len(deleted)), delete_after=5.0)
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
     async def until(self, ctx: commands.Context,
                     message_start: nextcord.Message):
-        messages = []
-        finder = False
-        messsage_finish = None
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+
+        iterator = message_start.channel.history(limit=1000)
+        count = 0
+        deleted = []
+        strategy = message_start.channel.delete_messages
         minimum_time = int((time.time() - 14 * 24 * 60 * 60)
                            * 1000.0 - 1420070400000) << 22
 
-        async for message in message_start.channel.history(limit=250):
-            if not messsage_finish:
-                messsage_finish = message
+        async for message in iterator:
+            if count == 100:
+                to_delete = deleted[-100:]
+                await strategy(to_delete)
+                count = 0
+                await asyncio.sleep(1)
+            if message.id < minimum_time:
+                to_delete = deleted[-count:]
+                await strategy(to_delete)
+                count = 0
+                strategy = _single_delete
 
-            if message == messsage_finish:
-                finder = True
+            count += 1
+            deleted.append(message)
 
-            if finder:
-                messages.append(message)
-
-            if message == message_start or message.id < minimum_time:
+            if message_start.created_at >= message.created_at or len(deleted) >= 250:
                 break
 
-        await ctx.channel.delete_messages(messages)
+        to_delete = deleted[-count:]
+        await strategy(to_delete)
 
-        await ctx.send(f'Deleted {len(messages)} message(s)', delete_after=5.0)
+        await ctx.send(i18n.t(locale, 'purge.success', lenght=len(deleted)), delete_after=5.0)
 
 
 def setup(bot):

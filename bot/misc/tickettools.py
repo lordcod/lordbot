@@ -35,8 +35,6 @@ class ModuleTicket:
         view = tickets.CloseTicketView(self)
         await self.ticket_channel.send(content, view=view)
 
-        self.__created = True
-
     async def close(self):
         view = tickets.DelopTicketView(self)
         await self.ticket_channel.send("Тикет закрыт!", view=view)

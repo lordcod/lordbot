@@ -1,9 +1,12 @@
+from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import IntEnum
+import logging
 import nextcord
 import time
 
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 import re
 import jmespath
@@ -16,23 +19,39 @@ from bot.databases import MongoDB, GuildDateBases
 from bot.languages import i18n
 
 
+_log = logging.getLogger(__name__)
 REGEXP_URL = re.compile(r'https?:\/\/(.+)')
 
 timeout_data: Dict[int, Dict[int, float]] = {}
 
 
-def get_ban(ideas: IdeasPayload, member_id: int) -> list | None:
-    ban_users = ideas.get('ban_users', [])
-    data_ban = jmespath.search(
-        f"[?@[0]==`{member_id}`]|[0]", ban_users)
-    return data_ban
+@dataclass
+class BanData:
+    user_id: int
+    moderator_id: int
+    reason: Optional[str] = None
+
+    @classmethod
+    def get(cls, ideas: IdeasPayload, member_id: int) -> Optional[BanData]:
+        ban_users = ideas.get('ban_users', [])
+        data_ban = jmespath.search(
+            f"[?@[0]==`{member_id}`]|[0]", ban_users)
+        return data_ban and cls(*data_ban)
 
 
-def get_mute(ideas: IdeasPayload, member_id: int) -> list | None:
-    muted_users = ideas.get('muted_users', [])
-    data_mute = jmespath.search(
-        f"[?@[0]==`{member_id}`]|[0]", muted_users)
-    return data_mute
+@dataclass
+class MuteData:
+    user_id: int
+    moderator_id: int
+    timestamp: float
+    reason: Optional[str] = None
+
+    @classmethod
+    def get(cls, ideas: IdeasPayload, member_id: int) -> Optional[MuteData]:
+        muted_users = ideas.get('muted_users', [])
+        data_mute = jmespath.search(
+            f"[?@[0]==`{member_id}`]|[0]", muted_users)
+        return data_mute and cls(*data_mute)
 
 
 class ReactionSystemType(IntEnum):
@@ -54,9 +73,8 @@ class Timeout:
         timeout_data[self.guild_id][self.member_id] = time.time() + delay
 
     def check_usage(self) -> bool:
-        if not self.get():
-            return True
-        return time.time() > self.get()
+        timeout = self.get()
+        return timeout and time.time() > timeout
 
 
 @to_async
@@ -423,9 +441,9 @@ class IdeaModal(nextcord.ui.Modal):
         self.add_item(self.idea)
 
         self.image = nextcord.ui.TextInput(
-            label="Image url",
+            label=i18n.t(locale, 'ideas.idea-modal.image.label'),
             style=nextcord.TextInputStyle.short,
-            placeholder="If you want, you can attach an image",
+            placeholder=i18n.t(locale, 'ideas.idea-modal.image.placeholder'),
             min_length=10,
             max_length=150,
             required=False
@@ -484,7 +502,7 @@ class IdeaModal(nextcord.ui.Modal):
         await mdb.set(mes.id, idea_data)
 
         Timeout(interaction.guild_id,
-                interaction.user.id).set(time.time()+cooldown)
+                interaction.user.id).set(cooldown)
         await logstool.Logs(interaction.guild).create_idea(interaction.user, idea, image)
 
 
@@ -500,27 +518,11 @@ class IdeaView(nextcord.ui.View):
         locale = await gdb.get('language')
         color = await gdb.get('color')
 
-        if locale == 'ru':
-            self.embed = nextcord.Embed(
-                title="Идеи",
-                description=(
-                    'У вас есть хорошая идея?\n'
-                    'И вы уверены, что она всем понравится!\n '
-                    'Прежде чем писать, убедитесь, что таких идей еще не было!'
-                ),
-                color=color
-            )
-        else:
-            self.embed = nextcord.Embed(
-                title="Ideas",
-                description=(
-                    "Do you have a good idea?\n"
-                    "And you are sure that everyone will like it!\n"
-                    "Before you write it, make sure that there have "
-                    "been no such ideas yet!"
-                ),
-                color=color
-            )
+        self.embed = nextcord.Embed(
+            title=i18n.t(locale, 'ideas.init.title'),
+            description=i18n.t(locale, 'ideas.init.description'),
+            color=color
+        )
 
         self.suggest.label = i18n.t(locale, 'ideas.globals.title')
 
@@ -537,9 +539,10 @@ class IdeaView(nextcord.ui.View):
         gdb = GuildDateBases(interaction.guild_id)
         locale = await gdb.get('language')
         ideas_data: IdeasPayload = await gdb.get('ideas')
+        cooldown: int = ideas_data.get('cooldown', 0)
         enabled: bool = ideas_data.get('enabled', False)
-        ban_data = get_ban(ideas_data, interaction.user.id)
-        mute_data = get_mute(ideas_data, interaction.user.id)
+        ban_data = BanData.get(ideas_data, interaction.user.id)
+        mute_data = MuteData.get(ideas_data, interaction.user.id)
         user_timeout = Timeout(interaction.guild_id, interaction.user.id).get()
 
         if not enabled:
@@ -549,31 +552,27 @@ class IdeaView(nextcord.ui.View):
         if user_timeout and user_timeout > time.time():
             await interaction.response.send_message(
                 content=i18n.t(
-                    locale, 'ideas.idea-view.timeout-message', time=int(user_timeout)),
+                    locale, 'ideas.idea-view.timeout-message', time=int(user_timeout), every_time=display_time(cooldown, locale)),
                 ephemeral=True
             )
             return
 
         if ban_data is not None:
-            moderator = interaction.guild.get_member(ban_data[1])
-            await interaction.response.send_message(
-                "You have limited access to creating ideas!\n"
-                "Exit Time: Forever\n"
-                f"Moderator: {moderator.mention}\n"
-                f"Reason: `{ban_data[2]}`",  # type: ignore
-                ephemeral=True
-            )
+            moderator = interaction.guild.get_member(ban_data.moderator_id)
+            await interaction.response.send_message(i18n.t(locale, 'ideas.mod.permission.ban',
+                                                           moderator=moderator.mention,
+                                                           reason=ban_data.reason or 'unspecified'),
+                                                    ephemeral=True)
             return
 
         if mute_data is not None:
-            moderator = interaction.guild.get_member(mute_data[1])
-            await interaction.response.send_message(
-                "You have limited access to creating ideas!\n"
-                f"Exit Time:  <t:{mute_data[2] :.0f}:f>({display_time(mute_data[2]-time.time())})\n"
-                f"Moderator: {moderator.mention}\n"
-                f"Reason: `{mute_data[3]}`",  # type: ignore
-                ephemeral=True
-            )
+            moderator = interaction.guild.get_member(mute_data.moderator_id)
+            await interaction.response.send_message(i18n.t(locale, 'ideas.mod.permission.mute',
+                                                           time=mute_data.timestamp,
+                                                           display_time=display_time(mute_data.timestamp-time.time()),
+                                                           moderator=moderator.mention,
+                                                           reason=mute_data.reason or 'unspecified'),
+                                                    ephemeral=True)
             return
 
         modal = await IdeaModal(interaction.guild_id)

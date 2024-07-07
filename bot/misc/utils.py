@@ -1,4 +1,5 @@
 from __future__ import annotations
+import contextlib
 import functools
 import logging
 import nextcord
@@ -364,7 +365,7 @@ class LordTimerHandler:
     ):
         th = self.loop.call_later(delay,  self.loop.create_task, coro)
         if key is not None:
-            print(f"Create new timer handle {coro.__name__} (ID:{key})")
+            _log.trace(f"Create new timer handle {coro.__name__} (ID:{key})")
             self.data[key] = th
 
     def close_as_key(self, key: Union[str, int]):
@@ -640,76 +641,26 @@ class TimeCalculator:
 
 
 def translate_to_timestamp(arg: str) -> int | None:
-    try:
-        tdt = datetime.strptime(arg, '%H:%M')
-        return datetime(
-            year=datetime.today().year,
-            month=datetime.today().month,
-            day=datetime.today().day,
-            hour=tdt.hour,
-            minute=tdt.minute
-        ).timestamp()
-    except ValueError:
-        pass
-    try:
-        tdt = datetime.strptime(arg, '%H:%M:%S')
-        return datetime(
-            year=datetime.today().year,
-            month=datetime.today().month,
-            day=datetime.today().day,
-            hour=tdt.hour,
-            minute=tdt.minute,
-            second=tdt.second
-        ).timestamp()
-    except ValueError:
-        pass
+    tdts = ['%H:%M', '%H:%M:%S', '%d.%m.%Y', '%d.%m.%Y %H:%M', '%d.%m.%Y %H:%M:%S', '%H:%M %d.%m.%Y',
+            '%H:%M:%S %d.%m.%Y', '%Y-%m-%d', '%H:%M %Y-%m-%d', '%H:%M:%S %Y-%m-%d',
+            '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S']
+    for th in tdts:
+        with contextlib.suppress(ValueError):
+            tdt = datetime.strptime(arg, th)
+            if tdt.year == 1900 and tdt.month == 1 and tdt.day == 1:
+                today = datetime.today()
+                tdt = datetime(
+                    today.year,
+                    today.month,
+                    today.day,
+                    tdt.hour,
+                    tdt.minute,
+                    tdt.second
+                )
+            return tdt.timestamp()
 
-    try:
-        return datetime.strptime(arg, '%d.%m.%Y').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%d.%m.%Y %H:%M').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%d.%m.%Y %H:%M:%S').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M %d.%m.%Y').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M:%S %d.%m.%Y').timestamp()
-    except ValueError:
-        pass
-
-    try:
-        return datetime.strptime(arg, '%Y-%m-%d').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M %Y-%m-%d').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M:%S %Y-%m-%d').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%Y-%m-%d %H:%M').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%Y-%m-%d %H:%M:%S').timestamp()
-    except ValueError:
-        pass
-
-    try:
+    with contextlib.suppress(ValueError):
         return TimeCalculator(operatable_time=True).convert(arg)
-    except ValueError:
-        pass
 
     return None
 

@@ -9,9 +9,6 @@ from bot.misc.lordbot import LordBot
 from bot.views.selector_music import MusicView
 from bot.misc.voice import (queue, MusicPlayer, current_players)
 from bot.misc.utils import clamp
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 ydl_opts = {

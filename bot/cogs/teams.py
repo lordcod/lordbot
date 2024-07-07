@@ -59,11 +59,11 @@ class Teams(commands.Cog):
     @check.team_only()
     async def reload_all_extensions(self, ctx: commands.Context):
         exts = self.bot.extensions
-        for ext in list(exts.values()):
+        for ext in exts.values():
             name = ext.__name__
             self.bot.reload_extension(name)
 
-        await ctx.send(f"All services have been successfully restarted")
+        await ctx.send("All services have been successfully restarted")
 
     @commands.command()
     @check.team_only()

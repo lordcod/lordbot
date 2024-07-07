@@ -1,5 +1,8 @@
 import nextcord
 
+from bot.databases.handlers.guildHD import GuildDateBases
+from bot.languages import i18n
+
 
 class DefaultSettingsView(nextcord.ui.View):
     async def interaction_check(
@@ -7,8 +10,10 @@ class DefaultSettingsView(nextcord.ui.View):
         interaction: nextcord.Interaction
     ) -> bool:
         if not interaction.user.guild_permissions.manage_guild:
+            gdb = GuildDateBases(interaction.guild_id)
+            locale = gdb.get('language')
             await interaction.response.send_message(
-                'You don\'t have the authority to use the settings',
+                i18n.t(locale, 'settings.permission.denied'),
                 ephemeral=True
             )
             return False

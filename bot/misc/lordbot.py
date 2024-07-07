@@ -1,23 +1,25 @@
 from __future__ import annotations
-from bot.misc.api_site import ApiSite
-from bot.misc.ipc_handlers import handlers
-from bot.resources.info import DEFAULT_PREFIX
 import asyncio
 import logging
 import sys
 import aiohttp
 import nextcord
 import regex
+from typing import Coroutine, List, Optional, Dict, Any
 
 from nextcord.ext import commands
 
-from bot.misc.utils import LordTimeHandler,  translate_flags
-from bot.languages import i18n
 from bot.databases import GuildDateBases
 from bot.databases import db
 from bot.databases.db import DataBase, establish_connection
 from bot.databases.config import host, port, user, password, db_name
-from typing import Coroutine, List, Optional, Dict, Any
+from bot.misc.api_site import ApiSite
+from bot.misc.ipc_handlers import handlers
+from bot.resources.info import DEFAULT_PREFIX
+from bot.misc.utils import LordTimeHandler,  translate_flags
+from bot.languages import i18n
+from bot.misc.noti import TwitchNotification, YoutubeNotification
+
 
 _log = logging.getLogger(__name__)
 
@@ -57,19 +59,24 @@ class LordBot(commands.AutoShardedBot):
 
         loop = asyncio.get_event_loop()
 
-        i18n.from_folder("./bot/languages/localization")
+        i18n.from_file("./bot/languages/localization_any.json")
         i18n.config['locale'] = 'en'
 
         self.__session = None
         self.apisite = ApiSite(self, handlers)
 
+        self.twnoti = TwitchNotification(self)
+        self.ytnoti = YoutubeNotification(self)
+
         self.__with_ready__ = loop.create_future()
         self.__with_ready_events__ = []
 
-        self.lord_handler_timer = LordTimeHandler(loop)
+        self.lord_handler_timer: LordTimeHandler = LordTimeHandler(loop)
 
         self.add_listener(self.listen_on_ready, 'on_ready')
         self.add_listener(self.apisite._ApiSite__run, 'on_ready')
+        self.add_listener(self.twnoti.parse_twitch, 'on_ready')
+        self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
 
     @property
     def session(self) -> aiohttp.ClientSession:

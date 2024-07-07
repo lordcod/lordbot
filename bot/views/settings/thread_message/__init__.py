@@ -32,17 +32,14 @@ class DropDown(nextcord.ui.StringSelect):
 
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
-            _disabled = True
-        else:
-            _disabled = False
+            self.disabled = True
 
         super().__init__(
             placeholder=i18n.t(
                 locale, 'settings.thread.init.placeholder'),
             min_values=1,
             max_values=1,
-            options=options,
-            disabled=_disabled
+            options=options
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:

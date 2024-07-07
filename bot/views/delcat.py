@@ -71,5 +71,5 @@ class DelCatView(nextcord.ui.View):
     async def interaction_check(
         self,
         interaction: nextcord.Interaction
-    ) -> Coroutine[Any, Any, bool]:
+    ) -> bool:
         return interaction.user == self.member

@@ -116,7 +116,7 @@ class GuildDateBases:
     @to_task
     @on_error()
     async def delete(self):
-        reserved.remove(self.guild_id)
+        reserved.pop(self.guild_id, None)
 
         await engine.execute('DELETE FROM guilds WHERE id = %s',
                              (self.guild_id,))
