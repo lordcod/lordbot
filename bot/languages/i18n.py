@@ -7,8 +7,13 @@ try:
 except ImportError:
     from translator import translate_dict as _translate_dict
 
+try:
+    from bot.resources.ether import Emoji
+except ImportError:
+    Emoji = None
+
 config = {}
-default_languages = ["da", "de", "en", "es", "fr", "id", "pl", "ru", "tr"]
+default_languages = ["da", "de", "en", "es", "fr",  "pl", "ru", "tr"]
 memoization_dict = {}
 resource_dict = {}
 
@@ -169,19 +174,23 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
     else:
         data = memoization_dict[locale][path]
 
-    return data.format(**kwargs)
+    return data.format(**kwargs, Emoji=Emoji)
 
 
 if __name__ == "__main__":
-    from_file("./bot/languages/localization.json")
+    # from_file("./bot/languages/localization.json")
 
-    for key, value in _parse_json(_load_file("add_temp_loc_ru.json")).items():
-        add_translation(key, value, 'ru')
-    for key, value in _parse_json(_load_file("add_temp_loc_en.json")).items():
-        add_translation(key, value, 'en')
+    # for key, value in _parse_json(_load_file("add_temp_loc_ru.json")).items():
+    #     add_translation(key, value, 'ru')
+    # for key, value in _parse_json(_load_file("add_temp_loc_en.json")).items():
+    #     add_translation(key, value, 'en')
 
-    with open(r'bot\languages\localization_any.json', 'wb') as file:
-        file.write(orjson.dumps(memoization_dict))
+    # with open(r'bot\languages\localization_any.json', 'wb') as file:
+    #     file.write(orjson.dumps(memoization_dict))
+
+    for locale, data in _parse_json(_load_file(("./bot/languages/localization.json"))).items():
+        with open(f'localization/{locale}.json', 'wb+') as file:
+            file.write(orjson.dumps(data))
 
     # with open('bot/languages/temp_loc.json', 'rb') as file:
     #     dataloc = orjson.loads(file.read())
@@ -217,4 +226,4 @@ if __name__ == "__main__":
     # To i18n format as any locales format
     # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    to_file("./bot/languages/localization_test.json")
+    # to_file("./bot/languages/localization_test.json")

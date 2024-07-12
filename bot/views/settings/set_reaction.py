@@ -5,11 +5,12 @@ import nextcord
 from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import is_custom_emoji, is_emoji, to_async
+from bot.misc.utils import is_custom_emoji, is_emoji, AsyncSterilization
+
 from nextcord.utils import MISSING
 
 
-@to_async
+@AsyncSterilization
 class RoleReactionItemModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild, future: asyncio.Future) -> None:
         gdb = GuildDateBases(guild.id)
@@ -33,7 +34,7 @@ class RoleReactionItemModal(nextcord.ui.Modal):
         self.future.set_result(value)
 
 
-@to_async
+@AsyncSterilization
 class ReactionUsingModal(nextcord.ui.View):
     async def __init__(self, guild_id: int, future: asyncio.Future) -> None:
         gdb = GuildDateBases(guild_id)

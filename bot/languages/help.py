@@ -17,6 +17,15 @@ class CommandOption(TypedDict):
     with_group: NotRequired[bool]
     commands_group: NotRequired[List[str]]
 
+    def get_arguments(self, locale: str) -> List[str]:
+        arguments = []
+        for arg in self.get('arguments', []):
+            if isinstance(arg, dict):
+                arguments.append(arg.get(locale, arg['en']))
+            else:
+                arguments.append(arg)
+        return arguments
+
 
 class CommandsPayload(TypedDict):
     categories_emoji: Dict[str, str]
@@ -38,7 +47,8 @@ def get_command(name: str) -> CommandOption:
         name = 'reactions'
     expression = f"[?name == '{name}'||contains(aliases, '{name}')]|[0]"
     result = jmespath.search(expression, commands)
-    return result
+    if result is not None:
+        return CommandOption(result)
 
 
 with open("bot/languages/commands_data.json", "rb") as file:

@@ -16,6 +16,13 @@ CORE = logging.INFO + 5
 
 DEFAULT_LOG = TRACE
 DEFAULT_DISCORD_LOG = logging.INFO
+DEFAULT_LOGS = {
+    'nextcord': logging.ERROR,
+    'pyngrok': logging.ERROR,
+    'git': logging.ERROR,
+    'httpx': logging.ERROR,
+    'aiocache': logging.ERROR
+}
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -131,6 +138,10 @@ class LordLogger(logging.Logger):
     COLOR_FORMAT = formatter_message(FORMAT, True)
 
     def __init__(self, name: str, level: int = DEFAULT_LOG):
+        for dfl_log, dfl_level in DEFAULT_LOGS.items():
+            if name.startswith(dfl_log):
+                level = dfl_level
+
         logging.Logger.__init__(self, name, level)
 
         color_formatter = ColoredFormatter(self.COLOR_FORMAT)

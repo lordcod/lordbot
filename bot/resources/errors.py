@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from asyncio import iscoroutinefunction
+import functools
 import inspect
 import logging
-import sys
 import nextcord
 from nextcord.ext import commands
 
@@ -13,6 +15,7 @@ from bot.languages.help import get_command
 from typing import TypeVar, Union
 
 _log = logging.getLogger(__name__)
+ExceptionT = TypeVar("ExceptionT", bound=BaseException)
 
 
 class DisabledCommand(commands.CheckFailure):
@@ -37,11 +40,15 @@ class MissingChannel(commands.CheckFailure):
     pass
 
 
-def attach_exception(*errors: BaseException):
-    def wrapped(func):
+def attach_exception(*errors: type[ExceptionT]):
+    def inner(func):
         func.__attachment_errors__ = errors
+
+        @functools.wraps(func)
+        async def wrapped(self: CallbackCommandError, error: ExceptionT):
+            await func(self, error)
         return func
-    return wrapped
+    return inner
 
 
 class CommandOnCooldown(commands.CommandError):
@@ -51,12 +58,14 @@ class CommandOnCooldown(commands.CommandError):
 
 
 class CallbackCommandError:
-    def __init__(self, ctx: commands.Context, error: BaseException) -> None:
+    def __init__(self, ctx: commands.Context) -> None:
         self.ctx = ctx
-        self.error: BaseException = error
+        self.gdb = GuildDateBases(ctx.guild.id)
+        self.locale = None
 
-    async def process(self):
-        self.gdb = GuildDateBases(self.ctx.guild.id)
+    @classmethod
+    async def process(cls, ctx: commands.Context, error):
+        self = cls(ctx)
         self.locale = await self.gdb.get('language')
 
         for name, item in inspect.getmembers(self):
@@ -64,63 +73,63 @@ class CallbackCommandError:
             if allow_errors is None or not iscoroutinefunction(item):
                 continue
 
-            if isinstance(self.error, allow_errors):
-                await item()
+            if isinstance(error, allow_errors):
+                await item(error)
                 break
         else:
             await self.OfterError()
 
     @attach_exception(commands.MissingPermissions)
-    async def MissingPermissions(self):
+    async def MissingPermissions(self, error):
         content = i18n.t(self.locale, 'errors.MissingPermissions')
 
         await self.ctx.send(content)
 
     @attach_exception(commands.BotMissingPermissions)
-    async def BotMissingPermissions(self):
+    async def BotMissingPermissions(self, error):
+
         content = i18n.t(self.locale, 'errors.BotMissingPermissions')
 
         await self.ctx.send(content)
 
     @attach_exception(MissingRole)
-    async def MissingRole(self):
+    async def MissingRole(self, error):
         content = i18n.t(self.locale, 'errors.MissingRole')
 
         await self.ctx.send(content)
 
     @attach_exception(MissingChannel)
-    async def MissingChannel(self):
+    async def MissingChannel(self, error):
         content = i18n.t(self.locale, 'errors.MissingChannel')
 
         await self.ctx.send(content)
 
     @attach_exception(commands.CommandNotFound)
-    async def CommandNotFound(self):
-        content = i18n.t(self.locale, 'errors.CommandNotFound')
-
-        await self.ctx.send(
-            content=content,
-            delete_after=5
-        )
+    async def CommandNotFound(self, error):
+        pass
 
     @attach_exception(commands.NotOwner)
-    async def NotOwner(self):
+    async def NotOwner(self, error):
         content = i18n.t(self.locale, 'errors.NotOwner')
 
         await self.ctx.send(content=content)
 
     @attach_exception(OnlyTeamError)
-    async def OnlyTeamError(self):
+    async def OnlyTeamError(self, error):
         content = i18n.t(self.locale, 'errors.OnlyTeamError')
 
         await self.ctx.send(content)
 
     @attach_exception(commands.BadArgument)
-    async def BadArgument(self):
+    async def BadArgument(self, error):
         title = i18n.t(self.locale, 'errors.BadArgument')
         color = await self.gdb.get('color')
 
         cmd_data = get_command(self.ctx.command.name)
+
+        if cmd_data:
+            return
+
         using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
 
         embed = nextcord.Embed(
@@ -144,11 +153,15 @@ class CallbackCommandError:
         await self.ctx.send(embed=embed)
 
     @attach_exception(commands.MissingRequiredArgument)
-    async def MissingRequiredArgument(self):
+    async def MissingRequiredArgument(self, error):
         title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
         color = await self.gdb.get('color')
 
         cmd_data = get_command(self.ctx.command.name)
+
+        if cmd_data:
+            return
+
         using = f"`{cmd_data.get('name')}{' '+' '.join([arg.get(self.locale) for arg in cmd_data.get('arguments')]) if cmd_data.get('arguments') else ''}`"
 
         embed = nextcord.Embed(
@@ -172,13 +185,13 @@ class CallbackCommandError:
         await self.ctx.send(embed=embed)
 
     @attach_exception(CommandOnCooldown)
-    async def CommandOnCooldown(self):
+    async def CommandOnCooldown(self, error):
         color = await self.gdb.get('color')
 
         embed = nextcord.Embed(
             title=i18n.t(self.locale, 'errors.CommandOnCooldown.title'),
             description=i18n.t(self.locale, 'errors.CommandOnCooldown.description',
-                               delay=display_time(self.error.retry_after,
+                               delay=display_time(error.retry_after,
                                                   self.locale)),
             color=color
         )
@@ -186,17 +199,17 @@ class CallbackCommandError:
         await self.ctx.send(embed=embed, delete_after=5.0)
 
     @attach_exception(InactiveEconomy)
-    async def InactiveEconomy(self):
+    async def InactiveEconomy(self, error):
         content = i18n.t(self.locale, 'errors.InactiveEconomy')
 
         await self.ctx.send(content)
 
     @attach_exception(DisabledCommand, commands.DisabledCommand)
-    async def DisabledCommand(self):
+    async def DisabledCommand(self, error):
         content = i18n.t(self.locale, 'errors.DisabledCommand')
 
         await self.ctx.send(content)
 
-    async def OfterError(self):
+    async def OfterError(self, error):
         _log.error(
-            "Ignoring exception in command %s", self.ctx.command, exc_info=self.error)
+            "Ignoring exception in command %s", self.ctx.command, exc_info=error)

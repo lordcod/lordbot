@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from ... import ideas
 from bot.views.settings._view import DefaultSettingsView
@@ -11,7 +12,7 @@ from bot.databases.varstructs import IdeasPayload
 from typing import Optional
 
 
-@to_async
+@AsyncSterilization
 class DropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
@@ -29,7 +30,7 @@ class DropDown(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class SuggestView(DefaultSettingsView):
     embed: nextcord.Embed = None
 

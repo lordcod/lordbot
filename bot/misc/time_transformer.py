@@ -72,7 +72,8 @@ def time_convert(timestamp: (int | float)) -> dict[str, int]:
 
 
 def display_time(number: int, lang: str = "en", max_items: int = 3) -> str:
-    number = round(number + 5, -1)
+    if number % 10 != 0:
+        number = round(number + 5, -1)
 
     func = distributing.get(lang, distributing['en'])
 
@@ -86,5 +87,11 @@ def display_time(number: int, lang: str = "en", max_items: int = 3) -> str:
 if __name__ == '__main__':
     while True:
         num = eval(input('> '), {}, [])
-        print(round(num + 5, -1))
+
+        if num % 10 != 0:
+            number = round(num + 5, -1)
+        else:
+            number = num
+        print(number, round(num + 5, -1))
+
         print(display_time(num))

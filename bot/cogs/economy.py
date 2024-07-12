@@ -1,4 +1,5 @@
 
+import logging
 import nextcord
 from nextcord.ext import commands
 import nextcord.gateway
@@ -18,12 +19,14 @@ from bot.misc import logstool
 from bot.resources import check
 from bot.views.economy_shop import EconomyShopView
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import clamp, randfloat, translate_flags
+from bot.misc.utils import TranslatorFlags, clamp, randfloat
 from bot.resources.errors import InactiveEconomy
 from bot.resources.ether import Emoji
 from bot.misc.utils import BlackjackGame
 from bot.resources.info import DEFAULT_ECONOMY_THEFT
 from bot.views.blackjack import BlackjackView
+
+_log = logging.getLogger(__name__)
 
 
 class ArgumntRouletteItem(TypedDict):
@@ -272,7 +275,7 @@ class Economy(commands.Cog):
             if await account.get(rw, 0) < loctime:
                 description += i18n.t(locale, 'economy.balance.reward.'+rw, prefix=prefix)
         if description:
-            description = i18n.t(locale, 'economy.balance.reward.available', Emoji=Emoji, description=description)
+            description = i18n.t(locale, 'economy.balance.reward.available', description=description)
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'economy.balance.name'),
@@ -283,17 +286,17 @@ class Economy(commands.Cog):
                          icon_url=member.display_avatar)
 
         embed.add_field(
-            name=i18n.t(locale, 'economy.balance.value.cash', Emoji=Emoji),
+            name=i18n.t(locale, 'economy.balance.value.cash'),
             value=f'{balance :,}{currency_emoji}',
             inline=True
         )
         embed.add_field(
-            name=i18n.t(locale, 'economy.balance.value.bank', Emoji=Emoji),
+            name=i18n.t(locale, 'economy.balance.value.bank'),
             value=f'{bank :,}{currency_emoji}',
             inline=True
         )
         embed.add_field(
-            name=i18n.t(locale, 'economy.balance.value.total', Emoji=Emoji),
+            name=i18n.t(locale, 'economy.balance.value.total'),
             value=f'{balance+bank :,}{currency_emoji}',
             inline=False
         )
@@ -405,7 +408,7 @@ class Economy(commands.Cog):
 
     @commands.command(name="gift")
     @commands.has_permissions(administrator=True)
-    async def gift(self, ctx: commands.Context, member: Optional[Union[nextcord.Member, nextcord.Role]], amount: int, *, flags: translate_flags = {}):
+    async def gift(self, ctx: commands.Context, member: Optional[Union[nextcord.Member, nextcord.Role]], amount: int, *, flags: TranslatorFlags['bank'] = {}):
         if not member:
             member = ctx.author
 
@@ -437,7 +440,7 @@ class Economy(commands.Cog):
 
     @commands.command(name="take")
     @commands.has_permissions(administrator=True)
-    async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], amount: Union[Literal['all'], int], *, flags: translate_flags = {}):
+    async def take(self, ctx: commands.Context, member: Optional[nextcord.Member], amount: Union[Literal['all'], int], *, flags: TranslatorFlags['bank'] = {}):
         if not member:
             member = ctx.author
 

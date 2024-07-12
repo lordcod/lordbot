@@ -4,14 +4,15 @@ import nextcord
 import jmespath
 from bot.languages import i18n
 from bot.resources.info import COUNT_ROLES_PAGE
-from bot.misc.utils import FissionIterator, to_async
+from bot.misc.utils import FissionIterator, AsyncSterilization
+
 from bot.databases import GuildDateBases
 from bot.databases import EconomyMemberDB
 from bot.views import menus
 from bot.databases.varstructs import RoleShopPayload
 
 
-@to_async
+@AsyncSterilization
 class ShopAcceptView(nextcord.ui.View):
     async def __init__(
         self,
@@ -97,7 +98,7 @@ class ShopAcceptView(nextcord.ui.View):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class EconomyShopDropdown(nextcord.ui.StringSelect):
     async def __init__(
         self,
@@ -119,11 +120,11 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
             for num, role in enumerate(data, start=1+index*COUNT_ROLES_PAGE)
         ]
 
-        super().__init__(placeholder=i18n.t(locale, "shop.dropdown.placeholder"), options=options)
-
+        disabled = 0 >= len(options)
         if 0 >= len(options):
-            self.add_option(label="Option")
-            self.disabled = True
+            options.append(label="Option")
+
+        super().__init__(placeholder=i18n.t(locale, "shop.dropdown.placeholder"), options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
@@ -155,7 +156,7 @@ class EconomyShopDropdown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class EconomyShopView(menus.Menus):
     value: List[List[RoleShopPayload]]
 

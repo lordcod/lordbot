@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING, Optional
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc import giveaway as misc_giveaway
-from bot.misc.utils import to_async, translate_to_timestamp
+from bot.misc.utils import AsyncSterilization, translate_to_timestamp
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
     from bot.misc.giveaway import GiveawayConfig, Giveaway
 
 
-@to_async
+@AsyncSterilization
 class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
     async def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: GiveawayConfig) -> None:
         gdb = GuildDateBases(guild_id)
@@ -34,7 +34,7 @@ class GiveawaySettingsSponsorDropDown(nextcord.ui.UserSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, member: nextcord.Member, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         gdb = GuildDateBases(guild_id)
@@ -55,7 +55,7 @@ class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class GiveawaySettingsPrizeModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         gdb = GuildDateBases(guild_id)
@@ -94,7 +94,7 @@ class GiveawaySettingsPrizeModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class GiveawaySettingsDescriptionModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         gdb = GuildDateBases(guild_id)
@@ -118,7 +118,7 @@ class GiveawaySettingsDescriptionModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class GiveawaySettingsDateendModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int, giveaway_config: 'GiveawayConfig') -> None:
         gdb = GuildDateBases(guild_id)
@@ -157,7 +157,7 @@ class GiveawaySettingsDateendModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class GiveawaySettingsView(nextcord.ui.View):
     embed: nextcord.Embed
 
@@ -238,7 +238,7 @@ class GiveawaySettingsView(nextcord.ui.View):
         await interaction.response.send_modal(await GiveawaySettingsDateendModal(interaction.guild_id, self.giveaway_config))
 
 
-@to_async
+@AsyncSterilization
 class GiveawayConfirmView(nextcord.ui.View):
     async def __init__(self, giveaway: 'Giveaway') -> None:
         gdb = GuildDateBases(giveaway.guild.id)

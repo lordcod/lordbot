@@ -1,14 +1,15 @@
 import nextcord
 
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from .. import thread_message
 
 from bot.databases import GuildDateBases
 
 
-@to_async
+@AsyncSterilization
 class ModalBuilder(nextcord.ui.Modal):
     async def __init__(self, guild_id, channel_id) -> None:
         gdb = GuildDateBases(guild_id)

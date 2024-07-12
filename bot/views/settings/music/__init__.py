@@ -1,6 +1,6 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
 
 
 from .dj_roles import DjRolesView
@@ -21,7 +21,7 @@ distribution = {
 }
 
 
-@to_async
+@AsyncSterilization
 class MusicDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
@@ -57,7 +57,7 @@ class MusicDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(view=view)
 
 
-@to_async
+@AsyncSterilization
 class MusicView(DefaultSettingsView):
     embed: nextcord.Embed
 

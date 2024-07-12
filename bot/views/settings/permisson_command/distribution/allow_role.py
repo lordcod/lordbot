@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
@@ -8,7 +9,7 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.databases import GuildDateBases, CommandDB
 
 
-@to_async
+@AsyncSterilization
 class RolesDropDown(nextcord.ui.RoleSelect):
     async def __init__(
         self,
@@ -45,7 +46,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class RolesView(DefaultSettingsView):
     embed: nextcord.Embed
 

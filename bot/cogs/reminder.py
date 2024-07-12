@@ -1,17 +1,14 @@
 
+from collections import defaultdict
 import time
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import localdb
 from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import translate_to_timestamp, randquan
-
-
-REMINDER_DB = localdb.get_table('reminder_state')
 
 
 class Reminder(commands.Cog):

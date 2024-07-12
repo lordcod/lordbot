@@ -5,14 +5,20 @@ from nextcord.ext import commands
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import GiveawayData
 from bot.languages.help import get_command
-from bot.databases import RoleDateBases, BanDateBases
+from bot.databases import RoleDateBases, BanDateBases, localdb
+from bot.misc import tickettools
 from bot.misc.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
+from bot.resources import info
 from bot.views.giveaway import GiveawayView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
 import time
 import asyncio
+
+from bot.views.tickets.closes import CloseTicketView
+from bot.views.tickets.delop import ControllerTicketView
+from bot.views.tickets.faq import FAQView
 _log = logging.getLogger(__name__)
 
 
@@ -23,6 +29,55 @@ class ReadyEvent(commands.Cog):
         bot.set_event(self.on_disconnect)
         super().__init__()
 
+    async def process_test(self):
+        guild_id = 1179069504186232852
+        channel_id = 1260722645603848283
+        message_id = 1260788032496468060
+        category_id = 1260722622241706064
+        guild = self.bot.get_guild(guild_id)
+        channel = guild.get_channel(channel_id)
+        gdb = GuildDateBases(guild.id)
+        ticket_data = info.DEFAULT_TICKET_PAYLOAD.copy()
+        ticket_data.update({
+            'message_id': message_id,
+            'channel_id': channel_id,
+            'category_id': category_id,
+            'type': 2,
+            'creating_embed_inputs': True,
+            'approved_roles': [1233832835660648449],
+            'moderation_roles': [1179070749361840220],
+            'user_tickets_limit': 2,
+            'categories': [
+                {'label': 'Appeal'},
+                {'label': 'Bug', 'approved_roles': [1233832835660648449, 1233832946570367018]},
+                {'label': '',
+                 'modals': [
+                     {'label': 'Your roblox nick'},
+                     {'label': 'The intruder\'s nickname'},
+                     {'label': 'What happened to you', 'style': 2},
+                 ], },
+            ],
+            'modals': [
+                {'label': 'Your roblox nick'},
+                {'label': 'What happened to you', 'style': 2}
+            ],
+            'faq': {
+                'type': 2,
+                'items': [
+                    {
+                        'label': 'QUE 1',
+                        'response': 'Answer 1'
+                    },
+                    {
+                        'label': 'QUE 2',
+                        'response': 'Answer 2'
+                    },
+                ]
+            }
+        })
+        # await gdb.set('tickets', {message_id: ticket_data})
+        # await tickettools.ModuleTicket.update_ticket_panel(guild, message_id)
+
     @commands.Cog.listener()
     async def on_ready(self):
         try:
@@ -30,20 +85,18 @@ class ReadyEvent(commands.Cog):
         except asyncio.TimeoutError:
             return
 
-        cmd_wnf = []
-        for cmd in self.bot.commands:
-            cmd_data = get_command(cmd.qualified_name)
-            if cmd_data is None:
-                cmd_wnf.append(cmd.qualified_name)
+        await asyncio.gather(
+            self.find_not_data_commands(),
+            self.process_test(),
+            self.process_temp_roles(),
+            self.process_temp_bans(),
+            self.process_giveaways(),
+            self.process_guild_delete_tasks()
+        )
 
-        if cmd_wnf:
-            _log.info(f"Was not found command information: {', '.join(cmd_wnf)}")
-
-        await self.process_temp_roles()
-        await self.process_temp_bans()
-        await self.process_giveaways()
-        await self.process_guild_delete_tasks()
-
+        self.bot.add_view(await ControllerTicketView())
+        self.bot.add_view(await CloseTicketView())
+        self.bot.add_view(await FAQView())
         self.bot.add_view(await ConfirmView())
         self.bot.add_view(await ReactionConfirmView())
         self.bot.add_view(await IdeaView())
@@ -52,12 +105,24 @@ class ReadyEvent(commands.Cog):
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def on_disconnect(self):
-        await self.bot.session.close()
+        await self.bot._LordBot__session.close()
+        await localdb._update_db(__name__)
+        await localdb.cache.close()
         self.bot.engine.get_connection().close()
         _log.critical("Bot is disconnect")
 
     async def on_shard_disconnect(self, shard_id: int):
         _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
+
+    async def find_not_data_commands(self):
+        cmd_wnf = []
+        for cmd in self.bot.commands:
+            cmd_data = get_command(cmd.qualified_name)
+            if cmd_data is None:
+                cmd_wnf.append(cmd.qualified_name)
+
+        if cmd_wnf:
+            _log.info(f"Was not found command information: {', '.join(cmd_wnf)}")
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
@@ -101,13 +166,7 @@ class ReadyEvent(commands.Cog):
                 )
 
     async def process_guild_delete_tasks(self):
-        deleted_tasks = await GuildDateBases.get_deleted()
-        for id, delay in deleted_tasks:
-            if self.bot.get_guild(id) or not delay:
-                continue
-            gdb = GuildDateBases(id)
-            self.bot.lord_handler_timer.create(
-                delay-time.time(), gdb.delete(), f'guild-deleted:{id}')
+        ...
 
 
 def setup(bot):

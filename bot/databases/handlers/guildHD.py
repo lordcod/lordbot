@@ -1,10 +1,9 @@
 from __future__ import annotations
 import asyncio
+from collections import defaultdict
 import functools
 import logging
-from typing import Any, Optional, Self, Union, TypeVar
-
-import psycopg2
+from typing import Any, Dict, List, Optional, Self, Union, TypeVar
 
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
@@ -14,6 +13,8 @@ _log = logging.getLogger(__name__)
 
 engine: DataBase = None
 reserved: dict = {}
+collectable_hashable_data: List[str] = ['language', 'color']
+hashable_data: Dict[int, Dict[str, Any]] = defaultdict(dict)
 T = TypeVar("T")
 
 
@@ -79,14 +80,23 @@ class GuildDateBases:
     async def get(self, service: str, default: T | None = None) -> Union[T, Any]:
         data = await self._get_service(self.guild_id, service)
 
+        if service in collectable_hashable_data:
+            hashable_data[self.guild_id][service] = data
+
         if data is None:
             return default
 
         return data
 
+    def get_hash(self, service: str, default: T | None = None) -> Union[T, Any]:
+        return hashable_data[self.guild_id].get(service, default)
+
     @check_registration
     @on_error()
     async def set(self, service, value):
+        if service in collectable_hashable_data:
+            hashable_data[self.guild_id][service] = value
+
         await engine.execute(
             'UPDATE guilds SET ' + service + ' = %s WHERE id = %s', (value,
                                                                      self.guild_id))

@@ -6,7 +6,8 @@ from bot.databases.varstructs import RoleShopPayload
 from typing import List, Optional
 from copy import deepcopy
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from .. import economy
 from .._view import DefaultSettingsView
 
@@ -32,7 +33,7 @@ def update_role_data(
     return new_roles
 
 
-@to_async
+@AsyncSterilization
 class ShopModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int, role_id: int) -> None:
         self.role_id = role_id
@@ -117,7 +118,7 @@ class ShopModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class ShopDropDown(nextcord.ui.RoleSelect):
     async def __init__(self, guild_id):
         self.gdb = GuildDateBases(guild_id)
@@ -154,7 +155,7 @@ class ShopDropDown(nextcord.ui.RoleSelect):
             await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class ShopView(DefaultSettingsView):
     embed: nextcord.Embed = None
 

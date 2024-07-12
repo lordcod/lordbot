@@ -1,21 +1,19 @@
+
 import nextcord
 import inspect
-import aiocache
 from nextcord.ext import commands
 
 from typing import List, Self, Tuple, TypeVar
 
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import get_award, FissionIterator, to_async
+from bot.misc.utils import get_award, FissionIterator, AsyncSterilization
+
 from bot.misc.time_transformer import display_time
 from bot.views import menus
 from bot.databases import GuildDateBases, EconomyMemberDB
 from bot.databases import localdb
 
 T = TypeVar("T")
-SCORE_STATE_DB = localdb.get_table('score')
-MESSAGE_STATE_DB = localdb.get_table('messages')
-VOICE_STATE_DB = localdb.get_table('voice_state')
 
 
 def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
@@ -47,7 +45,7 @@ def register_key(key: int) -> None:
     return wrapped
 
 
-@to_async
+@AsyncSterilization
 class EconomyLeaderboardView(menus.Menus):
     async def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]) -> Self:
         self.guild = guild
@@ -94,10 +92,10 @@ class LeaderboardDropDown(nextcord.ui.StringSelect):
     def __init__(self, guild_id: int) -> None:
         super().__init__(
             options=[
-                nextcord.SelectOption(label="Economy", value="0"),
-                nextcord.SelectOption(label="Voice Time", value="1"),
-                nextcord.SelectOption(label="Messages", value="2"),
-                nextcord.SelectOption(label="Score", value="3")
+                nextcord.SelectOption(label="Economy", value=0),
+                nextcord.SelectOption(label="Voice Time", value=1),
+                nextcord.SelectOption(label="Messages", value=2),
+                nextcord.SelectOption(label="Score", value=3)
             ]
         )
 
@@ -153,7 +151,9 @@ class LeaderboardTypes:
         gdb = GuildDateBases(guild.id)
         color = await gdb.get("color")
         locale = await gdb.get('language')
-        leaderboard = sorted(VOICE_STATE_DB.items(),
+        state = await localdb.get_table('voice_state')
+        items = (await state.fetch()).items()
+        leaderboard = sorted(items,
                              key=get_item_param, reverse=True)
         clear_empty_ofter_leaderboard(guild, leaderboard)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
@@ -193,7 +193,9 @@ class LeaderboardTypes:
         gdb = GuildDateBases(guild.id)
         color = await gdb.get("color")
         locale = await gdb.get('language')
-        leaderboard = sorted(MESSAGE_STATE_DB.items(),
+        state = await localdb.get_table('messages')
+        items = (await state.fetch()).items()
+        leaderboard = sorted(items,
                              key=get_item_param, reverse=True)
         clear_empty_ofter_leaderboard(guild, leaderboard)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]
@@ -233,7 +235,9 @@ class LeaderboardTypes:
         gdb = GuildDateBases(guild.id)
         color = await gdb.get("color")
         locale = await gdb.get('language')
-        leaderboard = sorted(SCORE_STATE_DB.items(),
+        state = await localdb.get_table('score')
+        items = (await state.fetch()).items()
+        leaderboard = sorted(items,
                              key=get_item_param, reverse=True)
         clear_empty_ofter_leaderboard(guild, leaderboard)
         leaderboard_indexs = [member_id for member_id, _ in leaderboard]

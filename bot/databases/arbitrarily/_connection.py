@@ -1,11 +1,12 @@
+import os
 import psycopg2
 import sys
 
-sys.path.append(r'bot\databases')
+sys.path.append(os.getcwd())
 
 
 try:
-    from config import (host, port, user, password, db_name)
+    from bot.databases.config import (host, port, user, password, db_name)
 
     connection = psycopg2.connect(
         host=host,
@@ -18,3 +19,4 @@ try:
 except Exception as err:
     print(type(err))
     print(err)
+    exit()

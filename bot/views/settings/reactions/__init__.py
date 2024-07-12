@@ -1,7 +1,8 @@
 import nextcord
 
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from .additional import InstallEmojiView
 from .precise import ReactData
@@ -12,7 +13,7 @@ from bot.databases import GuildDateBases
 from bot.resources.ether import channel_types_emoji
 
 
-@to_async
+@AsyncSterilization
 class DropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
@@ -70,7 +71,7 @@ class DropDown(nextcord.ui.StringSelect):
                                                 view=ReactData(channel, channel_data))
 
 
-@to_async
+@AsyncSterilization
 class AutoReactions(DefaultSettingsView):
     embed: nextcord.Embed
 

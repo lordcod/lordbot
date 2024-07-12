@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Literal, Optional
 import typing
 import nextcord
@@ -139,7 +140,6 @@ reactions_list = {
     }
 }
 
-# type: ignore
 AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare',
                            GreedyUser['bite'], 'clap', GreedyUser['cuddle'],
                            'bleh', 'blush', 'brofist', 'celebrate', 'cheers',
@@ -160,7 +160,7 @@ AllReactionsType = Literal[GreedyUser['airkiss'], 'angrystare',
                            'yawn', 'yay', 'yes', 'smile', 'woah']
 
 
-class ReactionsCommand(commands.Cog):
+class InteractionsCommand(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
 
@@ -183,7 +183,7 @@ class ReactionsCommand(commands.Cog):
             json = await responce.json()
             return json['url']
 
-    @commands.command()
+    @commands.command(name='interactions', aliases=['reactions'])
     async def reactions(self, ctx: commands.Context, react_type: AllReactionsType, user: Optional[nextcord.Member] = None, *, comment: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = await gdb.get('color')
@@ -215,4 +215,4 @@ class ReactionsCommand(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(ReactionsCommand(bot))
+    bot.add_cog(InteractionsCommand(bot))

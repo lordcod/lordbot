@@ -1,7 +1,8 @@
 import nextcord
 
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from .modal import ModalBuilder
 from .. import thread_message
@@ -10,7 +11,7 @@ from .._view import DefaultSettingsView
 from bot.databases import GuildDateBases
 
 
-@to_async
+@AsyncSterilization
 class ChannelDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -37,7 +38,7 @@ class ChannelDropDown(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(view=view)
 
 
-@to_async
+@AsyncSterilization
 class InstallThreadView(DefaultSettingsView):
     async def __init__(self, guild_id, installer=None) -> None:
         gdb = GuildDateBases(guild_id)

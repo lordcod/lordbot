@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from .. import permisson_command
 from .distribution.allow_channel import ChannelsView
@@ -14,7 +15,7 @@ from bot.languages import help as help_info, i18n
 from bot.languages.help import get_command
 
 
-@to_async
+@AsyncSterilization
 class DistrubDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id, command_name) -> None:
         self.command_name = command_name
@@ -50,7 +51,7 @@ class DistrubDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class CommandData(DefaultSettingsView):
     embed: nextcord.Embed = None
 

@@ -7,7 +7,8 @@ from bot.databases.varstructs import LogsPayload
 from bot.languages import i18n
 from bot.databases import GuildDateBases
 import nextcord
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.resources.ether import Emoji
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
@@ -51,7 +52,7 @@ logs_items = [
 ]
 
 
-@to_async
+@AsyncSterilization
 class ChannelSetDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild, selected_channel_id: Optional[int] = None):
         gdb = GuildDateBases(guild.id)
@@ -68,19 +69,18 @@ class ChannelSetDropDown(nextcord.ui.StringSelect):
             for channel_id, log_ids in logs_data.items()
             if (channel := guild.get_channel(channel_id))
         ]
+        disabled = len(options) == 0
+        if disabled:
+            options.append(nextcord.SelectOption(label='SelectOption'))
 
-        super().__init__(
-            placeholder=i18n.t(locale, "settings.logs.set-channel"),
-            channel_types=[nextcord.ChannelType.news,
-                           nextcord.ChannelType.text]
-        )
+        super().__init__(placeholder=i18n.t(locale, "settings.logs.set-channel"), disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         view = await LogsView(interaction.guild, int(self.values[0]))
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class ChannelDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
@@ -96,7 +96,7 @@ class ChannelDropDown(nextcord.ui.ChannelSelect):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class LogsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, selected_channel_id: Optional[int] = None,
                        selected_logs: Optional[List[int]] = None):
@@ -134,7 +134,7 @@ class LogsDropDown(nextcord.ui.StringSelect):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class LogsView(DefaultSettingsView):
     embed: nextcord.Embed
 

@@ -3,7 +3,8 @@ import nextcord
 from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
 
-from bot.misc.utils import TimeCalculator, to_async
+from bot.misc.utils import TimeCalculator, AsyncSterilization
+
 from bot.misc.time_transformer import display_time
 from bot.misc.ratelimit import BucketType
 from bot.databases import GuildDateBases, CommandDB
@@ -14,7 +15,7 @@ cd_types = {
 }
 
 
-@to_async
+@AsyncSterilization
 class CoolModal(nextcord.ui.Modal):
     async def __init__(
         self,
@@ -70,7 +71,7 @@ class CoolModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class CooltypeDropDown(nextcord.ui.StringSelect):
     def __init__(
         self,
@@ -116,7 +117,7 @@ class CooltypeDropDown(nextcord.ui.StringSelect):
         await interaction.response.send_modal(modal)
 
 
-@to_async
+@AsyncSterilization
 class CooldownsView(DefaultSettingsView):
     embed: nextcord.Embed = None
 

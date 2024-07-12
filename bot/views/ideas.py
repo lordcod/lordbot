@@ -12,10 +12,11 @@ import re
 import jmespath
 from bot.misc import logstool
 from bot.misc.time_transformer import display_time
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.resources.ether import Emoji
 from bot.databases.varstructs import IdeasPayload
-from bot.databases import MongoDB, GuildDateBases
+from bot.databases import localdb, GuildDateBases
 from bot.languages import i18n
 
 
@@ -77,7 +78,7 @@ class Timeout:
         return timeout and time.time() > timeout
 
 
-@to_async
+@AsyncSterilization
 class ConfirmModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
@@ -103,7 +104,7 @@ class ConfirmModal(nextcord.ui.Modal):
         idea_type_reaction = ideas_data.get('reaction_system', 0)
         channel_approved_id = ideas_data.get('channel_approved_id')
 
-        mdb = MongoDB('ideas')
+        mdb = await localdb.get_table('ideas')
         idea_data = await mdb.get(interaction.message.id)
         idea_image = idea_data.get('image')
         idea_content = idea_data.get('idea')
@@ -173,7 +174,7 @@ class ConfirmModal(nextcord.ui.Modal):
         await mdb.set(interaction.message.id, idea_data)
 
 
-@to_async
+@AsyncSterilization
 class DenyModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int) -> None:
         gdb = GuildDateBases(guild_id)
@@ -200,7 +201,7 @@ class DenyModal(nextcord.ui.Modal):
         idea_type_reaction = ideas_settings.get('reaction_system', 0)
         channel_denied_id = ideas_settings.get('channel_denied_id')
 
-        mdb = MongoDB('ideas')
+        mdb = await localdb.get_table('ideas')
         idea_data = await mdb.get(interaction.message.id)
         idea_content = idea_data.get('idea')
         idea_image = idea_data.get('image')
@@ -262,7 +263,7 @@ class DenyModal(nextcord.ui.Modal):
         await mdb.set(interaction.message.id, idea_data)
 
 
-@to_async
+@AsyncSterilization
 class ConfirmView(nextcord.ui.View):
     async def __init__(self, guild_id: Optional[int] = None):
         super().__init__(timeout=None)
@@ -319,7 +320,7 @@ class ConfirmView(nextcord.ui.View):
         await interaction.response.send_modal(modal)
 
 
-@to_async
+@AsyncSterilization
 class ReactionConfirmView(nextcord.ui.View):
     async def __init__(self, guild_id: int | None = None):
         super().__init__(timeout=None)
@@ -346,7 +347,7 @@ class ReactionConfirmView(nextcord.ui.View):
         self.demote.label = str(len(self.demoted_data))
 
     async def save_data(self, message_id) -> None:
-        mdb = MongoDB('ideas')
+        mdb = await localdb.get_table('ideas')
         idea_data = await mdb.get(message_id)
         idea_data.update({
             'promoted': self.promoted_data,
@@ -355,7 +356,7 @@ class ReactionConfirmView(nextcord.ui.View):
         await mdb.set(message_id, idea_data)
 
     async def load_data(self, message_id) -> None:
-        mdb = MongoDB('ideas')
+        mdb = await localdb.get_table('ideas')
         idea_data = await mdb.get(message_id)
         self.promoted_data = idea_data.get('promoted', [])
         self.demoted_data = idea_data.get('demoted', [])
@@ -421,7 +422,7 @@ class ReactionConfirmView(nextcord.ui.View):
         await interaction.response.send_modal(modal)
 
 
-@to_async
+@AsyncSterilization
 class IdeaModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
@@ -498,7 +499,7 @@ class IdeaModal(nextcord.ui.Modal):
             'idea': idea,
             'image': image
         }
-        mdb = MongoDB('ideas')
+        mdb = await localdb.get_table('ideas')
         await mdb.set(mes.id, idea_data)
 
         Timeout(interaction.guild_id,
@@ -506,7 +507,7 @@ class IdeaModal(nextcord.ui.Modal):
         await logstool.Logs(interaction.guild).create_idea(interaction.user, idea, image)
 
 
-@to_async
+@AsyncSterilization
 class IdeaView(nextcord.ui.View):
     async def __init__(self, guild_id: int = None):
         super().__init__(timeout=None)

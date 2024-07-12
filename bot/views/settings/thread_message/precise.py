@@ -10,7 +10,7 @@ from bot.languages import i18n
 from bot.databases import GuildDateBases
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class ThreadData(DefaultSettingsView):
     async def __init__(self, channel: nextcord.abc.GuildChannel, channel_data) -> None:
         self.channel_data = channel_data

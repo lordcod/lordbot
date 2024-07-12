@@ -4,11 +4,12 @@ import nextcord
 
 from bot.languages import i18n
 from bot.databases import GuildDateBases
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.resources.ether import Emoji
 
 
-@to_async
+@AsyncSterilization
 class DelCatView(nextcord.ui.View):
     async def __init__(
         self,
@@ -47,10 +48,6 @@ class DelCatView(nextcord.ui.View):
                 self.locale, "delcat.accept.description", count=len(self.category.channels)),
             color=0x57F287
         )
-
-        for channel in self.category.channels:
-            asyncio.create_task(channel.delete())
-        await self.category.delete()
 
         await interaction.response.edit_message(embed=embed, view=None)
 

@@ -1,10 +1,7 @@
 import logging
 import sys
-import traceback
-from types import TracebackType
 import nextcord
 from nextcord.ext import commands
-from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
@@ -123,15 +120,6 @@ class CommandEvent(commands.Cog):
         interaction: nextcord.Interaction,
         exception: nextcord.ApplicationError
     ) -> None:
-        """|coro|
-
-        The default application command error handler provided by the bot.
-
-        By default this prints to :data:`~sys.stderr` however it could be
-        overridden to have a different implementation.
-
-        This only fires if you do not specify any listeners for command error.
-        """
         if interaction.application_command is None:
             return  # Not supposed to ever happen
 
@@ -145,8 +133,7 @@ class CommandEvent(commands.Cog):
         _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=exception)
 
     async def on_command_error(self, ctx: commands.Context, error):
-        CommandError = CallbackCommandError(ctx, error)
-        await CommandError.process()
+        await CallbackCommandError.process(ctx, error)
 
     async def on_error(self, event, *args, **kwargs):
         _log.error(

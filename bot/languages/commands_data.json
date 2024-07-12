@@ -2,7 +2,7 @@
     "categories_emoji": {
         "economy": "💎",
         "major": "👑",
-        "voice": "🎤",
+        "music": "🎵",
         "moderation": "⚠",
         "reactions": "🎭"
     },
@@ -29,7 +29,7 @@
             "pl": "Major",
             "tr": "Büyük"
         },
-        "voice": {
+        "music": {
             "ru": "Голос",
             "en": "Voice",
             "id": "Suara",
@@ -709,7 +709,7 @@
         },
         {
             "name": "join",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [],
             "descriptrion": {
@@ -738,7 +738,7 @@
         },
         {
             "name": "leave",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [],
             "descriptrion": {
@@ -767,7 +767,7 @@
         },
         {
             "name": "play",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [
                 "<title/url>"
@@ -828,7 +828,7 @@
         },
         {
             "name": "stop",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [],
             "descriptrion": {
@@ -857,7 +857,7 @@
         },
         {
             "name": "pause",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [],
             "descriptrion": {
@@ -886,7 +886,7 @@
         },
         {
             "name": "resume",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [],
             "descriptrion": {
@@ -915,7 +915,7 @@
         },
         {
             "name": "volume",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [
                 "<volume>"
@@ -1457,7 +1457,7 @@
         },
         {
             "name": "skip",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [],
             "descriptrion": {
@@ -1671,7 +1671,7 @@
         },
         {
             "name": "move",
-            "category": "voice",
+            "category": "music",
             "aliases": [],
             "arguments": [
                 {

@@ -15,6 +15,11 @@ if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
 _log = logging.getLogger(__name__)
+_log.handlers.clear()
+handler = logging.FileHandler(f"logs/{__name__}.log")
+handler.stream.write('')
+handler.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
+_log.addHandler(handler)
 
 
 class TwNoti:
@@ -110,6 +115,8 @@ class TwNoti:
             if with_started:
                 self.twitch_streaming.append(uid)
 
+        _log.trace('Started twitch parsing, cheking: %s, current strems: %s', self.usernames,  self.twitch_streaming)
+
         while self.running:
             await asyncio.sleep(self.heartbeat_timeout)
             self.last_heartbeat = time.time()
@@ -117,6 +124,9 @@ class TwNoti:
             tasks = []
             for uid in self.usernames:
                 with_started, data = await self.is_streaming(uid)
+
+                _log.trace('Fetched from %s data %s %s', uid, with_started, data)
+
                 if with_started and uid not in self.twitch_streaming:
                     self.twitch_streaming.append(uid)
                     tasks.append(self.callback_on_start(data))

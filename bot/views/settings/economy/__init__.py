@@ -1,7 +1,8 @@
 import nextcord
 
 from bot.misc.time_transformer import display_time
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.resources.info import DEFAULT_ECONOMY_SETTINGS
 
 from .emoji import EmojiView
@@ -14,9 +15,29 @@ from bot.databases import GuildDateBases
 from bot.views import settings_menu
 
 
-@to_async
-class DropDown(nextcord.ui.StringSelect):
-    async def __init__(self):
+class EmojiDropDown(nextcord.ui.StringSelect):
+    def __init__(self, emoji: str):
+        options = [
+            nextcord.SelectOption(
+                label='Econonmy emoji',
+                value='emoji',
+                emoji=emoji,
+            ),
+        ]
+
+        super().__init__(
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+
+@AsyncSterilization
+class ChooseDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id: int):
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         options = [
             nextcord.SelectOption(
                 label='Change the amount of bonuses',
@@ -53,7 +74,7 @@ class DropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class Economy(DefaultSettingsView):
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -72,9 +93,12 @@ class Economy(DefaultSettingsView):
             color=color
         )
         self.embed.add_field(
-            name="Inforamtion",
+            name="Information about the store",
+            value=f""
+        )
+        self.embed.add_field(
+            name="Economy Information",
             value=(
-                f"Econonmy emoji: {self.es.get('emoji')}\n"
                 f"Daily reward: {self.es.get('daily')}\n"
                 f"Weekly reward: {self.es.get('weekly')}\n"
                 f"Monthly reward: {self.es.get('monthly')}\n"
@@ -88,7 +112,8 @@ class Economy(DefaultSettingsView):
 
         super().__init__()
 
-        economy_dd = await DropDown()
+        self.add_item(EmojiDropDown(self.es.get('emoji')))
+        economy_dd = await ChooseDropDown(guild.id)
         self.add_item(economy_dd)
 
         if operate:

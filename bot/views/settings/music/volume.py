@@ -7,7 +7,7 @@ from .._view import DefaultSettingsView
 from bot.languages import i18n
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class VolumeModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int, value: int) -> None:
         gdb = GuildDateBases(guild_id)
@@ -37,7 +37,7 @@ class VolumeModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class VolumeView(DefaultSettingsView):
     embed: nextcord.Embed
 
