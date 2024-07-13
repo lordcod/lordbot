@@ -11,7 +11,7 @@ from bot.views import settings_menu
 from bot.databases import GuildDateBases
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class MyIWMModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -44,7 +44,7 @@ class MyIWMModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class IWMDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -78,7 +78,7 @@ class IWMDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class MessageModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -103,7 +103,7 @@ class MessageModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class ChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
@@ -129,7 +129,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class WelcomerView(DefaultSettingsView):
     embed: nextcord.Embed
 
@@ -201,8 +201,8 @@ class WelcomerView(DefaultSettingsView):
 
         content: str = greeting_message.get('message')
 
-        guild_payload = utils.GuildPayload(interaction.guild).to_dict()
-        member_payload = utils.MemberPayload(interaction.user).to_dict()
+        guild_payload = utils.GuildPayload(interaction.guild)._to_dict()
+        member_payload = utils.MemberPayload(interaction.user)._to_dict()
         data_payload = guild_payload | member_payload
 
         message_format = utils.lord_format(content, data_payload)

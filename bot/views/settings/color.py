@@ -1,7 +1,8 @@
 import nextcord
 from bot.databases import GuildDateBases
 import re
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
 from bot.resources.info import DEFAULT_COLOR
@@ -10,7 +11,7 @@ from bot.languages import i18n
 HEX_REGEX = re.compile(r'#?([0-9a-fA-F]{6})')
 
 
-@to_async
+@AsyncSterilization
 class Modal(nextcord.ui.Modal):
     async def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -43,7 +44,7 @@ class Modal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class ColorView(DefaultSettingsView):
     embed: nextcord.Embed
 

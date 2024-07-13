@@ -8,11 +8,11 @@ from bot.databases import GuildDateBases
 from bot.misc import utils
 from bot.views import giveaway as views_giveaway
 
-VOICE_STATE_DB = localdb.get_table('voice_state')
-SCORE_STATE_DB = localdb.get_table('score')
-
 
 class GiveawayTypesChecker:
+    def __new__(cls) -> None:
+        return None
+
     def __init__(self, types: Dict[int, Any], giveaway: 'GiveawayData', member: nextcord.Member) -> None:
         self.member = member
         self.giveaway_data = giveaway

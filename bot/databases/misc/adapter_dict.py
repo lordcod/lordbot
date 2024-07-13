@@ -1,10 +1,13 @@
 
+import contextlib
 from enum import StrEnum
 import orjson
-from typing import Any, Dict, Union
+from typing import Any,  Union
 import psycopg2
 from psycopg2._psycopg import ISQLQuote, QuotedString
 import psycopg2._psycopg
+
+from bot.databases.misc.error_handler import on_error
 
 
 class NumberFormatType(StrEnum):
@@ -38,6 +41,22 @@ class QuotedJson():
         return self.getquoted().decode('ascii', 'replace')
 
 
+class FullJson:
+    def __init__(self, overnumber: bool = False) -> None:
+        self.overnumber = overnumber
+        self.encoding = 'utf-8'
+
+    def loads(self, dict_var):
+        data = Json.loads(dict_var)
+        data = NumberFormating.loads(data, self.overnumber)
+        return data
+
+    def dumps(self, dict_var):
+        data = NumberFormating.dumps(dict_var)
+        data = Json.dumps(data)
+        return data
+
+
 class Json:
     @staticmethod
     def loads(data) -> dict:
@@ -55,6 +74,7 @@ class Json:
         try:
             return orjson.dumps(data).decode()
         except orjson.JSONEncodeError:
+            print(f'Decode error {data!r}')
             return data
 
 
@@ -68,7 +88,12 @@ class NumberFormating:
         return number
 
     @staticmethod
-    def decode_number(value: str) -> Union[int, float, str]:
+    def decode_number(value: str, over: bool) -> Union[int, float, str]:
+        if isinstance(value, str) and over:
+            with contextlib.suppress(BaseException):
+                return int(value)
+            with contextlib.suppress(BaseException):
+                return float(value)
         if not (isinstance(value, str) and
                 value.startswith("__CONVERT_NUMBER__ ")):
             return value
@@ -85,17 +110,19 @@ class NumberFormating:
                 return value
 
     @staticmethod
-    def loads(data: Dict[str, Any]):
+    @on_error()
+    def loads(data: Any, over: bool = False):
         if not isinstance(data, dict):
             return data
         new_data = {}
         for key, value in data.items():
             new_data[NumberFormating.decode_number(
-                key)] = NumberFormating.loads(value)
+                key, over)] = NumberFormating.loads(value, over)
         return new_data
 
     @staticmethod
-    def dumps(data: dict):
+    @on_error()
+    def dumps(data: Any):
         if not isinstance(data, dict):
             return data
         new_data = {}

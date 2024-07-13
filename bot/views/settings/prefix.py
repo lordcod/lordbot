@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from ._view import DefaultSettingsView
 
@@ -10,7 +11,7 @@ from bot.resources.info import DEFAULT_PREFIX
 from bot.languages import i18n
 
 
-@to_async
+@AsyncSterilization
 class Modal(nextcord.ui.Modal):
     async def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
@@ -36,7 +37,7 @@ class Modal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class PrefixView(DefaultSettingsView):
     embed: nextcord.Embed
 

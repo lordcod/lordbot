@@ -1,7 +1,8 @@
 import nextcord
 
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from .modal import ModalBuilder
 from .. import reactions
@@ -10,7 +11,7 @@ from .._view import DefaultSettingsView
 from bot.databases import GuildDateBases
 
 
-@to_async
+@AsyncSterilization
 class ReactData(DefaultSettingsView):
     async def __init__(self, channel: nextcord.TextChannel, channel_data: dict) -> None:
         self.gdb = GuildDateBases(channel.guild.id)

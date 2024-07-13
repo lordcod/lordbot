@@ -44,32 +44,16 @@ def filter_bool(texts: list) -> list:
     ))
 
 
-_message_log: Dict[Tuple[int, int], asyncio.Future] = {}
-
-
 async def pre_message_delete_log(message: nextcord.Message):
     moderator: Optional[nextcord.Member] = None
-    loop = asyncio.get_event_loop()
-    future = loop.create_future()
-    _message_log[(message.channel.id, message.author.id)] = future
 
-    try:
-        await asyncio.wait_for(future, timeout=1)
-    except asyncio.TimeoutError:
-        pass
-    else:
-        moderator = future.result()
-    finally:
-        _message_log.pop((message.channel.id, message.author.id), None)
+    entry = (await message.guild.audit_logs(limit=1).flatten())[0]
+    if (entry.action == nextcord.AuditLogAction.message_delete
+        and entry.extra.channel == message.channel
+            and message.author == entry.target):
+        moderator = entry.user
 
     await Logs(message.guild).delete_message(message, moderator)
-
-
-async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: int, author_id: int) -> None:
-    try:
-        _message_log[(channel_id, author_id)].set_result(moderator)
-    except KeyError:
-        pass
 
 
 class Logs:

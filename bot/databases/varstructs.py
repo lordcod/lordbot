@@ -1,11 +1,16 @@
 from __future__ import annotations
+
+
 from typing import (
     TYPE_CHECKING,
+    Any,
+    Literal,
     Optional,
     List,
     TypedDict,
     Dict,
     Tuple,
+    Union,
 )
 
 if TYPE_CHECKING:
@@ -67,3 +72,116 @@ class ReactionRoleItemPayload(TypedDict):
 
 
 ReactionRolePayload = Dict[int, ReactionRoleItemPayload]
+
+Message = Union[str, Dict[str, Any]]
+
+
+class TicketsMessagesPayload(TypedDict):
+    panel: Message
+    open: Message
+    close: Message
+    reopen: Message
+    delete: Message
+
+
+class TicketsNamesPayload(TypedDict):
+    open: Optional[str]
+    close: Optional[str]
+
+
+class ButtonPayload(TypedDict):
+    label: Optional[str]
+    emoji: Optional[str]
+    style: Optional[Literal[1, 2, 3, 4, 5]]
+
+
+class SelectOptionPayload(TypedDict):
+    label: str
+    description: Optional[str]
+    emoji: Optional[str]
+
+
+class TicketsButtonsPayload(TypedDict):
+    category_placeholder: str
+    modal_placeholder: str
+    faq_placeholder: str
+    faq_option: SelectOptionPayload
+    faq_button_open: ButtonPayload
+    faq_button_create: ButtonPayload
+    delete_button: ButtonPayload
+    reopen_button: ButtonPayload
+    close_button: ButtonPayload
+
+
+class FaqItemPayload(SelectOptionPayload, total=True):
+    response: Message
+
+
+class FaqPayload(TypedDict):
+    type: Optional[Literal[1, 2]]
+    items:  List[FaqItemPayload]
+
+
+class ModalItemPayload(TypedDict):
+    label: str
+    style: Optional[Literal[1, 2]]
+    required: Optional[str]
+    placeholder: Optional[str]
+    default_value: Optional[str]
+    min_lenght: Optional[int]
+    max_lenght: Optional[int]
+
+
+class ButtonActionPayload(ButtonPayload, total=True):
+    action: str
+    data: Any
+
+
+class PartialCategoryPayload(TypedDict):
+    names: TicketsNamesPayload
+    messages: TicketsMessagesPayload
+    buttons: TicketsButtonsPayload
+    actions_buttons: List[ButtonActionPayload]
+    type: Optional[Literal[1, 2]]
+    permissions: Optional[Dict[int, Tuple[int, int]]]
+    category_id: Optional[int]
+    closed_category_id: Optional[int]
+    moderation_roles: Optional[List[int]]
+    user_closed: Optional[bool]
+    moderation_mention: Optional[bool]
+    approved_roles: Optional[List[int]]
+    saving_history: Optional[bool]
+    auto_archived: Optional[int]
+    modals: Optional[List[ModalItemPayload]]
+    creating_embed_inputs: Optional[bool]
+    user_tickets_limit: Optional[int]
+
+
+class CategoryPayload(PartialCategoryPayload, total=True):
+    label: str
+    channel_id: Optional[int] = None
+    description: Optional[str] = None
+    emoji: Optional[str] = None
+
+
+class TicketsItemPayload(PartialCategoryPayload, total=True):
+    channel_id: int
+    message_id: int
+    faq: Optional[FaqPayload]
+    categories: Optional[List[CategoryPayload]]
+    enabled: Optional[bool]
+    global_user_tickets_limit: Optional[int]
+    tickets_limit: Optional[int]
+
+
+TicketsPayload = Dict[int, TicketsItemPayload]
+
+
+class UserTicketPayload(TypedDict):
+    owner_id: int
+    channel_id: int
+    ticket_id: int
+    category: CategoryPayload
+    inputs: Dict[str, str]
+    status: int
+    index: int

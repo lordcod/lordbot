@@ -2,10 +2,10 @@ import nextcord
 
 from bot.languages import help as help_info
 from bot.databases import GuildDateBases
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
 
 
-@to_async
+@AsyncSterilization
 class HelpDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -44,7 +44,7 @@ class HelpDropDown(nextcord.ui.StringSelect):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-@to_async
+@AsyncSterilization
 class HelpView(nextcord.ui.View):
     async def __init__(self, guild_id) -> None:
         super().__init__()

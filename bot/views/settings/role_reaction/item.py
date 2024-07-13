@@ -5,13 +5,14 @@ import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import ReactionRoleItemPayload
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from .._view import DefaultSettingsView
 from .. import role_reaction
 from ..set_reaction import fetch_reaction
 
 
-@to_async
+@AsyncSterilization
 class RoleReactionRegisterItemDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload, selected_role: Optional[nextcord.Role] = None) -> None:
         gdb = GuildDateBases(guild.id)
@@ -32,11 +33,11 @@ class RoleReactionRegisterItemDropDown(nextcord.ui.StringSelect):
             if (role := guild.get_role(role_id))
         ]
 
+        disabled = 0 >= len(options)
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
-            self.disabled = True
 
-        super().__init__(placeholder=i18n.t(locale, "settings.role-reaction.item.role-set-dropdown"), options=options)
+        super().__init__(placeholder=i18n.t(locale, "settings.role-reaction.item.role-set-dropdown"), options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         role_id = int(self.values[0])
@@ -47,7 +48,7 @@ class RoleReactionRegisterItemDropDown(nextcord.ui.StringSelect):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class RoleReactionItemDropDown(nextcord.ui.RoleSelect):
     async def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload) -> None:
         gdb = GuildDateBases(guild.id)
@@ -90,7 +91,7 @@ class RoleReactionItemDropDown(nextcord.ui.RoleSelect):
             await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class RoleReactionItemView(DefaultSettingsView):
     embed: nextcord.Embed = None
 

@@ -1,2 +1,2 @@
 from .closes import CloseTicketView
-from .delop import DelopTicketView
+from .delop import ControllerTicketView

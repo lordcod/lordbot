@@ -21,7 +21,7 @@ class GuildsDB(Table):
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
     invites = Colum(data_type=PostType.JSON, default="{}")
     giveaways = Colum(data_type=PostType.JSON, default="{}")
-    tickettool = Colum(data_type=PostType.JSON, default="{}")
+    tickets = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
     auto_translate = Colum(data_type=PostType.JSON, default="{}")

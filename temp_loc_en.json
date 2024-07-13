@@ -1,0 +1,18 @@
+{
+    "music.player.out.previous": "I'll get out of the voice <t:{time:.0f}:R>",
+    "music.player.out.last": "The music was over and I left the channel",
+    "music.player.message.status": "Status",
+    "music.player.message.listen": "Listening for {passtime} / {fulltime}",
+    "music.player.message.pause": "Pause at {passtime} / {fulltime}",
+    "music.player.message.volume": "Volume: {volume}",
+    "music.player.loading": "{Emoji.loading} Uploading a track",
+    "music.player.placeholder": "Select a track from the queue",
+    "music.player.select": "{Emoji.yandex_music} We found {lenght} tracks according to your request",
+    "music.player.added": "The track has been added to the queue!",
+    "music.error.not_in_channel": "{Emoji.cross} You are not in the voice channel",
+    "music.error.already": "{Emoji.cross} The bot is already busy",
+    "music.error.bot_not_in_channel": "{Emoji.cross} The bot is not in the voice channel",
+    "music.error.track_not_found": "{Emoji.cross} No track number {index} found",
+    "music.error.current_track": "{Emoji.cross} This track is already playing\nIf you want to start listening to a track from scratch, use the UI panel",
+    "music.error.search": "{Emoji.cross} No tracks were found for your query"
+}

@@ -1,7 +1,7 @@
-
+import logging
 import nextcord
 from nextcord.ext import commands, application_checks
-from nextcord.utils import oauth_url
+from nextcord.utils import oauth_url, format_dt
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
@@ -22,6 +22,9 @@ import random
 from typing import Callable, Optional
 
 translator = googletrans.Translator()
+
+_log = logging.getLogger(__name__)
+_log.addHandler(logging.FileHandler('logs/presence.log', 'a+'))
 
 
 class Basic(commands.Cog):

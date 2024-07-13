@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from .precise import CommandData
 from bot.views.settings._view import DefaultSettingsView
@@ -10,7 +11,7 @@ from bot.views import settings_menu
 from bot.languages import help, i18n
 
 
-@to_async
+@AsyncSterilization
 class PermDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id, name):
         self.gdb = GuildDateBases(guild_id)
@@ -41,7 +42,7 @@ class PermDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class CommandsDataView(DefaultSettingsView):
     foundation: list = list(help.categories)
     step: int

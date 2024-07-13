@@ -9,7 +9,7 @@ from .. import role_reaction
 from .._view import DefaultSettingsView
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class RoleReactionSelectorChannelDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
@@ -30,7 +30,7 @@ class RoleReactionSelectorChannelDropDown(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, selected_message_id: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild.id)
@@ -52,11 +52,11 @@ class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
             for mes in messages
         ]
 
+        disabled = 0 >= len(options)
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
-            self.disabled = True
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.role-reaction.selector.message'), options=options)
+        super().__init__(placeholder=i18n.t(locale, 'settings.role-reaction.selector.message'), options=options, disabled=disabled)
 
     @staticmethod
     def get_content(mes: nextcord.Message) -> Optional[str]:
@@ -77,7 +77,7 @@ class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class RoleReactionSelectorView(DefaultSettingsView):
     embed: nextcord.Embed = None
 

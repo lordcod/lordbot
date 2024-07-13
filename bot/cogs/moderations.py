@@ -242,7 +242,7 @@ class Moderations(commands.Cog):
         )
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         role_name = name or role.name
         new_role = await interaction.guild.create_role(

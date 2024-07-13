@@ -4,14 +4,15 @@ import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import ReactionRolePayload
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from . import item
 from .selector import RoleReactionSelectorView
 from bot.views import settings_menu
 from .._view import DefaultSettingsView
 
 
-@to_async
+@AsyncSterilization
 class RoleReactionDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild, selected_message_id: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild.id)
@@ -28,11 +29,11 @@ class RoleReactionDropDown(nextcord.ui.StringSelect):
                 default=message_id == selected_message_id
             ))
 
+        disabled = 0 >= len(options)
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
-            self.disabled = True
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.role-reaction.role-view.select'), options=options)
+        super().__init__(placeholder=i18n.t(locale, 'settings.role-reaction.role-view.select'), options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         message_id = int(self.values[0])
@@ -41,7 +42,7 @@ class RoleReactionDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class RoleReactionView(DefaultSettingsView):
     embed: nextcord.Embed
 

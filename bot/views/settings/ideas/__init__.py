@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.views.settings._view import DefaultSettingsView
 from .distribution import distrubuters
 
@@ -12,7 +13,7 @@ from bot.languages import i18n
 from bot.misc.time_transformer import display_time
 
 
-@to_async
+@AsyncSterilization
 class DropDown(nextcord.ui.Select):
     async def __init__(self, guild_id):
         self.gdb = GuildDateBases(guild_id)
@@ -52,7 +53,7 @@ class DropDown(nextcord.ui.Select):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class IdeasView(DefaultSettingsView):
     embed: nextcord.Embed
 

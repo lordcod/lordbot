@@ -4,10 +4,10 @@ from ... import ideas
 from bot.views.settings._view import DefaultSettingsView
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
-from bot.misc.utils import TimeCalculator, to_async
+from bot.misc.utils import TimeCalculator, AsyncSterilization
 
 
-@to_async
+@AsyncSterilization
 class CooldownModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int):
         self.gdb = GuildDateBases(guild_id)
@@ -32,7 +32,7 @@ class CooldownModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class CooldownView(DefaultSettingsView):
     embed: nextcord.Embed = None
 

@@ -1,7 +1,7 @@
 from typing import Optional
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
 
 
 from .modal import ModalBuilder
@@ -12,7 +12,7 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
-@to_async
+@AsyncSterilization
 class DropDownBuilder(nextcord.ui.ChannelSelect):
     async def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -40,7 +40,7 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(view=view)
 
 
-@to_async
+@AsyncSterilization
 class InstallEmojiView(DefaultSettingsView):
     async def __init__(self, guild_id: int, channel_id: Optional[int] = None) -> None:
         self.channel_id = channel_id
