@@ -30,6 +30,7 @@ def start_bot():
     try:
         if token_name := flags.get('token'):
             token = getattr(env.Tokens, 'token_'+token_name)
+            print('token_'+token_name)
         else:
             token = env.Tokens.token
         print(flags, token)
