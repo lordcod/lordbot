@@ -13,7 +13,7 @@ from bot.databases.misc.adapter_dict import FullJson
 
 _log = logging.getLogger(__name__)
 
-HEARTBEAT_UPDATE = 18
+HEARTBEAT_UPDATE = 180
 last_updated = time.time()+HEARTBEAT_UPDATE
 handler: Optional[asyncio.TimerHandle] = None
 current_updated_task = {}
