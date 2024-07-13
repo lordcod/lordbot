@@ -32,6 +32,7 @@ def start_bot():
             token = getattr(env.Tokens, 'token_'+token_name)
         else:
             token = env.Tokens.token
+        print(flags, token)
         bot.run(token)
     except nextcord.HTTPException:
         return
