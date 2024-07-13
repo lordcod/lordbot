@@ -337,7 +337,8 @@ class TranslatorFlags:
 
     def __call__(self, text: str) -> Any:
         args = text.split()
-        self.flags = dict(getopt.getopt(args, '', self.longopts)[0])
+        self.flags = dict(map(lambda item: (item[0].removeprefix(
+            '--'), item[1]), getopt.getopt(args, '', self.longopts)[0]))
 
     def get(self, key: str):
         if key in self.flags and self.flags[key] == '':

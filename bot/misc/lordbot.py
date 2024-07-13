@@ -19,7 +19,7 @@ from bot.databases.config import host, port, user, password, db_name
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
-from bot.misc.utils import LordTimeHandler
+from bot.misc.utils import LordTimeHandler, TranslatorFlags
 from bot.languages import i18n
 from bot.misc.noti import TwitchNotification, YoutubeNotification
 
@@ -46,7 +46,7 @@ class LordBot(commands.AutoShardedBot):
     guild_timer_handlers = {}
 
     def __init__(self) -> None:
-        flags = dict(getopt.getopt(sys.argv[1:], '', ['shards=', 'token='])[0])
+        flags = TranslatorFlags('shards=', 'token=')(sys.argv[1:])
 
         shard_ids, shard_count = (flags.get(
             'shards') or os.getenv('shards') or input("Shared info: ")).split("/")

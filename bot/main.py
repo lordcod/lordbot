@@ -7,6 +7,8 @@ from bot.misc.lordbot import LordBot
 
 import os
 
+from bot.misc.utils import TranslatorFlags
+
 bot = LordBot()
 
 
@@ -23,17 +25,15 @@ def load_dir(dirpath: str) -> None:
 
 
 def start_bot():
-    flags = dict(getopt.getopt(sys.argv[1:], '', ['token=', 'shards='])[0])
+    flags = TranslatorFlags('shards=', 'token=')(sys.argv[1:])
 
     load_dir("./bot/cogs")
 
     try:
         if token_name := flags.get('token'):
             token = getattr(env.Tokens, 'token_'+token_name)
-            print('token_'+token_name)
         else:
             token = env.Tokens.token
-        print(flags, token)
         bot.run(token)
     except nextcord.HTTPException:
         return
