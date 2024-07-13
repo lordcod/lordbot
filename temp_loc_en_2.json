@@ -317,7 +317,7 @@
     "music.player.message.status": "Status",
     "music.player.message.listen": "Listening for {passtime} / {fulltime}",
     "music.player.message.pause": "Pause at {passtime} / {fulltime}",
-    "music.player.message.volume": "Volume: {volume}",
+    "music.player.message.volume": "Volume",
     "music.player.loading": "{Emoji.loading} Uploading a track",
     "music.player.placeholder": "Select a track from the queue",
     "music.player.select": "{Emoji.yandex_music} We found {lenght} tracks according to your request",

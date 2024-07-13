@@ -1,0 +1,18 @@
+{
+    "music.player.out.previous": "Я уйду из войса <t:{time:.0f}:R>",
+    "music.player.out.last": "Музыка закончилась, и я вышел канал",
+    "music.player.message.status": "Статус",
+    "music.player.message.listen": "Прослушивание в течение {passtime} / {fulltime}",
+    "music.player.message.pause": "Пауза на {passtime} / {fulltime}",
+    "music.player.message.volume": "Объем",
+    "music.player.loading": "{Emoji.loading} Загрузка трека",
+    "music.player.placeholder": "Выберите трек из очереди",
+    "music.player.select": "{{Emoji.yandex_music} Мы нашли треки {lenght} по вашему запросу",
+    "music.player.added": "Трек был добавлен в очередь!",
+    "music.error.not_in_channel": "{Emoji.cross} Вы не подключены к голосовому каналу",
+    "music.error.already": "{Emoji.cross} Бот уже занят",
+    "music.error.bot_not_in_channel": "{Emoji.cross} Бот не подключен к голосовому каналу",
+    "music.error.track_not_found": "{Emoji.cross} Не найден трек-номер {index}",
+    "music.error.current_track": "{Emoji.cross} Этот трек уже проигрывается\nЕсли вы хотите начать прослушивание трека заново, воспользуйтесь панелью пользовательского интерфейса",
+    "music.error.search": "{Emoji.cross} По вашему запросу не найдено ни одного трека"
+}
