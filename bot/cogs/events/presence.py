@@ -118,6 +118,7 @@ class PresenceEvent(commands.Cog):
             )
 
         if embed is not None:
+            return
             channel = self.bot.get_channel(1210578994726969384)
             await channel.send(embed=embed)
 
