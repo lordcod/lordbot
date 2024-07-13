@@ -39,11 +39,12 @@ class YtNoti:
         _log.debug('%s publish new video: %s (%s)',
                    video.channel.name, video.title, video.url)
         if video.channel.id == 'UC13nzpbDHuNhW4rmAVl7JhA':
-            guild = self.bot.get_guild(1179069504186232852)
-            channel = guild.get_channel(1260965150953967637)
-        else:
             guild = self.bot.get_guild(1252627796929282118)
             channel = guild.get_channel(1252984316485570570)
+        else:
+            guild = self.bot.get_guild(1178756879808221214)
+            channel = guild.get_channel(1261661459234947074)
+
         await channel.send(f'Тут у {video.channel.name} новое видео вышло, го смотреть?\n'
                            f'{video.url}\n'
                            f'|| {guild.default_role.mention} ||')

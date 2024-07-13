@@ -25,7 +25,7 @@ class VoiceStateEvent(commands.Cog):
             )
         if before.channel is not None and after.channel is None:
             await asyncio.gather(
-                TempVoiceModule.connect_voice(member, before.channel),
+                TempVoiceModule.disconnect_voice(member, before.channel),
                 self.disconnect_from_voice(member),
                 self.check_bot_player(before.channel)
             )

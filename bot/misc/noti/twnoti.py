@@ -42,11 +42,11 @@ class TwNoti:
     async def callback_on_start(self, stream: Stream):
         _log.debug('%s started stream', stream.user_name)
         if stream.user_name == 'f1ll666':
-            guild = self.bot.get_guild(1179069504186232852)
-            channel = guild.get_channel(1260965150953967637)
-        else:
             guild = self.bot.get_guild(1252627796929282118)
             channel = guild.get_channel(1252984316485570570)
+        else:
+            guild = self.bot.get_guild(1178756879808221214)
+            channel = guild.get_channel(1261661459234947074)
 
         await channel.send(f'{stream.user_name} запустил стрим, скорее присоединяйся\n'
                            f'{stream.url}\n'
