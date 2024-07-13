@@ -25,7 +25,8 @@ def load_dir(dirpath: str) -> None:
 
 
 def start_bot():
-    flags = TranslatorFlags(['shards=', 'token='])(sys.argv[1:])
+    flags = dict(map(lambda item: (item[0].removeprefix(
+        '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards='])[0]))
 
     load_dir("./bot/cogs")
 

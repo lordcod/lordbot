@@ -46,7 +46,8 @@ class LordBot(commands.AutoShardedBot):
     guild_timer_handlers = {}
 
     def __init__(self) -> None:
-        flags = TranslatorFlags(['shards=', 'token='])(sys.argv[1:])
+        flags = dict(map(lambda item: (item[0].removeprefix(
+            '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards='])[0]))
 
         shard_ids, shard_count = (flags.get(
             'shards') or os.getenv('shards') or input("Shared info: ")).split("/")
