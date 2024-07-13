@@ -2307,7 +2307,7 @@
         "music.player.message.volume": "Громкость",
         "music.player.loading": "{Emoji.loading} Загрузка трека",
         "music.player.placeholder": "Выберите трек из очереди",
-        "music.player.select": "{{Emoji.yandex_music} Мы нашли треки {lenght} по вашему запросу",
+        "music.player.select": "{Emoji.yandex_music} Мы нашли треки {lenght} по вашему запросу",
         "music.player.added": "Трек был добавлен в очередь!",
         "music.error.not_in_channel": "{Emoji.cross} Вы не подключены к голосовому каналу",
         "music.error.already": "{Emoji.cross} Бот уже занят",
