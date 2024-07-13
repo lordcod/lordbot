@@ -157,14 +157,14 @@ class LordBot(commands.AutoShardedBot):
         async with self.session.post('https://graphql.jino.ru/user/', json=data, headers=headers) as res:
             json = await res.json()
 
-        with_auth = True
-        with contextlib.suppress(KeyError, IndexError):
-            with_auth = json['errors'][0]['extensions']['code'] != 'AuthenticationFailed'
+        with_auth = len(json.get('errors', [])) > 0
 
         if with_auth:
-            _log.trace('Successfully adding the IP address %s to the database', ip)
+            _log.trace(
+                'Successfully adding the IP address %s to the database', ip)
         else:
-            _log.warning('The JINO token needs to be updated. The IP address was not added to the database.')
+            _log.warning(
+                'The JINO token needs to be updated. The IP address was not added to the database.')
 
     async def listen_on_ready(self) -> None:
         _log.debug('Listen on ready')

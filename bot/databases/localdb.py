@@ -3,6 +3,7 @@ import asyncio
 import contextlib
 from enum import Enum
 import logging
+from pprint import pformat
 import time
 from typing import Optional
 import aiocache
@@ -72,7 +73,8 @@ class UpdatedCache(aiocache.SimpleMemoryCache):
             return
 
         if last_updated > time.time():
-            handler = loop.call_later(last_updated-time.time(), asyncio.create_task, _update_db(self.__tablename__))
+            handler = loop.call_later(
+                last_updated-time.time(), asyncio.create_task, _update_db(self.__tablename__))
             return
 
         await _update_db(self.__tablename__)
@@ -92,7 +94,8 @@ async def _update_db(tablename) -> None:
     global last_updated, handler
     last_updated = time.time()+HEARTBEAT_UPDATE
     handler = None
-    _log.trace('Updated %s databases requests from %s', ', '.join(current_updated_task.keys()), tablename)
+    _log.trace('Updated %s databases requests from %s',
+               ', '.join(current_updated_task.keys()), tablename)
     with contextlib.suppress(BaseException):
         await cache.multi_set(current_updated_task.items())
         current_updated_task.clear()
@@ -115,9 +118,11 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
             last_exc = exc
         else:
             _log.trace('Fetched databases %s', table_name)
+            data = FullJson().loads(data)
             break
         await asyncio.sleep(1)
     else:
-        _log.trace('Getting the database %s ended with an error %s', table_name, type(last_exc).__name__)
+        _log.trace('Getting the database %s ended with an error %s',
+                   table_name, type(last_exc).__name__)
     db._cache = data
     return db

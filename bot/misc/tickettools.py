@@ -16,9 +16,10 @@ from bot.views.tickets.closes import CloseTicketView
 from bot.views.tickets.delop import ControllerTicketView
 from bot.views.tickets.faq import FAQView
 from bot.views.tickets.modals import TicketsModal
-from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PERMISSIONS
+from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU, DEFAULT_TICKET_PERMISSIONS
 
 _log = logging.getLogger(__name__)
+MISSING = object()
 
 
 class TicketStatus(IntEnum):
@@ -120,9 +121,11 @@ class ModuleTicket:
     @staticmethod
     async def create_ticket_panel(channel: nextcord.TextChannel, ticket_data: Optional[TicketsItemPayload] = None):
         gdb = GuildDateBases(channel.guild.id)
+        locale = await gdb.get('language')
 
         if ticket_data is None:
-            ticket_data = DEFAULT_TICKET_PAYLOAD.copy()
+            ticket_data = DEFAULT_TICKET_PAYLOAD_RU.copy(
+            ) if locale == 'ru' else DEFAULT_TICKET_PAYLOAD.copy()
 
         panel_message = ticket_data.get('messages').get('panel')
         msg_data = await utils.generate_message(utils.lord_format(panel_message, get_payload_from_panel(channel.guild)))
@@ -131,7 +134,8 @@ class ModuleTicket:
 
         ticket_data['message_id'] = message.id
         ticket_data['channel_id'] = channel.id
-        ticket_data['category_id'] = channel.category_id
+        if ticket_data.get('category_id', MISSING) is MISSING:
+            ticket_data['category_id'] = channel.category_id
         await gdb.set_on_json('tickets', message.id, ticket_data)
 
     @staticmethod
@@ -140,11 +144,11 @@ class ModuleTicket:
         tickets: TicketsPayload = await gdb.get('tickets', {})
         ticket_data = tickets.get(message_id)
 
-        channel_id = ticket_data.get('channel_id')
+        channel_id = ticket_data['channel_id']
         channel = guild.get_channel(channel_id)
         message = channel.get_partial_message(message_id)
 
-        panel_message = ticket_data.get('messages').get('panel')
+        panel_message = ticket_data['messages']['panel']
         msg_data = await utils.generate_message(utils.lord_format(panel_message, get_payload_from_panel(guild)))
         view = await FAQView(guild.id, ticket_data)
         message = await message.edit(**msg_data, view=view)
@@ -231,7 +235,8 @@ class ModuleTicket:
         if not permission_data:
             permission_data = DEFAULT_TICKET_PERMISSIONS.copy()
 
-        parse_permissions_string(permission_data, mod_roles, guild_id, owner_id)
+        parse_permissions_string(
+            permission_data, mod_roles, guild_id, owner_id)
         parsed_data = {}
         for id, (allow, deny) in permission_data.items():
             key = self.guild.get_member(id) or self.guild.get_role(id)
@@ -286,9 +291,11 @@ class ModuleTicket:
                 message['embeds'].append(msg_embed)
 
         if ticket_type == 1:
-            _log.trace('Getted category: %s, Channel category: %s', get_data('category_id'), channel.category)
+            _log.trace('Getted category: %s, Channel category: %s',
+                       get_data('category_id'), channel.category)
             category_id = get_data('category_id')
-            category: nextcord.CategoryChannel = self.guild.get_channel(category_id)
+            category: nextcord.CategoryChannel = self.guild.get_channel(
+                category_id)
             self.ticket_channel = channel = await self.guild.create_text_channel(
                 name=name,
                 category=category,
@@ -332,7 +339,8 @@ class ModuleTicket:
         ticket_data = await self.fetch_guild_ticket()
         categories_data = ticket_data.get('categories')
         buttons = ticket_data.get('buttons')
-        user_tickets_limit = (category and category.get('user_tickets_limit')) or ticket_data.get('user_tickets_limit') or 5
+        user_tickets_limit = (category and category.get(
+            'user_tickets_limit')) or ticket_data.get('user_tickets_limit') or 5
         self.selected_category = category
 
         if len(tickets) >= user_tickets_limit:

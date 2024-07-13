@@ -20,7 +20,8 @@ _log = logging.getLogger(__name__)
 _log.handlers.clear()
 handler = logging.FileHandler(f"logs/{__name__}.log")
 handler.flush()
-handler.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
+handler.setFormatter(logging.Formatter(
+    '[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
 _log.addHandler(handler)
 
 
@@ -28,7 +29,8 @@ class YtNoti:
     def __init__(self, bot: LordBot, apikey: str = os.getenv('YOUTUBE_API_KEY')) -> None:
         self.bot = bot
         self.apikey = apikey
-        self.channel_ids = ['UC13nzpbDHuNhW4rmAVl7JhA', 'UCPCTEN8OWHdJGxfMggbyGGg']
+        self.channel_ids = ['UC13nzpbDHuNhW4rmAVl7JhA',
+                            'UCPCTEN8OWHdJGxfMggbyGGg']
         self.video_history = VideoHistory()
         self.running = True
 
@@ -36,20 +38,22 @@ class YtNoti:
         self.last_heartbeat = time.time()
 
     async def callback(self, video: Video) -> None:
-        _log.debug('%s publish new video: %s (%s)', video.channel.name, video.title, video.url)
-        if video.channel.id == 'UCPCTEN8OWHdJGxfMggbyGGg':
-            guild = self.bot.get_guild(1252627796929282118)
-            channel = guild.get_channel(1252984316485570570)
-        else:
+        _log.debug('%s publish new video: %s (%s)',
+                   video.channel.name, video.title, video.url)
+        if video.channel.id == 'UC13nzpbDHuNhW4rmAVl7JhA':
             guild = self.bot.get_guild(1179069504186232852)
             channel = guild.get_channel(1260965150953967637)
+        else:
+            guild = self.bot.get_guild(1252627796929282118)
+            channel = guild.get_channel(1252984316485570570)
         await channel.send(f'Тут у {video.channel.name} новое видео вышло, го смотреть?\n'
                            f'{video.url}\n'
                            f'|| {guild.default_role.mention} ||')
 
     def get_videos_from_body(self, body: dict) -> List[Video]:
         videos = []
-        entries = body["feed"]["entry"] if isinstance(body["feed"]["entry"], list) else [body["feed"]["entry"]]
+        entries = body["feed"]["entry"] if isinstance(
+            body["feed"]["entry"], list) else [body["feed"]["entry"]]
 
         for entry in entries:
             channel = ShortChannel(
@@ -68,13 +72,17 @@ class YtNoti:
             stats = None
             if "media:community" in entry["media:group"]:
                 stats = Stats(
-                    likes=int(entry["media:group"]["media:community"]["media:starRating"]["@count"]),
-                    views=int(entry["media:group"]["media:community"]["media:statistics"]["@views"]),
+                    likes=int(entry["media:group"]["media:community"]
+                              ["media:starRating"]["@count"]),
+                    views=int(entry["media:group"]["media:community"]
+                              ["media:statistics"]["@views"]),
                 )
 
             timestamp = Timestamp(
-                published=datetime.strptime(entry["published"], "%Y-%m-%dT%H:%M:%S%z"),
-                updated=datetime.strptime(entry["updated"], "%Y-%m-%dT%H:%M:%S%z")
+                published=datetime.strptime(
+                    entry["published"], "%Y-%m-%dT%H:%M:%S%z"),
+                updated=datetime.strptime(
+                    entry["updated"], "%Y-%m-%dT%H:%M:%S%z")
             )
 
             videos.append(Video(
@@ -150,7 +158,8 @@ class YtNoti:
             vhd = self.video_history.get_diff(videos)
             self.video_history.extend(vhd)
 
-        _log.trace('Started youtube parsing, cheking: %s, count of videos found: %s', self.channel_ids,  len(self.video_history.videos))
+        _log.trace('Started youtube parsing, cheking: %s, count of videos found: %s',
+                   self.channel_ids,  len(self.video_history.videos))
 
         while self.running:
             await asyncio.sleep(self.heartbeat_timeout)
@@ -165,5 +174,6 @@ class YtNoti:
 
                 _log.trace('Fetched from %s data %s', cid, vhd)
                 if videos:
-                    _log.trace('%s last video: %s', videos[0].channel.name, videos[0].url)
+                    _log.trace('%s last video: %s',
+                               videos[0].channel.name, videos[0].url)
             await asyncio.gather(*[self.callback(v) for v in gvhd])

@@ -143,6 +143,93 @@ DEFAULT_TICKET_PAYLOAD = {
 }
 
 
+DEFAULT_TICKET_PAYLOAD_RU = {
+    'names': {
+        'open': '{ticket.count}-ticket',
+        'close': '{ticket.count}-closed'
+    },
+    'messages': {
+        'panel': orjson.dumps({
+            "title": "Тикет",
+            "description": "Если у вас есть вопросы о работе сервера, нажмите на взаимодействие, чтобы создать запрос.",
+            "color": "{guild.color}",
+            "footer": {
+                "text": "{bot.displayName}",
+                "timestamp": "{today_dt}",
+                'icon_url': '{bot.avatar}'
+            }, "thumbnail": ""
+        }).decode(),
+        'controller': orjson.dumps({
+            "title": "Контроль заявок в службе поддержки",
+            "color": "{guild.color}",
+            "footer": {
+                "timestamp": "{today_dt}"
+            },
+        }).decode(),
+        'close': orjson.dumps({
+            "title": "Действие",
+            "description": "Заявка закрыта {member.mention}",
+            "color": 16765743,
+            "footer": {
+                "timestamp": "{today_dt}"
+            },
+        }).decode(),
+        'reopen': orjson.dumps({
+            "title": "Действие",
+            "description": "Тикет открывается с помощью {member.mention}",
+            "color": 53380,
+            "footer": {
+                "timestamp": "{today_dt}"
+            },
+        }).decode(),
+        'delete': orjson.dumps({
+            "title": "Действие",
+            "description": 'Тикет будет удален через несколько секунд',
+            "color": 16718362,
+            "footer": {
+                "timestamp": "{today_dt}"
+            },
+        }).decode(),
+        'open': '{member} Привет!',
+    },
+    'buttons': {
+        'category_placeholder': 'Выберите категорию запроса',
+        'modal_placeholder': 'Бланки тикета',
+        'faq_placeholder': 'FAQ',
+        'faq_option': {
+            'label': 'Не нашли ответа на свой вопрос?',
+            'emoji': Emoji.tickets,
+            'description': 'Нажмите, чтобы создать запрос',
+        },
+        'faq_button_open': {
+            'label': 'FAQ',
+            'emoji': Emoji.faq,
+            'style': nextcord.ButtonStyle.blurple,
+        },
+        'faq_button_create': {
+            'label': 'Создать обращение',
+            'emoji': Emoji.tickets,
+            'style': nextcord.ButtonStyle.secondary,
+        },
+        'close_button': {
+            'label': "Закрыть заявку",
+            'emoji': "🔒",
+            'style': nextcord.ButtonStyle.red,
+        },
+        'reopen_button': {
+            'label': 'Повторно открыть билет',
+            'emoji': '🔓',
+            'style': nextcord.ButtonStyle.secondary,
+        },
+        'delete_button': {
+            'label': 'Удалить заявку',
+            'emoji': '⛔',
+            'style': nextcord.ButtonStyle.red,
+        },
+
+    }
+}
+
 DEFAULT_TICKET_PERMISSIONS_PERM = {
     'moderator': nextcord.PermissionOverwrite(
         view_channel=True,
@@ -172,7 +259,8 @@ DEFAULT_TICKET_PERMISSIONS_PERM = {
     ).pair(),
     'everyone': nextcord.PermissionOverwrite(view_channel=False).pair()
 }
-DEFAULT_TICKET_PERMISSIONS = {k: (v[0].value, v[1].value) for k, v in DEFAULT_TICKET_PERMISSIONS_PERM.items()}
+DEFAULT_TICKET_PERMISSIONS = {k: (v[0].value, v[1].value)
+                              for k, v in DEFAULT_TICKET_PERMISSIONS_PERM.items()}
 
 activities_list = [
     {

@@ -340,7 +340,7 @@ class ReactionConfirmView(nextcord.ui.View):
         custom_id = interaction.data['custom_id']
         if custom_id.startswith("reactions-ideas-confirm:"):
             return True
-        return await ConfirmView.__default_class__.interaction_check(self, interaction)
+        return await ConfirmView.cls.interaction_check(self, interaction)
 
     def change_votes(self) -> None:
         self.promote.label = str(len(self.promoted_data))
@@ -570,7 +570,8 @@ class IdeaView(nextcord.ui.View):
             moderator = interaction.guild.get_member(mute_data.moderator_id)
             await interaction.response.send_message(i18n.t(locale, 'ideas.mod.permission.mute',
                                                            time=mute_data.timestamp,
-                                                           display_time=display_time(mute_data.timestamp-time.time()),
+                                                           display_time=display_time(
+                                                               mute_data.timestamp-time.time()),
                                                            moderator=moderator.mention,
                                                            reason=mute_data.reason or 'unspecified'),
                                                     ephemeral=True)

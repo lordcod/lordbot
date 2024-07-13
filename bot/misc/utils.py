@@ -284,7 +284,8 @@ class BlackjackGame:
                 res = self.calculate_result(self.dealer_cards + [card])
                 if 21 >= res:
                     win_cards.append(card)
-            _log.debug('Win cards: %s, Chance: %s', len(win_cards), len(win_cards) / len(self.cards))
+            _log.debug('Win cards: %s, Chance: %s', len(
+                win_cards), len(win_cards) / len(self.cards))
             if len(win_cards) / len(self.cards) >= 0.5:
                 self.add_dealer_card()
             else:
@@ -325,6 +326,8 @@ def lord_format(
     __value: object,
     __mapping: Mapping[str, object]
 ) -> str:
+    if isinstance(__value, dict):
+        __value = orjson.dumps(__value).decode()
     return __LordFormatingTemplate(__value).format(__mapping)
 
 

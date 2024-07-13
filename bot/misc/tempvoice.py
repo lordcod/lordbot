@@ -12,8 +12,6 @@ class TempVoiceModule:
     def __init__(self, guild: nextcord.Guild) -> None:
         ...
 
-    async def process(self, member: nextcord.Member, channel)
-
     @classmethod
     async def disconnect_voice(cls, member: nextcord.Member, channel: nextcord.VoiceChannel) -> None:
         _log.trace('%s connected voice %s', member, channel)

@@ -18,7 +18,8 @@ _log = logging.getLogger(__name__)
 _log.handlers.clear()
 handler = logging.FileHandler(f"logs/{__name__}.log")
 handler.stream.write('')
-handler.setFormatter(logging.Formatter('[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
+handler.setFormatter(logging.Formatter(
+    '[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
 _log.addHandler(handler)
 
 
@@ -34,7 +35,7 @@ class TwNoti:
         self.bot = bot
         self.client_id = client_id
         self.client_secret = client_secret
-        self.usernames = ['f1ll666']
+        self.usernames = ['f1ll666', 'dy6fuo']
         self.twitch_streaming = []
         self.running = True
         self.heartbeat_timeout = 180
@@ -42,9 +43,13 @@ class TwNoti:
 
     async def callback_on_start(self, stream: Stream):
         _log.debug('%s started stream', stream.user_name)
+        if stream.user_name == 'f1ll666':
+            guild = self.bot.get_guild(1179069504186232852)
+            channel = guild.get_channel(1260965150953967637)
+        else:
+            guild = self.bot.get_guild(1252627796929282118)
+            channel = guild.get_channel(1252984316485570570)
 
-        guild = self.bot.get_guild(1252627796929282118)
-        channel = guild.get_channel(1252984316485570570)
         await channel.send(f'{stream.user_name} запустил стрим, скорее присоединяйся\n'
                            f'{stream.url}\n'
                            f'|| {guild.default_role.mention} ||')
@@ -115,7 +120,8 @@ class TwNoti:
             if with_started:
                 self.twitch_streaming.append(uid)
 
-        _log.trace('Started twitch parsing, cheking: %s, current strems: %s', self.usernames,  self.twitch_streaming)
+        _log.trace('Started twitch parsing, cheking: %s, current strems: %s',
+                   self.usernames,  self.twitch_streaming)
 
         while self.running:
             await asyncio.sleep(self.heartbeat_timeout)
@@ -125,7 +131,8 @@ class TwNoti:
             for uid in self.usernames:
                 with_started, data = await self.is_streaming(uid)
 
-                _log.trace('Fetched from %s data %s %s', uid, with_started, data)
+                _log.trace('Fetched from %s data %s %s',
+                           uid, with_started, data)
 
                 if with_started and uid not in self.twitch_streaming:
                     self.twitch_streaming.append(uid)

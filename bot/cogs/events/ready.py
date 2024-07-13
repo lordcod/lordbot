@@ -1,6 +1,7 @@
 import logging
 from typing import Dict
 from nextcord.ext import commands
+import orjson
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import GiveawayData
@@ -29,54 +30,41 @@ class ReadyEvent(commands.Cog):
         bot.set_event(self.on_disconnect)
         super().__init__()
 
-    async def process_test(self):
-        guild_id = 1179069504186232852
-        channel_id = 1260722645603848283
-        message_id = 1260788032496468060
-        category_id = 1260722622241706064
-        guild = self.bot.get_guild(guild_id)
-        channel = guild.get_channel(channel_id)
-        gdb = GuildDateBases(guild.id)
-        ticket_data = info.DEFAULT_TICKET_PAYLOAD.copy()
-        ticket_data.update({
-            'message_id': message_id,
-            'channel_id': channel_id,
-            'category_id': category_id,
-            'type': 2,
-            'creating_embed_inputs': True,
-            'approved_roles': [1233832835660648449],
-            'moderation_roles': [1179070749361840220],
-            'user_tickets_limit': 2,
-            'categories': [
-                {'label': 'Appeal'},
-                {'label': 'Bug', 'approved_roles': [1233832835660648449, 1233832946570367018]},
-                {'label': '',
-                 'modals': [
-                     {'label': 'Your roblox nick'},
-                     {'label': 'The intruder\'s nickname'},
-                     {'label': 'What happened to you', 'style': 2},
-                 ], },
-            ],
-            'modals': [
-                {'label': 'Your roblox nick'},
-                {'label': 'What happened to you', 'style': 2}
-            ],
-            'faq': {
-                'type': 2,
-                'items': [
-                    {
-                        'label': 'QUE 1',
-                        'response': 'Answer 1'
-                    },
-                    {
-                        'label': 'QUE 2',
-                        'response': 'Answer 2'
-                    },
-                ]
-            }
-        })
-        # await gdb.set('tickets', {message_id: ticket_data})
-        # await tickettools.ModuleTicket.update_ticket_panel(guild, message_id)
+    async def process_tickets(self):
+        with open('tickets_data.json', 'rb') as file:
+            tickets_data = orjson.loads(file.read())
+
+        for guild_id, ticket_payload in tickets_data.items():
+            guild_id = int(guild_id)
+            guild = self.bot.get_guild(guild_id)
+
+            if guild is None:
+                continue
+
+            gdb = GuildDateBases(guild_id)
+            tickets = await gdb.get('tickets')
+
+            if ticket_payload.pop('total', True) == False:
+                locale = ticket_payload.pop('locale', 'ru')
+                ticket_payload.update(info.DEFAULT_TICKET_PAYLOAD_RU.copy(
+                ) if locale == 'ru' else info.DEFAULT_TICKET_PAYLOAD.copy())
+
+            ticket_id = None
+            for message_id, ticket in tickets.items():
+                if ticket['channel_id'] == ticket_payload['channel_id']:
+                    ticket_id = message_id
+                    break
+
+            if ticket_id:
+                ticket_payload.update({
+                    'message_id': ticket_id,
+                    'category_id': ticket.get('category_id')
+                })
+                await gdb.set_on_json('tickets', ticket_id, ticket_payload)
+                await tickettools.ModuleTicket.update_ticket_panel(guild, ticket_id)
+            else:
+                channel = guild.get_channel(ticket_payload['channel_id'])
+                await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -87,7 +75,7 @@ class ReadyEvent(commands.Cog):
 
         await asyncio.gather(
             self.find_not_data_commands(),
-            self.process_test(),
+            self.process_tickets(),
             self.process_temp_roles(),
             self.process_temp_bans(),
             self.process_giveaways(),
@@ -122,7 +110,8 @@ class ReadyEvent(commands.Cog):
                 cmd_wnf.append(cmd.qualified_name)
 
         if cmd_wnf:
-            _log.info(f"Was not found command information: {', '.join(cmd_wnf)}")
+            _log.info(
+                f"Was not found command information: {', '.join(cmd_wnf)}")
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
