@@ -41,6 +41,8 @@ class ReadyEvent(commands.Cog):
             if guild is None:
                 continue
 
+            _log.trace('Set config %s (%d) for tickets', guild.name, guild_id)
+
             gdb = GuildDateBases(guild_id)
             tickets = await gdb.get('tickets')
 
