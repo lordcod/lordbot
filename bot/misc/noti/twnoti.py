@@ -15,9 +15,7 @@ if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
 _log = logging.getLogger(__name__)
-_log.handlers.clear()
 handler = logging.FileHandler(f"logs/{__name__}.log")
-handler.stream.write('')
 handler.setFormatter(logging.Formatter(
     '[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
 _log.addHandler(handler)
