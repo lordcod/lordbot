@@ -25,7 +25,7 @@ def load_dir(dirpath: str) -> None:
 
 
 def start_bot():
-    flags = TranslatorFlags('shards=', 'token=')(sys.argv[1:])
+    flags = TranslatorFlags(['shards=', 'token='])(sys.argv[1:])
 
     load_dir("./bot/cogs")
 
