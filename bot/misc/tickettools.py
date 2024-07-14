@@ -471,7 +471,6 @@ class ModuleTicket:
         )
 
         ticket_type = get_data('type', 1)
-        user_closed = get_data('user_closed', True)
         message = get_data('messages')['reopen']
         name = get_data('names')['open']
         close_name = get_data('names').get('close')
@@ -479,7 +478,7 @@ class ModuleTicket:
         reopen_message = await utils.generate_message(utils.lord_format(message, payload))
         reopen_name = utils.lord_format(name, payload)
 
-        if not (self._is_verification(get_data, user_closed)
+        if not (self._is_verification(get_data)
                 and self.status == TicketStatus.closed):
             return
 

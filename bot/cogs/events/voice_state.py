@@ -1,4 +1,3 @@
-
 import asyncio
 import time
 import math
@@ -20,15 +19,15 @@ class VoiceStateEvent(commands.Cog):
     async def on_voice_state_update(self, member: nextcord.Member, before: nextcord.VoiceState, after: nextcord.VoiceState) -> None:
         if before.channel is None and after.channel is not None:
             await asyncio.gather(
-                TempVoiceModule.connect_voice(member, after.channel),
                 self.connect_to_voice(member)
             )
         if before.channel is not None and after.channel is None:
             await asyncio.gather(
-                TempVoiceModule.disconnect_voice(member, before.channel),
                 self.disconnect_from_voice(member),
                 self.check_bot_player(before.channel)
             )
+        if before.channel != after.channel:
+            await TempVoiceModule().process(member, before.channel, after.channel)
 
     async def check_bot_player(self, channel: nextcord.VoiceChannel):
         if (1 == len(channel.members)

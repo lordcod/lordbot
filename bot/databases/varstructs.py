@@ -185,3 +185,16 @@ class UserTicketPayload(TypedDict):
     inputs: Dict[str, str]
     status: int
     index: int
+
+
+class TempChannelsPayload(TypedDict):
+    category_id: int
+    channel_id: int
+    channel_name: Optional[str]
+    channel_limit: Optional[int]
+
+
+class TempChannelsItemPayload(TypedDict):
+    channel_id: int
+    owner_id: int
+    status: int

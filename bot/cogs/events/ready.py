@@ -92,6 +92,14 @@ class ReadyEvent(commands.Cog):
         self.bot.add_view(await IdeaView())
         self.bot.add_view(GiveawayView())
 
+        await GuildDateBases(1179069504186232852).set('tempvoice', {
+            'enabled': True,
+            'category_id': 1179069504651796561,
+            'channel_id': 1179069504651796563,
+            'channel_name': '{voice.count}-{member.username}',
+            'channel_limit': 4
+        })
+
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def on_disconnect(self):
