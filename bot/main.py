@@ -9,7 +9,7 @@ import os
 
 from bot.misc.utils import TranslatorFlags
 
-bot = LordBot()
+bot = LordBot(False)
 
 
 def load_dir(dirpath: str) -> None:
