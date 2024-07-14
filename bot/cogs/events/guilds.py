@@ -1,32 +1,41 @@
+import logging
 import time
+from token import RPAR
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import GuildDateBases
+from bot.databases import GuildDateBases, EconomyMemberDB
 from bot.misc.lordbot import LordBot
 
+_log = logging.getLogger(__name__)
 
-class guilds_event(commands.Cog):
+
+class GuildsEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
     @commands.Cog.listener()
+    async def on_guild_available(self, guild: nextcord.Guild):
+        _log.trace('Guild available %s (%d), Member count: %d', guild.name, guild.id, guild.member_count)
+        gdb = GuildDateBases(guild.id)
+        await gdb.set('delete_task', None)
+        self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
+
+    @commands.Cog.listener()
     async def on_guild_join(self, guild: nextcord.Guild):
-        if ((gthd := self.bot.guild_timer_handlers.get(guild.id))
-                and gthd[1] > time.time()):
-            gthd[0].cancel()
-        else:
-            GuildDateBases(guild.id)
+        self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
+        gdb = GuildDateBases(guild.id)
+        await gdb.set('delete_task', None)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
         delay = 60 * 60 * 24 * 3
-        gth = self.bot.loop.call_later(delay, gdb.delete)
-        self.bot.guild_timer_handlers[guild.id] = (
-            gth, delay+time.time())
+        await gdb.set('delete_task', int(time.time()+delay))
+        self.bot.lord_handler_timer.create(
+            delay, gdb.delete(), f'guild-deleted:{guild.id}')
 
 
 def setup(bot):
-    bot.add_cog(guilds_event(bot))
+    bot.add_cog(GuildsEvent(bot))

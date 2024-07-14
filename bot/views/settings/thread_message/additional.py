@@ -1,6 +1,8 @@
 import nextcord
 
 from bot.languages import i18n
+from bot.misc.utils import AsyncSterilization
+
 
 from .modal import ModalBuilder
 from .. import thread_message
@@ -9,10 +11,11 @@ from .._view import DefaultSettingsView
 from bot.databases import GuildDateBases
 
 
+@AsyncSterilization
 class ChannelDropDown(nextcord.ui.ChannelSelect):
-    def __init__(self, guild_id) -> None:
+    async def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
-        locale = self.gdb.get('language')
+        locale = await self.gdb.get('language')
         super().__init__(
             placeholder=i18n.t(
                 locale, 'settings.thread.addptional.placeholder'),
@@ -22,25 +25,24 @@ class ChannelDropDown(nextcord.ui.ChannelSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel: nextcord.TextChannel = self.values[0]
-        locale = self.gdb.get('language')
-        forum_message = self.gdb.get('thread_messages')
+        locale = await self.gdb.get('language')
+        forum_message = await self.gdb.get('thread_messages')
 
         if channel.id in forum_message:
             await interaction.response.send_message(i18n.t(
                 locale, 'settings.thread.addptional.channel-error'))
             return
 
-        view = InstallThreadView(channel.guild.id, channel.id)
-
+        view = await InstallThreadView(channel.guild.id, channel.id)
         view.install.disabled = False
+        await interaction.response.edit_message(view=view)
 
-        await interaction.message.edit(view=view)
 
-
+@AsyncSterilization
 class InstallThreadView(DefaultSettingsView):
-    def __init__(self, guild_id, installer=None) -> None:
+    async def __init__(self, guild_id, installer=None) -> None:
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
         self.installer = installer
 
         super().__init__()
@@ -50,7 +52,7 @@ class InstallThreadView(DefaultSettingsView):
         self.install.label = i18n.t(
             locale, 'settings.thread.addptional.button.install-mes')
 
-        DDB = ChannelDropDown(guild_id)
+        DDB = await ChannelDropDown(guild_id)
 
         self.add_item(DDB)
 
@@ -58,9 +60,9 @@ class InstallThreadView(DefaultSettingsView):
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = thread_message.AutoThreadMessage(interaction.guild)
+        view = await thread_message.AutoThreadMessage(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Install message',
                         style=nextcord.ButtonStyle.blurple,
@@ -68,6 +70,6 @@ class InstallThreadView(DefaultSettingsView):
     async def install(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        modal = ModalBuilder(interaction.guild_id, self.installer)
+        modal = await ModalBuilder(interaction.guild_id, self.installer)
 
         await interaction.response.send_modal(modal)

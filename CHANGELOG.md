@@ -1,5 +1,57 @@
 # 📑 Change Log
 
+## v0.4.1-beta
+
+12.05.2024
+
+### What's Changed
+- Added new types of logs:
+  - Actions with deleted messages: All deleted messages are now recorded, providing transparency regarding deleted data.
+  - Edited messages: You can now view the history of changes to messages, which helps to control the integrity of communication.
+  - Penalties applied for violations: A system of penalties for violations of the rules has been introduced, ensuring order and fairness in the system.
+  - Transactions or changes in the economy: Added the ability to track all financial transactions and changes in the economy of the system.
+  - Considered proposals and ideas: Now all proposed ideas and proposals are being recorded, which contributes to the development of the idea and improvement of the system.
+
+- The following changes have been made to the functionality:
+  - Reaction roles: Added the ability to assign roles to users based on their reactions, which increases participation in the community.
+  - Reaction Commands: Users can now use reaction commands to perform certain actions, improving interaction.
+  - Work in the economy: A new economic system has been introduced that allows users to carry out various financial transactions.
+  - Games in economics: Added the ability to play various games using the game currency from the system's economy.
+  - New settings: Users have access to new settings that allow them to manage various aspects of the system.
+  - Theft: A theft feature has been introduced that allows users to interact with the economic system through theft.
+  - New database system: The database system has been updated to provide more efficient and reliable data storage.
+
+
+## v0.3.1-beta
+
+14.04.2024
+
+### What's Changed
+1. Added settings for the server store
+2. Fixed music playback
+3. Added localization for the `/delete-category` command
+4. The execution time for deleting channels in `/delete-category` has been accelerated
+5. New logic for buying roles
+6. New time entry system
+7. Added distribution settings
+8. A new kind of invites team
+9. Added 3 new leaderboards time in voice, points and number of messages 
+10. The avatar command has been added
+11. Added special features in ideas
+ - Ban
+ - Mute
+ - Image ban
+ - Auto-delete branches upon approval/refusal
+ - Own delay on ideas
+12. Added score, voice time and messages
+13. Added a polling system, the command `/poll` and `Finish poll`
+14. Added a server item store
+15. Added an error handler **interaction failed**, instead of it there will be a suggestion to repeat the action
+16. Added tracking of invitations and the `/invites' command
+17. Added translation for arguments in the `/help` command
+18. Fixed approval/rejecting an idea in the ideas module
+19. Added emoji verification
+
 
 ## Alpha/v0.2.2
 

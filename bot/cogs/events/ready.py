@@ -1,68 +1,164 @@
+import logging
+from typing import Dict
 from nextcord.ext import commands
+import orjson
 
-from bot.misc.logger import Logger
-from bot.databases import RoleDateBases, BanDateBases
+from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases.varstructs import GiveawayData
+from bot.languages.help import get_command
+from bot.databases import RoleDateBases, BanDateBases, localdb
+from bot.misc import tickettools
+from bot.misc.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
-from bot.views.ideas import (ConfirmView, IdeaView)
+from bot.resources import info
+from bot.views.giveaway import GiveawayView
+from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
 import time
 import asyncio
 
+from bot.views.tickets.closes import CloseTicketView
+from bot.views.tickets.delop import ControllerTicketView
+from bot.views.tickets.faq import FAQView
+_log = logging.getLogger(__name__)
 
-class ready_event(commands.Cog):
+
+class ReadyEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+        bot.set_event(self.on_shard_disconnect)
+        bot.set_event(self.on_disconnect)
         super().__init__()
+
+    async def process_tickets(self):
+        with open('tickets_data.json', 'rb') as file:
+            tickets_data = orjson.loads(file.read())
+
+        for guild_id, ticket_payload in tickets_data.items():
+            guild_id = int(guild_id)
+            guild = self.bot.get_guild(guild_id)
+
+            if guild is None:
+                continue
+
+            _log.trace('Set config %s (%d) for tickets', guild.name, guild_id)
+
+            gdb = GuildDateBases(guild_id)
+            tickets = await gdb.get('tickets')
+
+            if ticket_payload.pop('total', True) == False:
+                locale = ticket_payload.pop('locale', 'ru')
+                ticket_payload.update(info.DEFAULT_TICKET_PAYLOAD_RU.copy(
+                ) if locale == 'ru' else info.DEFAULT_TICKET_PAYLOAD.copy())
+
+            ticket_id = None
+            for message_id, ticket in tickets.items():
+                if ticket['channel_id'] == ticket_payload['channel_id']:
+                    ticket_id = message_id
+                    break
+
+            if ticket_id:
+                ticket_payload.update({
+                    'message_id': ticket_id,
+                    'category_id': ticket.get('category_id')
+                })
+                await gdb.set_on_json('tickets', ticket_id, ticket_payload)
+                await tickettools.ModuleTicket.update_ticket_panel(guild, ticket_id)
+            else:
+                channel = guild.get_channel(ticket_payload['channel_id'])
+                await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await self.process_temp_roles()
-        await self.process_temp_bans()
+        try:
+            await asyncio.wait_for(self.bot.__with_ready__, timeout=30)
+        except asyncio.TimeoutError:
+            return
 
-        self.bot.add_view(ConfirmView())
-        self.bot.add_view(IdeaView())
+        await asyncio.gather(
+            self.find_not_data_commands(),
+            self.process_tickets(),
+            self.process_temp_roles(),
+            self.process_temp_bans(),
+            self.process_giveaways(),
+            self.process_guild_delete_tasks()
+        )
 
-        Logger.success(f"The bot is registered as {self.bot.user}")
+        self.bot.add_view(await ControllerTicketView())
+        self.bot.add_view(await CloseTicketView())
+        self.bot.add_view(await FAQView())
+        self.bot.add_view(await ConfirmView())
+        self.bot.add_view(await ReactionConfirmView())
+        self.bot.add_view(await IdeaView())
+        self.bot.add_view(GiveawayView())
 
-    @commands.Cog.listener()
+        _log.info(f"The bot is registered as {self.bot.user}")
+
     async def on_disconnect(self):
-        Logger.core("Bot is disconnect")
+        await self.bot._LordBot__session.close()
+        await localdb._update_db(__name__)
+        await localdb.cache.close()
+        self.bot.engine.get_connection().close()
+        _log.critical("Bot is disconnect")
+
+    async def on_shard_disconnect(self, shard_id: int):
+        _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
+
+    async def find_not_data_commands(self):
+        cmd_wnf = []
+        for cmd in self.bot.commands:
+            cmd_data = get_command(cmd.qualified_name)
+            if cmd_data is None:
+                cmd_wnf.append(cmd.qualified_name)
+
+        if cmd_wnf:
+            _log.info(
+                f"Was not found command information: {', '.join(cmd_wnf)}")
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
-        datas = bsdb.get_all()
+        datas = await bsdb.get_all()
 
         for (guild_id, member_id, ban_time) in datas:
             mbrsd = BanDateBases(guild_id, member_id)
-            self.bot.loop.call_later(
-                ban_time-time.time(),
-                asyncio.create_task,
-                mbrsd.remove_ban(self.bot._connection)
-            )
+            self.bot.lord_handler_timer.create(
+                ban_time-time.time(), mbrsd.remove_ban(self.bot._connection), f"ban:{guild_id}:{member_id}")
 
     async def process_temp_roles(self):
         rsdb = RoleDateBases()
-        datas = rsdb.get_all()
+        datas = await rsdb.get_all()
 
         for (guild_id, member_id, role_id, role_time) in datas:
             if not (
-                (guild := self.bot.get_guild(guild_id)) and
-                (member := guild.get_member(member_id)) and
-                (role := guild.get_role(role_id))
+                (guild := self.bot.get_guild(guild_id))
+                and (member := guild.get_member(member_id))
+                and (role := guild.get_role(role_id))
             ):
                 continue
 
             mrsdb = RoleDateBases(guild_id, member_id)
 
-            rth = self.bot.loop.call_later(
-                role_time-time.time(),
-                asyncio.create_task,
-                mrsdb.remove_role(member, role)
-            )
+            self.bot.lord_handler_timer.create(
+                role_time-time.time(), mrsdb.remove_role(member, role), f"role:{guild_id}:{member_id}:{role_id}")
 
-            self.bot.role_timer_handlers.add_th(
-                guild.id, member.id, role.id, rth)
+    async def process_giveaways(self):
+        for guild in self.bot.guilds:
+            gdb = GuildDateBases(guild.id)
+            giveaways: Dict[int, GiveawayData] = await gdb.get('giveaways', {})
+            for id, data in giveaways.items():
+                if data['completed']:
+                    continue
+                gw = Giveaway(guild, id)
+                gw.giveaway_data = data
+                self.bot.lord_handler_timer.create(
+                    gw.giveaway_data.get('date_end')-time.time(),
+                    gw.complete(),
+                    f'giveaway:{id}'
+                )
+
+    async def process_guild_delete_tasks(self):
+        ...
 
 
 def setup(bot):
-    bot.add_cog(ready_event(bot))
+    bot.add_cog(ReadyEvent(bot))

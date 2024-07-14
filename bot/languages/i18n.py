@@ -1,13 +1,24 @@
 import os
 import orjson
-import googletrans
 from typing import Optional, Dict, List
 
+try:
+    from .translator import translate_dict as _translate_dict
+except ImportError:
+    from translator import translate_dict as _translate_dict
+
+try:
+    from bot.resources.ether import Emoji
+except ImportError:
+    Emoji = None
 
 config = {}
-default_languages = ["da", "de", "en", "es", "fr", "id", "pl", "ru", "tr"]
+default_languages = ["da", "de", "en", "es", "fr",  "pl", "ru", "tr"]
 memoization_dict = {}
 resource_dict = {}
+
+
+def translate(text, dest, src): ...
 
 
 def _load_file(filename: str) -> bytes:
@@ -33,7 +44,10 @@ def add_res_translation(key: str, value: str, locale: str):
 
 
 def add_translation(
-    key: str, value: str, locale: Optional[str] = None, loadable: bool = False
+    key: str,
+    value: str,
+    locale: Optional[str] = None,
+    loadable: bool = False
 ) -> None:
     locale = locale or config.get("locale")
     memoization_dict.setdefault(locale, {})
@@ -48,7 +62,6 @@ def add_dict_translations(path: str, data: Dict[str, str]):
 
 
 def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
-    translator = googletrans.Translator()
     dest_dict = {}
     for key, value in src_dict.items():
         if isinstance(value, dict):
@@ -56,9 +69,10 @@ def translate_dict(src: str, dest: str, src_dict: dict) -> dict:
         elif isinstance(value, list):
             for num, text in enumerate(value):
                 dest_dict.setdefault(key, [])
-                dest_dict[key][num] = translator.translate(text, dest, src).text
+                dest_dict[key][num] = translate(
+                    text, dest, src)
         else:
-            dest_dict[key] = translator.translate(value, dest, src).text
+            dest_dict[key] = translate(value, dest, src)
     return dest_dict
 
 
@@ -69,10 +83,8 @@ def translation_with_languages(locale: str, text: str, languages: List[str]) -> 
     if locale in languages:
         languages.remove(locale)
 
-    translator = googletrans.Translator()
-
     for dest in languages:
-        tran_text = translator.translate(text, dest, locale).text
+        tran_text = translate(text, dest)
         data[dest] = tran_text
 
     return data
@@ -99,8 +111,6 @@ def to_any_locales() -> dict:
 
 def to_i18n_translation(data: dict, path: Optional[str] = None) -> None:
     for key, value in data.items():
-        if not isinstance(value, dict):
-            raise ValueError("Use another method")
         if set(default_languages) & set(value.keys()):
             add_dict_translations(f"{path+'.' if path else ''}{key}", value)
         else:
@@ -122,6 +132,21 @@ def to_folder(foldername: str) -> str:
         with open(f"{foldername}/{lang}.json", "+wb") as file:
             jsondata = orjson.dumps(data)
             file.write(jsondata)
+
+
+def from_file(filename: str) -> None:
+    global resource_dict
+    filecontent = _load_file(filename)
+    json_resource = _parse_json(filecontent)
+    resource_dict = json_resource
+    for lang, data in resource_dict.items():
+        parser(data, lang)
+
+
+def to_file(filename: str) -> str:
+    jsondata = orjson.dumps(resource_dict)
+    with open(filename, 'wb+') as file:
+        file.write(jsondata)
 
 
 def parser(
@@ -149,11 +174,28 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
     else:
         data = memoization_dict[locale][path]
 
-    return data.format_map(kwargs)
+    return data.format(**kwargs, Emoji=Emoji)
 
 
 if __name__ == "__main__":
-    from_folder("./bot/languages/localization")
+    # from_file("./bot/languages/localization.json")
+
+    # for key, value in _parse_json(_load_file("add_temp_loc_ru.json")).items():
+    #     add_translation(key, value, 'ru')
+    # for key, value in _parse_json(_load_file("add_temp_loc_en.json")).items():
+    #     add_translation(key, value, 'en')
+
+    # with open(r'bot\languages\localization_any.json', 'wb') as file:
+    #     file.write(orjson.dumps(memoization_dict))
+
+    for locale, data in _parse_json(_load_file(("./bot/languages/localization.json"))).items():
+        with open(f'localization/{locale}.json', 'wb+') as file:
+            file.write(orjson.dumps(data))
+
+    # with open('bot/languages/temp_loc.json', 'rb') as file:
+    #     dataloc = orjson.loads(file.read())
+    #     for loc, data in dataloc.items():
+    #         parser(data, loc, loadable=False)
 
     # Translation dict
     # for lang in default_languages:
@@ -161,18 +203,19 @@ if __name__ == "__main__":
     #         continue
     #     print(lang)
     #     trd = translate_dict(
-    #         "en", lang, resource_dict['en']["settings"]['music'])
+    #         "en", lang, resource_dict['en']['delcat'])
     #     print(trd)
-    #     parser(trd, lang, "settings.music", loadable=False)
+    #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
     # data = translation_with_languages(
-    #     "en", "Issues a sheet with all temporary bans that were issued by the bot", default_languages)
+    #     "en", "<time>", default_languages)
+    # print(data)
     # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(
-    #     "help.record", translation_with_languages("en", "Record", default_languages))
+    #     "settings.module-name.role-reactions", translation_with_languages("en", "Reaction Roles", default_languages))
 
     # To any locales format
     # data = to_any_locales()
@@ -181,21 +224,6 @@ if __name__ == "__main__":
     #     file.write(jsondata)
 
     # To i18n format as any locales format
-    # to_i18n_translation(
-    #     {
-    #         "failed": {
-    #             "da": "Rollen {role} kan ikke tildeles og bruges til integration eller af en bot.",
-    #             "de": "Die Rolle {role} kann nicht zugewiesen werden und wird zur Integration oder von einem Bot verwendet.",
-    #             "en": "The {role} role cannot be assigned and is used for integration or by a bot.",
-    #             "es": "El rol {role} no se puede asignar y se usa para la integración o por un bot.",
-    #             "fr": "Le rôle {role} ne peut pas être attribué et est utilisé pour l'intégration ou par un bot.",
-    #             "id": "Peran {role} tidak dapat ditetapkan dan digunakan untuk integrasi atau dengan bot.",
-    #             "pl": "Rola {role} nie można przypisać i służy do integracji lub przez bot.",
-    #             "ru": "Роль {role} не может быть назначена, потому что используется для интеграции или бота.",
-    #             "tr": "{role} rolü atanamaz ve entegrasyon veya bir bot tarafından kullanılır.",
-    #         }
-    #     }
-    # )
-    # print(resource_dict)
+    # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    # to_folder("./bot/languages/localization")
+    # to_file("./bot/languages/localization_test.json")

@@ -1,39 +1,93 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import IntEnum
+import logging
 import nextcord
 import time
 
-from typing import Optional
+from typing import Dict, Optional
+
+import re
+import jmespath
+from bot.misc import logstool
+from bot.misc.time_transformer import display_time
+from bot.misc.utils import AsyncSterilization
 
 from bot.resources.ether import Emoji
 from bot.databases.varstructs import IdeasPayload
-from bot.databases import MongoDB, GuildDateBases
+from bot.databases import localdb, GuildDateBases
 from bot.languages import i18n
 
 
-@lambda _: _()
+_log = logging.getLogger(__name__)
+REGEXP_URL = re.compile(r'https?:\/\/(.+)')
+
+timeout_data: Dict[int, Dict[int, float]] = {}
+
+
+@dataclass
+class BanData:
+    user_id: int
+    moderator_id: int
+    reason: Optional[str] = None
+
+    @classmethod
+    def get(cls, ideas: IdeasPayload, member_id: int) -> Optional[BanData]:
+        ban_users = ideas.get('ban_users', [])
+        data_ban = jmespath.search(
+            f"[?@[0]==`{member_id}`]|[0]", ban_users)
+        return data_ban and cls(*data_ban)
+
+
+@dataclass
+class MuteData:
+    user_id: int
+    moderator_id: int
+    timestamp: float
+    reason: Optional[str] = None
+
+    @classmethod
+    def get(cls, ideas: IdeasPayload, member_id: int) -> Optional[MuteData]:
+        muted_users = ideas.get('muted_users', [])
+        data_mute = jmespath.search(
+            f"[?@[0]==`{member_id}`]|[0]", muted_users)
+        return data_mute and cls(*data_mute)
+
+
+class ReactionSystemType(IntEnum):
+    REACTIONS = 0
+    BUTTONS = 1
+
+
 class Timeout:
-    def __init__(self) -> None:
-        self.data = {}
+    def __init__(self, guild_id: int, member_id: int) -> None:
+        self.guild_id = guild_id
+        self.member_id = member_id
 
-    def get(self, guild_id: int, member_id: int) -> Optional[float]:
-        if guild_id not in self.data:
-            self.data[guild_id] = {}
-        return self.data[guild_id].get(member_id)
+    def get(self) -> Optional[float]:
+        timeout_data.setdefault(self.guild_id, {})
+        return timeout_data[self.guild_id].get(self.member_id)
 
-    def set(self, guild_id: int, member_id: int, delay: float) -> None:
-        if guild_id not in self.data:
-            self.data[guild_id] = {}
-        self.data[guild_id][member_id] = delay
+    def set(self, delay: float) -> None:
+        timeout_data.setdefault(self.guild_id, {})
+        timeout_data[self.guild_id][self.member_id] = time.time() + delay
+
+    def check_usage(self) -> bool:
+        timeout = self.get()
+        return timeout and time.time() > timeout
 
 
+@AsyncSterilization
 class ConfirmModal(nextcord.ui.Modal):
-    def __init__(self, guild_id: int):
+    async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
         self.reason = nextcord.ui.TextInput(
-            label=i18n.t(locale, 'ideas.confirm-modal.reason-label'),
+            label=i18n.t(locale, 'ideas.confirm-modal.reason'),
             required=False,
             style=nextcord.TextInputStyle.paragraph,
             min_length=0,
@@ -45,175 +99,336 @@ class ConfirmModal(nextcord.ui.Modal):
         await interaction.response.defer(ephemeral=True)
 
         gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
-        ideas_data = gdb.get('ideas')
-        channel_approved_id = ideas_data.get('channel-approved-id')
+        locale = await gdb.get('language')
+        ideas_data = await gdb.get('ideas')
+        idea_type_reaction = ideas_data.get('reaction_system', 0)
+        channel_approved_id = ideas_data.get('channel_approved_id')
 
-        mdb = MongoDB('ideas')
-        idea_data = mdb.get(interaction.message.id)
-        if idea_data is None:
-            return
-
+        mdb = await localdb.get_table('ideas')
+        idea_data = await mdb.get(interaction.message.id)
         idea_image = idea_data.get('image')
         idea_content = idea_data.get('idea')
         idea_author_id = idea_data.get('user_id')
+        idea_author = interaction.guild.get_member(idea_author_id)
 
         reason = self.reason.value
 
+        content = i18n.t(locale, 'ideas.confirm-modal.content',
+                         mention=idea_author.mention)
+
         embed = nextcord.Embed(
-            title=i18n.t(locale, 'ideas.confirm-modal.embed.title'),
+            title=i18n.t(locale, 'ideas.confirm-modal.title'),
             color=nextcord.Color.green()
         )
-        embed.set_author(
-            name=interaction.user.display_name,
-            icon_url=interaction.user.display_avatar
-        )
-        embed.add_field(
-            name=i18n.t(locale, 'ideas.confirm-modal.embed.field'),
-            value=idea_content
-        )
         embed.set_image(idea_image)
+        embed.add_field(
+            name=i18n.t(locale, 'ideas.confirm-modal.essence'),
+            value=idea_content,
+            inline=False
+        )
+        if reason:
+            embed.add_field(
+                name=i18n.t(locale, 'ideas.confirm-modal.reason'),
+                value=reason,
+                inline=False
+            )
+        embed.set_footer(
+            text=i18n.t(locale, 'ideas.confirm-modal.approve',
+                        name=interaction.user.display_name),
+            icon_url=interaction.user.display_avatar)
 
-        author = interaction.guild.get_member(idea_author_id)
-        content = i18n.t(locale, 'ideas.confirm-modal.idea.content',
-                         mention=author.mention)
+        if idea_type_reaction == ReactionSystemType.REACTIONS:
+            view = await ConfirmView(interaction.guild_id)
+        elif idea_type_reaction == ReactionSystemType.BUTTONS:
+            view = await ReactionConfirmView(interaction.guild_id)
+            view.promote.disabled = True
+            view.demote.disabled = True
+        view.approve.disabled = True
 
-        views = ConfirmView(interaction.guild_id)
-        views.approve.disabled = True
-        views.deny.disabled = True
+        await interaction.message.edit(content=content, embed=embed, view=view)
 
-        await interaction.message.edit(content=content, embed=embed, view=views)
+        await logstool.Logs(interaction.guild).approve_idea(interaction.user, idea_author, idea_content, reason, idea_image)
+
+        if ideas_data.get('thread_delete') and (thread := interaction.message.thread):
+            await thread.delete()
+
+        if denrd_msg_id := idea_data.get('denied_message_id'):
+            try:
+                await interaction._state.http.delete_message(ideas_data['channel_denied_id'], denrd_msg_id)
+            except (KeyError, nextcord.NotFound):
+                pass
 
         if channel_approved_id is None:
             return
 
-        channel = interaction.guild.get_channel(channel_approved_id)
+        approved_channel = interaction.guild.get_channel(channel_approved_id)
 
-        embed_accept = nextcord.Embed(
-            title=i18n.t(locale, 'ideas.confirm-modal.idea.embed.title'),
-            color=nextcord.Color.green()
+        embed.set_author(
+            name=idea_author.display_name,
+            icon_url=idea_author.display_avatar
         )
-        embed_accept.add_field(
-            name=i18n.t(locale, 'ideas.confirm-modal.idea.embed.field'),
-            value=idea_content,
-            inline=False
+
+        apprd_msg = await approved_channel.send(embed=embed)
+
+        idea_data['approved_message_id'] = apprd_msg.id
+        await mdb.set(interaction.message.id, idea_data)
+
+
+@AsyncSterilization
+class DenyModal(nextcord.ui.Modal):
+    async def __init__(self, guild_id: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
+        super().__init__(i18n.t(locale, 'ideas.globals.title'))
+
+        self.reason = nextcord.ui.TextInput(
+            label="Argument:",
+            required=False,
+            style=nextcord.TextInputStyle.paragraph,
+            min_length=0,
+            max_length=1500,
         )
-        embed_accept.set_image(idea_image)
+        self.add_item(self.reason)
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        await interaction.response.defer(ephemeral=True)
+
+        reason = self.reason.value
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
+        ideas_settings: IdeasPayload = await gdb.get('ideas')
+        idea_type_reaction = ideas_settings.get('reaction_system', 0)
+        channel_denied_id = ideas_settings.get('channel_denied_id')
+
+        mdb = await localdb.get_table('ideas')
+        idea_data = await mdb.get(interaction.message.id)
+        idea_content = idea_data.get('idea')
+        idea_image = idea_data.get('image')
+        idea_author_id = idea_data.get('user_id')
+        idea_author = interaction.guild.get_member(idea_author_id)
+
+        embed = nextcord.Embed(
+            title=i18n.t(locale, 'ideas.confirm-view.title'),
+            color=nextcord.Color.red()
+        )
+        embed.add_field(name=i18n.t(
+            locale, 'ideas.confirm-view.idea'), value=idea_content)
         if reason:
-            embed_accept.add_field(
-                name=i18n.t(locale, 'ideas.confirm-modal.idea.embed.reason'),
+            embed.add_field(
+                name="Argument:",
                 value=reason,
                 inline=False
             )
-        embed_accept.set_footer(
-            text=interaction.user.display_name,
-            icon_url=interaction.user.display_avatar
+        embed.set_footer(
+            text=i18n.t(locale, 'ideas.confirm-view.refused',
+                        name=interaction.user.display_name),
+            icon_url=interaction.user.display_avatar)
+        embed.set_image(idea_image)
+
+        content = i18n.t(locale, 'ideas.confirm-view.idea-content',
+                         mention=idea_author.mention)
+
+        if idea_type_reaction == ReactionSystemType.REACTIONS:
+            view = await ConfirmView(interaction.guild_id)
+        elif idea_type_reaction == ReactionSystemType.BUTTONS:
+            view = await ReactionConfirmView(interaction.guild_id)
+            view.promote.disabled = True
+            view.demote.disabled = True
+        view.deny.disabled = True
+
+        await interaction.message.edit(content=content, embed=embed, view=view)
+
+        if ideas_settings.get('thread_delete') and (thread := interaction.message.thread):
+            await thread.delete()
+
+        if apprd_msg_id := idea_data.get('approved_message_id'):
+            try:
+                await interaction._state.http.delete_message(ideas_settings['channel_approved_id'], apprd_msg_id)
+            except (KeyError, nextcord.NotFound):
+                pass
+
+        if channel_denied_id is None:
+            return
+
+        channel_denied = interaction.guild.get_channel(channel_denied_id)
+
+        embed.set_author(
+            name=idea_author.display_name,
+            icon_url=idea_author.display_avatar
         )
-        await channel.send(content=content, embed=embed_accept)
+
+        denrd_msg = await channel_denied.send(embed=embed)
+        idea_data['denied_message_id'] = denrd_msg.id
+        await mdb.set(interaction.message.id, idea_data)
 
 
+@AsyncSterilization
 class ConfirmView(nextcord.ui.View):
-    def __init__(self, guild_id: Optional[int] = None):
+    async def __init__(self, guild_id: Optional[int] = None):
         super().__init__(timeout=None)
 
         if guild_id is None:
             return
 
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         self.approve.label = i18n.t(
             locale, 'ideas.confirm-view.button.approve')
         self.deny.label = i18n.t(
             locale, 'ideas.confirm-view.button.deny')
 
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
+
+        ideas_data: IdeasPayload = await gdb.get('ideas')
+        enabled: bool = ideas_data.get('enabled')
+
+        moderation_role_ids = ideas_data.get('moderation_role_ids', [])
+        role_ids = set(interaction.user._roles)
+        moderation_roles = set(moderation_role_ids)
+
+        if not enabled:
+            await interaction.response.send_message(i18n.t(
+                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
+            return False
+
+        if not role_ids & moderation_roles:
+            await interaction.response.defer(ephemeral=True)
+            return False
+
+        return True
+
     @nextcord.ui.button(label="Approve",
                         style=nextcord.ButtonStyle.green,
-                        custom_id='ideas-confirm:confirm')
+                        custom_id='ideas-confirm:confirm',
+                        row=1)
     async def approve(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
-        gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
-        ideas_data: IdeasPayload = gdb.get('ideas')
-        moderation_role_ids = ideas_data.get('moderation-role-ids', [])
-        enabled: bool = ideas_data.get('enabled', False)
-
-        if enabled is False:
-            await interaction.response.send_message(i18n.t(
-                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
-            return
-
-        role_ids = set(interaction.user._roles)
-        moderation_roles = set(moderation_role_ids)
-        if not role_ids & moderation_roles:
-            await interaction.response.defer(ephemeral=True)
-            return
-
-        modal = ConfirmModal(interaction.guild_id)
+        modal = await ConfirmModal(interaction.guild_id)
         await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label="Deny",
                         style=nextcord.ButtonStyle.red,
-                        custom_id='ideas-confirm:cancel')
+                        custom_id='ideas-confirm:cancel',
+                        row=1)
     async def deny(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        modal = await DenyModal(interaction.guild_id)
+        await interaction.response.send_modal(modal)
 
-        gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
-        ideas_data: IdeasPayload = gdb.get('ideas')
-        moderation_role_ids = ideas_data.get('moderation-role-ids', [])
-        enabled: bool = ideas_data.get('enabled', False)
-        if enabled is False:
-            await interaction.response.send_message(i18n.t(
-                locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
+
+@AsyncSterilization
+class ReactionConfirmView(nextcord.ui.View):
+    async def __init__(self, guild_id: int | None = None):
+        super().__init__(timeout=None)
+
+        if guild_id is None:
             return
 
-        mdb = MongoDB('ideas')
-        idea_data = mdb.get(interaction.message.id)
-        if idea_data is None:
-            return
-
-        idea_content = idea_data.get('idea')
-        idea_image = idea_data.get('image')
-        idea_author_id = idea_data.get('user_id')
-
-        role_ids = set(interaction.user._roles)
-        moderation_roles = set(moderation_role_ids)
-        if not (interaction.user.id == idea_author_id
-                or role_ids & moderation_roles):
-            return
-
-        name = interaction.user.display_name
-        embed = nextcord.Embed(
-            title=i18n.t(locale, 'ideas.confirm-view.old-idea'),
-            color=nextcord.Color.red()
-        )
-        embed.set_author(
-            name=interaction.user.display_name,
-            icon_url=interaction.user.display_avatar
-        )
-        embed.add_field(name=i18n.t(
-            locale, 'ideas.confirm-view.idea'), value=idea_content)
-        embed.set_footer(
-            text=i18n.t(locale, 'ideas.confirm-view.refused', name=name),
-            icon_url=interaction.user.display_avatar)
-        embed.set_image(idea_image)
-
-        author = interaction.guild.get_member(idea_author_id)
-        content = i18n.t(locale, 'ideas.confirm-view.idea-content',
-                         mention=author.mention)
-
-        self.approve.disabled = True
-        self.deny.disabled = True
-
-        await interaction.message.edit(content=content, embed=embed, view=self)
-
-
-class IdeaModal(nextcord.ui.Modal):
-    def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
+
+        self.approve.label = i18n.t(
+            locale, 'ideas.confirm-view.button.approve')
+        self.deny.label = i18n.t(
+            locale, 'ideas.confirm-view.button.deny')
+
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        custom_id = interaction.data['custom_id']
+        if custom_id.startswith("reactions-ideas-confirm:"):
+            return True
+        return await ConfirmView.cls.interaction_check(self, interaction)
+
+    def change_votes(self) -> None:
+        self.promote.label = str(len(self.promoted_data))
+        self.demote.label = str(len(self.demoted_data))
+
+    async def save_data(self, message_id) -> None:
+        mdb = await localdb.get_table('ideas')
+        idea_data = await mdb.get(message_id)
+        idea_data.update({
+            'promoted': self.promoted_data,
+            'demoted': self.demoted_data
+        })
+        await mdb.set(message_id, idea_data)
+
+    async def load_data(self, message_id) -> None:
+        mdb = await localdb.get_table('ideas')
+        idea_data = await mdb.get(message_id)
+        self.promoted_data = idea_data.get('promoted', [])
+        self.demoted_data = idea_data.get('demoted', [])
+
+    async def check_data(self, message_id) -> None:
+        promoted_data = getattr(self, "promoted_data", None)
+        demoted_data = getattr(self, "demoted_data", None)
+        if promoted_data is None or demoted_data is None:
+            await self.load_data(message_id)
+
+    @nextcord.ui.button(label="0", emoji="👍", row=2, custom_id="reactions-ideas-confirm:promote")
+    async def promote(self, button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
+        await self.check_data(interaction.message.id)
+
+        if interaction.user.id in self.promoted_data:
+            self.promoted_data.remove(interaction.user.id)
+        elif interaction.user.id in self.demoted_data:
+            self.demoted_data.remove(interaction.user.id)
+            self.promoted_data.append(interaction.user.id)
+        else:
+            self.promoted_data.append(interaction.user.id)
+
+        self.change_votes()
+
+        await self.save_data(interaction.message.id)
+        await interaction.response.edit_message(view=self)
+
+    @nextcord.ui.button(label="0", emoji="👎", row=2, custom_id="reactions-ideas-confirm:demote")
+    async def demote(self, button: nextcord.ui.Button,
+                     interaction: nextcord.Interaction):
+        await self.check_data(interaction.message.id)
+
+        if interaction.user.id in self.demoted_data:
+            self.demoted_data.remove(interaction.user.id)
+        elif interaction.user.id in self.promoted_data:
+            self.promoted_data.remove(interaction.user.id)
+            self.demoted_data.append(interaction.user.id)
+        else:
+            self.demoted_data.append(interaction.user.id)
+
+        self.change_votes()
+
+        await self.save_data(interaction.message.id)
+        await interaction.response.edit_message(view=self)
+
+    @nextcord.ui.button(label="Approve",
+                        style=nextcord.ButtonStyle.green,
+                        custom_id='ideas-confirm:confirm',
+                        row=1)
+    async def approve(self,
+                      button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
+        modal = await ConfirmModal(interaction.guild_id)
+        await interaction.response.send_modal(modal)
+
+    @nextcord.ui.button(label="Deny",
+                        style=nextcord.ButtonStyle.red,
+                        custom_id='ideas-confirm:cancel',
+                        row=1)
+    async def deny(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        modal = await DenyModal(interaction.guild_id)
+        await interaction.response.send_modal(modal)
+
+
+@AsyncSterilization
+class IdeaModal(nextcord.ui.Modal):
+    async def __init__(self, guild_id: int):
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+        ideas_data: IdeasPayload = await gdb.get('ideas')
+        allow_image = ideas_data.get('allow_image', True)
 
         super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
@@ -225,30 +440,36 @@ class IdeaModal(nextcord.ui.Modal):
             max_length=1500
         )
         self.add_item(self.idea)
-        
-        
+
         self.image = nextcord.ui.TextInput(
-            label="Image url",
+            label=i18n.t(locale, 'ideas.idea-modal.image.label'),
             style=nextcord.TextInputStyle.short,
-            placeholder="If you want, you can attach an image",
+            placeholder=i18n.t(locale, 'ideas.idea-modal.image.placeholder'),
             min_length=10,
             max_length=150,
             required=False
         )
-        self.add_item(self.image)
+        if allow_image:
+            self.add_item(self.image)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
 
         gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
-        color = gdb.get('color')
-        ideas_data = gdb.get('ideas')
-        channel_offers_id = ideas_data.get('channel-offers-id')
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
+        ideas_data: IdeasPayload = await gdb.get('ideas')
+        channel_offers_id = ideas_data.get('channel_offers_id')
         cooldown = ideas_data.get('cooldown', 0)
+        reaction_type = ideas_data.get(
+            'reaction_system', ReactionSystemType.REACTIONS)
 
         channel = interaction.guild.get_channel(channel_offers_id)
         idea = self.idea.value
+        image = self.image.value
+
+        if not (image and REGEXP_URL.fullmatch(image)):
+            image = None
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'ideas.globals.title'),
@@ -261,34 +482,49 @@ class IdeaModal(nextcord.ui.Modal):
         )
         embed.add_field(name=i18n.t(
             locale, 'ideas.idea-modal.idea'), value=idea)
-        embed.set_image(self.image.value)
+        embed.set_image(image)
 
-        mes = await channel.send(content=interaction.user.mention,
-                                 embed=embed,
-                                 view=ConfirmView(interaction.guild_id))
-        await mes.add_reaction(Emoji.tickmark)
-        await mes.add_reaction(Emoji.cross)
+        if reaction_type == ReactionSystemType.REACTIONS:
+            view = await ConfirmView(interaction.guild_id)
+            mes = await channel.send(embed=embed, view=view)
+            await mes.add_reaction(Emoji.tickmark)
+            await mes.add_reaction(Emoji.cross)
+        elif reaction_type == ReactionSystemType.BUTTONS:
+            view = await ReactionConfirmView(interaction.guild_id)
+            mes = await channel.send(embed=embed, view=view)
         await mes.create_thread(name=i18n.t(locale, 'ideas.idea-modal.thread-name', name=interaction.user.display_name))
 
         idea_data = {
             'user_id': interaction.user.id,
             'idea': idea,
-            'image': self.image.value
+            'image': image
         }
-        mdb = MongoDB('ideas')
-        mdb.set(mes.id, idea_data)
+        mdb = await localdb.get_table('ideas')
+        await mdb.set(mes.id, idea_data)
 
-        Timeout.set(interaction.guild_id,
-                    interaction.user.id, time.time()+cooldown)
+        Timeout(interaction.guild_id,
+                interaction.user.id).set(cooldown)
+        await logstool.Logs(interaction.guild).create_idea(interaction.user, idea, image)
 
 
+@AsyncSterilization
 class IdeaView(nextcord.ui.View):
-    def __init__(self, guild_id: int = None):
+    async def __init__(self, guild_id: int = None):
         super().__init__(timeout=None)
+
         if guild_id is None:
             return
+
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
+        color = await gdb.get('color')
+
+        self.embed = nextcord.Embed(
+            title=i18n.t(locale, 'ideas.init.title'),
+            description=i18n.t(locale, 'ideas.init.description'),
+            color=color
+        )
+
         self.suggest.label = i18n.t(locale, 'ideas.globals.title')
 
     @nextcord.ui.button(
@@ -302,23 +538,44 @@ class IdeaView(nextcord.ui.View):
         interaction: nextcord.Interaction
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
+        ideas_data: IdeasPayload = await gdb.get('ideas')
+        cooldown: int = ideas_data.get('cooldown', 0)
+        enabled: bool = ideas_data.get('enabled', False)
+        ban_data = BanData.get(ideas_data, interaction.user.id)
+        mute_data = MuteData.get(ideas_data, interaction.user.id)
+        user_timeout = Timeout(interaction.guild_id, interaction.user.id).get()
 
-        user_timeout = Timeout.get(interaction.guild_id, interaction.user.id)
+        if not enabled:
+            await interaction.response.send_message(i18n.t(locale, 'ideas.globals.ideas-disabled'), ephemeral=True)
+            return
+
         if user_timeout and user_timeout > time.time():
             await interaction.response.send_message(
                 content=i18n.t(
-                    locale, 'ideas.idea-view.timeout-message', time=int(user_timeout)),
+                    locale, 'ideas.idea-view.timeout-message', time=int(user_timeout), every_time=display_time(cooldown, locale)),
                 ephemeral=True
             )
             return
 
-        gdb = GuildDateBases(interaction.guild_id)
-        ideas_data: IdeasPayload = gdb.get('ideas')
-        enabled: bool = ideas_data.get('enabled', False)
-        if enabled is False:
-            await interaction.response.send_message(i18n.t(locale, 'ideas.globals.ideas-disabled'), ephemeral=True)
+        if ban_data is not None:
+            moderator = interaction.guild.get_member(ban_data.moderator_id)
+            await interaction.response.send_message(i18n.t(locale, 'ideas.mod.permission.ban',
+                                                           moderator=moderator.mention,
+                                                           reason=ban_data.reason or 'unspecified'),
+                                                    ephemeral=True)
             return
 
-        modal = IdeaModal(interaction.guild_id)
+        if mute_data is not None:
+            moderator = interaction.guild.get_member(mute_data.moderator_id)
+            await interaction.response.send_message(i18n.t(locale, 'ideas.mod.permission.mute',
+                                                           time=mute_data.timestamp,
+                                                           display_time=display_time(
+                                                               mute_data.timestamp-time.time()),
+                                                           moderator=moderator.mention,
+                                                           reason=mute_data.reason or 'unspecified'),
+                                                    ephemeral=True)
+            return
+
+        modal = await IdeaModal(interaction.guild_id)
         await interaction.response.send_modal(modal)

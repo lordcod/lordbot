@@ -1,170 +1,247 @@
-import time
+
+import io
+import logging
+from logging import _srcfile
+import os
+import sys
+import traceback
 import aiohttp
 import asyncio
-import enum
+
+log_webhook = os.environ.get('log_webhook')
+loop = asyncio.get_event_loop()
+
+TRACE = logging.DEBUG - 5
+CORE = logging.INFO + 5
+
+DEFAULT_LOG = TRACE
+DEFAULT_DISCORD_LOG = logging.INFO
+DEFAULT_LOGS = {
+    'nextcord': logging.ERROR,
+    'pyngrok': logging.ERROR,
+    'git': logging.ERROR,
+    'httpx': logging.ERROR,
+    'aiocache': logging.ERROR
+}
+
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+
+RESET_SEQ = "\033[0m"
+COLOR_SEQ = "\033[1;%dm"
+BOLD_SEQ = "\033[1m"
+
+RESET_SEQD = '[0m'
+COLOR_SEQD = '[2;%dm'
+BOLD_SEQD = '[2;1m'
+
+COLORS = {
+    'WARNING': YELLOW,
+    'INFO': GREEN,
+    'DEBUG': BLUE,
+    'CRITICAL': YELLOW,
+    'ERROR': RED,
+    'TRACE': CYAN,
+    'CORE': MAGENTA
+}
 
 
-class TextColors(enum.Enum):
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    OBLIQUE = '\033[3m'
-
-    GREY = '\033[90m'
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    VIOLET = '\033[95m'
-    CYAN = '\033[96m'
-
-    def __str__(self) -> str:
-        return self.value
+def currentframe(): return sys._getframe(3)
 
 
-class DiscordTextColors(enum.Enum):
-    RESET = '[0m'
-
-    GREY = '[2;30m'
-    RED = '[2;31m'
-    GREEN = '[2;32m'
-    YELLOW = '[2;33m'
-    BLUE = '[2;34m'
-    VIOLET = '[2;35m'
-    CYAN = '[2;36m'
-
-    def __str__(self) -> str:
-        return self.value
+def _is_internal_frame(frame):
+    """Signal whether the frame is a CPython or logging module internal."""
+    filename = os.path.normcase(frame.f_code.co_filename)
+    return filename == _srcfile or (
+        "importlib" in filename and "_bootstrap" in filename
+    )
 
 
-async def post_mes(data, time_string):
-    url = "https://discord.com/api/webhooks/1202680614772285450/GL1vm6jvvoaNLxb3hXeECOfGH2NuMdjB34h7SBazhDDYK18OMy-x_WV0sIEbRZ0r1BBj"
-    data = {
-        "content": (
-            "```ansi\n"
-            f"{data.get('discord_color')}"
-            f"[{time_string}][{data.get('service')}]: {data.get('text')}"
-            f"{DiscordTextColors.RESET}"
-            "```"
-        )
-    }
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=data):
-            pass
+def formatter_message(message, use_color=True):
+    if use_color:
+        message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
+    else:
+        message = message.replace("$RESET", "").replace("$BOLD", "")
+    return message
 
 
-@lambda _: _(True)
-class Logger:
-    loop = None
+def formatter_discord_message(message, use_color=True):
+    if use_color:
+        message = message.replace("$RESET", RESET_SEQD).replace("$BOLD", BOLD_SEQD)
+    else:
+        message = message.replace("$RESET", "").replace("$BOLD", "")
+    return message
 
-    def __init__(self, prints) -> None:
-        self.prints = prints
-        self.loop = asyncio.get_event_loop()
 
-    def callback(self, text):
-        if self.prints:
-            print(text)
+posters_tasks = []
+task_lock = asyncio.Lock()
 
-    def on_logs(func):
-        def redirect(self, txt: str):
-            named_tuple = time.localtime()
-            time_string = time.strftime("%m-%d-%Y %H:%M:%S", named_tuple)
 
-            data: dict = func(self, txt)
-            self.loop.create_task(post_mes(data, time_string))
+async def post_mes(webhook_url: str, text: str) -> None:
+    async with task_lock:
+        async with aiohttp.ClientSession() as session:
+            data = {
+                'content': '```ansi\n' + text + '```'
+            }
+            async with session.post(webhook_url, data=data):
+                pass
 
-            text = (
-                f"{data.get('color')}"
-                f"[{time_string}][{data.get('service')}]: {data.get('text')}"
-                f"{TextColors.RESET}"
-            )
 
-            self.callback(text)
+class StandartFormatter(logging.Formatter):
+    """override logging.Formatter to use an aware datetime object"""
 
-            return text
-        return redirect
 
-    @on_logs
-    def info(self, text):
-        color = TextColors.GREY
-        discord_color = DiscordTextColors.GREY
-        service = 'INFO'
-        return {
-            'text': text,
-            'color': color,
-            'discord_color': discord_color,
-            'service': service
-        }
+class DiscordColoredFormatter(StandartFormatter):
+    def __init__(self, msg, use_color=True):
+        logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
+        self.use_color = use_color
 
-    @on_logs
-    def warn(self, text):
-        color = TextColors.YELLOW
-        discord_color = DiscordTextColors.YELLOW
-        service = 'WARN'
-        return {
-            'text': text,
-            'color': color,
-            'discord_color': discord_color,
-            'service': service
-        }
+    def format(self, record):
+        levelname = record.levelname
+        if self.use_color and levelname in COLORS:
+            levelname_color = COLOR_SEQD % (30 + COLORS[levelname]) + levelname + RESET_SEQD
+            record.levelname = levelname_color
+        return logging.Formatter.format(self, record)
 
-    @on_logs
-    def error(self, text):
-        color = TextColors.RED
-        discord_color = DiscordTextColors.RED
-        service = 'ERROR'
-        return {
-            'text': text,
-            'color': color,
-            'discord_color': discord_color,
-            'service': service
-        }
 
-    @on_logs
-    def critical(self, text):
-        color = TextColors.VIOLET
-        discord_color = DiscordTextColors.VIOLET
-        service = 'CRITICAL'
-        return {
-            'text': text,
-            'color': color,
-            'discord_color': discord_color,
-            'service': service
-        }
+class ColoredFormatter(StandartFormatter):
+    def __init__(self, msg, use_color=True):
+        logging.Formatter.__init__(self, msg, datefmt='%m-%d-%Y %H:%M:%S')
+        self.use_color = use_color
 
-    @on_logs
-    def success(self, text):
-        color = TextColors.GREEN
-        discord_color = DiscordTextColors.GREEN
-        service = 'SUCCESS'
-        return {
-            'text': text,
-            'color': color,
-            'discord_color': discord_color,
-            'service': service
-        }
+    def format(self, record):
+        levelname = record.levelname
+        if self.use_color and levelname in COLORS:
+            levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
+            record.levelname = levelname_color
+        return logging.Formatter.format(self, record)
 
-    @on_logs
-    def inportent(self, text):
-        color = TextColors.BLUE
-        discord_color = DiscordTextColors.BLUE
-        service = 'IMPORTENT'
-        return {
-            'text': text,
-            'color': color,
-            'discord_color': discord_color,
-            'service': service
-        }
 
-    @on_logs
-    def core(self, text):
-        color = TextColors.CYAN
-        discord_color = DiscordTextColors.CYAN
-        service = 'CORE'
-        return {
-            'text': text,
-            'color': color,
-            'discord_color': discord_color,
-            'service': service
-        }
+class DiscordHandler(logging.Handler):
+    def __init__(self, webhook_url: str) -> None:
+        self.webhook_url = webhook_url
+        super().__init__()
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            msg = self.format(record)
+            task = loop.create_task(post_mes(self.webhook_url, msg))
+            posters_tasks.append(task)
+            self.flush()
+        except RecursionError:
+            raise
+        except Exception:
+            self.handleError(record)
+
+
+class LordLogger(logging.Logger):
+    FORMAT = "[$BOLD%(asctime)s$RESET][$BOLD%(name)s$RESET][%(levelname)s]  %(message)s ($BOLD%(filename)s$RESET:%(lineno)d)"
+    COLOR_FORMAT = formatter_message(FORMAT, True)
+
+    def __init__(self, name: str, level: int = DEFAULT_LOG):
+        for dfl_log, dfl_level in DEFAULT_LOGS.items():
+            if name.startswith(dfl_log):
+                level = dfl_level
+
+        logging.Logger.__init__(self, name, level)
+
+        color_formatter = ColoredFormatter(self.COLOR_FORMAT)
+        self.console = logging.StreamHandler()
+        self.console.setFormatter(color_formatter)
+        self.addHandler(self.console)
+
+        color_formatter = DiscordColoredFormatter(self.COLOR_FORMAT)
+        self.discord_handler = DiscordHandler(log_webhook)
+        self.discord_handler.setFormatter(color_formatter)
+        self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
+        self.addHandler(self.discord_handler)
+
+    def _findCaller(self, stack_info=False, stacklevel=1):
+        """
+        Find the stack frame of the caller so that we can note the source
+        file name, line number and function name.
+        """
+        # On some versions of IronPython, currentframe() returns None if
+        # IronPython isn't run with -X:Frames.
+        f = currentframe()
+        if f is None:
+            return "(unknown file)", 0, "(unknown function)", None
+        while stacklevel > 0:
+            next_f = f.f_back
+            if next_f is None:
+                # We've got options here.
+                # If we want to use the last (deepest) frame:
+                break
+                # If we want to mimic the warnings module:
+                # return ("sys", 1, "(unknown function)", None)
+                # If we want to be pedantic:
+                # raise ValueError("call stack is not deep enough")
+            f = next_f
+            if not _is_internal_frame(f):
+                stacklevel -= 1
+        co = f.f_code
+        sinfo = None
+        if stack_info:
+            with io.StringIO() as sio:
+                sio.write("Stack (most recent call last):\n")
+                traceback.print_stack(f, file=sio)
+                sinfo = sio.getvalue()
+                if sinfo[-1] == '\n':
+                    sinfo = sinfo[:-1]
+        return co.co_filename, f.f_lineno, co.co_name, sinfo
+
+    def _adt_log(self, level, msg, *args, exc_info=None, extra=None, stack_info=False,
+                 stacklevel=1):
+        """
+        Low-level logging routine which creates a LogRecord and then calls
+        all the handlers of this logger to handle the record.
+        """
+        sinfo = None
+        if _srcfile:
+            # IronPython doesn't track Python frames, so findCaller raises an
+            # exception on some versions of IronPython. We trap it here so that
+            # IronPython can use logging.
+            try:
+                fn, lno, func, sinfo = self._findCaller(stack_info, stacklevel)
+            except ValueError:  # pragma: no cover
+                fn, lno, func = "(unknown file)", 0, "(unknown function)"
+        else:  # pragma: no cover
+            fn, lno, func = "(unknown file)", 0, "(unknown function)"
+        if exc_info:
+            if isinstance(exc_info, BaseException):
+                exc_info = (type(exc_info), exc_info, exc_info.__traceback__)
+            elif not isinstance(exc_info, tuple):
+                exc_info = sys.exc_info()
+        record = self.makeRecord(self.name, level, fn, lno, msg, args,
+                                 exc_info, func, extra, sinfo)
+        self.handle(record)
+
+    def trace(self, msg, *args, **kwargs):
+        """
+        Log 'msg % args' with severity 'TRACE'.
+
+        To pass exception information, use the keyword argument exc_info with
+        a true value, e.g.
+
+        logger.trace("Houston, we have a %s", "interesting problem", exc_info=1)
+        """
+        if self.isEnabledFor(TRACE):
+            self._adt_log(TRACE, msg, *args, **kwargs)
+
+    def core(self, msg, *args, **kwargs):
+        """
+        Log 'msg % args' with severity 'CORE'.
+
+        To pass exception information, use the keyword argument exc_info with
+        a true value, e.g.
+
+        logger.core("Houston, we have a %s", "interesting problem", exc_info=1)
+        """
+
+        if self.isEnabledFor(CORE):
+            self._adt_log(CORE, msg, *args, **kwargs)
+
+
+logging.setLoggerClass(LordLogger)
+
+logging.addLevelName(TRACE, 'TRACE')
+logging.addLevelName(CORE, 'CORE')

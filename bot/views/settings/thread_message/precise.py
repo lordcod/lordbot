@@ -10,14 +10,15 @@ from bot.languages import i18n
 from bot.databases import GuildDateBases
 
 
+@utils.AsyncSterilization
 class ThreadData(DefaultSettingsView):
-    def __init__(self, channel: nextcord.abc.GuildChannel, channel_data) -> None:
+    async def __init__(self, channel: nextcord.abc.GuildChannel, channel_data) -> None:
         self.channel_data = channel_data
         self.channel = channel
 
         self.gdb = GuildDateBases(channel.guild.id)
-        self.forum_message = self.gdb.get('thread_messages')
-        locale = self.gdb.get('language')
+        self.forum_message = await self.gdb.get('thread_messages')
+        locale = await self.gdb.get('language')
 
         super().__init__()
 
@@ -34,9 +35,9 @@ class ThreadData(DefaultSettingsView):
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = thread_message.AutoThreadMessage(interaction.guild)
+        view = await thread_message.AutoThreadMessage(interaction.guild)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Message', style=nextcord.ButtonStyle.success)
     async def message(self,
@@ -45,7 +46,7 @@ class ThreadData(DefaultSettingsView):
         channel_content = self.channel_data
 
         gdb = GuildDateBases(interaction.guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         if not channel_content:
             await interaction.response.send_message(i18n.t(
@@ -59,7 +60,7 @@ class ThreadData(DefaultSettingsView):
     async def edit_message(self,
                            button: nextcord.ui.Button,
                            interaction: nextcord.Interaction):
-        modal = ModalBuilder(interaction.guild_id, self.channel.id)
+        modal = await ModalBuilder(interaction.guild_id, self.channel.id)
 
         await interaction.response.send_modal(modal)
 
@@ -68,9 +69,9 @@ class ThreadData(DefaultSettingsView):
                              button: nextcord.ui.Button,
                              interaction: nextcord.Interaction):
         channel_id = self.channel.id
-        del self.forum_message[channel_id]
+        self.forum_message.pop(channel_id, None)
 
-        self.gdb.set('thread_messages', self.forum_message)
+        await self.gdb.set('thread_messages', self.forum_message)
 
         view = thread_message.AutoThreadMessage(interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

@@ -1,52 +1,68 @@
 
-
+import asyncio
+import time
+import math
 import nextcord
 from nextcord.ext import commands
 
+from bot.databases import localdb
 from bot.misc.lordbot import LordBot
-from bot.misc.tempchannels import (TempChannels,
-                                   TempChannelsDataBases,
-                                   _guild_data)
+from bot.misc.music import current_players
+from bot.misc.tempvoice import TempVoiceModule
 
 
-class voice_state_event(commands.Cog):
+class VoiceStateEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
     @commands.Cog.listener()
-    async def on_voice_state_update(
-        self,
-        member: nextcord.Member,
-        before: nextcord.VoiceState,
-        after: nextcord.VoiceState
-    ) -> None:
-        self.member = member
-        self.before = before
-        self.after = after
+    async def on_voice_state_update(self, member: nextcord.Member, before: nextcord.VoiceState, after: nextcord.VoiceState) -> None:
+        if before.channel is None and after.channel is not None:
+            await asyncio.gather(
+                TempVoiceModule.connect_voice(member, after.channel),
+                self.connect_to_voice(member)
+            )
+        if before.channel is not None and after.channel is None:
+            await asyncio.gather(
+                TempVoiceModule.disconnect_voice(member, before.channel),
+                self.disconnect_from_voice(member),
+                self.check_bot_player(before.channel)
+            )
 
-        await self.process_create()
-        await self.process_delete()
+    async def check_bot_player(self, channel: nextcord.VoiceChannel):
+        if (1 == len(channel.members)
+            and self.bot.user == channel.members[0]
+                and channel.guild.id in current_players):
+            await current_players[channel.guild.id].point_not_user()
 
-    async def process_create(self) -> None:
-        if self.before.channel == self.after.channel or not (
-            self.after.channel and
-            self.after.channel.id == _guild_data.get('trigger_channel_id')
-        ):
+    async def connect_to_voice(self, member: nextcord.Member) -> None:
+        state = await localdb.get_table('temp_voice_state')
+        await state.set(member.id, time.time())
+
+    async def disconnect_from_voice(self, member: nextcord.Member) -> None:
+        state = await localdb.get_table('voice_state')
+        temp_state = await localdb.get_table('temp_voice_state')
+        member_started_at = await temp_state.get(member.id)
+        await temp_state.delete(member.id)
+
+        if member_started_at is None:
             return
 
-        if channel_id := TempChannelsDataBases.get(self.member.guild.id, self.member.id):
-            voice = self.member.guild.get_channel(channel_id)
-            await self.member.move_to(voice)
-            return
+        voice_time = time.time()-member_started_at
+        await state.increment(member.id, voice_time)
 
-        await TempChannels.create(self.member.guild, self.member)
+        await self.give_score(member, voice_time)
 
-    async def process_delete(self) -> None:
-        if not self.before.channel or len(self.before.channel.members) > 0:
-            return
-        await TempChannels(self.before.channel).delete()
+    async def give_score(self, member: nextcord.Member, voice_time: float) -> None:
+        state = await localdb.get_table('score')
+
+        multiplier = 1
+        user_level = 1
+
+        await state.increment(member.id, voice_time * 0.5
+                              * multiplier / math.sqrt(user_level))
 
 
-def setup(bot):
-    bot.add_cog(voice_state_event(bot))
+def setup(bot: LordBot):
+    bot.add_cog(VoiceStateEvent(bot))

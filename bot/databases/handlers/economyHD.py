@@ -1,5 +1,7 @@
 from __future__ import annotations
-from psycopg2.extras import DictCursor
+
+from bot.databases.misc.adapter_dict import adapt_array
+from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
 
@@ -11,11 +13,13 @@ class EconomyMemberDB:
         self.guild_id = guild_id
         self.member_id = member_id
 
-        self.data = self._get()
+    async def get_data(self) -> dict:
+        data = await self._get()
+        return data
 
     @on_error()
-    def get_leaderboards(self):
-        leaderboard = engine.fetchall(
+    async def get_leaderboards(self):
+        leaderboard = await engine.fetchall(
             """SELECT member_id, balance, bank, balance+bank as total
                 FROM economic
                 WHERE guild_id = %s
@@ -26,52 +30,87 @@ class EconomyMemberDB:
         return leaderboard
 
     @on_error()
-    def _get(self):
-        with engine.connection.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(
-                'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
-                (self.guild_id, self.member_id))
-            data = cursor.fetchone()
+    async def _get(self):
+        data = await engine.fetchone_dict(
+            'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
+            (self.guild_id, self.member_id))
 
-        if not data:
-            self.insert()
-            data = self._get()
+        if data is None:
+            await self.insert()
+            data = await self._get()
 
         return data
 
     @on_error()
-    def insert(self):
-        engine.execute(
-            'INSERT INTO economic (guild_id, member_id) VALUES (%s,%s)', (self.guild_id, self.member_id))
+    async def insert(self):
+        await engine.execute(
+            'INSERT INTO economic (guild_id, member_id) VALUES (%s, %s)', (self.guild_id, self.member_id))
 
+    @to_task
     @on_error()
-    def update(self, arg, value):
-        engine.execute(f'UPDATE economic SET {arg} = %s WHERE guild_id = %s AND member_id = %s', (
+    async def update(self, arg, value):
+        await engine.execute(f'UPDATE economic SET {arg} = %s WHERE guild_id = %s AND member_id = %s', (
             value, self.guild_id, self.member_id))
 
+    @to_task
     @on_error()
-    def update_list(self, args: dict):
-        keys = ', '.join([f"{a} = %s" for a in args.keys()])
+    async def update_list(self, args: dict):
+        keys = ', '.join(
+            [f"{a} = %s" for a in args.keys()])
         values = [*args.values(), self.guild_id, self.member_id]
-        engine.execute(
+        await engine.execute(
             f'UPDATE economic SET {keys} WHERE guild_id = %s AND member_id = %s', values)
 
+    @to_task
     @on_error()
-    def delete(self):
-        engine.execute(
+    async def delete(self):
+        await engine.execute(
             'DELETE FROM economic WHERE guild_id = %s AND member_id = %s', (self.guild_id, self.member_id))
 
+    @to_task
     @on_error()
-    def delete_guild(self):
-        engine.execute(
+    async def delete_guild(self):
+        await engine.execute(
             'DELETE FROM economic WHERE guild_id = %s', (self.guild_id,))
 
-    def get(self, __name, __default=None):
-        return self.data.get(__name, __default)
+    async def get(self, __name, __default=None):
+        data = await self.get_data()
+        return data.get(__name, __default)
 
-    def __getitem__(self, item):
-        return self.get(item)
+    @to_task
+    async def set(self, key, value):
+        data = await self.get_data()
+        data[key] = value
+        await self.update(key, value)
 
-    def __setitem__(self, key, value):
-        self.data[key] = value
-        self.update(key, value)
+    @to_task
+    async def increment(self, key, value):
+        data = await self.get_data()
+        data[key] += value
+        await self.update(key, data[key])
+
+    @to_task
+    async def decline(self, key, value):
+        data = await self.get_data()
+        data[key] -= value
+        await self.update(key, data[key])
+
+    @to_task
+    @on_error()
+    @staticmethod
+    async def increment_for_ids(guild_id, member_ids, key, value):
+        dmis = adapt_array(member_ids)
+        await engine.execute(f"""UPDATE economic SET {key} = {key} + %s
+                                 WHERE guild_id = %s
+                                 AND (SELECT ARRAY[member_id] && %s::bigint[])""", (
+            value, guild_id, dmis))
+
+    @to_task
+    @on_error()
+    @staticmethod
+    async def decline_for_ids(guild_id, member_ids, key, value):
+        dmis = adapt_array(member_ids)
+        await engine.execute(f"""UPDATE economic SET {key} = {key} - %s
+                                 WHERE guild_id = %s
+                                 AND (SELECT ARRAY[member_id] && %s::bigint[])""", (
+            value, guild_id, dmis))

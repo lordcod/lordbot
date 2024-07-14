@@ -1,39 +1,43 @@
-import timeit
-from typing import Callable
+import logging
 import nextcord
 from nextcord.ext import commands, application_checks
-from nextcord.utils import oauth_url
-from bot.misc.lordbot import LordBot
+from nextcord.utils import oauth_url, format_dt
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
+from bot.views.giveaway import GiveawaySettingsView
+from bot.misc.lordbot import LordBot
 from bot.databases import GuildDateBases
 from bot.resources import info
+from bot.views.tic_tac_toe import TicTacToe
 from bot.views.translate import TranslateView
 from bot.languages import i18n
 from bot.languages import data as lang_data
 
 import jmespath
+import timeit
 import googletrans
 import asyncio
 import random
-import re
+from typing import Callable, Optional
 
 translator = googletrans.Translator()
 
-EMOJI_REGEXP = re.compile(r"<(a?):([a-zA-Z_-]+):(\d{19})>")
+_log = logging.getLogger(__name__)
+_log.addHandler(logging.FileHandler('logs/presence.log', 'a+'))
 
 
-class basic(commands.Cog):
+class Basic(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
 
         stime = timeit.default_timer()
-        color = gdb.get('color')
+        color = await gdb.get('color')
         ftime = timeit.default_timer()
 
         discord_latency_ms = round(self.bot.latency*100, 2)
@@ -41,33 +45,48 @@ class basic(commands.Cog):
         command_latency_ms = round(
             (discord_latency_ms*2)+(databases_latency_ms*10), 2)
 
+        shard_id = (ctx.guild.id >> 22) % self.bot.shard_count
+
         embed = nextcord.Embed(
             title="Pong!🏓🎉",
-            description=(
-                f"Discord latency: {discord_latency_ms}ms\n"
-                f"Databases latency: {databases_latency_ms}ms\n"
-                f"Command processing latency: {command_latency_ms}ms\n"
-            ),
+            description=i18n.t(locale, 'basic.ping.description',
+                               discord_latency_ms=discord_latency_ms,
+                               databases_latency_ms=databases_latency_ms,
+                               command_latency_ms=command_latency_ms,
+                               shard_id=shard_id),
             color=color
         )
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_permissions(manage_guild=True)
+    async def giveaway(self, ctx: commands.Context):
+        view = await GiveawaySettingsView(ctx.author, ctx.guild.id)
+        await ctx.send(embed=view.embed, view=view)
+
+    @commands.command()
+    async def avatar(self, ctx: commands.Context, member: nextcord.Member) -> None:
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+
+        embed = nextcord.Embed(
+            title=i18n.t(locale, 'basic.avatar.description', member=member.display_name))
+        embed.set_image(member.display_avatar.url)
 
         await ctx.send(embed=embed)
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
-        invite_link = oauth_url(
-            client_id=self.bot.user.id,
-            permissions=nextcord.Permissions.all(),
-            redirect_uri=info.site_link,
-            scopes=("bot", "applications.commands"),
-        )
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
 
-        await ctx.send(f"[**Click to add to your server**]({invite_link})")
+        invite_link = oauth_url(client_id=self.bot.user.id)
+        await ctx.send(i18n.t(locale, 'basic.invite.description', invite_link=invite_link))
 
     @commands.command()
     async def captcha(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
-        lang = gdb.get('language')
+        lang = await gdb.get('language')
         data, code = await utils.generator_captcha(random.randint(3, 7))
         image_file = nextcord.File(
             data, filename="captcha.png", description="Captcha", spoiler=True)
@@ -112,8 +131,8 @@ class basic(commands.Cog):
         ),
     ) -> None:
         gdb = GuildDateBases(interaction.guild_id)
-        lang = gdb.get('language')
-        color = gdb.get('color')
+        lang = await gdb.get('language')
+        color = await gdb.get('color')
 
         activiti: dict = jmespath.search(
             f"[?label=='{act}']|[0]", info.activities_list)
@@ -123,14 +142,14 @@ class basic(commands.Cog):
                 target_type=nextcord.InviteTarget.embedded_application,
                 target_application_id=activiti.get('id')
             )
-        except (nextcord.HTTPException, nextcord.NotFound):
+        except nextcord.HTTPException:
             await interaction.response.send_message(
                 content=i18n.t(lang, 'activiti.failed'))
             return
 
         view = nextcord.ui.View(timeout=None)
         view.add_item(nextcord.ui.Button(
-            label="Activiti", emoji=Emoji.roketa, url=inv.url))
+            label="Activiti", emoji=Emoji.rocket, url=inv.url))
 
         embed = nextcord.Embed(
             title=i18n.t(lang, 'activiti.embed.title'),
@@ -156,7 +175,7 @@ class basic(commands.Cog):
         message: nextcord.Message
     ):
         gdb = GuildDateBases(inters.guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         if not message.content:
             await inters.response.send_message(i18n.t(locale, 'translate.failed'),
@@ -169,12 +188,16 @@ class basic(commands.Cog):
         result = translator.translate(
             text=message.content, dest=data.get('google_language'))
 
-        view = TranslateView(inters.guild_id, data.get('google_language'))
+        view = await TranslateView(inters.guild_id, data.get('google_language'))
 
         await inters.response.send_message(content=result.text,
                                            view=view,
                                            ephemeral=True)
 
+    @commands.command()
+    async def tic(self, ctx: commands.Context, member: Optional[nextcord.Member] = None):
+        await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe(ctx.author, member))
+
 
 def setup(bot):
-    bot.add_cog(basic(bot))
+    bot.add_cog(Basic(bot))

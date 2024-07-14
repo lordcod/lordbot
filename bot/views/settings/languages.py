@@ -1,15 +1,19 @@
+
 import nextcord
 from bot import languages
+from bot.misc.utils import AsyncSterilization
+
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
 from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
-class DropDown(nextcord.ui.Select):
-    def __init__(self, guild_id):
+@AsyncSterilization
+class DropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id):
         gdb = GuildDateBases(guild_id)
-        locale = gdb.get('language')
+        locale = await gdb.get('language')
 
         options = [
             nextcord.SelectOption(
@@ -19,7 +23,7 @@ class DropDown(nextcord.ui.Select):
                 emoji=data.get('flag', None),
                 default=locale == data.get('locale')
             )
-            for data in languages.current[:25]
+            for data in languages.current
         ]
 
         super().__init__(
@@ -31,22 +35,22 @@ class DropDown(nextcord.ui.Select):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
+
         gdb = GuildDateBases(interaction.guild_id)
+        await gdb.set('language', value)
 
-        gdb.set('language', value)
-
-        view = Languages(interaction.guild)
-
-        await interaction.message.edit(embed=view.embed, view=view)
+        view = await Languages(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@AsyncSterilization
 class Languages(DefaultSettingsView):
     embed: nextcord.Embed
 
-    def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        color = gdb.get('color')
-        locale = gdb.get('language')
+        color = await gdb.get('color')
+        locale = await gdb.get('language')
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.languages.title'),
@@ -58,14 +62,13 @@ class Languages(DefaultSettingsView):
 
         self.back.label = i18n.t(locale, 'settings.button.back')
 
-        lang = DropDown(guild.id)
-
+        lang = await DropDown(guild.id)
         self.add_item(lang)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = settings_menu.SettingsView(interaction.user)
+        view = await settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

@@ -1,16 +1,29 @@
 from _connection import connection
+from bot.misc import logger
+from bot.databases import localdb
+import asyncio
 
 
-guild_id = 1179069504186232852
+async def main():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+                        SELECT values
+                        FROM mongo 
+                        WHERE name = 'ideas'
+                    """)
 
-with connection.cursor() as cursor:
-    cursor.execute(
-        "SELECT command_permissions ->> 'pay' FROM guilds WHERE id = %s", (guild_id,))
-
-    val = cursor.fetchone()
-    print(val)
-    print(val[0])
+        cache = await localdb.get_table('ideas')
+        val = cursor.fetchone()
+        data = val[0]
+        data.update(cache._cache)
+        data = dict(map(lambda item: (
+            f"__CONVERT_NUMBER__ INTEGER {item[0]}", item[1]), data.items()))
+        localdb.current_updated_task['ideas'] = data
+        await localdb._update_db(__name__)
+        await localdb.cache.close()
 
 
 print("Finish")
+asyncio.run(main())
 connection.close()

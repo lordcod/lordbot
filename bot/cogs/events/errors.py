@@ -1,9 +1,10 @@
+import logging
+import sys
 import nextcord
 from nextcord.ext import commands
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
-from bot.misc.logger import Logger
 from bot.resources import errors
 from bot.databases import CommandDB
 from bot.resources.errors import (CallbackCommandError,
@@ -11,8 +12,7 @@ from bot.resources.errors import (CallbackCommandError,
                                   MissingChannel,
                                   CommandOnCooldown)
 
-TrueType = type(True)
-NumberType = (int, float)
+_log = logging.getLogger(__name__)
 
 
 class PermissionChecker:
@@ -23,7 +23,7 @@ class PermissionChecker:
         ctx = self.ctx
         command_name = ctx.command.qualified_name
         cdb = CommandDB(ctx.guild.id)
-        self.command_permissions = cdb.get(command_name, {})
+        self.command_permissions = await cdb.get(command_name, {})
 
         enabled = await self.is_enabled()
         allowed = await self.is_allowed()
@@ -97,45 +97,58 @@ class PermissionChecker:
             raise TypeError(retry)
 
     allowed_types = {
-        'allow-roles': _is_allowed_role,
-        'allow-channels': _is_allowed_channel,
+        'allow-role': _is_allowed_role,
+        'allow-channel': _is_allowed_channel,
         'cooldown': _is_cooldown
     }
 
 
-class command_event(commands.Cog):
+class CommandEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
-        # bot.add_event(self.on_error)
-        bot.add_event(self.on_command_error)
-        bot.add_event(self.on_application_error)
+        bot.set_event(self.on_error)
+        bot.set_event(self.on_command_error)
+        bot.set_event(self.on_application_command_error)
 
         bot.add_check(self.permission_check)
 
-    async def on_application_error(
-            self, interaction: nextcord.Interaction, error: Exception):
-        pass
+    async def on_application_command_error(
+        self,
+        interaction: nextcord.Interaction,
+        exception: nextcord.ApplicationError
+    ) -> None:
+        if interaction.application_command is None:
+            return  # Not supposed to ever happen
+
+        if interaction.application_command.has_error_handler():
+            return
+
+        cog = interaction.application_command.parent_cog
+        if cog and cog.has_application_command_error_handler():
+            return
+
+        _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=exception)
 
     async def on_command_error(self, ctx: commands.Context, error):
-        CommandError = CallbackCommandError(ctx, error)
-        await CommandError.process()
+        await CallbackCommandError.process(ctx, error)
 
     async def on_error(self, event, *args, **kwargs):
-        Logger.error(event)
+        _log.error(
+            "Ignoring exception in event %s", event, exc_info=sys.exc_info())
 
-    async def permission_check(self,  ctx: commands.Context):
+    async def permission_check(self, ctx: commands.Context):
         perch = PermissionChecker(ctx)
         answer = await perch.process()
 
         return answer
 
     async def after_invoke(self, ctx: commands.Context) -> None:
-        if hasattr(ctx, 'cooldown'):
-            ctx.cooldown.add()
+        if cooldown := getattr(ctx, 'cooldown', None):
+            cooldown.add()
 
 
 def setup(bot):
-    bot.add_cog(command_event(bot))
+    bot.add_cog(CommandEvent(bot))

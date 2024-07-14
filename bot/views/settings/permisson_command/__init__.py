@@ -1,5 +1,8 @@
 import nextcord
 
+from bot.misc.utils import AsyncSterilization
+
+
 from .precise import CommandData
 from bot.views.settings._view import DefaultSettingsView
 
@@ -8,10 +11,11 @@ from bot.views import settings_menu
 from bot.languages import help, i18n
 
 
-class DropDown(nextcord.ui.Select):
-    def __init__(self, guild_id, name):
+@AsyncSterilization
+class PermDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id, name):
         self.gdb = GuildDateBases(guild_id)
-        locale = self.gdb.get('language')
+        locale = await self.gdb.get('language')
 
         commands = help.categories.get(name)
         options = []
@@ -23,7 +27,6 @@ class DropDown(nextcord.ui.Select):
                 description=command.get('brief_descriptrion').get(locale),
                 emoji=help.categories_emoji.get(name),
             )
-
             options.append(selectOption)
 
         super().__init__(
@@ -35,24 +38,22 @@ class DropDown(nextcord.ui.Select):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         command = self.values[0]
-        view = CommandData(interaction.guild, command)
+        view = await CommandData(interaction.guild, command)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
-        await interaction.message.edit(embed=view.embed, view=view)
 
-
+@AsyncSterilization
 class CommandsDataView(DefaultSettingsView):
-    foundation: list = list(help.categories.keys())
+    foundation: list = list(help.categories)
     step: int
-    maximum: int = len(foundation)-1
-
     embed: nextcord.Embed
 
-    def __init__(self, guild: nextcord.Guild, step=0) -> None:
+    async def __init__(self, guild: nextcord.Guild, step: int = 0) -> None:
         self.step = step
 
         gdb = GuildDateBases(guild.id)
-        color = gdb.get('color')
-        locale = gdb.get('language')
+        color = await gdb.get('color')
+        locale = await gdb.get('language')
 
         self.embed = nextcord.Embed(
             title="Command Permission",
@@ -62,40 +63,37 @@ class CommandsDataView(DefaultSettingsView):
 
         super().__init__()
 
-        self.add_item(DropDown(guild.id, self.foundation[step]))
+        if self.step + 1 >= len(self.foundation):
+            self.next.disabled = True
+        if 0 > self.step - 1:
+            self.previous.disabled = True
 
+        dd = PermDropDown(guild.id, self.foundation[step])
+        self.add_item(dd)
         self.back.label = i18n.t(locale, 'settings.button.back')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        view = settings_menu.SettingsView(interaction.user)
+        view = await settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     async def visual_handler(self, interaction: nextcord.Interaction):
-        view = self.__class__(interaction.guild, self.step)
-        await interaction.message.edit(embed=view.embed, view=view)
+        view = await CommandData(interaction.guild, self.step)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Previous', style=nextcord.ButtonStyle.grey)
     async def previous(self,
                        button: nextcord.ui.Button,
                        interaction: nextcord.Interaction):
-        if 0 > (self.step - 1):
-            return
-
         self.step -= 1
-
         await self.visual_handler(interaction)
 
     @nextcord.ui.button(label='Next', style=nextcord.ButtonStyle.grey)
     async def next(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
-        if (self.step + 1) > self.maximum:
-            return
-
         self.step += 1
-
         await self.visual_handler(interaction)

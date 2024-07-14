@@ -1,17 +1,9 @@
-import threading
-import asyncio
-
 from .handlers import establish_connection
-from .settings import Table, Colum, PostType, set_connection
+from .settings import Table, Colum, PostType
 from .db_engine import DataBase
 from .config import (host, port, user, password, db_name)
 
 from bot.resources import info
-
-engine = DataBase.create_engine(host, port, user, password, db_name)
-
-establish_connection(engine)
-set_connection(engine)
 
 
 class GuildsDB(Table):
@@ -24,16 +16,25 @@ class GuildsDB(Table):
                    default=info.DEFAULT_PREFIX)
     color = Colum(data_type=PostType.BIGINT, default=info.DEFAULT_COLOR)
     economic_settings = Colum(data_type=PostType.JSON,
-                              default=info.DEFAULT_ECONOMY_SETTINGS)
+                              default=info.DEFAULT_ECONOMY_SETTINGS_JSON)
     music_settings = Colum(data_type=PostType.JSON, default="{}")
     auto_roles = Colum(data_type=PostType.JSON, default="{}")
-    tickettool = Colum(data_type=PostType.JSON, default="{}")
+    invites = Colum(data_type=PostType.JSON, default="{}")
+    giveaways = Colum(data_type=PostType.JSON, default="{}")
+    tickets = Colum(data_type=PostType.JSON, default="{}")
     thread_messages = Colum(data_type=PostType.JSON, default="{}")
     reactions = Colum(data_type=PostType.JSON, default="{}")
     auto_translate = Colum(data_type=PostType.JSON, default="{}")
+    polls = Colum(data_type=PostType.JSON, default="{}")
     greeting_message = Colum(data_type=PostType.JSON, default="{}")
     command_permissions = Colum(data_type=PostType.JSON, default="{}")
     ideas = Colum(data_type=PostType.JSON, default="{}")
+    logs = Colum(data_type=PostType.JSON, default="{}")
+    role_reactions = Colum(data_type=PostType.JSON, default="{}")
+    delete_task = Colum(data_type=PostType.BIGINT, default="0")
+    # message_state = Colum(data_type=PostType.JSON, default="{}")
+    # voice_time_state = Colum(data_type=PostType.JSON, default="{}")
+    # score_state = Colum(data_type=PostType.JSON, default="{}")
 
 
 class EconomicDB(Table):
@@ -46,6 +47,9 @@ class EconomicDB(Table):
     daily = Colum(data_type=PostType.BIGINT, default="0")
     weekly = Colum(data_type=PostType.BIGINT, default="0")
     monthly = Colum(data_type=PostType.BIGINT, default="0")
+    rob = Colum(data_type=PostType.BIGINT, default="0")
+    conclusion = Colum(data_type=PostType.BIGINT, default="0")
+    work = Colum(data_type=PostType.BIGINT, default="0")
 
 
 class RolesDB(Table):
@@ -72,17 +76,4 @@ class MongoDataBases(Table):
     values = Colum(data_type=PostType.JSON, default="{}")
 
 
-def db_forever():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_forever()
-    finally:
-        engine.connection.close()
-        loop.close()
-        exit()
-
-
-thread = threading.Thread(
-    target=db_forever, name='DataBase')
-thread.start()
+_tables = [GuildsDB, EconomicDB, RolesDB, BansDB, MongoDataBases]

@@ -1,7 +1,13 @@
 import nextcord
 
+from bot.misc.time_transformer import display_time
+from bot.misc.utils import AsyncSterilization
+
+from bot.resources.info import DEFAULT_ECONOMY_SETTINGS
+
 from .emoji import EmojiView
-from .bonuses import Bonus
+from .bonuses import BonusView
+from .shop import ShopView
 from .._view import DefaultSettingsView
 
 from bot.resources.ether import Emoji
@@ -9,15 +15,45 @@ from bot.databases import GuildDateBases
 from bot.views import settings_menu
 
 
-class DropDown(nextcord.ui.Select):
-    def __init__(self):
+class EmojiDropDown(nextcord.ui.StringSelect):
+    def __init__(self, emoji: str):
         options = [
             nextcord.SelectOption(
-                label='Change the amount of bonuses', emoji=Emoji.bagmoney, value='bonus'
+                label='Econonmy emoji',
+                value='emoji',
+                emoji=emoji,
+            ),
+        ]
+
+        super().__init__(
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+
+@AsyncSterilization
+class ChooseDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id: int):
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
+        options = [
+            nextcord.SelectOption(
+                label='Change the amount of bonuses',
+                emoji=Emoji.bagmoney,
+                value='bonus'
             ),
             nextcord.SelectOption(
-                label='Change the emoji', emoji=Emoji.emoji, value='emoji'
-            )
+                label='Change the emoji',
+                emoji=Emoji.emoji,
+                value='emoji'
+            ),
+            nextcord.SelectOption(
+                label='Change the shop roles',
+                emoji=Emoji.auto_role,
+                value='shop'
+            ),
         ]
 
         super().__init__(
@@ -29,37 +65,56 @@ class DropDown(nextcord.ui.Select):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
-        lists = {
-            'bonus': Bonus,
-            'emoji': EmojiView
+        distrubutes = {
+            'bonus': BonusView,
+            'emoji': EmojiView,
+            'shop': ShopView
         }
-        view = lists[value](interaction.guild)
-        await interaction.message.edit(embed=view.embed, view=view)
+        view = await distrubutes[value](interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
+@AsyncSterilization
 class Economy(DefaultSettingsView):
-    embed = nextcord.Embed(
-        title='The economic system',
-        description=(
-            "The economic system will allow your server to rise to a completely different level.\n"
-            "Games, levels, promotions, contests and more.\n"
-            "All this is in our economic system.\n"
-        )
-    )
-
-    def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
-        self.es: dict = self.gdb.get('economic_settings')
+        color: int = await self.gdb.get('color')
+        locale: str = await self.gdb.get('language')
+        self.es: dict = await self.gdb.get('economic_settings')
         operate: bool = self.es.get('operate')
-        color: int = self.gdb.get('color')
 
-        self.embed.color = color
+        self.embed = nextcord.Embed(
+            title='The economic system',
+            description=(
+                "The economic system will allow your server to rise to a completely different level.\n"
+                "Games, levels, promotions, contests and more.\n"
+                "All this is in our economic system."
+            ),
+            color=color
+        )
+        self.embed.add_field(
+            name="Information about the store",
+            value=f""
+        )
+        self.embed.add_field(
+            name="Economy Information",
+            value=(
+                f"Daily reward: {self.es.get('daily')}\n"
+                f"Weekly reward: {self.es.get('weekly')}\n"
+                f"Monthly reward: {self.es.get('monthly')}\n"
+                f"Minimum bid: {self.es.get('bet', DEFAULT_ECONOMY_SETTINGS['bet']).get('min')}\n"
+                f"Maximum bid: {self.es.get('bet', DEFAULT_ECONOMY_SETTINGS['bet']).get('max')}\n"
+                f"Minimum payment for work: {self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('min')}\n"
+                f"Maximum payment for work: {self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('max')}\n"
+                f"Cooldown for work: {display_time(self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('cooldown'), locale)}\n"
+            )
+        )
 
         super().__init__()
 
-        self.economy_dd = DropDown()
-
-        self.add_item(self.economy_dd)
+        self.add_item(EmojiDropDown(self.es.get('emoji')))
+        economy_dd = await ChooseDropDown(guild.id)
+        self.add_item(economy_dd)
 
         if operate:
             self.economy_switcher.label = "Disable"
@@ -70,19 +125,18 @@ class Economy(DefaultSettingsView):
             self.economy_switcher.style = nextcord.ButtonStyle.green
             self.economy_switcher_value = True
 
-            self.economy_dd.disabled = True
+            economy_dd.disabled = True
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = settings_menu.SettingsView(interaction.user)
+        view = await settings_menu.SettingsView(interaction.user)
 
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Switch', style=nextcord.ButtonStyle.green, row=1)
     async def economy_switcher(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        self.es['operate'] = self.economy_switcher_value
-        self.gdb.set('economic_settings', self.es)
+        await self.gdb.set_on_json('economic_settings', 'operate',
+                                   self.economy_switcher_value)
 
-        view = self.__class__(interaction.guild)
-
-        await interaction.message.edit(embed=view.embed, view=view)
+        view = await Economy(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)

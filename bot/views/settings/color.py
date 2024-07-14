@@ -1,17 +1,22 @@
 import nextcord
 from bot.databases import GuildDateBases
 import re
+from bot.misc.utils import AsyncSterilization
+
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
 from bot.resources.info import DEFAULT_COLOR
 from bot.languages import i18n
 
+HEX_REGEX = re.compile(r'#?([0-9a-fA-F]{6})')
 
+
+@AsyncSterilization
 class Modal(nextcord.ui.Modal):
-    def __init__(self, guild_id) -> None:
+    async def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
 
-        color = self.gdb.get("color")
+        color = await self.gdb.get("color")
         hex_color = f"#{color:0>6x}".upper()
 
         super().__init__("Color")
@@ -22,29 +27,31 @@ class Modal(nextcord.ui.Modal):
         self.add_item(self.color)
 
     async def callback(self, interaction: nextcord.Interaction):
-        locale = self.gdb.get('language')
+        locale = await self.gdb.get('language')
 
         hex_color = self.color.value
-        if not (result := re.fullmatch(r"#?([0-9a-fA-F]{6})", hex_color)):
+        result = HEX_REGEX.fullmatch(hex_color)
+
+        if not result:
             await interaction.response.send_message(i18n.t(locale, 'settings.color.not-valid'),
                                                     ephemeral=True)
             return
 
         color = int(result.group(1), 16)
-        self.gdb.set("color", color)
+        await self.gdb.set("color", color)
 
         view = ColorView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
-        await interaction.message.edit(embed=view.embed, view=view)
 
-
+@AsyncSterilization
 class ColorView(DefaultSettingsView):
     embed: nextcord.Embed
 
-    def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        locale = gdb.get("language")
-        color = gdb.get("color")
+        locale = await gdb.get("language")
+        color = await gdb.get("color")
         hex_color = f"#{color:0>6x}".upper()
 
         self.embed = nextcord.Embed(
@@ -52,10 +59,10 @@ class ColorView(DefaultSettingsView):
             description=i18n.t(locale, 'settings.color.description'),
             color=color,
         )
-        self.embed._fields = [
-            {"name": i18n.t(locale, 'settings.color.current', hex_color=hex_color),
-             "value": ""}
-        ]
+        self.embed.add_field(
+            name=i18n.t(locale, 'settings.color.current', hex_color=hex_color),
+            value=''
+        )
 
         super().__init__()
 
@@ -68,17 +75,15 @@ class ColorView(DefaultSettingsView):
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction
                    ):
-        view = settings_menu.SettingsView(interaction.user)
-
-        await interaction.message.edit(embed=view.embed, view=view)
+        view = await settings_menu.SettingsView(interaction.user)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label="Edit", style=nextcord.ButtonStyle.blurple)
     async def edit(self,
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction
                    ):
-        modal = Modal(interaction.guild_id)
-
+        modal = await Modal(interaction.guild_id)
         await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label="Reset", style=nextcord.ButtonStyle.success)
@@ -86,8 +91,7 @@ class ColorView(DefaultSettingsView):
         self, button: nextcord.ui.Button, interaction: nextcord.Interaction
     ):
         gdb = GuildDateBases(interaction.guild_id)
-        gdb.set("color", DEFAULT_COLOR)
+        await gdb.set("color", DEFAULT_COLOR)
 
         view = ColorView(interaction.guild)
-
-        await interaction.message.edit(embed=view.embed, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)
