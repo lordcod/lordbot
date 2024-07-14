@@ -1,6 +1,7 @@
 from asyncio import Task
 import asyncio
 from collections import defaultdict
+import contextlib
 import logging
 import time
 import nextcord
@@ -20,6 +21,7 @@ _log = logging.getLogger(__name__)
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 ffmpeg_path = "ffmpeg"
 initally_num = 10
+DEFAULT_VOLUME = 0.5
 
 
 def convert_time(timestamp: Any):
@@ -149,6 +151,7 @@ class MusicPlayer:
             )
             return
 
+        sessions_volume[self.guild_id] = DEFAULT_VOLUME
         current_players[self.guild_id] = self
         await self.play()
 
@@ -169,9 +172,11 @@ class MusicPlayer:
     async def stop(self):
         self.with_stopped = True
 
+        if self.voice.is_playing():
+            self.voice.stop()
         queue.clear(self.guild_id)
         current_players.pop(self.guild_id)
-        self.voice.stop()
+        sessions_volume.pop(self.guild_id)
         await self.voice.disconnect()
 
         gdb = GuildDateBases(self.guild_id)
@@ -183,18 +188,7 @@ class MusicPlayer:
     def get_leaved_task(self) -> Task:
         async def inner():
             await asyncio.sleep(180)
-
-            queue.clear(self.guild_id)
-            current_players.pop(self.guild_id)
-            await self.voice.disconnect()
-
-            gdb = GuildDateBases(self.guild_id)
-            locale = await gdb.get('language')
-            await self.message.edit(
-                i18n.t(locale, 'music.player.out.last'),
-                embeds=[],
-                view=None
-            )
+            await self.stop()
         return asyncio.create_task(inner(), name=f'voice-leave-task:{self.guild_id}')
 
     def get_updated_task(self) -> Task:
@@ -263,9 +257,8 @@ class MusicPlayer:
         )
 
     async def callback(self, err):
-        gdb = GuildDateBases(self.guild_id)
-        locale = await gdb.get('language')
-
+        with contextlib.suppress(AttributeError):
+            sessions_volume[self.guild_id] = self.voice.source.volume
         if not self.updated_task.done():
             self.updated_task.cancel()
         if self.with_stopped:
@@ -274,6 +267,9 @@ class MusicPlayer:
             asyncio.create_task(self.played_coro)
             self.played_coro = None
             return
+
+        gdb = GuildDateBases(self.guild_id)
+        locale = await gdb.get('language')
 
         if not queue.has(self.guild_id, self.index+1):
             await self.message.edit(
@@ -296,7 +292,7 @@ class MusicPlayer:
         music_url = await self.data.download_link()
         source = nextcord.FFmpegPCMAudio(
             music_url, pipe=False, executable=ffmpeg_path, **options)
-        source = nextcord.PCMVolumeTransformer(source, volume=0.5)
+        source = nextcord.PCMVolumeTransformer(source, volume=sessions_volume[self.guild_id])
         self.voice.play(source, after=self.callback)
 
         if indent_song is not None:
@@ -308,5 +304,6 @@ class MusicPlayer:
         await self.update_message()
 
 
+sessions_volume: Dict[int, int] = {}
 current_players: Dict[int, MusicPlayer] = {}
 queue: Queue = Queue()

@@ -1,4 +1,6 @@
 import os
+import random
+import string
 import orjson
 from typing import Optional, Dict, List
 
@@ -149,6 +151,24 @@ def to_file(filename: str) -> str:
         file.write(jsondata)
 
 
+def to_zip(filename: str) -> str:
+    import shutil
+    import os
+    dirname = '_temp_localization_'+''.join([random.choice(string.hexdigits) for _ in range(4)])
+    os.mkdir(dirname)
+
+    filecontent = _load_file(filename)
+    json_resource = _parse_json(filecontent)
+    for lang, data in json_resource.items():
+        with open(f'{dirname}/{lang}.json', 'wb+') as file:
+            file.write(orjson.dumps(data))
+
+    shutil.make_archive('localization', 'zip', dirname)
+    for lang in json_resource.keys():
+        os.remove(f'{dirname}/{lang}.json')
+    os.rmdir(dirname)
+
+
 def parser(
     json_resource: dict,
     locale: Optional[str] = None,
@@ -180,6 +200,8 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 if __name__ == "__main__":
     # from_file("./bot/languages/localization.json")
 
+    to_zip("./bot/languages/localization_any.json")
+
     # for key, value in _parse_json(_load_file("add_temp_loc_ru.json")).items():
     #     add_translation(key, value, 'ru')
     # for key, value in _parse_json(_load_file("add_temp_loc_en.json")).items():
@@ -188,9 +210,9 @@ if __name__ == "__main__":
     # with open(r'bot\languages\localization_any.json', 'wb') as file:
     #     file.write(orjson.dumps(memoization_dict))
 
-    for locale, data in _parse_json(_load_file(("./bot/languages/localization.json"))).items():
-        with open(f'localization/{locale}.json', 'wb+') as file:
-            file.write(orjson.dumps(data))
+    # for locale, data in _parse_json(_load_file(("./bot/languages/localization.json"))).items():
+    #     with open(f'localization/{locale}.json', 'wb+') as file:
+    #         file.write(orjson.dumps(data))
 
     # with open('bot/languages/temp_loc.json', 'rb') as file:
     #     dataloc = orjson.loads(file.read())
