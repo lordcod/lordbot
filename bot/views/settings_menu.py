@@ -1,5 +1,6 @@
 import nextcord
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.resources.ether import Emoji
 from bot.databases import GuildDateBases
 from bot.views.settings import moduls
@@ -7,7 +8,7 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.languages import i18n
 
 
-@to_async
+@AsyncSterilization
 class SetDropdown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
@@ -95,7 +96,7 @@ class SetDropdown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class SettingsView(DefaultSettingsView):
     embed: nextcord.Embed
 

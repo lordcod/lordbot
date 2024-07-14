@@ -4,14 +4,20 @@ from typing import Optional
 import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import ReactionRoleItemPayload
-from bot.misc.utils import to_async
+from bot.languages import i18n
+from bot.misc.utils import AsyncSterilization
+
 from .._view import DefaultSettingsView
 from .. import role_reaction
 from ..set_reaction import fetch_reaction
 
 
+@AsyncSterilization
 class RoleReactionRegisterItemDropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload, selected_role: Optional[nextcord.Role] = None) -> None:
+    async def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload, selected_role: Optional[nextcord.Role] = None) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.message_id = message_id
         self.channel_id = channel_id
         self.role_reaction = role_reaction
@@ -27,70 +33,72 @@ class RoleReactionRegisterItemDropDown(nextcord.ui.StringSelect):
             if (role := guild.get_role(role_id))
         ]
 
+        disabled = 0 >= len(options)
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
-            _disabled = True
-        else:
-            _disabled = False
 
-        super().__init__(options=options, disabled=_disabled)
+        super().__init__(placeholder=i18n.t(locale, "settings.role-reaction.item.role-set-dropdown"), options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         role_id = int(self.values[0])
         role = interaction.guild.get_role(role_id)
 
-        view = RoleReactionItemView(
+        view = await RoleReactionItemView(
             interaction.guild, self.message_id, self.channel_id, self.role_reaction, role)
         await interaction.message.edit(embed=view.embed, view=view)
 
 
+@AsyncSterilization
 class RoleReactionItemDropDown(nextcord.ui.RoleSelect):
-    def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload) -> None:
+    async def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.message_id = message_id
         self.channel_id = channel_id
         self.role_reaction = role_reaction
-        super().__init__()
+
+        super().__init__(placeholder=i18n.t(locale, "settings.role-reaction.item.role-dropdown"))
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
         role: nextcord.Role = self.values[0]
 
         if role.is_default():
             await interaction.response.send_message(
-                content=f"The {role.mention} role is the default role for all users and can't be selected.",
+                content=i18n.t(locale, 'settings.roles.error.default'),
                 ephemeral=True
             )
-            return
         elif role.is_premium_subscriber():
             await interaction.response.send_message(
-                content=f"The {role.mention} role is a role that is used by subscribers of your server.",
+                content=i18n.t(locale, 'settings.roles.error.premium', role=role.mention),
                 ephemeral=True
             )
-            return
         elif role.is_integration() or role.is_bot_managed():
             await interaction.response.send_message(
-                content=f"The {role.mention} role cannot be assigned and is used for integration or by a bot.",
+                content=i18n.t(locale, 'settings.roles.error.integration', role=role.mention),
                 ephemeral=True
             )
-            return
         elif not role.is_assignable():
             await interaction.response.send_message(
-                content=f"The bot will not be able to assign the role {role.mention}, as that role is lower than the bot's. To resolve this issue, please move the role {interaction.guild.self_role.mention} to a higher position than {role.mention}.",
+                content=i18n.t(locale, 'settings.roles.error.assignable', role=role.mention, bot_role=interaction.guild.self_role.mention),
                 ephemeral=True
             )
-            return
+        else:
+            view = await RoleReactionItemView(
+                interaction.guild, self.message_id, self.channel_id, self.role_reaction, role)
+            await interaction.response.edit_message(embed=view.embed, view=view)
 
-        view = await RoleReactionItemView(
-            interaction.guild, self.message_id, self.channel_id, self.role_reaction, role)
-        await interaction.response.edit_message(embed=view.embed, view=view)
 
-
-@to_async
+@AsyncSterilization
 class RoleReactionItemView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, channel_id: int, role_reaction: ReactionRoleItemPayload, selected_role: Optional[nextcord.Role] = None):
         gdb = GuildDateBases(guild.id)
         color = await gdb.get('color')
+        locale = await gdb.get('language')
 
         self.selected_role = selected_role
         self.role_reaction = role_reaction
@@ -100,13 +108,13 @@ class RoleReactionItemView(DefaultSettingsView):
         super().__init__()
 
         self.embed = nextcord.Embed(
-            title="Roles for reactions",
-            color=color,
-            description='This module will help you assign roles based on reactions'
+            title=i18n.t(locale, 'settings.role-reaction.global.title'),
+            description=i18n.t(locale, 'settings.role-reaction.global.description'),
+            color=color
         )
         if role_reaction['reactions']:
             self.embed.add_field(
-                name='Reactions',
+                name=i18n.t(locale, 'settings.role-reaction.item.field'),
                 value='\n'.join([
                     f"・{emoji} - <@&{role_id}>"
                     for emoji, role_id in role_reaction['reactions'].items()
@@ -117,10 +125,15 @@ class RoleReactionItemView(DefaultSettingsView):
             self.update.disabled = False
             self.delete.disabled = False
 
-        self.add_item(RoleReactionRegisterItemDropDown(
+        self.add_item(await RoleReactionRegisterItemDropDown(
             guild, message_id, channel_id, role_reaction, selected_role))
-        self.add_item(RoleReactionItemDropDown(
+        self.add_item(await RoleReactionItemDropDown(
             guild, message_id, channel_id, role_reaction))
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.create.label = i18n.t(locale, 'settings.button.create')
+        self.update.label = i18n.t(locale, 'settings.button.edit')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
     @nextcord.ui.button(label="Back", style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -147,7 +160,7 @@ class RoleReactionItemView(DefaultSettingsView):
 
         await self.back.callback(interaction)
 
-    @nextcord.ui.button(label="Set reaction", style=nextcord.ButtonStyle.success, disabled=True)
+    @nextcord.ui.button(label="Edit", style=nextcord.ButtonStyle.success, disabled=True)
     async def update(self,
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction
@@ -163,7 +176,7 @@ class RoleReactionItemView(DefaultSettingsView):
             interaction.guild, self.message_id, self.channel_id, self.role_reaction, self.selected_role)
         await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label="Delete reaction", style=nextcord.ButtonStyle.red, disabled=True)
+    @nextcord.ui.button(label="Delete", style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self,
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction

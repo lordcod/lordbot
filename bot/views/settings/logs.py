@@ -7,7 +7,9 @@ from bot.databases.varstructs import LogsPayload
 from bot.languages import i18n
 from bot.databases import GuildDateBases
 import nextcord
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
+from bot.resources.ether import Emoji
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
 from bot.misc.logstool import LogType
@@ -22,10 +24,11 @@ class LogItem:
 
 
 logs_items = [
-    LogItem(LogType.delete_message,
-            "Удаление сообщения",
-            "Действия с удаленными сообщениями: Этот лог содержит информацию о всех удаленных сообщениях в системе. Он помогает отслеживать, кто и когда удалил сообщение, и обеспечивает прозрачность в отношении удаленных данных.",
-            ),
+    LogItem(
+        LogType.delete_message,
+        "Удаление сообщения",
+        "Действия с удаленными сообщениями: Этот лог содержит информацию о всех удаленных сообщениях в системе. Он помогает отслеживать, кто и когда удалил сообщение, и обеспечивает прозрачность в отношении удаленных данных.",
+    ),
     LogItem(
         LogType.edit_message,
         "Редактирование сообщения",
@@ -49,12 +52,41 @@ logs_items = [
 ]
 
 
-@to_async
+@AsyncSterilization
+class ChannelSetDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild: nextcord.Guild, selected_channel_id: Optional[int] = None):
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+        logs_data = await gdb.get('logs')
+        options = [
+            nextcord.SelectOption(
+                label=channel.name,
+                value=channel_id,
+                description=', '.join([log_item.name for log_item in logs_items if log_item.id in log_ids]),
+                emoji=Emoji.channel_text,
+                default=channel_id == selected_channel_id
+            )
+            for channel_id, log_ids in logs_data.items()
+            if (channel := guild.get_channel(channel_id))
+        ]
+        disabled = len(options) == 0
+        if disabled:
+            options.append(nextcord.SelectOption(label='SelectOption'))
+
+        super().__init__(placeholder=i18n.t(locale, "settings.logs.set-channel"), disabled=disabled)
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        view = await LogsView(interaction.guild, int(self.values[0]))
+        await interaction.message.edit(embed=view.embed, view=view)
+
+
+@AsyncSterilization
 class ChannelDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
         super().__init__(
+            placeholder=i18n.t(locale, "settings.logs.channel"),
             channel_types=[nextcord.ChannelType.news,
                            nextcord.ChannelType.text]
         )
@@ -64,7 +96,7 @@ class ChannelDropDown(nextcord.ui.ChannelSelect):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class LogsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, selected_channel_id: Optional[int] = None,
                        selected_logs: Optional[List[int]] = None):
@@ -88,6 +120,7 @@ class LogsDropDown(nextcord.ui.StringSelect):
         ]
 
         super().__init__(
+            placeholder=i18n.t(locale, "settings.logs.type"),
             min_values=1,
             max_values=len(options),
             options=options,
@@ -101,7 +134,7 @@ class LogsDropDown(nextcord.ui.StringSelect):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class LogsView(DefaultSettingsView):
     embed: nextcord.Embed
 
@@ -118,7 +151,11 @@ class LogsView(DefaultSettingsView):
         color = await gdb.get('color')
         locale = await gdb.get('language')
 
-        self.embed = None
+        self.embed = nextcord.Embed(
+            title=i18n.t(locale, 'settings.logs.embed.title'),
+            description=i18n.t(locale, 'settings.logs.embed.description'),
+            color=color
+        )
 
         super().__init__()
 
@@ -128,7 +165,10 @@ class LogsView(DefaultSettingsView):
             self.delete.disabled = False
 
         self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
+        self.add_item(await ChannelSetDropDown(guild))
         self.add_item(await ChannelDropDown(guild.id))
         self.add_item(await LogsDropDown(
             guild.id, selected_channel_id, selected_logs))

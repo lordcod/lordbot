@@ -1,7 +1,8 @@
 from typing import Optional
 import nextcord
 from bot.databases import GuildDateBases
-from bot.misc.utils import TimeCalculator, to_async
+from bot.misc.utils import TimeCalculator, AsyncSterilization
+
 from bot.resources.info import DEFAULT_ECONOMY_SETTINGS
 from .. import economy
 from .._view import DefaultSettingsView
@@ -14,7 +15,7 @@ reward_names = {
 }
 
 
-@to_async
+@AsyncSterilization
 class RewardBonusModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild, value: str) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -42,7 +43,7 @@ class RewardBonusModal(nextcord.ui.Modal):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class WorkBonusModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild) -> None:
         super().__init__('Work', timeout=300)
@@ -111,7 +112,7 @@ class WorkBonusModal(nextcord.ui.Modal):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class BetBonusModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild) -> None:
         super().__init__('Bet', timeout=300)
@@ -161,7 +162,7 @@ class BetBonusModal(nextcord.ui.Modal):
         await interaction.message.edit(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class BonusDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, selected_value: Optional[str] = None):
         self.gdb = GuildDateBases(guild_id)
@@ -207,7 +208,7 @@ class BonusDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class BonusView(DefaultSettingsView):
     embed: nextcord.Embed
 

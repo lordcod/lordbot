@@ -1,12 +1,13 @@
 import nextcord
 from bot.databases import GuildDateBases
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from .. import music
 from .._view import DefaultSettingsView
 
 
-@to_async
+@AsyncSterilization
 class MaxSizeModal(nextcord.ui.Modal):
     async def __init__(self, guild_id, value: int) -> None:
         gdb = GuildDateBases(guild_id)
@@ -32,7 +33,7 @@ class MaxSizeModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class MaxSizeView(DefaultSettingsView):
     embed: nextcord.Embed
 

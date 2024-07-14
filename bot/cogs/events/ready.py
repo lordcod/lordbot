@@ -1,18 +1,25 @@
 import logging
 from typing import Dict
 from nextcord.ext import commands
+import orjson
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import GiveawayData
 from bot.languages.help import get_command
-from bot.databases import RoleDateBases, BanDateBases
+from bot.databases import RoleDateBases, BanDateBases, localdb
+from bot.misc import tickettools
 from bot.misc.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
+from bot.resources import info
 from bot.views.giveaway import GiveawayView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
 import time
 import asyncio
+
+from bot.views.tickets.closes import CloseTicketView
+from bot.views.tickets.delop import ControllerTicketView
+from bot.views.tickets.faq import FAQView
 _log = logging.getLogger(__name__)
 
 
@@ -23,6 +30,44 @@ class ReadyEvent(commands.Cog):
         bot.set_event(self.on_disconnect)
         super().__init__()
 
+    async def process_tickets(self):
+        with open('tickets_data.json', 'rb') as file:
+            tickets_data = orjson.loads(file.read())
+
+        for guild_id, ticket_payload in tickets_data.items():
+            guild_id = int(guild_id)
+            guild = self.bot.get_guild(guild_id)
+
+            if guild is None:
+                continue
+
+            _log.trace('Set config %s (%d) for tickets', guild.name, guild_id)
+
+            gdb = GuildDateBases(guild_id)
+            tickets = await gdb.get('tickets')
+
+            if ticket_payload.pop('total', True) == False:
+                locale = ticket_payload.pop('locale', 'ru')
+                ticket_payload.update(info.DEFAULT_TICKET_PAYLOAD_RU.copy(
+                ) if locale == 'ru' else info.DEFAULT_TICKET_PAYLOAD.copy())
+
+            ticket_id = None
+            for message_id, ticket in tickets.items():
+                if ticket['channel_id'] == ticket_payload['channel_id']:
+                    ticket_id = message_id
+                    break
+
+            if ticket_id:
+                ticket_payload.update({
+                    'message_id': ticket_id,
+                    'category_id': ticket.get('category_id')
+                })
+                await gdb.set_on_json('tickets', ticket_id, ticket_payload)
+                await tickettools.ModuleTicket.update_ticket_panel(guild, ticket_id)
+            else:
+                channel = guild.get_channel(ticket_payload['channel_id'])
+                await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
+
     @commands.Cog.listener()
     async def on_ready(self):
         try:
@@ -30,20 +75,18 @@ class ReadyEvent(commands.Cog):
         except asyncio.TimeoutError:
             return
 
-        cmd_wnf = []
-        for cmd in self.bot.commands:
-            cmd_data = get_command(cmd.qualified_name)
-            if cmd_data is None:
-                cmd_wnf.append(cmd.qualified_name)
+        await asyncio.gather(
+            self.find_not_data_commands(),
+            self.process_tickets(),
+            self.process_temp_roles(),
+            self.process_temp_bans(),
+            self.process_giveaways(),
+            self.process_guild_delete_tasks()
+        )
 
-        if cmd_wnf:
-            _log.info(f"Was not found command information: {', '.join(cmd_wnf)}")
-
-        await self.process_temp_roles()
-        await self.process_temp_bans()
-        await self.process_giveaways()
-        await self.process_guild_delete_tasks()
-
+        self.bot.add_view(await ControllerTicketView())
+        self.bot.add_view(await CloseTicketView())
+        self.bot.add_view(await FAQView())
         self.bot.add_view(await ConfirmView())
         self.bot.add_view(await ReactionConfirmView())
         self.bot.add_view(await IdeaView())
@@ -52,12 +95,25 @@ class ReadyEvent(commands.Cog):
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def on_disconnect(self):
-        await self.bot.session.close()
+        await self.bot._LordBot__session.close()
+        await localdb._update_db(__name__)
+        await localdb.cache.close()
         self.bot.engine.get_connection().close()
         _log.critical("Bot is disconnect")
 
     async def on_shard_disconnect(self, shard_id: int):
         _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
+
+    async def find_not_data_commands(self):
+        cmd_wnf = []
+        for cmd in self.bot.commands:
+            cmd_data = get_command(cmd.qualified_name)
+            if cmd_data is None:
+                cmd_wnf.append(cmd.qualified_name)
+
+        if cmd_wnf:
+            _log.info(
+                f"Was not found command information: {', '.join(cmd_wnf)}")
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
@@ -101,13 +157,7 @@ class ReadyEvent(commands.Cog):
                 )
 
     async def process_guild_delete_tasks(self):
-        deleted_tasks = await GuildDateBases.get_deleted()
-        for id, delay in deleted_tasks:
-            if self.bot.get_guild(id) or not delay:
-                continue
-            gdb = GuildDateBases(id)
-            self.bot.lord_handler_timer.create(
-                delay-time.time(), gdb.delete(), f'guild-deleted:{id}')
+        ...
 
 
 def setup(bot):

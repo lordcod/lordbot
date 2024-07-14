@@ -1,5 +1,8 @@
 from __future__ import annotations
+from ast import arg
+import contextlib
 import functools
+import getopt
 import logging
 import nextcord
 from nextcord.ext import commands
@@ -19,9 +22,8 @@ import orjson
 
 from asyncio import TimerHandle
 from collections import namedtuple
-from typing import (TYPE_CHECKING, Awaitable, Callable, Coroutine, Dict,  Optional,  Tuple, Union,
+from typing import (TYPE_CHECKING, Awaitable, Coroutine, Dict, Generic,  Optional,  Tuple, Type, Union,
                     Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
-from typing import Any, Coroutine, Dict, Iterable,  Optional, Self, SupportsIndex,  Tuple, Union, Mapping
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -55,7 +57,7 @@ class TempletePayload:
     _prefix = None
     _as_prefix: bool = False
 
-    def to_dict(self):
+    def _to_dict(self):
         if self._prefix is not None:
             prefix = str(self._prefix)
         else:
@@ -67,7 +69,7 @@ class TempletePayload:
             base[prefix] = str(self)
 
         for name, arg in inspect.getmembers(self):
-            if name.startswith("_") or name == "to_dict":
+            if name.startswith("_"):
                 continue
 
             base[f"{prefix}.{name}"] = arg
@@ -77,12 +79,17 @@ class TempletePayload:
 
 class GuildPayload(TempletePayload):
     _prefix = 'guild'
+    _as_prefix = True
 
     def __init__(self, guild: nextcord.Guild) -> None:
+        gdb = GuildDateBases(guild.id)
+
+        self.color = gdb.get_hash('color')
         self.id: int = guild.id
         self.name: str = guild.name
         self.memberCount: int = guild.member_count
-        self.createdAt: datetime = guild.created_at
+        self.createdAt: int = guild.created_at.timestamp()
+        self.createdAt_dt: datetime = guild.created_at.isoformat()
         self.premiumSubscriptionCount: int = guild.premium_subscription_count
 
         if not (guild.icon and guild.icon.url):
@@ -96,6 +103,7 @@ class GuildPayload(TempletePayload):
 
 class MemberPayload(TempletePayload):
     _prefix = 'member'
+    _as_prefix = True
 
     def __init__(self, member: nextcord.Member) -> None:
         self.id: int = member.id
@@ -104,14 +112,10 @@ class MemberPayload(TempletePayload):
         self.displayName: str = member.display_name
         self.discriminator: str = member.discriminator
         self.tag = f'{member.name}#{member.discriminator}'
-
-        if not (member.display_avatar and member.display_avatar.url):
-            self.avatar = None
-        else:
-            self.avatar = member.display_avatar.url
+        self.avatar = member.display_avatar.url
 
     def __str__(self) -> str:
-        return self.tag
+        return self.mention
 
 
 class __LordFormatingTemplate(string.Template):
@@ -280,7 +284,8 @@ class BlackjackGame:
                 res = self.calculate_result(self.dealer_cards + [card])
                 if 21 >= res:
                     win_cards.append(card)
-            _log.debug('Win cards: %s, Chance: %s', len(win_cards), len(win_cards) / len(self.cards))
+            _log.debug('Win cards: %s, Chance: %s', len(
+                win_cards), len(win_cards) / len(self.cards))
             if len(win_cards) / len(self.cards) >= 0.5:
                 self.add_dealer_card()
             else:
@@ -321,21 +326,27 @@ def lord_format(
     __value: object,
     __mapping: Mapping[str, object]
 ) -> str:
+    if isinstance(__value, dict):
+        __value = orjson.dumps(__value).decode()
     return __LordFormatingTemplate(__value).format(__mapping)
 
 
-def translate_flags(text: str) -> dict:
-    if not text:
-        return {}
-    if not regex.fullmatch(r"(\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)){1,}", text):
-        raise TypeError("Not a flag.")
-    return dict(map(
-        lambda item: (item[0], item[1]) if item[1] else (item[0], True),
-        regex.findall(
-            r"\-\-([a-zA-Z0-9\_\-\/]+)=?([a-zA-Z0-9\_\-\s\/]+)?(\s|$)",
-            text
-        )
-    ))
+class TranslatorFlags:
+    def __init__(self, longopts: list[str] = []):
+        self.longopts = longopts
+
+    def __call__(self, text: str) -> Any:
+        args = text.split()
+        self.flags = dict(map(lambda item: (item[0].removeprefix(
+            '--'), item[1]), getopt.getopt(args, '', self.longopts)[0]))
+
+    def get(self, key: str):
+        if key in self.flags and self.flags[key] == '':
+            return True
+        return self.flags.get(key)
+
+    def __class_getitem__(cls, *args: str):
+        return cls(args)
 
 
 async def clone_message(message: nextcord.Message) -> dict:
@@ -364,7 +375,7 @@ class LordTimerHandler:
     ):
         th = self.loop.call_later(delay,  self.loop.create_task, coro)
         if key is not None:
-            print(f"Create new timer handle {coro.__name__} (ID:{key})")
+            _log.trace(f"Create new timer handle {coro.__name__} (ID:{key})")
             self.data[key] = th
 
     def close_as_key(self, key: Union[str, int]):
@@ -413,14 +424,24 @@ class FissionIterator:
         return list(iter(self))
 
 
-def to_async(cls: type[T]) -> Awaitable[T]:
-    @functools.wraps(cls)
-    async def wrapped(*args, **kwargs) -> T:
-        self = cls.__new__(cls)
-        await self.__init__(*args, **kwargs)
+class AsyncSterilization(Generic[T]):
+    if TYPE_CHECKING:
+        cls: type[T]
+
+        def __new__(_cls, cls: type[T], *args, **kwargs) -> AsyncSterilization[T]:
+            self = cls.__new__(cls)
+            return self
+
+        def __init__(self, *args, **kwargs):
+            self.cls(*args, **kwargs)
+
+    def __init__(self, cls) -> None:
+        self.cls = cls
+
+    async def __call__(self, *args: Any, **kwds: Any) -> T:
+        self = self.cls.__new__(self.cls)
+        await self.__init__(*args, **kwds)
         return self
-    wrapped.__default_class__ = cls
-    return wrapped
 
 
 @dataclass
@@ -467,6 +488,7 @@ class LordTimeHandler:
         if ilth is None:
             return
 
+        ilth.coro.close()
         ilth.th.cancel()
         return ilth
 
@@ -640,76 +662,26 @@ class TimeCalculator:
 
 
 def translate_to_timestamp(arg: str) -> int | None:
-    try:
-        tdt = datetime.strptime(arg, '%H:%M')
-        return datetime(
-            year=datetime.today().year,
-            month=datetime.today().month,
-            day=datetime.today().day,
-            hour=tdt.hour,
-            minute=tdt.minute
-        ).timestamp()
-    except ValueError:
-        pass
-    try:
-        tdt = datetime.strptime(arg, '%H:%M:%S')
-        return datetime(
-            year=datetime.today().year,
-            month=datetime.today().month,
-            day=datetime.today().day,
-            hour=tdt.hour,
-            minute=tdt.minute,
-            second=tdt.second
-        ).timestamp()
-    except ValueError:
-        pass
+    tdts = ['%H:%M', '%H:%M:%S', '%d.%m.%Y', '%d.%m.%Y %H:%M', '%d.%m.%Y %H:%M:%S', '%H:%M %d.%m.%Y',
+            '%H:%M:%S %d.%m.%Y', '%Y-%m-%d', '%H:%M %Y-%m-%d', '%H:%M:%S %Y-%m-%d',
+            '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S']
+    for th in tdts:
+        with contextlib.suppress(ValueError):
+            tdt = datetime.strptime(arg, th)
+            if tdt.year == 1900 and tdt.month == 1 and tdt.day == 1:
+                today = datetime.today()
+                tdt = datetime(
+                    today.year,
+                    today.month,
+                    today.day,
+                    tdt.hour,
+                    tdt.minute,
+                    tdt.second
+                )
+            return tdt.timestamp()
 
-    try:
-        return datetime.strptime(arg, '%d.%m.%Y').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%d.%m.%Y %H:%M').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%d.%m.%Y %H:%M:%S').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M %d.%m.%Y').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M:%S %d.%m.%Y').timestamp()
-    except ValueError:
-        pass
-
-    try:
-        return datetime.strptime(arg, '%Y-%m-%d').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M %Y-%m-%d').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%H:%M:%S %Y-%m-%d').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%Y-%m-%d %H:%M').timestamp()
-    except ValueError:
-        pass
-    try:
-        return datetime.strptime(arg, '%Y-%m-%d %H:%M:%S').timestamp()
-    except ValueError:
-        pass
-
-    try:
+    with contextlib.suppress(ValueError):
         return TimeCalculator(operatable_time=True).convert(arg)
-    except ValueError:
-        pass
 
     return None
 
@@ -730,19 +702,22 @@ def randfloat(a: float | int, b: float | int, scope: int = 14) -> float:
 
 
 async def generate_message(content: str) -> dict:
-    content = str(content)
     message = {}
     try:
-        content: dict = orjson.loads(content)
+        if not isinstance(content, dict):
+            content: dict = orjson.loads(content)
 
         message_content = content.get('plainText')
         message['content'] = message_content
 
         title = content.get('title')
         description = content.get('description')
-        color = content.get('color')
+        color = None
         url = content.get('url')
         fields = content.get('fields', [])
+
+        with contextlib.suppress(ValueError, TypeError):
+            color = int(content.get('color'))
 
         embed = nextcord.Embed(
             title=title,
@@ -762,6 +737,8 @@ async def generate_message(content: str) -> dict:
             )
 
         if footer := content.get('footer'):
+            if dt := footer.get('timestamp'):
+                embed.timestamp = datetime.fromisoformat(dt)
             embed.set_footer(
                 text=footer.get('text'),
                 icon_url=footer.get('icon_url'),
@@ -782,8 +759,8 @@ async def generate_message(content: str) -> dict:
             message['embed'] = embed
         elif not message_content:
             raise ValueError
-    except (TypeError, ValueError, orjson.JSONDecodeError):
-        message['content'] = content
+    except (TypeError, ValueError, orjson.JSONDecodeError) as exc:
+        message['content'] = str(content)
     return message
 
 

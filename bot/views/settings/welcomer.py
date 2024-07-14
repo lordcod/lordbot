@@ -11,25 +11,31 @@ from bot.views import settings_menu
 from bot.databases import GuildDateBases
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class MyIWMModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int) -> None:
         self.gdb = GuildDateBases(guild_id)
+        locale = self.gdb.get('language')
 
         super().__init__("image")
 
         self.link = nextcord.ui.TextInput(
-            label="Link", placeholder="Enter a link",
-            min_length=10, max_length=1000)
+            label=i18n.t(locale, 'settings.welcomer.image.link'),
+            placeholder=i18n.t(locale, 'settings.welcomer.image.placeholder'),
+            min_length=10,
+            max_length=1000
+        )
 
         self.add_item(self.link)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        locale = self.gdb.get('language')
         link = self.link.value
+
         try:
             await load_image_async(link)
         except (ClientConnectorError, UnidentifiedImageError):
-            await interaction.response.send_message("The data does not match the links.", ephemeral=True)
+            await interaction.response.send_message(i18n.t(locale, 'settings.welcomer.image.error'), ephemeral=True)
             return
 
         await self.gdb.set_on_json('greeting_message', 'image', link)
@@ -38,7 +44,7 @@ class MyIWMModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class IWMDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int) -> None:
         self.gdb = GuildDateBases(guild_id)
@@ -51,7 +57,7 @@ class IWMDropDown(nextcord.ui.StringSelect):
                 label=wel_mes[0],
                 value=name,
                 description=wel_mes[2],
-                default=(wel_mes[1] == image)
+                default=wel_mes[1] == image
             ))
         super().__init__(options=options)
 
@@ -63,7 +69,7 @@ class IWMDropDown(nextcord.ui.StringSelect):
             await interaction.response.send_modal(modal)
             return
 
-        await interaction.response.defer()
+        await interaction.response.defer(with_message=True)
 
         image = utils.welcome_message_items[value][1]
         await self.gdb.set_on_json('greeting_message', 'image', image)
@@ -72,7 +78,7 @@ class IWMDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class MessageModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -97,7 +103,7 @@ class MessageModal(nextcord.ui.Modal):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class ChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild_id) -> None:
         gdb = GuildDateBases(guild_id)
@@ -123,7 +129,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class WelcomerView(DefaultSettingsView):
     embed: nextcord.Embed
 
@@ -195,8 +201,8 @@ class WelcomerView(DefaultSettingsView):
 
         content: str = greeting_message.get('message')
 
-        guild_payload = utils.GuildPayload(interaction.guild).to_dict()
-        member_payload = utils.MemberPayload(interaction.user).to_dict()
+        guild_payload = utils.GuildPayload(interaction.guild)._to_dict()
+        member_payload = utils.MemberPayload(interaction.user)._to_dict()
         data_payload = guild_payload | member_payload
 
         message_format = utils.lord_format(content, data_payload)

@@ -4,11 +4,12 @@ import nextcord
 
 from bot.languages import i18n
 from bot.databases import GuildDateBases
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.resources.ether import Emoji
 
 
-@to_async
+@AsyncSterilization
 class DelCatView(nextcord.ui.View):
     async def __init__(
         self,
@@ -48,10 +49,6 @@ class DelCatView(nextcord.ui.View):
             color=0x57F287
         )
 
-        for channel in self.category.channels:
-            asyncio.create_task(channel.delete())
-        await self.category.delete()
-
         await interaction.response.edit_message(embed=embed, view=None)
 
     @ nextcord.ui.button(label="Cancel", style=nextcord.ButtonStyle.red)
@@ -71,5 +68,5 @@ class DelCatView(nextcord.ui.View):
     async def interaction_check(
         self,
         interaction: nextcord.Interaction
-    ) -> Coroutine[Any, Any, bool]:
+    ) -> bool:
         return interaction.user == self.member

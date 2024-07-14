@@ -1,3 +1,4 @@
+import getopt
 import sys
 
 import nextcord
@@ -6,7 +7,7 @@ from bot.misc.lordbot import LordBot
 
 import os
 
-from bot.misc.utils import translate_flags
+from bot.misc.utils import TranslatorFlags
 
 bot = LordBot()
 
@@ -24,7 +25,8 @@ def load_dir(dirpath: str) -> None:
 
 
 def start_bot():
-    flags = translate_flags(' '.join(sys.argv[1:]))
+    flags = dict(map(lambda item: (item[0].removeprefix(
+        '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards='])[0]))
 
     load_dir("./bot/cogs")
 

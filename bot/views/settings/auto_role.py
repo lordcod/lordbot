@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.views import settings_menu
@@ -8,7 +9,7 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
-@to_async
+@AsyncSterilization
 class RolesDropDown(nextcord.ui.RoleSelect):
     async def __init__(
         self,
@@ -24,25 +25,27 @@ class RolesDropDown(nextcord.ui.RoleSelect):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        locale = await self.gdb.get('language')
+
         for role in self.values.roles:
             if role.is_default():
                 await interaction.response.send_message(
-                    content=f"The {role.mention} role is the default role for all users and can't be selected.",
+                    content=i18n.t(locale, 'settings.roles.error.default'),
                     ephemeral=True
                 )
             elif role.is_premium_subscriber():
                 await interaction.response.send_message(
-                    content=f"The {role.mention} role is a role that is used by subscribers of your server.",
+                    content=i18n.t(locale, 'settings.roles.error.premium', role=role.mention),
                     ephemeral=True
                 )
             elif role.is_integration() or role.is_bot_managed():
                 await interaction.response.send_message(
-                    content=f"The {role.mention} role cannot be assigned and is used for integration or by a bot.",
+                    content=i18n.t(locale, 'settings.roles.error.integration', role=role.mention),
                     ephemeral=True
                 )
             elif not role.is_assignable():
                 await interaction.response.send_message(
-                    content=f"The bot will not be able to assign the role {role.mention}, as that role is lower than the bot's. To resolve this issue, please move the role {interaction.guild.self_role.mention} to a higher position than {role.mention}.",
+                    content=i18n.t(locale, 'settings.roles.error.assignable', role=role.mention, bot_role=interaction.guild.self_role.mention),
                     ephemeral=True
                 )
             else:
@@ -55,7 +58,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
             await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class AutoRoleView(DefaultSettingsView):
     embed: nextcord.Embed
 

@@ -1,7 +1,8 @@
 import nextcord
 from bot.databases import GuildDateBases
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 from .. import music
 from .._view import DefaultSettingsView
 
@@ -34,7 +35,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
             await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class DjRolesView(DefaultSettingsView):
     embed: nextcord.Embed
 

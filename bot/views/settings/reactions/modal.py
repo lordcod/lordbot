@@ -1,6 +1,7 @@
 import nextcord
 
-from bot.misc.utils import is_emoji, to_async
+from bot.misc.utils import is_emoji, AsyncSterilization
+
 
 from .. import reactions
 
@@ -8,7 +9,7 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
-@to_async
+@AsyncSterilization
 class ModalBuilder(nextcord.ui.Modal):
     async def __init__(self, guild_id, channel_id) -> None:
         gdb = GuildDateBases(guild_id)

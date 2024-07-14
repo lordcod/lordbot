@@ -45,14 +45,30 @@ class Emoji(StrEnum):
     playlist = '<:playlist:1207675618322550804>'
     volume_up = '<:volume_up:1207676856300478525>'
 
+    # Music
+    yandex_music = '<:yandex_music:1259622734132936784>'
+    undo = '<:undo:1260237132321263656>'
+    redo = '<:redo:1260237228945178664> '
+    previous = '<:previous:1260237142618275840>'
+    next = '<:next:1260237144157454447>'
+    pause = '<:pause:1260237230262194267>'
+    resume = '<:play:1260237150650372136>'
+    volume_down = '<:volume2:1260237138289492008>'
+    volume_up_2 = '<:volume3:1260237136838262854>'
+    playlist_2 = '<:playlist:1260237135357808715>'
+    stop = '<:stop:1260237147873742930>'
+    repeat = '<:repeat:1260237133831213108>'
+
+    volume_0 = '<:volume0:1260237141271908442>'
+    volume_1 = '<:volume1:1260237139342393345>'
+    volume_2 = volume_down
+    volume_3 = volume_up_2
+
     # Ofher
     cooldown = '<:cooldown:1185277451295793192>'
     lightbulb = '<:lightbulb:1191467123462119554>'
     congratulation = '<a:congratulation:1165684808844845176>'
     rocket = '<a:rocketa:1165684783754522704>'
-
-    undo = '<:undo:1191377269143388250>'
-    redo = '<:redo:1191377267574710372>'
 
     tickmark = '<a:tickmark:1165684814557495326>'
     success = '<a:success:1165684794361917611>'
@@ -64,6 +80,10 @@ class Emoji(StrEnum):
     empty_card = '<:empty_card:1239171805885894717>'
     tic_tac_x = '<:tic_tac_x:1249468200626819133>'
     tic_tac_o = '<:tic_tac_o:1249468198869405726>'
+
+    # Tickets
+    tickets = '<:tickettool:1260646170590445598>'
+    faq = '<:faq:1260652584507801640>'
 
 
 channel_types_emoji = {

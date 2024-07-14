@@ -3,7 +3,8 @@ import nextcord
 
 from bot.databases import GuildDateBases
 from bot.resources.info import DEFAULT_EMOJI
-from bot.misc.utils import is_emoji, to_async
+from bot.misc.utils import is_emoji, AsyncSterilization
+
 from bot.views.settings.set_reaction import fetch_reaction
 
 from .. import economy
@@ -21,7 +22,7 @@ class SelectedEmojiDropDown(nextcord.ui.StringSelect):
         ])
 
 
-@to_async
+@AsyncSterilization
 class EmojiView(DefaultSettingsView):
     embed: nextcord.Embed
 

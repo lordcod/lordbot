@@ -1,16 +1,14 @@
 
+from collections import defaultdict
 import time
 import nextcord
 from nextcord.ext import commands
 
-from bot.databases import localdb
 from bot.databases import GuildDateBases
+from bot.languages import i18n
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import translate_to_timestamp, randquan
-
-
-REMINDER_DB = localdb.get_table('reminder_state')
 
 
 class Reminder(commands.Cog):
@@ -19,8 +17,11 @@ class Reminder(commands.Cog):
 
     @commands.command()
     async def reminder(self, ctx: commands.Context, time_now: translate_to_timestamp, *, text: str) -> None:
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+
         if time.time() > time_now:
-            await ctx.send("You must specify a time that is later than the current time.")
+            await ctx.send(i18n.t(locale, 'reminder.error.time'))
             return
         self.bot.lord_handler_timer.create(
             time_now-time.time(),
@@ -31,14 +32,16 @@ class Reminder(commands.Cog):
 
     async def process_reminder(self, time_old: float, member: nextcord.Member, channel: nextcord.TextChannel, text: str) -> None:
         gdb = GuildDateBases(channel.guild.id)
+        locale = await gdb.get('language')
         color = await gdb.get('color')
+
         embed = nextcord.Embed(
-            title="🛎️ Reminder",
-            description=f"{display_time(time.time()-time_old)} ago you asked me to remind you",
+            title=i18n.t(locale, 'reminder.embed.title'),
+            description=i18n.t(locale, 'reminder.embed.description', time=display_time(time.time()-time_old)),
             color=color
         )
         embed.add_field(
-            name="Remind",
+            name=i18n.t(locale, 'reminder.embed.field'),
             value=text
         )
 

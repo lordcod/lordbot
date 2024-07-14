@@ -1,7 +1,8 @@
 from typing import List
 import nextcord
 
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from ... import permisson_command
 from bot.views.settings._view import DefaultSettingsView
@@ -9,7 +10,7 @@ from bot.views.settings._view import DefaultSettingsView
 from bot.databases import GuildDateBases, CommandDB
 
 
-@to_async
+@AsyncSterilization
 class ChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
@@ -59,7 +60,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@to_async
+@AsyncSterilization
 class ChannelsView(DefaultSettingsView):
     embed: nextcord.Embed = None
 

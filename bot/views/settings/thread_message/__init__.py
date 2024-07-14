@@ -1,7 +1,8 @@
 import nextcord
 
 from bot.languages import i18n
-from bot.misc.utils import to_async
+from bot.misc.utils import AsyncSterilization
+
 
 from .additional import InstallThreadView
 from .precise import ThreadData
@@ -12,7 +13,7 @@ from bot.databases import GuildDateBases
 from bot.resources.ether import channel_types_emoji
 
 
-@to_async
+@AsyncSterilization
 class DropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild):
         self.gdb = GuildDateBases(guild.id)
@@ -30,19 +31,16 @@ class DropDown(nextcord.ui.StringSelect):
             if chnl is not None
         ]
 
+        disabled = 0 >= len(options)
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
-            _disabled = True
-        else:
-            _disabled = False
 
         super().__init__(
             placeholder=i18n.t(
                 locale, 'settings.thread.init.placeholder'),
             min_values=1,
             max_values=1,
-            options=options,
-            disabled=_disabled
+            options=options
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -64,7 +62,7 @@ class DropDown(nextcord.ui.StringSelect):
                                                 view=ThreadData(channel, channel_data))
 
 
-@to_async
+@AsyncSterilization
 class AutoThreadMessage(DefaultSettingsView):
     embed: nextcord.Embed
 

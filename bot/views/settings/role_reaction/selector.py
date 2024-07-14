@@ -2,17 +2,20 @@ from typing import List, Optional
 import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import ReactionRolePayload
+from bot.languages import i18n
 from bot.misc import utils
 from . import item
 from .. import role_reaction
 from .._view import DefaultSettingsView
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class RoleReactionSelectorChannelDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        super().__init__(channel_types=[
+        locale = await gdb.get('language')
+
+        super().__init__(placeholder=i18n.t(locale, 'settings.role-reaction.selector.channel'), channel_types=[
             nextcord.ChannelType.text,
             nextcord.ChannelType.voice,
             nextcord.ChannelType.news,
@@ -24,20 +27,20 @@ class RoleReactionSelectorChannelDropDown(nextcord.ui.ChannelSelect):
         channel = self.values[0]
 
         view = await RoleReactionSelectorView(interaction.user.guild, channel)
-
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, selected_message_id: Optional[int] = None) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.channel = channel
         if channel:
             messages = await channel.history(limit=15).flatten()
-        if not (channel and messages):
-            super().__init__(options=[nextcord.SelectOption(
-                label="SelectOption")], disabled=True)
-            return
+        else:
+            messages = []
 
         options = [
             nextcord.SelectOption(
@@ -49,12 +52,11 @@ class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
             for mes in messages
         ]
 
+        disabled = 0 >= len(options)
         if 0 >= len(options):
             options.append(nextcord.SelectOption(label="SelectOption"))
-            _disabled = True
-        else:
-            _disabled = False
-        super().__init__(options=options, disabled=_disabled)
+
+        super().__init__(placeholder=i18n.t(locale, 'settings.role-reaction.selector.message'), options=options, disabled=disabled)
 
     @staticmethod
     def get_content(mes: nextcord.Message) -> Optional[str]:
@@ -75,21 +77,22 @@ class RoleReactionSelectorMessageDropDown(nextcord.ui.StringSelect):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
-@utils.to_async
+@utils.AsyncSterilization
 class RoleReactionSelectorView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
     async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None, message_id: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild.id)
         color = await gdb.get('color')
+        locale = await gdb.get('language')
 
         self.channel = channel
         self.message_id = message_id
 
         self.embed = nextcord.Embed(
-            title="Roles for reactions",
-            color=color,
-            description='This module will help you assign roles based on reactions'
+            title=i18n.t(locale, 'settings.role-reaction.global.title'),
+            description=i18n.t(locale, 'settings.role-reaction.global.description'),
+            color=color
         )
 
         super().__init__()

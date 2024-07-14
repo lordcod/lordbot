@@ -5,14 +5,15 @@ import random
 import string
 from typing import TYPE_CHECKING
 import orjson
-from uvicorn import Config, Server
-from pyngrok import ngrok, conf, ngrok
 import asyncio
+from uvicorn import Config, Server
+from pyngrok import ngrok, conf
 from fastapi import FastAPI, APIRouter, Request, Response
 
 
 if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
+
 
 _log = logging.getLogger(__name__)
 pyngrok_config = conf.PyngrokConfig(log_event_callback=lambda log: None,
@@ -27,7 +28,7 @@ class ApiSite:
 
     def __init__(self,
                  bot: LordBot,
-                 handlers: list,) -> None:
+                 handlers: list) -> None:
         self.bot = bot
         self.handlers = handlers
 
@@ -92,3 +93,8 @@ class ApiSite:
     def _is_authorization(self, request: Request) -> bool:
         password = request.headers.get('Authorization')
         return self.password == password
+
+
+if __name__ == '__main__':
+    api = ApiSite('Any', [])
+    api.run()

@@ -1,7 +1,7 @@
-
+import logging
 import nextcord
 from nextcord.ext import commands, application_checks
-from nextcord.utils import oauth_url
+from nextcord.utils import oauth_url, format_dt
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
@@ -23,6 +23,9 @@ from typing import Callable, Optional
 
 translator = googletrans.Translator()
 
+_log = logging.getLogger(__name__)
+_log.addHandler(logging.FileHandler('logs/presence.log', 'a+'))
+
 
 class Basic(commands.Cog):
     def __init__(self, bot: LordBot):
@@ -31,6 +34,7 @@ class Basic(commands.Cog):
     @commands.command()
     async def ping(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
 
         stime = timeit.default_timer()
         color = await gdb.get('color')
@@ -45,35 +49,39 @@ class Basic(commands.Cog):
 
         embed = nextcord.Embed(
             title="Pong!🏓🎉",
-            description=(
-                f"Discord latency: {discord_latency_ms}ms\n"
-                f"Databases latency: {databases_latency_ms}ms\n"
-                f"Command processing latency: {command_latency_ms}ms\n"
-                f"Shard id: {shard_id}"
-            ),
+            description=i18n.t(locale, 'basic.ping.description',
+                               discord_latency_ms=discord_latency_ms,
+                               databases_latency_ms=databases_latency_ms,
+                               command_latency_ms=command_latency_ms,
+                               shard_id=shard_id),
             color=color
         )
-
         await ctx.send(embed=embed)
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
     async def giveaway(self, ctx: commands.Context):
-        view = GiveawaySettingsView(ctx.author, ctx.guild.id)
+        view = await GiveawaySettingsView(ctx.author, ctx.guild.id)
         await ctx.send(embed=view.embed, view=view)
 
     @commands.command()
     async def avatar(self, ctx: commands.Context, member: nextcord.Member) -> None:
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+
         embed = nextcord.Embed(
-            title=f"Avatar of the {member.display_name} member")
+            title=i18n.t(locale, 'basic.avatar.description', member=member.display_name))
         embed.set_image(member.display_avatar.url)
 
         await ctx.send(embed=embed)
 
     @commands.command()
     async def invite(self, ctx: commands.Context):
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+
         invite_link = oauth_url(client_id=self.bot.user.id)
-        await ctx.send(f"[**Click to add to your server**]({invite_link})")
+        await ctx.send(i18n.t(locale, 'basic.invite.description', invite_link=invite_link))
 
     @commands.command()
     async def captcha(self, ctx: commands.Context):
