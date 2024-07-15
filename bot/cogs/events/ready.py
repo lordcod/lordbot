@@ -10,6 +10,7 @@ from bot.databases import RoleDateBases, BanDateBases, localdb
 from bot.misc import tickettools
 from bot.misc.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
+from bot.misc.utils import AsyncSterilization
 from bot.resources import info
 from bot.views.giveaway import GiveawayView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
@@ -17,6 +18,7 @@ from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 import time
 import asyncio
 
+from bot.views.tempvoice import TempVoiceView
 from bot.views.tickets.closes import CloseTicketView
 from bot.views.tickets.delop import ControllerTicketView
 from bot.views.tickets.faq import FAQView
@@ -84,13 +86,15 @@ class ReadyEvent(commands.Cog):
             self.process_guild_delete_tasks()
         )
 
-        self.bot.add_view(await ControllerTicketView())
-        self.bot.add_view(await CloseTicketView())
-        self.bot.add_view(await FAQView())
-        self.bot.add_view(await ConfirmView())
-        self.bot.add_view(await ReactionConfirmView())
-        self.bot.add_view(await IdeaView())
-        self.bot.add_view(GiveawayView())
+        views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
+                 ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView]
+        _log.trace('Views set: %s', views)
+        for view in views:
+            if isinstance(view, AsyncSterilization):
+                rs = await view()
+            else:
+                rs = view()
+            self.bot.add_view(rs)
 
         await GuildDateBases(1179069504186232852).set('tempvoice', {
             'enabled': True,

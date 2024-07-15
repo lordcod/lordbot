@@ -110,6 +110,8 @@ class TwNoti:
             return False, None
 
     async def parse_twitch(self) -> None:
+        if self.client_id is None or self.client_secret is None:
+            return
         if self.twitch_api_access_token is None:
             await self.get_oauth_token()
 

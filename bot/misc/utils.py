@@ -438,6 +438,9 @@ class AsyncSterilization(Generic[T]):
     def __init__(self, cls) -> None:
         self.cls = cls
 
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} {self.cls.__name__}>"
+
     async def __call__(self, *args: Any, **kwds: Any) -> T:
         self = self.cls.__new__(self.cls)
         await self.__init__(*args, **kwds)

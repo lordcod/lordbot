@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 from dataclasses import dataclass
 import datetime
 from enum import IntEnum
@@ -47,7 +48,8 @@ def filter_bool(texts: list) -> list:
 async def pre_message_delete_log(message: nextcord.Message):
     moderator: Optional[nextcord.Member] = None
 
-    entry = (await message.guild.audit_logs(limit=1).flatten())[0]
+    with contextlib.suppress(IndexError, nextcord.Forbidden):
+        entry = (await message.guild.audit_logs(limit=1).flatten())[0]
     if (entry.action == nextcord.AuditLogAction.message_delete
         and entry.extra.channel == message.channel
             and message.author == entry.target):
@@ -67,11 +69,10 @@ class Logs:
             @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
                 mes: Optional[Message] = await coro(self, *args, **kwargs)
-
-                if mes is None:  # type: ignore
-                    return
-
                 guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
+
+                if mes is None or guild_data is None:
+                    return
 
                 for channel_id, logs_types in guild_data.items():
                     if log_type not in logs_types:

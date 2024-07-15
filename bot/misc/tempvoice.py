@@ -4,16 +4,21 @@ import logging
 import time
 import nextcord
 
-from bot.cogs.events import voice_state
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TempChannelsItemPayload, TempChannelsPayload
 from bot.misc.utils import GuildPayload, MemberPayload, lord_format
+from bot.views.tempvoice import TempVoiceView
 
 
 _log = logging.getLogger(__name__)
 
-TIMEOUT_VOICE = 300
+TIMEOUT_VOICE = 5
+
+
+class VoiceStatus(IntEnum):
+    opened = 1
+    closed = 2
 
 
 def get_payload(member: nextcord.Member, count: int):
@@ -21,11 +26,6 @@ def get_payload(member: nextcord.Member, count: int):
     payload.update(MemberPayload(member)._to_dict())
     payload.update(GuildPayload(member.guild)._to_dict())
     return payload
-
-
-class VoiceStatus(IntEnum):
-    opened = 1
-    closed = 2
 
 
 class TempVoiceModule:
@@ -64,6 +64,11 @@ class TempVoiceModule:
             if voice_data['status'] == VoiceStatus.opened:
                 channel = self.member.guild.get_channel(
                     voice_data['channel_id'])
+                if channel is None:
+                    voice_data['status'] = VoiceStatus.closed
+                    voice_data['closed_time'] = time.time()
+                    await channels_data.set(cid, voice_data)
+                    continue
                 await self.member.move_to(channel)
                 return False
         return True
@@ -119,6 +124,9 @@ class TempVoiceModule:
                 )
             })
         await self.member.move_to(channel)
+
+        view = TempVoiceView()
+        await channel.send(view=view)
 
         channels_track_data.append(channel.id)
         await channels_tracks_db.set(self.member.guild.id, channels_track_data)
