@@ -45,7 +45,7 @@ class LordBot(commands.AutoShardedBot):
     timeouts = {}
     guild_timer_handlers = {}
 
-    def __init__(self) -> None:
+    def __init__(self, rollout_functions: bool = True) -> None:
         flags = dict(map(lambda item: (item[0].removeprefix(
             '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards='])[0]))
 
@@ -60,12 +60,11 @@ class LordBot(commands.AutoShardedBot):
             help_command=None,
             shard_ids=shard_ids,
             shard_count=shard_count,
-
-            # rollout_associate_known=False,
-            # rollout_delete_unknown=False,
-            # rollout_register_new=False,
-            # rollout_update_known=False,
-            # rollout_all_guilds=False
+            rollout_associate_known=rollout_functions,
+            rollout_delete_unknown=rollout_functions,
+            rollout_register_new=rollout_functions,
+            rollout_update_known=rollout_functions,
+            rollout_all_guilds=rollout_functions
         )
 
         loop = asyncio.get_event_loop()
@@ -196,6 +195,5 @@ class LordBot(commands.AutoShardedBot):
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         if not self.__with_ready__.done() and event_name.lower() != 'ready':
             self.__with_ready_events__.append((event_name, args, kwargs))
-            _log.trace('Postponed event %s', event_name)
             return
         return super().dispatch(event_name, *args, **kwargs)

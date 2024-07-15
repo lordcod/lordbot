@@ -3,7 +3,7 @@ import asyncio
 from collections import defaultdict
 import functools
 import logging
-from typing import Any, Dict, List, Optional, Self, Union, TypeVar
+from typing import Any, Dict, List, Optional, Union, TypeVar
 
 from bot.databases.misc.simple_task import to_task
 from ..db_engine import DataBase
@@ -12,7 +12,7 @@ from ..misc.error_handler import on_error
 _log = logging.getLogger(__name__)
 
 engine: DataBase = None
-reserved: dict = {}
+reserved = []
 collectable_hashable_data: List[str] = ['language', 'color']
 hashable_data: Dict[int, Dict[str, Any]] = defaultdict(dict)
 T = TypeVar("T")
@@ -27,33 +27,16 @@ def check_registration(func):
 
 
 class GuildDateBases:
-    __with_reserved__: bool = False
-    __required_task__: Optional[asyncio.Future] = None
-
-    def __new__(cls, guild_id: int) -> Self:
-        try:
-            __instance = reserved[guild_id]
-        except KeyError:
-            __instance = object.__new__(cls)
-            reserved[guild_id] = __instance
-            __instance.__with_reserved__ = True
-
-        return __instance
-
     def __init__(self, guild_id: int) -> None:
         self.guild_id = guild_id
 
     @on_error()
     async def register(self):
-        if self.__required_task__:
-            await asyncio.wait_for(self.__required_task__, timeout=None)
-        if self.__with_reserved__:
-            loop = asyncio.get_event_loop()
-            self.__required_task__ = loop.create_future()
-            if not await self._get(self.guild_id):
-                await self._insert(self.guild_id)
-            self.__with_reserved__ = False
-            self.__required_task__.set_result(None)
+        if self.guild_id in reserved:
+            return
+        reserved.append(self.guild_id)
+        if not await self._get(self.guild_id):
+            await self._insert(self.guild_id)
             _log.trace(f"Guild {self.guild_id} registration completed")
 
     @on_error()
@@ -70,7 +53,6 @@ class GuildDateBases:
 
         return value
 
-    @to_task
     @on_error()
     async def _insert(self, guild_id):
         await engine.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
@@ -123,7 +105,6 @@ class GuildDateBases:
         data.append(value)
         await self.set(service, data)
 
-    @to_task
     @on_error()
     async def delete(self):
         reserved.pop(self.guild_id, None)

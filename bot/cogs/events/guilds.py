@@ -17,7 +17,6 @@ class GuildsEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_available(self, guild: nextcord.Guild):
-        _log.trace('Guild available %s (%d), Member count: %d', guild.name, guild.id, guild.member_count)
         gdb = GuildDateBases(guild.id)
         await gdb.set('delete_task', None)
         self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
