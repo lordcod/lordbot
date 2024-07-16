@@ -12,6 +12,7 @@ from typing import Any, Coroutine, List,  Optional, Dict
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
+from bot.misc.utils import get_emoji_wrap
 from bot.resources.ether import Emoji
 from bot.views.music import MusicView
 
@@ -37,14 +38,15 @@ def convert_time(timestamp: Any):
         return f"{hours:0>2.0f}:{minutes:0>2.0f}:{seconds:0>2.0f}"
 
 
-def get_emoji(volume: int):
+async def get_emoji(gdb: GuildDateBases, volume: int):
+    _get_emoji = await get_emoji_wrap(gdb)
     if 66 < volume <= 100:
-        return Emoji.volume_3
+        return _get_emoji('vol3')
     if 33 < volume <= 66:
-        return Emoji.volume_2
+        return _get_emoji('vol2')
     if 0 < volume <= 33:
-        return Emoji.volume_1
-    return Emoji.volume_0
+        return _get_emoji('vol1')
+    return _get_emoji('vol0')
 
 
 class Queue:
@@ -250,10 +252,10 @@ class MusicPlayer:
         volume = self.voice.source.volume * 100
         embed.add_field(
             name=i18n.t(locale, 'music.player.message.volume'),
-            value=f'{get_emoji(volume)} {volume:.0f}%'
+            value=f'{await get_emoji(gdb, volume)} {volume:.0f}%'
         )
 
-        self.view.parse_buttons()
+        await self.view.parse_buttons()
         self.view.mqdd.update_queue()
 
         await self.message.edit(

@@ -1,7 +1,7 @@
 import nextcord
 
 from bot.misc.time_transformer import display_time
-from bot.misc.utils import AsyncSterilization
+from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
 from bot.resources.info import DEFAULT_ECONOMY_SETTINGS
 
@@ -19,9 +19,10 @@ class EmojiDropDown(nextcord.ui.StringSelect):
     def __init__(self, emoji: str):
         options = [
             nextcord.SelectOption(
-                label='Econonmy emoji',
+                label='Economy emoji',
                 value='emoji',
                 emoji=emoji,
+                default=True
             ),
         ]
 
@@ -29,6 +30,7 @@ class EmojiDropDown(nextcord.ui.StringSelect):
             min_values=1,
             max_values=1,
             options=options,
+            row=1
         )
 
 
@@ -37,6 +39,7 @@ class ChooseDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(guild_id)
 
         options = [
             nextcord.SelectOption(
@@ -61,6 +64,7 @@ class ChooseDropDown(nextcord.ui.StringSelect):
             min_values=1,
             max_values=1,
             options=options,
+            row=2
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -93,10 +97,6 @@ class Economy(DefaultSettingsView):
             color=color
         )
         self.embed.add_field(
-            name="Information about the store",
-            value=f""
-        )
-        self.embed.add_field(
             name="Economy Information",
             value=(
                 f"Daily reward: {self.es.get('daily')}\n"
@@ -127,13 +127,13 @@ class Economy(DefaultSettingsView):
 
             economy_dd.disabled = True
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=3)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = await settings_menu.SettingsView(interaction.user)
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Switch', style=nextcord.ButtonStyle.green, row=1)
+    @nextcord.ui.button(label='Switch', style=nextcord.ButtonStyle.green, row=3)
     async def economy_switcher(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.gdb.set_on_json('economic_settings', 'operate',
                                    self.economy_switcher_value)

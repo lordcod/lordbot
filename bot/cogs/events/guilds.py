@@ -19,8 +19,17 @@ class GuildsEvent(commands.Cog):
     async def on_guild_available(self, guild: nextcord.Guild):
         _log.trace('Guild available %s (%d), Member count: %d', guild.name, guild.id, guild.member_count)
         gdb = GuildDateBases(guild.id)
+
         await gdb.set('delete_task', None)
         self.bot.lord_handler_timer.close(f'guild-deleted:{guild.id}')
+
+        twitch_data = await gdb.get('twitch_notification', {})
+        for data in twitch_data.values():
+            await self.bot.twnoti.add_channel(guild.id, data['username'])
+
+        youtube_data = await gdb.get('youtube_notification', {})
+        for data in youtube_data.values():
+            await self.bot.ytnoti.add_channel(guild.id, data['yt_id'])
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: nextcord.Guild):

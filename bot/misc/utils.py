@@ -1,5 +1,4 @@
 from __future__ import annotations
-from ast import arg
 import contextlib
 import functools
 import getopt
@@ -22,7 +21,7 @@ import orjson
 
 from asyncio import TimerHandle
 from collections import namedtuple
-from typing import (TYPE_CHECKING, Awaitable, Coroutine, Dict, Generic,  Optional,  Tuple, Type, Union,
+from typing import (TYPE_CHECKING, Callable,  Coroutine, Dict, Generic,  Optional,  Tuple,  Union,
                     Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
 from datetime import datetime
 from captcha.image import ImageCaptcha
@@ -34,8 +33,12 @@ from easy_pil import Editor, Font, load_image_async
 
 from bot.databases import GuildDateBases
 from cryptography.fernet import Fernet
-
+from bot.resources import ether
 from bot.resources.ether import Emoji
+
+if TYPE_CHECKING:
+    from bot.misc.noti.twnoti import Stream as TwStream, User as TwUser
+    from bot.misc.noti.ytnoti import Video as YtVideo
 
 _log = logging.getLogger(__name__)
 T = TypeVar('T')
@@ -75,6 +78,29 @@ class TempletePayload:
             base[f"{prefix}.{name}"] = arg
 
         return base
+
+
+class StreamPayload(TempletePayload):
+    _prefix = 'stream'
+
+    def __init__(self, stream: TwStream, user: TwUser) -> None:
+        self.username = stream.user_name
+        self.title = stream.title
+        self.gameName = stream.game_name
+        self.thumbnailUrl = stream.thumbnail_url
+        self.avatarUrl = user.profile_image_url
+        self.url = stream.url
+
+
+class VideoPayload(TempletePayload):
+    _prefix = 'video'
+
+    def __init__(self, video: YtVideo) -> None:
+        self.username = video.channel.name
+        self.title = video.title
+        self.description = video.description
+        self.url = video.url
+        self.videoIcon = video.thumbnail.url
 
 
 class GuildPayload(TempletePayload):
@@ -335,10 +361,11 @@ class TranslatorFlags:
     def __init__(self, longopts: list[str] = []):
         self.longopts = longopts
 
-    def __call__(self, text: str) -> Any:
+    async def convert(self, ctx: commands.Context, text: str) -> Any:
         args = text.split()
         self.flags = dict(map(lambda item: (item[0].removeprefix(
             '--'), item[1]), getopt.getopt(args, '', self.longopts)[0]))
+        return self
 
     def get(self, key: str):
         if key in self.flags and self.flags[key] == '':
@@ -347,6 +374,32 @@ class TranslatorFlags:
 
     def __class_getitem__(cls, *args: str):
         return cls(args)
+
+
+async def get_emoji(guild_id: int, name: str):
+    gdb = GuildDateBases(guild_id)
+    system_emoji = await gdb.get('system_emoji')
+    return ether.every_emojis[name][system_emoji]
+
+
+@overload
+async def get_emoji_wrap(gdb: GuildDateBases) -> Callable[[str], str]: ...
+
+
+@overload
+async def get_emoji_wrap(guild_id: int) -> Callable[[str], str]: ...
+
+
+async def get_emoji_wrap(guild_data: GuildDateBases | int) -> Callable[[str], str]:
+    if isinstance(guild_data, GuildDateBases):
+        gdb = guild_data
+    else:
+        gdb = GuildDateBases(guild_data)
+    system_emoji = await gdb.get('system_emoji')
+
+    def _get_emoji_inner(name: str):
+        return ether.every_emojis[name][system_emoji]
+    return _get_emoji_inner
 
 
 async def clone_message(message: nextcord.Message) -> dict:
@@ -445,6 +498,24 @@ class AsyncSterilization(Generic[T]):
         self = self.cls.__new__(self.cls)
         await self.__init__(*args, **kwds)
         return self
+
+
+@AsyncSterilization
+class GuildEmoji:
+    async def __init__(self, guild_data: GuildDateBases | int) -> None:
+        if isinstance(guild_data, GuildDateBases):
+            gdb = guild_data
+        else:
+            gdb = GuildDateBases(guild_data)
+        self.system_emoji = await gdb.get('system_emoji')
+        self.data = {}
+
+        for name, data in ether.every_emojis.items():
+            self.data[name] = data[self.system_emoji]
+            setattr(self, name, data[self.system_emoji])
+
+    def get(self, name: str) -> str:
+        return self.data[name]
 
 
 @dataclass

@@ -3,11 +3,11 @@ from aiohttp import ClientConnectorError
 import nextcord
 from easy_pil import load_image_async
 
+from bot.views.settings import notification
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.misc import utils
 from bot.languages import i18n
-from bot.views import settings_menu
 from bot.databases import GuildDateBases
 
 
@@ -183,8 +183,7 @@ class WelcomerView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await settings_menu.SettingsView(interaction.user)
-
+        view = await notification.NotificationView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Install', style=nextcord.ButtonStyle.success)

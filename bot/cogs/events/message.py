@@ -162,6 +162,12 @@ class MessageEvent(commands.Cog):
     async def on_message_delete(self, message: nextcord.Message):
         await logstool.pre_message_delete_log(message)
 
+    @commands.Cog.listener()
+    async def on_guild_audit_log_entry_create(self, entry: nextcord.AuditLogEntry):
+        if entry.action != nextcord.AuditLogAction.message_delete or entry.target.id is None:
+            return
+        await logstool.set_message_delete_audit_log(entry.user, entry.extra.channel.id, entry.target.id)
+
 
 def setup(bot):
     bot.add_cog(MessageEvent(bot))

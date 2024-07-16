@@ -2,7 +2,7 @@ from bot.views.settings.logs import LogsView
 from bot.views.settings.role_reaction import RoleReactionView
 from .music import MusicView
 from .ideas import IdeasView
-from .welcomer import WelcomerView
+from .notification import NotificationView
 from .auto_role import AutoRoleView
 from .permisson_command import CommandsDataView
 from .thread_message import AutoThreadMessage
@@ -21,7 +21,7 @@ moduls = {
     'CommandPermission': CommandsDataView,
     'RoleReactions': RoleReactionView,
     'Music': MusicView,
-    'Welcomer': WelcomerView,
+    'Notification': NotificationView,
     'AutoRoles': AutoRoleView,
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,

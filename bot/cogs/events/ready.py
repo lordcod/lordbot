@@ -1,5 +1,6 @@
 import logging
 from typing import Dict
+from emoji import emoji_list
 from nextcord.ext import commands
 import orjson
 
@@ -11,14 +12,16 @@ from bot.misc import tickettools
 from bot.misc.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import AsyncSterilization
-from bot.resources import info
+from bot.resources import info, ether
+from bot.resources.ether import ColorType
 from bot.views.giveaway import GiveawayView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
 import time
 import asyncio
 
-from bot.views.tempvoice import TempVoiceView
+from bot.views.tempvoice.view import TempVoiceView
+from bot.views.tempvoice.dropdown import AdvancedTempVoiceView
 from bot.views.tickets.closes import CloseTicketView
 from bot.views.tickets.delop import ControllerTicketView
 from bot.views.tickets.faq import FAQView
@@ -70,6 +73,36 @@ class ReadyEvent(commands.Cog):
                 channel = guild.get_channel(ticket_payload['channel_id'])
                 await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
 
+    async def get_emojis(self):
+        values = {}
+        json_values = {}
+        names = ('aqua', 'mala', 'barh', 'lava', 'perl', 'yant', 'sume', 'sliv')
+
+        def get_color(name: str) -> str:
+            for prefix in names:
+                if name.startswith(prefix):
+                    return prefix
+
+        for emoji in self.bot.emojis:
+            if emoji.name.startswith(names):
+                color = get_color(emoji.name)
+                name = emoji.name.removeprefix(color)
+
+                values.setdefault(name, {})
+                json_values.setdefault(name, {})
+                values[name][ColorType.get(color).value] = str(emoji)
+                json_values[name][color] = str(emoji)
+
+        ether.every_emojis.update(values)
+        with open('emojis.json', 'wb+') as file:
+            file.write(orjson.dumps(json_values))
+
+        emo_names = [emo.name for emo in self.bot.emojis]
+        for name, emojis in json_values.items():
+            missing = set(names)-set(emojis.keys())
+            if missing:
+                _log.trace('Emojis were not found in %s: %s', name, missing)
+
     @commands.Cog.listener()
     async def on_ready(self):
         try:
@@ -78,6 +111,7 @@ class ReadyEvent(commands.Cog):
             return
 
         await asyncio.gather(
+            self.get_emojis(),
             self.find_not_data_commands(),
             self.process_tickets(),
             self.process_temp_roles(),
@@ -87,8 +121,7 @@ class ReadyEvent(commands.Cog):
         )
 
         views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
-                 ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView]
-        _log.trace('Views set: %s', views)
+                 ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView, AdvancedTempVoiceView]
         for view in views:
             if isinstance(view, AsyncSterilization):
                 rs = await view()

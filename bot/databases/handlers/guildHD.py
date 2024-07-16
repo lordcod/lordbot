@@ -70,7 +70,6 @@ class GuildDateBases:
 
         return value
 
-    @to_task
     @on_error()
     async def _insert(self, guild_id):
         await engine.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
@@ -123,7 +122,6 @@ class GuildDateBases:
         data.append(value)
         await self.set(service, data)
 
-    @to_task
     @on_error()
     async def delete(self):
         reserved.pop(self.guild_id, None)

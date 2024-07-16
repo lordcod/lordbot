@@ -144,7 +144,7 @@ def check_prison():
         if not conclusion or time.time() > conclusion:
             return True
 
-        await ctx.send(i18n.t(locale, 'economy.permission.prison'))
+        await ctx.send(i18n.t(locale, 'economy.permission.prison', conclusion=conclusion))
         return False
     return commands.check(predicate)
 
@@ -329,7 +329,7 @@ class Economy(commands.Cog):
             return
 
         embed = nextcord.Embed(
-            title=i18n.t(locale, 'economy.pay.success.description'),
+            title=i18n.t(locale, 'economy.pay.success.title'),
             description=i18n.t(locale, 'economy.pay.success.description', author=ctx.author.name, member=member.name, amount=amount, emoji=currency_emoji),
             color=color,
         )
@@ -544,7 +544,7 @@ class Economy(commands.Cog):
             else:
                 embed = nextcord.Embed(
                     title=i18n.t(locale, 'economy.rob.title'),
-                    description=i18n.t(locale, 'economy.rob.success.mini',
+                    description=i18n.t(locale, 'economy.rob.success.full',
                                        author=ctx.author.name,
                                        member=member.name,
                                        debt=debt,
@@ -557,7 +557,7 @@ class Economy(commands.Cog):
                 await logstool.Logs(ctx.guild).add_currency(ctx.author, debt, reason='a successful attempt at theft')
                 await logstool.Logs(ctx.guild).remove_currency(member, debt, reason='a successful attempt at theft')
         else:
-            debt = (1-win_chance) * thief_account['balance'] * 1/2
+            debt = (1-win_chance) * thief_balance * 1/2
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'economy.rob.title'),
                 description=i18n.t(locale, 'economy.rob.success.failure',

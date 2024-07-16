@@ -52,7 +52,6 @@ class RoleDateBases:
 
         return data
 
-    @to_task
     @on_error()
     async def insert(self, role_id: int, time: int):
         await engine.execute(
@@ -62,7 +61,6 @@ class RoleDateBases:
             (self.guild_id, self.member_id, role_id, time)
         )
 
-    @to_task
     @on_error()
     async def update(self, role_id: int, time: int):
         await engine.execute(
@@ -72,7 +70,6 @@ class RoleDateBases:
             (time, self.guild_id, self.member_id, role_id)
         )
 
-    @to_task
     @on_error()
     async def delete(self, role_id: int):
         await engine.execute(
@@ -81,14 +78,12 @@ class RoleDateBases:
             (self.guild_id, self.member_id, role_id)
         )
 
-    @to_task
     @on_error()
     async def remove(self, role_id):
         _role_data = await self.get_as_role(role_id)
         if _role_data is not None:
             await self.delete(role_id)
 
-    @to_task
     @on_error()
     async def set_role(self, role_id: int, time: int) -> None:
         _role_data = await self.get_as_role(role_id)
@@ -97,7 +92,6 @@ class RoleDateBases:
         else:
             await self.update(role_id, time)
 
-    @to_task
     async def remove_role(self, member: nextcord.Member, role: nextcord.Role):
         await self.remove(role.id)
         await member.remove_roles(role)

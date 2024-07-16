@@ -7,8 +7,6 @@ from bot.misc.lordbot import LordBot
 
 import os
 
-from bot.misc.utils import TranslatorFlags
-
 bot = LordBot()
 
 
