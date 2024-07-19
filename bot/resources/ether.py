@@ -20,6 +20,8 @@ class ColorType(IntEnum):
 
 
 class Emoji(StrEnum):
+    lordcord = '<:lordcord:1179130474006859776>'
+
     # Channels
     category = '<:category:1166001036553621534>'
     channel_text = '<:channel_text:1166001040198484178>'
@@ -36,10 +38,9 @@ class Emoji(StrEnum):
     money = '<:money:1178745649248882770>'
     award = '<:award:1178745644714831954>'
 
-    # Greeting
+    # Economy Sets
     auto_role = '<:auto_role:1180609685112492172>'
-
-    # Economy
+    theft = '<:robbery:1262915680575946772>'
     emoji = '<:emoji:1183456189141504091>'
 
     # Disabled command

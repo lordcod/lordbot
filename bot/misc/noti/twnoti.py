@@ -6,10 +6,9 @@ import time
 import logging
 from typing import TYPE_CHECKING, Optional, Tuple
 
-import nextcord
-
+from aiohttp.web_exceptions import HTTPUnauthorized
 from bot.databases.handlers.guildHD import GuildDateBases
-from bot.misc.utils import GuildPayload, StreamPayload, generate_message, lord_format
+from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_TWITCH_MESSAGE
 
 try:
@@ -27,15 +26,9 @@ handler.setFormatter(logging.Formatter(
 _log.addHandler(handler)
 
 
-def get_payload(guild: nextcord.Guild, stream: Stream, user: User) -> dict:
-    data = {}
-    data.update(GuildPayload(guild)._to_dict())
-    data.update(StreamPayload(stream, user)._to_dict())
-    return data
-
-
 class TwNoti:
     twitch_api_access_token: Optional[str] = None
+    twitch_api_refresh_token: Optional[str] = None
     twitch_api_access_token_end: Optional[int] = None
 
     def __init__(
@@ -72,7 +65,7 @@ class TwNoti:
             for id, data in twitch_data.items():
                 if data['username'] == stream.user_name:
                     channel = self.bot.get_channel(data['channel_id'])
-                    payload = get_payload(guild, stream, user)
+                    payload = get_payload(guild=guild, stream=stream, user=user)
                     mes_data = await generate_message(lord_format(data.get('message', DEFAULT_TWITCH_MESSAGE), payload))
                     await channel.send(**mes_data)
 
@@ -90,8 +83,13 @@ class TwNoti:
         self.directed_data[username].add(guild_id)
 
     async def check_token(self) -> None:
-        if self.twitch_api_access_token is None or time.time() > self.twitch_api_access_token_end:
+        if self.twitch_api_access_token is None:
             await self.get_oauth_token()
+        if time.time() > self.twitch_api_access_token_end:
+            try:
+                await self.refresh_oauth_token()
+            except HTTPUnauthorized:
+                await self.get_oauth_token()
 
     async def get_oauth_token(self) -> None:
         url = 'https://id.twitch.tv/oauth2/token'
@@ -106,6 +104,23 @@ class TwNoti:
 
         self.twitch_api_access_token_end = json['expires_in']+time.time()
         self.twitch_api_access_token = json['access_token']
+        self.twitch_api_refresh_token = json['refresh_token']
+
+    async def refresh_oauth_token(self) -> None:
+        url = 'https://id.twitch.tv/oauth2/token'
+        data = {
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'grant_type': 'refresh_token',
+            'refresh_token': self.twitch_api_refresh_token
+        }
+        async with self.bot.session.post(url, data=data) as response:
+            response.raise_for_status()
+            json = await response.json()
+
+        self.twitch_api_access_token_end = json['expires_in']+time.time()
+        self.twitch_api_access_token = json['access_token']
+        self.twitch_api_refresh_token = json['refresh_token']
 
     async def get_user_info(self, username: str) -> Optional[User]:
         await self.check_token()
@@ -119,9 +134,12 @@ class TwNoti:
             'Authorization': 'Bearer ' + self.twitch_api_access_token
         }
         async with self.bot.session.get(url, params=params, headers=headers) as response:
-            if not response.ok:
-                return
             data = await response.json()
+            if response.status == 401:
+                await self.refresh_oauth_token()
+            if not response.ok:
+                _log.trace('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
+                return
 
         if len(data['data']) > 0:
             user = User(**data['data'][0])
@@ -141,6 +159,8 @@ class TwNoti:
         }
         async with self.bot.session.get(url, params=params, headers=headers) as response:
             data = await response.json()
+            if response.status == 401:
+                await self.refresh_oauth_token()
             if not response.ok:
                 _log.trace('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
                 return False, None

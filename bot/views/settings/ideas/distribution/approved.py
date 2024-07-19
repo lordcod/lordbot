@@ -18,8 +18,8 @@ class DropDown(nextcord.ui.ChannelSelect):
         self,
         guild_id: int
     ) -> None:
-        gdb = GuildDateBases(guild_id)
-        self.idea_data = await gdb.get('ideas')
+        self.gdb = GuildDateBases(guild_id)
+        self.idea_data = await self.gdb.get('ideas')
 
         super().__init__(channel_types=[nextcord.ChannelType.text])
 
@@ -38,6 +38,17 @@ class ApprovedView(DefaultSettingsView):
         self.gdb = GuildDateBases(guild.id)
         self.idea_data: IdeasPayload = await self.gdb.get('ideas')
         channel_approved_id = self.idea_data.get('channel_approved_id')
+        color = await self.gdb.get('color')
+
+        self.embed = nextcord.Embed(
+            title="Ideas",
+            description="The ideas module allows you to collect, discuss and evaluate user suggestions. It organizes ideas in one place, allows you to vote for them and track their status.",
+            color=color
+        )
+        self.embed.add_field(
+            name='',
+            value='> Choose a channel that will match the channel of approved ideas'
+        )
 
         super().__init__()
 

@@ -45,8 +45,6 @@ class TwitchMessageModal(nextcord.ui.Modal):
 
 @AsyncSterilization
 class TwitchItemModal(nextcord.ui.Modal):
-    embed = None
-
     async def __init__(self, guild: nextcord.Guild, selected_id: Optional[str] = None, data: Optional[dict] = None):
         self.selected_id = selected_id
         self.data = data
@@ -110,6 +108,7 @@ class TwitchItemView(nextcord.ui.View):
 
     async def __init__(self, guild: nextcord.Guild, selected_id: str, data: Optional[dict] = None):
         gdb = GuildDateBases(guild.id)
+        color = await gdb.get('color')
         twitch_data = await gdb.get('twitch_notification')
 
         if selected_id in twitch_data and not data:
@@ -117,6 +116,37 @@ class TwitchItemView(nextcord.ui.View):
 
         self.selected_id = selected_id
         self.data = data
+
+        if 'username' in data:
+            username = data['username']
+            bot: LordBot = guild._state._get_client()
+
+            if username in bot.twnoti.user_info:
+                userinfo = bot.twnoti.user_info[username]
+
+            response = await bot.twnoti.get_user_info(username)
+            if response is None:
+                userinfo = None
+            else:
+                userinfo = response
+        else:
+            userinfo = None
+
+        user = f'{userinfo.display_name} ({userinfo.login})' if userinfo else 'unspecified'
+
+        self.embed = nextcord.Embed(
+            title='Twitch Notifications',
+            color=color,
+            description='Stay updated with real-time alerts for live streams and new content from your favorite Twitch channels.'
+        )
+        self.embed.set_thumbnail(userinfo.profile_image_url if userinfo else None)
+        self.embed.add_field(
+            name='',
+            value=(
+                f"> Username: **{user}**\n"
+                f"> Channel: {channel.mention if (channel := guild.get_channel(data.get('channel_id'))) else 'unspecified'}"
+            )
+        )
 
         super().__init__()
 
@@ -163,7 +193,7 @@ class TwitchItemView(nextcord.ui.View):
         modal = await TwitchMessageModal(interaction.guild, self.selected_id, self.data)
         await interaction.response.send_modal(modal)
 
-    @nextcord.ui.button(label='Chnage username', style=nextcord.ButtonStyle.grey, row=2)
+    @nextcord.ui.button(label='Change username', style=nextcord.ButtonStyle.grey, row=2)
     async def change_username(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await TwitchItemModal(interaction.guild, self.selected_id, self.data)
         await interaction.response.send_modal(modal)
@@ -198,11 +228,18 @@ class TwitchItemsDropDown(nextcord.ui.StringSelect):
 
 @AsyncSterilization
 class TwitchView(DefaultSettingsView):
-    embed = None
+    embed: nextcord.Embed
 
     async def __init__(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
+        color = await gdb.get('color')
         locale = await gdb.get('language')
+
+        self.embed = nextcord.Embed(
+            title='Twitch Notifications',
+            color=color,
+            description='Stay updated with real-time alerts for live streams and new content from your favorite Twitch channels.'
+        )
 
         super().__init__()
 

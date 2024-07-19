@@ -47,6 +47,9 @@
     "tempvoice.panel.message.title": "{emoji} Private rooms",
     "tempvoice.panel.message.description": "Change your private channel using the UI control panel.",
 
-    "settings.module-name.notification": "Notification"
+    "settings.module-name.notification": "Notification",
+    "settings.module-name.tempvoice": "Temp Voice",
+
+    "economy.rob.disabled": "{Emoji.cross} Theft is disabled on this server!"
 
 }

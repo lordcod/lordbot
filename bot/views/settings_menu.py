@@ -1,7 +1,6 @@
 import nextcord
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
-from bot.resources import ether
 from bot.databases import GuildDateBases
 from bot.views.settings import moduls
 from bot.views.settings._view import DefaultSettingsView
@@ -57,13 +56,18 @@ class SetDropdown(nextcord.ui.StringSelect):
                 value='Notification'
             ),
             nextcord.SelectOption(
+                label=i18n.t(locale, 'settings.module-name.tempvoice'),
+                emoji=get_emoji('timechannels'),
+                value='TempVoice'
+            ),
+            nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.reactions'),
                 emoji=get_emoji('autoreac'),
                 value='Reactions'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.thread'),
-                emoji=get_emoji('timechannels'),
+                emoji=get_emoji('automes'),
                 value='ThreadMessage'
             ),
             nextcord.SelectOption(
@@ -73,7 +77,7 @@ class SetDropdown(nextcord.ui.StringSelect):
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.ideas'),
-                emoji=get_emoji('idea'),
+                emoji=get_emoji('ideas'),
                 value='Ideas'
             ),
             nextcord.SelectOption(

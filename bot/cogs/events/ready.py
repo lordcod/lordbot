@@ -97,7 +97,6 @@ class ReadyEvent(commands.Cog):
         with open('emojis.json', 'wb+') as file:
             file.write(orjson.dumps(json_values))
 
-        emo_names = [emo.name for emo in self.bot.emojis]
         for name, emojis in json_values.items():
             missing = set(names)-set(emojis.keys())
             if missing:
@@ -129,13 +128,7 @@ class ReadyEvent(commands.Cog):
                 rs = view()
             self.bot.add_view(rs)
 
-        await GuildDateBases(1179069504186232852).set('tempvoice', {
-            'enabled': True,
-            'category_id': 1179069504651796561,
-            'channel_id': 1179069504651796563,
-            'channel_name': '{voice.count}-{member.username}',
-            'channel_limit': 4
-        })
+        # await GuildDateBases(1179069504186232852).set('tempvoice', {})
 
         _log.info(f"The bot is registered as {self.bot.user}")
 

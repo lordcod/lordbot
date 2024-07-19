@@ -4,7 +4,7 @@ import nextcord
 import jmespath
 from bot.languages import i18n
 from bot.resources.info import COUNT_ROLES_PAGE
-from bot.misc.utils import FissionIterator, AsyncSterilization
+from bot.misc.utils import AsyncSterilization, parse_fission
 
 from bot.databases import GuildDateBases
 from bot.databases import EconomyMemberDB
@@ -170,7 +170,7 @@ class EconomyShopView(menus.Menus):
         self.locale = await self.gdb.get('language')
         self.economy_settings = await self.gdb.get('economic_settings')
         shop_info = self.economy_settings.get('shop', [])
-        eft = FissionIterator(shop_info, COUNT_ROLES_PAGE).to_list()
+        eft = parse_fission(shop_info, COUNT_ROLES_PAGE)
 
         super().__init__(eft)
 

@@ -62,7 +62,7 @@ class ChannelSetDropDown(nextcord.ui.StringSelect):
             nextcord.SelectOption(
                 label=channel.name,
                 value=channel_id,
-                description=', '.join([log_item.name for log_item in logs_items if log_item.id in log_ids]),
+                description=', '.join([log_item.name for log_item in logs_items if log_item.id in log_ids])[:100],
                 emoji=Emoji.channel_text,
                 default=channel_id == selected_channel_id
             )
@@ -73,7 +73,9 @@ class ChannelSetDropDown(nextcord.ui.StringSelect):
         if disabled:
             options.append(nextcord.SelectOption(label='SelectOption'))
 
-        super().__init__(placeholder=i18n.t(locale, "settings.logs.set-channel"), disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale, "settings.logs.set-channel"),
+                         options=options,
+                         disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         view = await LogsView(interaction.guild, int(self.values[0]))

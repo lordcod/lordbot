@@ -9,11 +9,8 @@ from nextcord.utils import snowflake_time
 
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
-from bot.databases.varstructs import TempChannelsItemPayload, TempChannelsPayload
 from bot.languages import i18n
-from bot.misc.utils import GuildPayload, MemberPayload, get_emoji_wrap, lord_format
-from bot.resources.info import DEFAULT_BOT_COLOR
-from bot.resources.ether import temp_voice_emojis
+from bot.misc.utils import get_payload, get_emoji_wrap, lord_format
 from bot.views.tempvoice.view import TempVoiceView
 from bot.views.tempvoice.dropdown import AdvancedTempVoiceView
 
@@ -28,21 +25,16 @@ class VoiceStatus(IntEnum):
     closed = 2
 
 
-def get_payload(member: nextcord.Member, count: int):
-    payload = {'voice.count': count}
-    payload.update(MemberPayload(member)._to_dict())
-    payload.update(GuildPayload(member.guild)._to_dict())
-    return payload
-
-
 class TempVoiceModule:
+    def __init__(self, member: nextcord.Member) -> None:
+        self.member = member
+
     async def process(
         self,
-        member: nextcord.Member,
         before: Optional[nextcord.VoiceChannel],
         after: Optional[nextcord.VoiceChannel]
     ) -> None:
-        self.member = member
+        member = self.member
 
         gdb = GuildDateBases(member.guild.id)
         data = await gdb.get('tempvoice')
@@ -75,8 +67,55 @@ class TempVoiceModule:
         if before and await channels_data.exists(before.id):
             await self.delete(before)
 
-    async def get_embed(self) -> nextcord.Embed:
-        gdb = GuildDateBases(self.member.guild.id)
+    @classmethod
+    async def create_panel(cls, guild: nextcord.Guild):
+        gdb = GuildDateBases(guild.id)
+        data = await gdb.get('tempvoice')
+        panel_channel = guild.get_channel(data.get('panel_channel_id'))
+        type_panel = data.get('type_panel', 1)
+
+        if data.get('type_message_panel', 1) in {1, 3} and panel_channel:
+            if type_panel == 1:
+                view = await TempVoiceView(guild.id)
+            elif type_panel == 2:
+                view = await AdvancedTempVoiceView(guild.id)
+            else:
+                view = None
+
+            if view is not None:
+                embed = await cls.get_embed(guild)
+                message = await panel_channel.send(embed=embed, view=view)
+                await gdb.set_on_json('tempvoice', 'panel_message_id',  message.id)
+
+    @classmethod
+    async def edit_panel(cls, guild: nextcord.Guild):
+        gdb = GuildDateBases(guild.id)
+        data = await gdb.get('tempvoice')
+        panel_channel = guild.get_channel(data.get('panel_channel_id'))
+        type_panel = data.get('type_panel', 1)
+        panel_message_id = data.get('panel_message_id')
+
+        if panel_message_id is None:
+            cls.create_panel(guild)
+            return
+
+        if data.get('type_message_panel', 1) in {1, 3} and panel_channel:
+            if type_panel == 1:
+                view = await TempVoiceView(guild.id)
+            elif type_panel == 2:
+                view = await AdvancedTempVoiceView(guild.id)
+            else:
+                view = None
+
+            if view is not None:
+                message = panel_channel.get_partial_message(panel_message_id)
+
+                embed = await cls.get_embed(guild)
+                await message.edit(embed=embed, view=view)
+
+    @staticmethod
+    async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
+        gdb = GuildDateBases(guild.id)
         locale = await gdb.get('language')
         color = await gdb.get('color')
         get_emoji = await get_emoji_wrap(gdb)
@@ -124,17 +163,22 @@ class TempVoiceModule:
                 return False
         return True
 
-    async def get_activity_count(self):
+    async def get_count(self):
         channels_tracks_db = await localdb.get_table('channels_track_data')
         channels_data = await localdb.get_table('channels_data')
         channels_track_data = await channels_tracks_db.get(self.member.guild.id, [])
 
-        count = 1
+        total = 1
+        active = 1
         for cid in channels_track_data:
+            total += 1
             voice_data = await channels_data.get(cid)
             if voice_data['status'] == VoiceStatus.opened:
-                count += 1
-        return count
+                active += 1
+        return {
+            'active': active,
+            'total': total
+        }
 
     async def create(self, channel: nextcord.VoiceChannel):
         if not await self.check_user(channel):
@@ -146,8 +190,10 @@ class TempVoiceModule:
         channels_data = await localdb.get_table('channels_data')
         channels_track_data = await channels_tracks_db.get(self.member.guild.id, [])
 
-        type_panel = data.get('type_panel', 2)
-        name = lord_format(data['channel_name'], get_payload(self.member, await self.get_activity_count()))
+        type_panel = data.get('type_panel', 1)
+        name = lord_format(data.get('channel_name', '{voice.count.active}-{member.username}'),
+                           get_payload(member=self.member,
+                                       voice_count=await self.get_count()))
         category = self.member.guild.get_channel(data['category_id'])
         channel = await self.member.guild.create_voice_channel(
             name=name,
@@ -167,8 +213,8 @@ class TempVoiceModule:
                     priority_speaker=True,
                 ),
                 self.member.guild.default_role: nextcord.PermissionOverwrite(
-                    create_instant_invite=True,
                     view_channel=True,
+                    read_message_history=True,
                     connect=True,
                     speak=True,
                     stream=True,
@@ -178,7 +224,7 @@ class TempVoiceModule:
             })
         await self.member.move_to(channel)
 
-        if data.get('type_message_panel', 2) in {2, 3}:
+        if data.get('type_message_panel', 1) in {2, 3}:
             if type_panel == 1:
                 view = await TempVoiceView(self.member.guild.id)
             elif type_panel == 2:
@@ -186,7 +232,7 @@ class TempVoiceModule:
             else:
                 view = None
             if view is not None:
-                embed = await self.get_embed()
+                embed = await self.get_embed(self.member.guild)
                 await channel.send(embed=embed, view=view)
 
         channels_track_data.append(channel.id)

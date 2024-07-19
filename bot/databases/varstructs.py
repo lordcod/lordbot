@@ -172,6 +172,7 @@ class TicketsItemPayload(PartialCategoryPayload, total=True):
     enabled: Optional[bool]
     global_user_tickets_limit: Optional[int]
     tickets_limit: Optional[int]
+    messages: Optional[List[dict]]
 
 
 TicketsPayload = Dict[int, TicketsItemPayload]
@@ -188,8 +189,11 @@ class UserTicketPayload(TypedDict):
 
 
 class TempChannelsPayload(TypedDict):
-    category_id: int
     channel_id: int
+    category_id: int
+    panel_channel_id: Optional[int]
+    panel_message_id: Optional[int]
+    enabled: Optional[bool]
     channel_name: Optional[str]
     channel_limit: Optional[int]
     advance_panel: Optional[bool]

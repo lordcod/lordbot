@@ -70,7 +70,7 @@ advance_dd_voice_items = [
     ],
     [
         {'emoji': 'kick', 'value': 'kick_member'},
-        {'emoji': 'mic', 'value': 'unmute_member_fd'},
+        {'emoji': 'micon', 'value': 'unmute_member_fd'},
         {'emoji': 'micoff', 'value': 'mute_member_fd'},
         {'emoji': 'permit', 'value': 'permit'},
         {'emoji': 'reject', 'value': 'reject'},
@@ -89,7 +89,7 @@ advance_but_voice_items = [
     {'emoji': 'bitrate', 'row': 1, 'value': 'set_bitrate'},
     {'emoji': 'invite', 'row': 1, 'value': 'invite'},
     {'emoji': 'kick', 'row': 2, 'value': 'kick_member'},
-    {'emoji': 'mic', 'row': 2, 'value': 'unmute_member_fd'},
+    {'emoji': 'micon', 'row': 2, 'value': 'unmute_member_fd'},
     {'emoji': 'micoff', 'row': 2, 'value': 'mute_member_fd'},
     {'emoji': 'permit', 'row': 2, 'value': 'permit'},
     {'emoji': 'reject', 'row': 2, 'value': 'reject'},

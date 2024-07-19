@@ -30,9 +30,11 @@ from functools import lru_cache
 from dataclasses import dataclass, field
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
+from yandex_music import Video
 
 from bot.databases import GuildDateBases
 from cryptography.fernet import Fernet
+from bot.databases.varstructs import CategoryPayload
 from bot.resources import ether
 from bot.resources.ether import Emoji
 
@@ -142,6 +144,69 @@ class MemberPayload(TempletePayload):
 
     def __str__(self) -> str:
         return self.mention
+
+
+def parse_prefix(
+    prefix: str,
+    iterable: Union[Iterable[Tuple[Union[str, int], Any]],
+                    Dict[Union[str, int], Any],
+                    List[Any]]
+) -> Dict[str, Any]:
+    if isinstance(iterable, dict):
+        iterable = iterable.items()
+    if isinstance(iterable, list):
+        iterable = enumerate(iterable)
+
+    ret = {}
+    for key, value in iterable:
+        ret[f'{prefix}.{key}'] = value
+    return ret
+
+
+def get_payload(
+    *,
+    member: Optional[nextcord.Member] = None,
+    guild: Optional[nextcord.Guild] = None,
+    stream: Optional[TwStream] = None,
+    user: Optional[TwUser] = None,
+    video: Optional[YtVideo] = None,
+    category: Optional[CategoryPayload] = None,
+    inputs: Optional[Dict[str, str]] = None,
+    ticket_count: Optional[dict] = None,
+    voice_count: Optional[dict] = None,
+):
+    bot_payload = None
+    if member is not None and guild is None:
+        guild = member.guild
+    if guild is not None:
+        bot = guild._state._get_client().user
+        bot_payload = MemberPayload(bot)
+        bot_payload._prefix = 'bot'
+
+    data = {
+        'today_dt': datetime.today().isoformat()
+    }
+
+    if member is not None:
+        data.update(MemberPayload(member)._to_dict())
+    if guild is not None:
+        data.update(GuildPayload(guild)._to_dict())
+    if stream is not None and user is not None:
+        data.update(StreamPayload(stream, user)._to_dict())
+    if video is not None:
+        data.update(VideoPayload(video)._to_dict())
+    if bot_payload is not None:
+        data.update(bot_payload._to_dict())
+    if inputs is not None and inputs:
+        data.update(parse_prefix('ticket.forms', list(inputs.values())))
+    if category is not None and category:
+        data['ticket.category.name'] = category['label']
+    if ticket_count is not None:
+        data.update(parse_prefix('ticket.count', ticket_count))
+    if voice_count is not None:
+        data.update(parse_prefix('voice.count', voice_count))
+
+    return data
 
 
 class __LordFormatingTemplate(string.Template):
@@ -382,6 +447,10 @@ async def get_emoji(guild_id: int, name: str):
     return ether.every_emojis[name][system_emoji]
 
 
+def get_emoji_as_color(system_emoji: int, name: str):
+    return ether.every_emojis[name][system_emoji]
+
+
 @overload
 async def get_emoji_wrap(gdb: GuildDateBases) -> Callable[[str], str]: ...
 
@@ -398,7 +467,10 @@ async def get_emoji_wrap(guild_data: GuildDateBases | int) -> Callable[[str], st
     system_emoji = await gdb.get('system_emoji')
 
     def _get_emoji_inner(name: str):
-        return ether.every_emojis[name][system_emoji]
+        try:
+            return ether.every_emojis[name][system_emoji]
+        except:
+            return Emoji.lordcord
     return _get_emoji_inner
 
 
@@ -447,34 +519,17 @@ class LordTimerHandler:
         th.cancel()
 
 
-class FissionIterator:
-    def __init__(self, iterable: Iterable[Any], count: int) -> None:
-        self.iterable = list(iterable)
-        self.count = count
-        self.value = 0
-        self.max_value = False
-
-    def __iter__(self) -> Self:
-        return self
-
-    def __next__(self) -> Any:
-        if self.max_value:
-            raise StopIteration
-        items = []
-        stop = self.value+self.count
-        if stop >= len(self.iterable):
-            stop = len(self.iterable)
-            self.max_value = True
-        for item in self.iterable[self.value:stop]:
-            items.append(item)
-        self.value = stop
-        return items
-
-    def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
-        return list(iter(self))[__value]
-
-    def to_list(self):
-        return list(iter(self))
+def parse_fission(iterable: Iterable[T], count: int) -> list[list[T]]:
+    ret = []
+    for index, value in enumerate(iterable):
+        ret_index = int(index // count)
+        try:
+            values = ret[ret_index]
+        except IndexError:
+            values = []
+            ret.append(values)
+        values.append(value)
+    return ret
 
 
 class AsyncSterilization(Generic[T]):
@@ -487,6 +542,8 @@ class AsyncSterilization(Generic[T]):
 
         def __init__(self, *args, **kwargs):
             self.cls(*args, **kwargs)
+
+        __call__ = type[T]
 
     def __init__(self, cls) -> None:
         self.cls = cls

@@ -36,9 +36,11 @@ class GuildsDB(Table):
     tempvoice = Colum(data_type=PostType.JSON, default="{}")
     twitch_notification = Colum(data_type=PostType.JSON, default="{}")
     youtube_notification = Colum(data_type=PostType.JSON, default="{}")
-    # message_state = Colum(data_type=PostType.JSON, default="{}")
-    # voice_time_state = Colum(data_type=PostType.JSON, default="{}")
-    # score_state = Colum(data_type=PostType.JSON, default="{}")
+    farewell_message = Colum(data_type=PostType.JSON, default="{}")
+    message_state = Colum(data_type=PostType.JSON, default="{}")
+    voice_time_state = Colum(data_type=PostType.JSON, default="{}")
+    score_state = Colum(data_type=PostType.JSON, default="{}")
+    level_state = Colum(data_type=PostType.JSON, default="{}")
 
 
 class EconomicDB(Table):

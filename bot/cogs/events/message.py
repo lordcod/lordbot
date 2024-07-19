@@ -9,6 +9,7 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases, localdb
 from bot.misc import logstool
 from bot.misc.lordbot import LordBot
+from bot.misc.tickettools import ModuleTicket
 from bot.misc.utils import is_emoji
 from bot.languages import i18n
 from bot.resources.ether import Emoji
@@ -63,6 +64,7 @@ class MessageEvent(commands.Cog):
         if message.guild is None:
             return
         await asyncio.gather(
+            ModuleTicket.archive_message(message),
             self.add_reactions(message),
             self.process_mention(message),
             self.give_score(message),
@@ -134,6 +136,11 @@ class MessageEvent(commands.Cog):
             asyncio.create_task(message.channel.send(embed=embed))
 
     async def give_message_score(self, message: nextcord.Message) -> None:
+        gdb = GuildDateBases(message.guild.id)
+        guild_state = await gdb.get('message_state', {})
+        guild_state[message.author.id] = guild_state.get(message.author.id, 0) + 1
+        await gdb.set('message_state', guild_state)
+
         state = await localdb.get_table('messages')
         await state.increment(message.author.id)
 
@@ -148,10 +155,17 @@ class MessageEvent(commands.Cog):
 
         multiplier = 1
         user_level = 1
+        score = random.randint(
+            0, 10) * multiplier / math.sqrt(user_level)
+
+        gdb = GuildDateBases(message.guild.id)
+        guild_state = await gdb.get('score_state', {})
+        guild_state[message.author.id] = guild_state.get(message.author.id, 0) + score
+        await gdb.set('score_state', guild_state)
 
         state = await localdb.get_table('score')
-        await state.increment(message.author.id, random.randint(
-            0, 10) * multiplier / math.sqrt(user_level))
+        await state.increment(message.author.id, score)
+
         BETWEEN_MESSAGES_TIME[message.author.id] = time.time() + 10
 
     @commands.Cog.listener()

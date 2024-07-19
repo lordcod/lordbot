@@ -45,28 +45,14 @@ class DropDown(nextcord.ui.StringSelect):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        gdb = GuildDateBases(interaction.guild_id)
-        color = await gdb.get('color')
-        locale = await gdb.get('language')
-
-        value = self.values[0]
-        value = int(value)
+        value = int(self.values[0])
 
         channel = interaction.guild.get_channel(value)
         channel_data = self.reactions.get(value)
 
-        embed = nextcord.Embed(
-            title=i18n.t(locale, 'settings.reactions.init.brief'),
-            description=i18n.t(
-                locale, 'settings.reactions.init.dddesc',
-                channel=channel.mention,
-                emojis=', '.join([emo for emo in channel_data])
-            ),
-            color=color
-        )
-
-        await interaction.response.edit_message(embed=embed,
-                                                view=ReactData(channel, channel_data))
+        view = await ReactData(channel, channel_data)
+        await interaction.response.edit_message(embed=view.embed,
+                                                view=view)
 
 
 @AsyncSterilization
@@ -104,4 +90,4 @@ class AutoReactions(DefaultSettingsView):
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
         view = await InstallEmojiView(interaction.guild_id)
-        await interaction.response.edit_message(embed=None, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

@@ -58,8 +58,8 @@ COUNT_ROLES_PAGE = 5
 
 DEFAULT_TICKET_PAYLOAD = {
     'names': {
-        'open': '{ticket.count}-ticket',
-        'close': '{ticket.count}-closed'
+        'open': '{ticket.count.total}-ticket',
+        'close': '{ticket.count.total}-closed'
     },
     'messages': {
         'panel': orjson.dumps({
@@ -146,8 +146,8 @@ DEFAULT_TICKET_PAYLOAD = {
 
 DEFAULT_TICKET_PAYLOAD_RU = {
     'names': {
-        'open': '{ticket.count}-ticket',
-        'close': '{ticket.count}-closed'
+        'open': '{ticket.count.total}-ticket',
+        'close': '{ticket.count.total}-closed'
     },
     'messages': {
         'panel': orjson.dumps({

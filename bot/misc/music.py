@@ -13,7 +13,6 @@ from typing import Any, Coroutine, List,  Optional, Dict
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import get_emoji_wrap
-from bot.resources.ether import Emoji
 from bot.views.music import MusicView
 
 _log = logging.getLogger(__name__)

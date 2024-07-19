@@ -5,9 +5,7 @@ import nextcord
 
 from bot.databases import GuildDateBases, localdb
 from bot.languages import i18n
-from bot.resources.ether import temp_voice_emojis
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
-from bot.resources.info import DEFAULT_BOT_COLOR
 from .information import simple_but_voice_items, advance_but_voice_items
 from .functions import TempVoiceFunctioins
 
@@ -56,7 +54,7 @@ class TempVoiceView(nextcord.ui.View):
         data = await gdb.get('tempvoice')
         get_emoji = await get_emoji_wrap(gdb)
 
-        if data.get('advance_panel'):
+        if data.get('advance_panel', False):
             iterator = advance_but_voice_items
         else:
             iterator = simple_but_voice_items

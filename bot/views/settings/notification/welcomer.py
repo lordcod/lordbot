@@ -197,15 +197,9 @@ class WelcomerView(DefaultSettingsView):
         await interaction.response.defer()
 
         greeting_message: dict = await self.gdb.get('greeting_message')
-
         content: str = greeting_message.get('message')
-
-        guild_payload = utils.GuildPayload(interaction.guild)._to_dict()
-        member_payload = utils.MemberPayload(interaction.user)._to_dict()
-        data_payload = guild_payload | member_payload
-
-        message_format = utils.lord_format(content, data_payload)
-
+        payload = utils.get_payload(member=interaction.user)
+        message_format = utils.lord_format(content, payload)
         message_data = await utils.generate_message(message_format)
 
         if image_link := greeting_message.get('image'):

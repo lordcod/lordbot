@@ -363,8 +363,8 @@ class Economy(commands.Cog):
             await ctx.send(i18n.t(locale, 'economy.deposit.error.unenough', prefix=prefix))
             return
 
-        account.decline('balance', amount)
-        account.increment('bank', amount)
+        await account.decline('balance', amount)
+        await account.increment('bank', amount)
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'economy.deposit.success.title'),
@@ -488,6 +488,10 @@ class Economy(commands.Cog):
         scope = (theft_data['time_prison']['max'] -
                  theft_data['time_prison']['min']
                  ) / theft_data['time_prison']['adaptive']
+
+        if not theft_data['jail']:
+            await ctx.send(i18n.t(locale, 'economy.rob.disabled'))
+            return
 
         conclusion = (
             time.time() +
@@ -714,6 +718,7 @@ class Economy(commands.Cog):
     async def blackjack(self, ctx: commands.Context, amount: int):
         gdb = GuildDateBases(ctx.guild.id)
         prefix = await gdb.get('prefix')
+        locale = await gdb.get('language')
         economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
         bet_info = economic_settings.get('bet')
@@ -723,16 +728,18 @@ class Economy(commands.Cog):
         balance = await account.get('balance')
 
         if amount <= 0:
-            await ctx.send("Specify the amount more `0`")
-            raise TypeError('Planned error(negative amount)')
+            await ctx.send(i18n.t(locale, "economy.roulette.error.negative"))
+            return
         if amount > balance:
-            await ctx.send(f"Not enough funds to check your balance use `{prefix}balance`")
-            raise TypeError('Planned error(negative amount)')
+            await ctx.send(i18n.t(locale, "economy.roulette.error.unenough", prefix=prefix))
+            return
         if not _max_bet >= amount >= _min_bet:
-            await ctx.send(f"The maximum bid: {_max_bet}{currency_emoji}\n"
-                           f"The minimum bid: {_min_bet}{currency_emoji}\n"
-                           f"Your bid: {amount}{currency_emoji}")
-            raise TypeError('Planned error(Betting violations)')
+            await ctx.send(i18n.t(locale, "economy.roulette.error.limit",
+                                  max_bet=_max_bet,
+                                  min_bet=_min_bet,
+                                  emoji=currency_emoji,
+                                  amount=amount))
+            return
 
         bjg = BlackjackGame(ctx.author, amount)
         await account.decline("balance", amount)

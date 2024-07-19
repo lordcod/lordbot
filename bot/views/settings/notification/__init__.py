@@ -32,8 +32,8 @@ class NotificationDropDown(nextcord.ui.StringSelect):
             nextcord.SelectOption(
                 label='Welcomer',
                 value='welcomer',
-                description=get_emoji('welcmes'),
-                emoji=get_emoji
+                description='',
+                emoji=get_emoji('welcmes')
             ),
             nextcord.SelectOption(
                 label='Farewell',

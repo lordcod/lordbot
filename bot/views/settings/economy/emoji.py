@@ -42,6 +42,10 @@ class EmojiView(DefaultSettingsView):
         )
 
         super().__init__()
+
+        if emoji != DEFAULT_EMOJI:
+            self.reset.disabled = False
+
         self.add_item(SelectedEmojiDropDown(guild, emoji))
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
@@ -57,13 +61,16 @@ class EmojiView(DefaultSettingsView):
                       interaction: nextcord.Interaction):
         value = await fetch_reaction(interaction)
 
+        if value is None:
+            return
+
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set_on_json('economic_settings', 'emoji', value)
 
-        view = EmojiView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
+        view = await EmojiView(interaction.guild)
+        await interaction.message.edit(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.success)
+    @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.success, disabled=True)
     async def reset(self,
                     button: nextcord.ui.Button,
                     interaction: nextcord.Interaction):

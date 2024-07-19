@@ -79,9 +79,6 @@ class MusicView(nextcord.ui.View):
 
         super().__init__(timeout=1800)
 
-        self.mqdd = MusicQueueDropDown(guild_id, queue, player)
-        self.add_item(self.mqdd)
-
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         gdb = GuildDateBases(interaction.guild_id)
         locale = await gdb.get('language')
@@ -97,9 +94,10 @@ class MusicView(nextcord.ui.View):
     async def create_buttons(self):
         get_emoji = await get_emoji_wrap(self.guild_id)
 
-        for child in self.children:
-            if isinstance(child, nextcord.ui.Button):
-                self.remove_item(child)
+        self.clear_items()
+
+        self.mqdd = MusicQueueDropDown(self.guild_id, self.queue, self.player)
+        self.add_item(self.mqdd)
 
         for name, but in self.__class__.__dict__.items():
             if isinstance(but, nextcord.ui.Button):
@@ -108,7 +106,6 @@ class MusicView(nextcord.ui.View):
                 continue
 
             data = but.__button_data__.copy()
-            print(data)
             try:
                 data['emoji'] = get_emoji(data['emoji'])
             except KeyError:

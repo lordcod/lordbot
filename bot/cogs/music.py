@@ -1,6 +1,7 @@
 from os import environ
 import logging
 import re
+import time
 from nextcord.ext import commands
 from yandex_music_api import Client as YaClient
 from yandex_music_api.exceptions import NotFound as YandexNotFound
@@ -121,6 +122,22 @@ class Voice(commands.Cog):
             await ctx.send(i18n.t(locale, 'music.error.current_track'))
         else:
             await player.move_to(index-1)
+
+    @commands.command(name="seek")
+    async def seek(self, ctx: commands.Context, seconds: int):
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+        player = current_players.get(ctx.guild.id)
+
+        if not ctx.author.voice:
+            await ctx.send(i18n.t(locale, 'music.error.not_in_channel'))
+        elif player is None:
+            await ctx.send(i18n.t(locale, 'music.error.bot_not_in_channel'))
+        elif ctx.author.voice.channel != player.voice.channel:
+            await ctx.send(i18n.t(locale, 'music.error.already'))
+
+        player.played_coro = player.play(seconds)
+        player.voice.stop()
 
 
 def setup(bot):

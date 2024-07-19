@@ -9,6 +9,7 @@ from bot.misc.lordbot import LordBot
 from bot.misc.noti.ytypes import Channel
 from bot.misc.utils import AsyncSterilization, generate_message
 from bot.resources.info import DEFAULT_YOUTUBE_MESSAGE
+from bot.views.information_dd import get_info_dd
 from bot.views.settings import notification
 from bot.views.settings._view import DefaultSettingsView
 
@@ -53,7 +54,8 @@ class YoutubeChooseDropDown(nextcord.ui.StringSelect):
             nextcord.SelectOption(
                 label=ch.name,
                 value=ch.id,
-                description=ch.custom_url
+                description=ch.custom_url,
+                default=data and data['yt_id'] == ch.id
             )
             for ch in values
         ]
@@ -71,7 +73,7 @@ class YoutubeChooseDropDown(nextcord.ui.StringSelect):
                 self.data['yt_name'] = ch.name
                 break
 
-        view = await YoutubeItemView(interaction.guild, self.data['id'], self.data)
+        view = await YoutubeChooseView(interaction.guild, self.channels, self.data['id'], self.data)
         await interaction.message.edit(embed=view.embed, view=view)
 
 
@@ -80,9 +82,41 @@ class YoutubeChooseView(nextcord.ui.View):
     embed = None
 
     async def __init__(self, guild: nextcord.Guild, values: List[Channel], selected_id: Optional[str] = None, data: Optional[dict] = None) -> None:
+        gdb = GuildDateBases(guild.id)
+        color = await gdb.get('color')
+
+        self.selected_id = selected_id
+        self.data = data
+        self.channels = values
+
+        if data is not None:
+            selected_channel = nextcord.utils.get(values, id=data['yt_id'])
+        else:
+            selected_channel = None
+
+        self.embed = nextcord.Embed(
+            title='Youtube Notifications',
+            color=color,
+            description='Get instant updates for new videos from your favorite YouTube channels.',
+        )
+
         super().__init__()
 
+        if selected_channel is not None:
+            self.embed.set_thumbnail(selected_channel.thumbnail)
+            self.confirm.disabled = False
+
         self.add_item(await YoutubeChooseDropDown(guild, values, selected_id, data))
+
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
+    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        view = await YoutubeView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Confirm', style=nextcord.ButtonStyle.success, disabled=True)
+    async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        view = await YoutubeItemView(interaction.guild, self.data['id'], self.data)
+        await interaction.message.edit(embed=view.embed, view=view)
 
 
 @AsyncSterilization
@@ -141,6 +175,7 @@ class YoutubeItemView(nextcord.ui.View):
 
     async def __init__(self, guild: nextcord.Guild, selected_id: str, data: Optional[dict] = None):
         gdb = GuildDateBases(guild.id)
+        color = await gdb.get('color')
         youtube_data = await gdb.get('youtube_notification')
 
         if selected_id in youtube_data and not data:
@@ -148,6 +183,37 @@ class YoutubeItemView(nextcord.ui.View):
 
         self.selected_id = selected_id
         self.data = data
+
+        if 'yt_id' in data:
+            cid: int = data['yt_id']
+            bot: LordBot = guild._state._get_client()
+
+            if cid in bot.ytnoti.user_info:
+                userinfo = bot.ytnoti.user_info[cid]
+
+            response = await bot.ytnoti.get_channel_ids([cid])
+            if len(response) == 0:
+                userinfo = None
+            else:
+                userinfo = response[0]
+        else:
+            userinfo = None
+
+        user = f'{userinfo.name} ({userinfo.id})' if userinfo else 'unspecified'
+
+        self.embed = nextcord.Embed(
+            title='Youtube Notifications',
+            color=color,
+            description='Get instant updates for new videos from your favorite YouTube channels.',
+        )
+        self.embed.set_thumbnail(userinfo.thumbnail if userinfo else None)
+        self.embed.add_field(
+            name='',
+            value=(
+                f"> User: **{user}**\n"
+                f"> Channel: {channel.mention if (channel := guild.get_channel(data.get('channel_id'))) else 'unspecified'}"
+            )
+        )
 
         super().__init__()
 
@@ -186,7 +252,7 @@ class YoutubeItemView(nextcord.ui.View):
     @nextcord.ui.button(label='Preview message', style=nextcord.ButtonStyle.success, row=2)
     async def view_message(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         message = self.data.get('message', DEFAULT_YOUTUBE_MESSAGE)
-        data = generate_message(message)
+        data = await generate_message(message)
         await interaction.response.send_message(**data, ephemeral=True)
 
     @nextcord.ui.button(label='Change message', style=nextcord.ButtonStyle.blurple, row=2)
@@ -233,7 +299,14 @@ class YoutubeView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
+        color = await gdb.get('color')
         locale = await gdb.get('language')
+
+        self.embed = nextcord.Embed(
+            title='Youtube Notifications',
+            color=color,
+            description='Get instant updates for new videos from your favorite YouTube channels.',
+        )
 
         super().__init__()
 

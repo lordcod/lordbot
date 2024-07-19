@@ -3,14 +3,14 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import List,  TYPE_CHECKING
+from typing import List,  TYPE_CHECKING,  Dict
 import os
 import nextcord
 import xmltodict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from bot.databases.handlers.guildHD import GuildDateBases
-from bot.misc.utils import GuildPayload, VideoPayload, generate_message, lord_format
+from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_YOUTUBE_MESSAGE
 
 try:
@@ -28,13 +28,6 @@ handler.setFormatter(logging.Formatter(
 _log.addHandler(handler)
 
 
-def get_payload(guild: nextcord.Guild, video: Video) -> dict:
-    data = {}
-    data.update(GuildPayload(guild)._to_dict())
-    data.update(VideoPayload(video)._to_dict())
-    return data
-
-
 class YtNoti:
     def __init__(self, bot: LordBot, apikey: str = os.getenv('YOUTUBE_API_KEY')) -> None:
         self.bot = bot
@@ -44,7 +37,7 @@ class YtNoti:
         self.channel_ids = set()
         self.video_history = VideoHistory()
         self.directed_data = {}
-        self.user_info = {}
+        self.user_info: Dict[int, Channel] = {}
 
         self.heartbeat_timeout = 180
         self.last_heartbeat = time.time()
@@ -53,6 +46,11 @@ class YtNoti:
         _log.debug('%s publish new video: %s (%s)',
                    video.channel.name, video.title, video.url)
 
+        if datetime.today()-timedelta(hours=1) > video.timestamp.published:
+            _log.debug('load video error (queue violation)',
+                       video.channel.name, video.title, video.url)
+            return
+
         for gid in self.directed_data[video.channel.id]:
             guild = self.bot.get_guild(gid)
             gdb = GuildDateBases(gid)
@@ -60,18 +58,22 @@ class YtNoti:
             for id, data in yt_data.items():
                 if data['yt_id'] == video.channel.id:
                     channel = self.bot.get_channel(data['channel_id'])
-                    payload = get_payload(guild, video)
+                    payload = get_payload(guild=guild, video=video)
                     mes_data = await generate_message(lord_format(data.get('message', DEFAULT_YOUTUBE_MESSAGE), payload))
                     await channel.send(**mes_data)
 
     def parse_channel(self, data: dict) -> Channel:
+        channel_id = data['id']
+        if isinstance(channel_id, dict):
+            channel_id = channel_id['channelId']
+
         channel = Channel(
-            id=data['id'],
+            id=channel_id,
             name=data['snippet']['title'],
             description=data['snippet']['description'],
             thumbnail=data['snippet']['thumbnails']['default']['url'],
             created_at=datetime.fromisoformat(data['snippet']['publishedAt']),
-            custom_url=data['snippet']['customUrl'],
+            custom_url=data['snippet'].get('customUrl', None),
         )
         self.user_info[channel.id] = channel
         return channel
@@ -140,7 +142,9 @@ class YtNoti:
         json = xmltodict.parse(body.decode())
         return self.get_videos_from_body(json)
 
-    async def search(self, query: str) -> dict:
+    async def search(self, query: str) -> List[Channel]:
+        ret = []
+
         url = 'https://youtube.googleapis.com/youtube/v3/search'
         params = {
             'part': 'snippet,id',
@@ -154,9 +158,14 @@ class YtNoti:
             json = await res.json()
             res.raise_for_status()
 
-        return json
+        for data in json['items']:
+            ret.append(self.parse_channel(data))
 
-    async def get_channel_ids(self, ids: List[str]) -> dict:
+        return ret
+
+    async def get_channel_ids(self, ids: List[str]) -> List[Channel]:
+        ret = []
+
         url = 'https://www.googleapis.com/youtube/v3/channels'
         params = list({
             'part': 'snippet,id',
@@ -172,17 +181,15 @@ class YtNoti:
             json = await res.json()
             res.raise_for_status()
 
-        return json
-
-    async def get_channel_ids_additionally(self, query: str) -> List[Channel]:
-        ret = []
-        search_result = await self.search(query)
-        json = await self.get_channel_ids([data['id']['channelId'] for data in search_result['items']])
-
         for data in json['items']:
             ret.append(self.parse_channel(data))
 
         return ret
+
+    async def get_channel_ids_additionally(self, query: str) -> List[Channel]:
+        search_result = await self.search(query)
+        geted_result = await self.get_channel_ids([data.id for data in search_result])
+        return geted_result
 
     async def parse_youtube(self) -> None:
         for cid in self.channel_ids:
