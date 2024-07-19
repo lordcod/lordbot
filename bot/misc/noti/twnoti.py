@@ -28,7 +28,6 @@ _log.addHandler(handler)
 
 class TwNoti:
     twitch_api_access_token: Optional[str] = None
-    twitch_api_refresh_token: Optional[str] = None
     twitch_api_access_token_end: Optional[int] = None
 
     def __init__(
@@ -83,13 +82,8 @@ class TwNoti:
         self.directed_data[username].add(guild_id)
 
     async def check_token(self) -> None:
-        if self.twitch_api_access_token is None:
+        if self.twitch_api_access_token is None or time.time() > self.twitch_api_access_token_end:
             await self.get_oauth_token()
-        if time.time() > self.twitch_api_access_token_end:
-            try:
-                await self.refresh_oauth_token()
-            except HTTPUnauthorized:
-                await self.get_oauth_token()
 
     async def get_oauth_token(self) -> None:
         url = 'https://id.twitch.tv/oauth2/token'
@@ -104,23 +98,6 @@ class TwNoti:
 
         self.twitch_api_access_token_end = json['expires_in']+time.time()
         self.twitch_api_access_token = json['access_token']
-        self.twitch_api_refresh_token = json['refresh_token']
-
-    async def refresh_oauth_token(self) -> None:
-        url = 'https://id.twitch.tv/oauth2/token'
-        data = {
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-            'grant_type': 'refresh_token',
-            'refresh_token': self.twitch_api_refresh_token
-        }
-        async with self.bot.session.post(url, data=data) as response:
-            response.raise_for_status()
-            json = await response.json()
-
-        self.twitch_api_access_token_end = json['expires_in']+time.time()
-        self.twitch_api_access_token = json['access_token']
-        self.twitch_api_refresh_token = json['refresh_token']
 
     async def get_user_info(self, username: str) -> Optional[User]:
         await self.check_token()
@@ -136,7 +113,7 @@ class TwNoti:
         async with self.bot.session.get(url, params=params, headers=headers) as response:
             data = await response.json()
             if response.status == 401:
-                await self.refresh_oauth_token()
+                await self.get_oauth_token()
             if not response.ok:
                 _log.trace('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
                 return
@@ -160,7 +137,7 @@ class TwNoti:
         async with self.bot.session.get(url, params=params, headers=headers) as response:
             data = await response.json()
             if response.status == 401:
-                await self.refresh_oauth_token()
+                await self.get_oauth_token()
             if not response.ok:
                 _log.trace('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
                 return False, None
