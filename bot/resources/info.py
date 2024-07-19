@@ -1,7 +1,8 @@
 import nextcord
 import orjson
-from bot.resources.ether import Emoji
+from bot.resources.ether import ColorType, Emoji
 
+DEFAULT_BOT_COLOR = ColorType.sliv
 
 DEFAULT_PREFIX = 'l.'
 DEFAULT_COLOR = 2829617
@@ -57,8 +58,8 @@ COUNT_ROLES_PAGE = 5
 
 DEFAULT_TICKET_PAYLOAD = {
     'names': {
-        'open': '{ticket.count}-ticket',
-        'close': '{ticket.count}-closed'
+        'open': '{ticket.count.total}-ticket',
+        'close': '{ticket.count.total}-closed'
     },
     'messages': {
         'panel': orjson.dumps({
@@ -145,8 +146,8 @@ DEFAULT_TICKET_PAYLOAD = {
 
 DEFAULT_TICKET_PAYLOAD_RU = {
     'names': {
-        'open': '{ticket.count}-ticket',
-        'close': '{ticket.count}-closed'
+        'open': '{ticket.count.total}-ticket',
+        'close': '{ticket.count.total}-closed'
     },
     'messages': {
         'panel': orjson.dumps({
@@ -230,7 +231,7 @@ DEFAULT_TICKET_PAYLOAD_RU = {
     }
 }
 
-DEFAULT_TICKET_PERMISSIONS_PERM = {
+DEFAULT_TICKET_PERMISSIONS_OVER = {
     'moderator': nextcord.PermissionOverwrite(
         view_channel=True,
         send_messages=True,
@@ -260,7 +261,10 @@ DEFAULT_TICKET_PERMISSIONS_PERM = {
     'everyone': nextcord.PermissionOverwrite(view_channel=False).pair()
 }
 DEFAULT_TICKET_PERMISSIONS = {k: (v[0].value, v[1].value)
-                              for k, v in DEFAULT_TICKET_PERMISSIONS_PERM.items()}
+                              for k, v in DEFAULT_TICKET_PERMISSIONS_OVER.items()}
+
+DEFAULT_TWITCH_MESSAGE = '🎥 У {stream.username} начался новый стрим!\nПрисоединяйтесь к нам сейчас: {stream.url}'
+DEFAULT_YOUTUBE_MESSAGE = '🎥 Новое видео на YouTube от {video.username}!\nСмотрите прямо сейчас: {video.url}'
 
 activities_list = [
     {

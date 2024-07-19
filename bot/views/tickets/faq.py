@@ -1,21 +1,9 @@
 import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import TicketsButtonsPayload, TicketsItemPayload, TicketsPayload, FaqItemPayload
-from bot.misc import utils
-from bot.misc.utils import AsyncSterilization, generate_message, lord_format
+from bot.misc.utils import AsyncSterilization, generate_message, lord_format, get_payload
 from typing import List, Optional
-from bot.resources.ether import Emoji
 from bot.misc import tickettools
-import datetime
-
-
-def get_payload(member: nextcord.Member) -> dict:
-    data = {
-        'today_dt': datetime.datetime.today().isoformat()
-    }
-    data.update(utils.MemberPayload(member)._to_dict())
-    data.update(utils.GuildPayload(member.guild)._to_dict())
-    return data
 
 
 @AsyncSterilization
@@ -47,7 +35,7 @@ class FAQDropDown(nextcord.ui.StringSelect):
         tickets: TicketsPayload = await gdb.get('tickets', {})
         items = tickets.get(interaction.message.id).get('faq').get('items')
         response = items[int(self.values[0])]
-        data = await generate_message(lord_format(response['response'], get_payload(interaction.user)))
+        data = await generate_message(lord_format(response['response'], get_payload(member=interaction.user)))
         await interaction.response.send_message(**data, ephemeral=True)
 
 
@@ -61,7 +49,7 @@ class FAQTempDropDown(FAQDropDown.cls):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         response = self.faq_items[int(self.values[0])]
-        data = await generate_message(lord_format(response['response'], get_payload(interaction.user)))
+        data = await generate_message(lord_format(response['response'], get_payload(member=interaction.user)))
         await interaction.response.send_message(**data, ephemeral=True)
 
 
@@ -156,7 +144,7 @@ class FAQView(nextcord.ui.View):
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets', {})
-        ticket_data = tickets.get(interaction.message.id)
+        ticket_data = tickets.get(interaction.message.id, {})
         enabled = ticket_data.get('enabled', True)
         if not enabled:
             await interaction.response.send_message('Tickets are disabled by the server administrators!', ephemeral=True)

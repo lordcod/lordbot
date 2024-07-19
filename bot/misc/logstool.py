@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 from dataclasses import dataclass
 import datetime
 from enum import IntEnum
@@ -44,16 +45,32 @@ def filter_bool(texts: list) -> list:
     ))
 
 
+_message_log: Dict[Tuple[int, int], asyncio.Future] = {}
+
+
 async def pre_message_delete_log(message: nextcord.Message):
     moderator: Optional[nextcord.Member] = None
+    loop = asyncio.get_event_loop()
+    future = loop.create_future()
+    _message_log[(message.channel.id, message.author.id)] = future
 
-    entry = (await message.guild.audit_logs(limit=1).flatten())[0]
-    if (entry.action == nextcord.AuditLogAction.message_delete
-        and entry.extra.channel == message.channel
-            and message.author == entry.target):
-        moderator = entry.user
+    try:
+        await asyncio.wait_for(future, timeout=1)
+    except asyncio.TimeoutError:
+        pass
+    else:
+        moderator = future.result()
+    finally:
+        _message_log.pop((message.channel.id, message.author.id), None)
 
     await Logs(message.guild).delete_message(message, moderator)
+
+
+async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: int, author_id: int) -> None:
+    try:
+        _message_log[(channel_id, author_id)].set_result(moderator)
+    except KeyError:
+        pass
 
 
 class Logs:
@@ -67,11 +84,10 @@ class Logs:
             @functools.wraps(coro)
             async def wrapped(self: Self, *args, **kwargs) -> None:
                 mes: Optional[Message] = await coro(self, *args, **kwargs)
-
-                if mes is None:  # type: ignore
-                    return
-
                 guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
+
+                if mes is None or guild_data is None:
+                    return
 
                 for channel_id, logs_types in guild_data.items():
                     if log_type not in logs_types:

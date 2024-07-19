@@ -39,6 +39,17 @@ class CooldownView(DefaultSettingsView):
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
         self.idea_datas: IdeasPayload = await self.gdb.get('ideas')
+        color = await self.gdb.get('color')
+
+        self.embed = nextcord.Embed(
+            title="Ideas",
+            description="The ideas module allows you to collect, discuss and evaluate user suggestions. It organizes ideas in one place, allows you to vote for them and track their status.",
+            color=color
+        )
+        self.embed.add_field(
+            name='',
+            value='> Set the delay time between publishing ideas'
+        )
 
         super().__init__()
 

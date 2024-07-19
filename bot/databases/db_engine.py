@@ -118,8 +118,9 @@ class DataBase:
         with conn.cursor() as cursor:
             cursor.execute(query, vars)
             data = cursor.fetchone()
+
             if data is None:
-                return data
+                return
 
             return data[0]
 

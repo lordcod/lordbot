@@ -106,7 +106,7 @@ class LordBot(commands.AutoShardedBot):
         if msg.guild is None:
             return [DEFAULT_PREFIX, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
         gdb = GuildDateBases(msg.guild.id)
-        prefix = await gdb.get('prefix') or DEFAULT_PREFIX
+        prefix = await gdb.get('prefix', DEFAULT_PREFIX)
         return [prefix, f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]
 
     def set_event(self, coro: Coroutine, name: Optional[str] = None) -> None:

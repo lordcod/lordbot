@@ -1,4 +1,3 @@
-
 import asyncio
 import time
 import math
@@ -6,6 +5,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.databases import localdb
+from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.misc.music import current_players
 from bot.misc.tempvoice import TempVoiceModule
@@ -20,15 +20,15 @@ class VoiceStateEvent(commands.Cog):
     async def on_voice_state_update(self, member: nextcord.Member, before: nextcord.VoiceState, after: nextcord.VoiceState) -> None:
         if before.channel is None and after.channel is not None:
             await asyncio.gather(
-                TempVoiceModule.connect_voice(member, after.channel),
                 self.connect_to_voice(member)
             )
         if before.channel is not None and after.channel is None:
             await asyncio.gather(
-                TempVoiceModule.disconnect_voice(member, before.channel),
                 self.disconnect_from_voice(member),
                 self.check_bot_player(before.channel)
             )
+        if before.channel != after.channel:
+            await TempVoiceModule(member).process(before.channel, after.channel)
 
     async def check_bot_player(self, channel: nextcord.VoiceChannel):
         if (1 == len(channel.members)
@@ -41,6 +41,7 @@ class VoiceStateEvent(commands.Cog):
         await state.set(member.id, time.time())
 
     async def disconnect_from_voice(self, member: nextcord.Member) -> None:
+        gdb = GuildDateBases(member.guild.id)
         state = await localdb.get_table('voice_state')
         temp_state = await localdb.get_table('temp_voice_state')
         member_started_at = await temp_state.get(member.id)
@@ -50,18 +51,29 @@ class VoiceStateEvent(commands.Cog):
             return
 
         voice_time = time.time()-member_started_at
+
+        guild_state = await gdb.get('voice_time_state', {})
+        guild_state[member.id] = guild_state.get(member.id, 0) + voice_time
+        await gdb.set('voice_time_state', guild_state)
+
         await state.increment(member.id, voice_time)
 
         await self.give_score(member, voice_time)
 
     async def give_score(self, member: nextcord.Member, voice_time: float) -> None:
         state = await localdb.get_table('score')
+        gdb = GuildDateBases(member.guild.id)
 
         multiplier = 1
         user_level = 1
+        score = voice_time * 0.5 \
+            * multiplier / math.sqrt(user_level)
 
-        await state.increment(member.id, voice_time * 0.5
-                              * multiplier / math.sqrt(user_level))
+        guild_state = await gdb.get('score_state', {})
+        guild_state[member.id] = guild_state.get(member.id, 0) + score
+        await gdb.set('score_state', guild_state)
+
+        await state.increment(member.id, score)
 
 
 def setup(bot: LordBot):

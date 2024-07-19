@@ -3,7 +3,6 @@ import asyncio
 import contextlib
 from enum import Enum
 import logging
-from pprint import pformat
 import time
 from typing import Optional
 import aiocache

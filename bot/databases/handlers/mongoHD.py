@@ -25,7 +25,6 @@ class MongoDB:
     def __init__(self, table_name: str) -> None:
         self.table_name = table_name
 
-    @to_task
     @on_error()
     async def create(self):
         await engine.execute(
@@ -33,7 +32,6 @@ class MongoDB:
             (self.table_name, )
         )
 
-    @to_task
     @on_error()
     async def _check_table(self):
         data = await engine.fetchone(
@@ -70,7 +68,6 @@ class MongoDB:
 
         return decode_dict(data)
 
-    @to_task
     @check_table
     @on_error()
     async def set(self, key, value):
@@ -85,7 +82,6 @@ class MongoDB:
             ('{'+key+'}', value, self.table_name, )
         )
 
-    @to_task
     @check_table
     @on_error()
     async def set_table(self, value):

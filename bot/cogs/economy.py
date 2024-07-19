@@ -144,7 +144,7 @@ def check_prison():
         if not conclusion or time.time() > conclusion:
             return True
 
-        await ctx.send(i18n.t(locale, 'economy.permission.prison'))
+        await ctx.send(i18n.t(locale, 'economy.permission.prison', conclusion=conclusion))
         return False
     return commands.check(predicate)
 
@@ -329,7 +329,7 @@ class Economy(commands.Cog):
             return
 
         embed = nextcord.Embed(
-            title=i18n.t(locale, 'economy.pay.success.description'),
+            title=i18n.t(locale, 'economy.pay.success.title'),
             description=i18n.t(locale, 'economy.pay.success.description', author=ctx.author.name, member=member.name, amount=amount, emoji=currency_emoji),
             color=color,
         )
@@ -363,8 +363,8 @@ class Economy(commands.Cog):
             await ctx.send(i18n.t(locale, 'economy.deposit.error.unenough', prefix=prefix))
             return
 
-        account.decline('balance', amount)
-        account.increment('bank', amount)
+        await account.decline('balance', amount)
+        await account.increment('bank', amount)
 
         embed = nextcord.Embed(
             title=i18n.t(locale, 'economy.deposit.success.title'),
@@ -489,6 +489,10 @@ class Economy(commands.Cog):
                  theft_data['time_prison']['min']
                  ) / theft_data['time_prison']['adaptive']
 
+        if not theft_data['jail']:
+            await ctx.send(i18n.t(locale, 'economy.rob.disabled'))
+            return
+
         conclusion = (
             time.time() +
             theft_data['time_prison']['adaptive'] *
@@ -544,7 +548,7 @@ class Economy(commands.Cog):
             else:
                 embed = nextcord.Embed(
                     title=i18n.t(locale, 'economy.rob.title'),
-                    description=i18n.t(locale, 'economy.rob.success.mini',
+                    description=i18n.t(locale, 'economy.rob.success.full',
                                        author=ctx.author.name,
                                        member=member.name,
                                        debt=debt,
@@ -557,7 +561,7 @@ class Economy(commands.Cog):
                 await logstool.Logs(ctx.guild).add_currency(ctx.author, debt, reason='a successful attempt at theft')
                 await logstool.Logs(ctx.guild).remove_currency(member, debt, reason='a successful attempt at theft')
         else:
-            debt = (1-win_chance) * thief_account['balance'] * 1/2
+            debt = (1-win_chance) * thief_balance * 1/2
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'economy.rob.title'),
                 description=i18n.t(locale, 'economy.rob.success.failure',
@@ -714,6 +718,7 @@ class Economy(commands.Cog):
     async def blackjack(self, ctx: commands.Context, amount: int):
         gdb = GuildDateBases(ctx.guild.id)
         prefix = await gdb.get('prefix')
+        locale = await gdb.get('language')
         economic_settings: dict = await gdb.get('economic_settings')
         currency_emoji = economic_settings.get('emoji')
         bet_info = economic_settings.get('bet')
@@ -723,16 +728,18 @@ class Economy(commands.Cog):
         balance = await account.get('balance')
 
         if amount <= 0:
-            await ctx.send("Specify the amount more `0`")
-            raise TypeError('Planned error(negative amount)')
+            await ctx.send(i18n.t(locale, "economy.roulette.error.negative"))
+            return
         if amount > balance:
-            await ctx.send(f"Not enough funds to check your balance use `{prefix}balance`")
-            raise TypeError('Planned error(negative amount)')
+            await ctx.send(i18n.t(locale, "economy.roulette.error.unenough", prefix=prefix))
+            return
         if not _max_bet >= amount >= _min_bet:
-            await ctx.send(f"The maximum bid: {_max_bet}{currency_emoji}\n"
-                           f"The minimum bid: {_min_bet}{currency_emoji}\n"
-                           f"Your bid: {amount}{currency_emoji}")
-            raise TypeError('Planned error(Betting violations)')
+            await ctx.send(i18n.t(locale, "economy.roulette.error.limit",
+                                  max_bet=_max_bet,
+                                  min_bet=_min_bet,
+                                  emoji=currency_emoji,
+                                  amount=amount))
+            return
 
         bjg = BlackjackGame(ctx.author, amount)
         await account.decline("balance", amount)

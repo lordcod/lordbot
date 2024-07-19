@@ -21,23 +21,28 @@ class DropDown(nextcord.ui.Select):
         options = [
             nextcord.SelectOption(
                 label='Suggest',
-                value='suggest'
+                value='suggest',
+                description='Channel to suggest idea'
             ),
             nextcord.SelectOption(
                 label='Offers',
-                value='offers'
+                value='offers',
+                description='Channel of all ideas'
             ),
             nextcord.SelectOption(
                 label='Approved',
-                value='approved'
+                value='approved',
+                description='An approved ideas channel'
             ),
             nextcord.SelectOption(
                 label='Moderation roles',
-                value='moderation_roles'
+                value='moderation_roles',
+                description='Roles that can handle ideas'
             ),
             nextcord.SelectOption(
                 label='Cooldown',
-                value='cooldown'
+                value='cooldown',
+                description='The delay between ideas'
             )
         ]
 
@@ -66,38 +71,46 @@ class IdeasView(DefaultSettingsView):
 
         self.embed = nextcord.Embed(
             title="Ideas",
-            description="",
+            description="The ideas module allows you to collect, discuss and evaluate user suggestions. It organizes ideas in one place, allows you to vote for them and track their status.",
             color=color
         )
 
         super().__init__()
 
+        description = ''
+
         if channel_suggest := guild.get_channel(ideas.get("channel_suggest_id")):
-            self.embed.description += ("Channel suggest: "
-                                       f"{channel_suggest.mention}\n")
+            description += ("Channel suggest: "
+                            f"{channel_suggest.mention}\n")
 
         if channel_offers := guild.get_channel(ideas.get("channel_offers_id")):
-            self.embed.description += ("Channel offers: "
-                                       f"{channel_offers.mention}\n")
+            description += ("Channel offers: "
+                            f"{channel_offers.mention}\n")
 
         if channel_approved := guild.get_channel(
                 ideas.get("channel_approved_id")):
-            self.embed.description += ("Channel approved: "
-                                       f"{channel_approved.mention}\n")
+            description += ("Channel approved: "
+                            f"{channel_approved.mention}\n")
 
         if cooldown := ideas.get('cooldown'):
-            self.embed.description += ("Cooldown: "
-                                       f"{display_time(cooldown)}\n")
+            description += ("Cooldown: "
+                            f"{display_time(cooldown)}\n")
 
         if moderation_role_ids := ideas.get("moderation_role_ids"):
             moderation_roles = filter(lambda item: item is not None,
                                       map(guild.get_role,
                                           moderation_role_ids))
             if moderation_roles:
-                self.embed.description += (
+                description += (
                     "Moderation roles: "
                     f"{', '.join([role.mention for role in moderation_roles])}"
                 )
+
+        if description:
+            self.embed.add_field(
+                name='',
+                value=description
+            )
 
         self.allow_image.style = nextcord.ButtonStyle.green if ideas.get(
             'allow_image', True) else nextcord.ButtonStyle.red

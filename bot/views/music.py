@@ -1,4 +1,6 @@
 from __future__ import annotations
+import contextlib
+from functools import partial
 import logging
 import time
 import nextcord
@@ -6,12 +8,24 @@ from typing import TYPE_CHECKING
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
+from bot.misc.utils import get_emoji_wrap
 from bot.resources.ether import Emoji
 
 if TYPE_CHECKING:
     from bot.misc.music import Queue, MusicPlayer
 
 _log = logging.getLogger(__name__)
+
+
+def attach_button(emoji: str, row: int) -> None:
+    def decorator(func):
+        func.__button_data__ = {
+            "url": None,
+            "emoji": emoji,
+            "row": row,
+        }
+        return func
+    return decorator
 
 
 class MusicQueueDropDown(nextcord.ui.StringSelect):
@@ -65,9 +79,6 @@ class MusicView(nextcord.ui.View):
 
         super().__init__(timeout=1800)
 
-        self.mqdd = MusicQueueDropDown(guild_id, queue, player)
-        self.add_item(self.mqdd)
-
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         gdb = GuildDateBases(interaction.guild_id)
         locale = await gdb.get('language')
@@ -80,13 +91,41 @@ class MusicView(nextcord.ui.View):
             return False
         return True
 
-    def parse_buttons(self):
+    async def create_buttons(self):
+        get_emoji = await get_emoji_wrap(self.guild_id)
+
+        self.clear_items()
+
+        self.mqdd = MusicQueueDropDown(self.guild_id, self.queue, self.player)
+        self.add_item(self.mqdd)
+
+        for name, but in self.__class__.__dict__.items():
+            if isinstance(but, nextcord.ui.Button):
+                but = button.callback.func
+            if not hasattr(but, '__button_data__'):
+                continue
+
+            data = but.__button_data__.copy()
+            try:
+                data['emoji'] = get_emoji(data['emoji'])
+            except KeyError:
+                data['label'] = 'ㅤ'
+                data['emoji'] = None
+            button = nextcord.ui.Button(**data)
+            button.callback = partial(but, self)
+            self.add_item(button)
+
+            setattr(self, name, button)
+
+    async def parse_buttons(self):
+        await self.create_buttons()
+        get_emoji = await get_emoji_wrap(self.guild_id)
         with_empty = not (self.player.voice.is_playing() or self.player.voice.is_paused())
 
         if self.player.voice.is_playing():
-            self.pause_play.emoji = Emoji.pause
+            self.pause_play.emoji = get_emoji('pause')
         if self.player.voice.is_paused():
-            self.pause_play.emoji = Emoji.resume
+            self.pause_play.emoji = get_emoji('play')
         if with_empty:
             self.pause_play.disabled = True
             self.repeat.disabled = True
@@ -124,17 +163,17 @@ class MusicView(nextcord.ui.View):
         else:
             self.forward.disabled = False
 
-    @nextcord.ui.button(emoji=Emoji.undo, row=1)
-    async def undo(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='undo', row=1)
+    async def undo(self, interaction: nextcord.Interaction):
         self.player.played_coro = self.player.play(time.time()-self.player.started_at-15)
         self.player.voice.stop()
 
-    @nextcord.ui.button(emoji=Emoji.previous, row=1)
-    async def backward(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='previous', row=1)
+    async def backward(self, interaction: nextcord.Interaction):
         await self.player.move_to(self.player.index-1)
 
-    @nextcord.ui.button(emoji=Emoji.pause, row=1)
-    async def pause_play(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='pause', row=1)
+    async def pause_play(self, interaction: nextcord.Interaction):
         if self.player.voice.is_playing():
             self.player.voice.pause()
             self.player.updated_task.cancel()
@@ -145,34 +184,34 @@ class MusicView(nextcord.ui.View):
             self.player.updated_task = self.player.get_updated_task()
         await self.player.update_message()
 
-    @nextcord.ui.button(emoji=Emoji.next, row=1)
-    async def forward(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='next', row=1)
+    async def forward(self, interaction: nextcord.Interaction):
         await self.player.move_to(self.player.index+1)
 
-    @nextcord.ui.button(emoji=Emoji.redo, row=1)
-    async def redo(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='redo', row=1)
+    async def redo(self, interaction: nextcord.Interaction):
         self.player.played_coro = self.player.play(time.time()-self.player.started_at+15)
         self.player.voice.stop()
 
-    @nextcord.ui.button(emoji=Emoji.stop, row=2)
-    async def stop(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='stop', row=2)
+    async def stop(self, interaction: nextcord.Interaction):
         await self.player.stop()
 
-    @nextcord.ui.button(emoji=Emoji.repeat, row=2)
-    async def repeat(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='repeat', row=2)
+    async def repeat(self, interaction: nextcord.Interaction):
         self.player.played_coro = self.player.play()
         self.player.voice.stop()
 
-    @nextcord.ui.button(emoji=Emoji.volume_down, row=2)
-    async def volume_down(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='vol2', row=2)
+    async def volume_down(self, interaction: nextcord.Interaction):
         self.player.voice.source.volume -= 0.1
         await self.player.update_message()
 
-    @nextcord.ui.button(emoji=Emoji.volume_up_2, row=2)
-    async def volume_up(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='vol3', row=2)
+    async def volume_up(self, interaction: nextcord.Interaction):
         self.player.voice.source.volume += 0.1
         await self.player.update_message()
 
-    @nextcord.ui.button(emoji=Emoji.playlist_2, row=2)
-    async def playlist(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @attach_button(emoji='playlist', row=2)
+    async def playlist(self, interaction: nextcord.Interaction):
         pass

@@ -172,6 +172,7 @@ class TicketsItemPayload(PartialCategoryPayload, total=True):
     enabled: Optional[bool]
     global_user_tickets_limit: Optional[int]
     tickets_limit: Optional[int]
+    messages: Optional[List[dict]]
 
 
 TicketsPayload = Dict[int, TicketsItemPayload]
@@ -185,3 +186,45 @@ class UserTicketPayload(TypedDict):
     inputs: Dict[str, str]
     status: int
     index: int
+
+
+class TempChannelsPayload(TypedDict):
+    channel_id: int
+    category_id: int
+    panel_channel_id: Optional[int]
+    panel_message_id: Optional[int]
+    enabled: Optional[bool]
+    channel_name: Optional[str]
+    channel_limit: Optional[int]
+    advance_panel: Optional[bool]
+    type_panel: Optional[int]
+    type_message_panel: Optional[int]
+    removed_mutes:  Optional[List[int]]
+
+
+class TempChannelsItemPayload(TypedDict):
+    channel_id: int
+    owner_id: int
+    status: int
+    mutes: Optional[Dict[int, bool]]
+
+
+class TwitchNotifiItemPayload(TypedDict):
+    id: str
+    channel_id: int
+    username: str
+    message: str
+
+
+TwitchNotifiPayload = Dict[str, TwitchNotifiItemPayload]
+
+
+class YoutubeNotifiItemPayload(TypedDict):
+    id: str
+    channel_id: int
+    yt_name: str
+    yt_id: str
+    message: str
+
+
+YoutubeNotifiPayload = Dict[str, YoutubeNotifiItemPayload]

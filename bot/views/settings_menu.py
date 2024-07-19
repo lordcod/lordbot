@@ -1,7 +1,6 @@
 import nextcord
-from bot.misc.utils import AsyncSterilization
+from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
-from bot.resources.ether import Emoji
 from bot.databases import GuildDateBases
 from bot.views.settings import moduls
 from bot.views.settings._view import DefaultSettingsView
@@ -13,72 +12,78 @@ class SetDropdown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int):
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(gdb)
 
         options = [
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.economy'),
-                emoji=Emoji.economy,
+                emoji=get_emoji('economy'),
                 value='Economy'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.languages'),
-                emoji=Emoji.languages,
+                emoji=get_emoji('lang'),
                 value='Languages'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.prefix'),
-                emoji=Emoji.prefix,
+                emoji=get_emoji('prefix'),
                 value='Prefix'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.color'),
-                emoji=Emoji.color,
+                emoji=get_emoji('colors'),
                 value='Color'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.music'),
-                emoji=Emoji.channel_voice,
+                emoji=get_emoji('music'),
                 value='Music'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.auto-roles'),
-                emoji=Emoji.auto_role,
+                emoji=get_emoji('autoroles'),
                 value='AutoRoles'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.role-reactions'),
-                emoji=Emoji.auto_role,
+                emoji=get_emoji('reacroles'),
                 value='RoleReactions'
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.module-name.welcomer'),
-                emoji=Emoji.frame_person,
-                value='Welcomer'
+                label=i18n.t(locale, 'settings.module-name.notification'),
+                emoji=get_emoji('notifi'),
+                value='Notification'
+            ),
+            nextcord.SelectOption(
+                label=i18n.t(locale, 'settings.module-name.tempvoice'),
+                emoji=get_emoji('timechannels'),
+                value='TempVoice'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.reactions'),
-                emoji=Emoji.reactions,
+                emoji=get_emoji('autoreac'),
                 value='Reactions'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.thread'),
-                emoji=Emoji.thread_message,
+                emoji=get_emoji('automes'),
                 value='ThreadMessage'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.logs'),
-                emoji=Emoji.frame_person,
+                emoji=get_emoji('changelog'),
                 value='Logs'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.ideas'),
-                emoji=Emoji.lightbulb,
+                emoji=get_emoji('ideas'),
                 value='Ideas'
             ),
             nextcord.SelectOption(
                 label=i18n.t(
                     locale, 'settings.module-name.command-permission'),
-                emoji=Emoji.command,
+                emoji=get_emoji('settings'),
                 value='CommandPermission'
             ),
         ]

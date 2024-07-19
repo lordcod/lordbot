@@ -45,6 +45,17 @@ class ModerationRolesView(DefaultSettingsView):
         self.gdb = GuildDateBases(guild.id)
         self.idea_datas: IdeasPayload = await self.gdb.get('ideas')
         mod_role_ids = self.idea_datas.get('moderation_role_ids')
+        color = await self.gdb.get('color')
+
+        self.embed = nextcord.Embed(
+            title="Ideas",
+            description="The ideas module allows you to collect, discuss and evaluate user suggestions. It organizes ideas in one place, allows you to vote for them and track their status.",
+            color=color
+        )
+        self.embed.add_field(
+            name='',
+            value='> Choose roles that can approve/reject ideas'
+        )
 
         super().__init__()
 

@@ -32,43 +32,27 @@ class DropDown(nextcord.ui.StringSelect):
             for chnl in channels
         ]
 
-        if len(channels) <= 0:
-            options.append(nextcord.SelectOption('SelectOption'))
-            _disabled = True
-        else:
-            _disabled = False
+        disabled = len(channels) <= 0
+        if disabled:
+            options.append(nextcord.SelectOption(label='SelectOption'))
 
         super().__init__(
             placeholder=i18n.t(locale, 'settings.reactions.init.placeholder'),
             min_values=1,
             max_values=1,
             options=options,
-            disabled=_disabled
+            disabled=disabled
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        gdb = GuildDateBases(interaction.guild_id)
-        color = await gdb.get('color')
-        locale = await gdb.get('language')
-
-        value = self.values[0]
-        value = int(value)
+        value = int(self.values[0])
 
         channel = interaction.guild.get_channel(value)
         channel_data = self.reactions.get(value)
 
-        embed = nextcord.Embed(
-            title=i18n.t(locale, 'settings.reactions.init.brief'),
-            description=i18n.t(
-                locale, 'settings.reactions.init.dddesc',
-                channel=channel.mention,
-                emojis=', '.join([emo for emo in channel_data])
-            ),
-            color=color
-        )
-
-        await interaction.response.edit_message(embed=embed,
-                                                view=ReactData(channel, channel_data))
+        view = await ReactData(channel, channel_data)
+        await interaction.response.edit_message(embed=view.embed,
+                                                view=view)
 
 
 @AsyncSterilization
@@ -106,4 +90,4 @@ class AutoReactions(DefaultSettingsView):
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
         view = await InstallEmojiView(interaction.guild_id)
-        await interaction.response.edit_message(embed=None, view=view)
+        await interaction.response.edit_message(embed=view.embed, view=view)

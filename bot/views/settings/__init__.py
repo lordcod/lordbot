@@ -1,8 +1,10 @@
-from bot.views.settings.logs import LogsView
-from bot.views.settings.role_reaction import RoleReactionView
+from .logs import LogsView
+from .role_reaction import RoleReactionView
+from .tickets import TicketsView
+from .tempvoice import TempVoiceView
 from .music import MusicView
 from .ideas import IdeasView
-from .welcomer import WelcomerView
+from .notification import NotificationView
 from .auto_role import AutoRoleView
 from .permisson_command import CommandsDataView
 from .thread_message import AutoThreadMessage
@@ -18,13 +20,15 @@ moduls = {
     'Color': Color,
     'Languages': Languages,
     'Prefix': Prefix,
+    'TempVoice': TempVoiceView,
     'CommandPermission': CommandsDataView,
     'RoleReactions': RoleReactionView,
     'Music': MusicView,
-    'Welcomer': WelcomerView,
+    'Notification': NotificationView,
     'AutoRoles': AutoRoleView,
     'Reactions': AutoReactions,
     'ThreadMessage': AutoThreadMessage,
+    'Tickets': TicketsView,
     'Ideas': IdeasView,
     'Logs': LogsView
 }

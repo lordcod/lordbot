@@ -6,9 +6,10 @@ import nextcord
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import CategoryPayload, TicketsItemPayload, TicketsPayload, UserTicketPayload
-from typing import Any, Dict, Iterable, List, Literal, Optional, Self, Tuple, Union
+from typing import Dict,  List, Literal, Optional, Self, Tuple
 
 from bot.misc import utils
+from bot.misc.utils import get_payload
 from bot.misc.lordbot import LordBot
 from bot.resources.ether import Emoji
 from bot.views.tickets.categories import CategoryView
@@ -26,46 +27,6 @@ class TicketStatus(IntEnum):
     opened = 1
     closed = 2
     deleted = 3
-
-
-def parse_prefix(
-    prefix: str,
-    iterable: Union[Iterable[Tuple[Union[str, int], Any]],
-                    Dict[Union[str, int], Any],
-                    List[Any]]
-) -> Dict[str, Any]:
-    if isinstance(iterable, dict):
-        iterable = iterable.items()
-    if isinstance(iterable, list):
-        iterable = enumerate(iterable)
-
-    ret = {}
-    for key, value in iterable:
-        ret[f'{prefix}.{key}'] = value
-    return ret
-
-
-def get_payload(member: nextcord.Member, inputs: Dict[str, str], category: CategoryPayload, ticket_count: int) -> Dict[str, Any]:
-    data = {
-        'ticket.count': ticket_count,
-        'today_dt': datetime.datetime.today().isoformat()
-    }
-    bot_payload = utils.MemberPayload(member._state._get_client().user)
-    bot_payload._prefix = 'bot'
-    data.update(bot_payload._to_dict())
-    data.update(utils.MemberPayload(member)._to_dict())
-    data.update(utils.GuildPayload(member.guild)._to_dict())
-    if inputs:
-        data.update(parse_prefix('ticket.forms', list(inputs.values())))
-    if category:
-        data['ticket.category.name'] = category['label']
-    return data
-
-
-def get_payload_from_panel(guild: nextcord.Guild) -> dict:
-    bot_payload = utils.MemberPayload(guild._state._get_client().user)
-    bot_payload._prefix = 'bot'
-    return utils.GuildPayload(guild)._to_dict() | bot_payload._to_dict() | {'today_dt': datetime.datetime.today().isoformat()}
 
 
 def parse_permissions_string(permission_data: dict, mod_roles: list, guild_id: int, owner_id: int):
@@ -93,6 +54,7 @@ class ModuleTicket:
     input_answer: Optional[Dict[str, str]] = None
     status: Optional[TicketStatus] = None
     owner: Optional[nextcord.Member] = None
+    messages: Optional[List] = None
 
     def __init__(
         self,
@@ -128,7 +90,7 @@ class ModuleTicket:
             ) if locale == 'ru' else DEFAULT_TICKET_PAYLOAD.copy()
 
         panel_message = ticket_data.get('messages').get('panel')
-        msg_data = await utils.generate_message(utils.lord_format(panel_message, get_payload_from_panel(channel.guild)))
+        msg_data = await utils.generate_message(utils.lord_format(panel_message, get_payload(guild=channel.guild)))
         view = await FAQView(channel.guild.id, ticket_data)
         message = await channel.send(**msg_data, view=view)
 
@@ -149,7 +111,7 @@ class ModuleTicket:
         message = channel.get_partial_message(message_id)
 
         panel_message = ticket_data['messages']['panel']
-        msg_data = await utils.generate_message(utils.lord_format(panel_message, get_payload_from_panel(guild)))
+        msg_data = await utils.generate_message(utils.lord_format(panel_message, get_payload(guild=guild)))
         view = await FAQView(guild.id, ticket_data)
         message = await message.edit(**msg_data, view=view)
 
@@ -185,9 +147,21 @@ class ModuleTicket:
         return ret
 
     async def get_ticket_count(self):
-        tickets_data_panel = await localdb.get_table('tickets-panel')
-        channels = await tickets_data_panel.get(self.message_id, [])
-        return len(channels)
+        tickets_data = await localdb.get_table('tickets')
+        keys = await self.get_ticket_keys()
+        tickets: List[UserTicketPayload] = await tickets_data.multi_get(keys)
+
+        total = len(tickets)+1
+        active = 1
+
+        for ticket in tickets:
+            if ticket['status'] == TicketStatus.opened:
+                active += 1
+
+        return {
+            'total': total,
+            'active': active
+        }
 
     async def get_ticket_keys(self):
         tickets_data_panel = await localdb.get_table('tickets-panel')
@@ -215,7 +189,8 @@ class ModuleTicket:
             'category': self.selected_category,
             'inputs': self.input_answer,
             'status': self.status,
-            'index': self.ticket_index
+            'count': self.ticket_count,
+            'messages': self.messages
         }
 
     def update_from_ticket_data(self, data: UserTicketPayload):
@@ -224,7 +199,8 @@ class ModuleTicket:
         self.selected_category = data['category']
         self.input_answer = data['inputs']
         self.status = TicketStatus(data['status'])
-        self.ticket_index = data['index']
+        self.ticket_count = data['count']
+        self.messages = data.get('messages', [])
 
     async def get_permissions(self, permission_data: Dict[int, Tuple[int, int]]):
         ticket_data = await self.fetch_guild_ticket()
@@ -251,8 +227,9 @@ class ModuleTicket:
 
     async def create(self) -> None:
         ticket_data = await self.fetch_guild_ticket()
-        self.ticket_index = await self.get_ticket_count()
+        self.ticket_count = await self.get_ticket_count()
         category_payload = self.selected_category
+
         if category_payload:
             def get_data(key, default=None):
                 return category_payload.get(key) or ticket_data.get(key) or default
@@ -265,10 +242,10 @@ class ModuleTicket:
         ticket_type = get_data('type', 1)
         channel_id = get_data('channel_id')
         payload = get_payload(
-            self.member,
-            self.input_answer,
-            self.selected_category,
-            self.ticket_index+1
+            member=self.member,
+            inputs=self.input_answer,
+            category=self.selected_category,
+            ticket_count=self.ticket_count
         )
 
         name = utils.lord_format(open_name, payload)
@@ -313,7 +290,8 @@ class ModuleTicket:
             msg = await thread.send(**message, view=view)
             if mod_roles := get_data('moderation_roles'):
                 await thread.send(' '.join([role.mention for role_id in mod_roles if (role := self.guild.get_role(role_id))]),
-                                  delete_after=1)
+                                  delete_after=1,
+                                  flags=nextcord.MessageFlags(suppress_notifications=True))
 
         _log.trace('Created ticket channel %s', self.ticket_channel)
         self.status = TicketStatus.opened
@@ -328,13 +306,12 @@ class ModuleTicket:
     async def create_after_modals(self, interaction: nextcord.Interaction, modals: Optional[dict] = None):
         if self.settings_message is None:
             self.settings_message = await interaction.response.send_message(f'{Emoji.loading} Loading...', ephemeral=True)
-        else:
+        elif not interaction.response._responded:
             await interaction.response.defer()
         self.input_answer = modals
         await self.create()
 
     async def create_after_category(self, interaction: nextcord.Interaction, category: Optional[CategoryPayload] = None):
-        tickets = await self.get_ticket_data_from_member(category)
         tickets = await self.get_ticket_data_from_member(category)
         ticket_data = await self.fetch_guild_ticket()
         categories_data = ticket_data.get('categories')
@@ -398,10 +375,10 @@ class ModuleTicket:
             get_data = ticket_data.get
 
         payload = get_payload(
-            self.member,
-            self.input_answer,
-            self.selected_category,
-            self.ticket_index+1
+            member=self.member,
+            inputs=self.input_answer,
+            category=self.selected_category,
+            ticket_count=self.ticket_count
         )
 
         buttons = get_data('buttons')
@@ -446,7 +423,9 @@ class ModuleTicket:
         if name is None:
             editted_data.pop('name')
         if editted_data:
+            _log.trace('Start update')
             await self.ticket_channel.edit(**editted_data)
+            _log.trace('Fin update')
 
         self.status = TicketStatus.closed
         await self.set_ticket_data()
@@ -464,14 +443,13 @@ class ModuleTicket:
             get_data = ticket_data.get
 
         payload = get_payload(
-            self.member,
-            self.input_answer,
-            self.selected_category,
-            self.ticket_index+1
+            member=self.member,
+            inputs=self.input_answer,
+            category=self.selected_category,
+            ticket_count=self.ticket_count
         )
 
         ticket_type = get_data('type', 1)
-        user_closed = get_data('user_closed', True)
         message = get_data('messages')['reopen']
         name = get_data('names')['open']
         close_name = get_data('names').get('close')
@@ -479,7 +457,7 @@ class ModuleTicket:
         reopen_message = await utils.generate_message(utils.lord_format(message, payload))
         reopen_name = utils.lord_format(name, payload)
 
-        if not (self._is_verification(get_data, user_closed)
+        if not (self._is_verification(get_data)
                 and self.status == TicketStatus.closed):
             return
 
@@ -525,10 +503,10 @@ class ModuleTicket:
             get_data = ticket_data.get
 
         payload = get_payload(
-            self.member,
-            self.input_answer,
-            self.selected_category,
-            self.ticket_index+1
+            member=self.member,
+            inputs=self.input_answer,
+            category=self.selected_category,
+            ticket_count=self.ticket_count
         )
 
         user_closed = get_data('user_closed', True)
@@ -550,9 +528,36 @@ class ModuleTicket:
     async def __delete(self):
         self.status = TicketStatus.deleted
         await self.ticket_channel.delete()
-        await self.remove_ticket_count()
         await self.set_ticket_data()
+
+        content = '\n'.join([
+            f"{msg['username']}: {msg['content']}"
+            for msg in self.messages
+        ])
+        with open('words.txt', 'w+') as file:
+            file.write(content)
+        n_file = nextcord.File('words.txt', 'archive.txt')
+        channel = self.guild.get_channel(1263495679351849051)
+        await channel.send(file=n_file)
 
     def _is_verification(self, get_data, with_user: bool = True) -> Literal[1, 2]:
         mod_roles = get_data('moderation_roles')
         return (self.member == self.owner and with_user) or bool(mod_roles and set(self.member._roles) & set(mod_roles))
+
+    @classmethod
+    async def archive_message(cls, message: nextcord.Message):
+        if message.author.bot:
+            return
+        try:
+            self = await cls.from_channel_id(message.author, message.channel)
+        except Exception:
+            return
+
+        if self.messages is None:
+            self.messages = []
+        self.messages.append({
+            'content': message.content,
+            'username': message.author.name
+        })
+
+        await self.set_ticket_data()
