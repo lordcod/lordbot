@@ -76,6 +76,7 @@ class VideoHistory:
     def get_diff(self, videos: List[Video]) -> Tuple[List[Video], List[Video]]:
         ret = []
         diff = []
+
         include = True
         for video in videos:
             if video not in self.videos:

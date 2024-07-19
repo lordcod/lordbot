@@ -124,8 +124,8 @@ class YtNoti:
     async def add_channel(self, guild_id: int, channel_id: str) -> None:
         if channel_id not in self.channel_ids:
             videos = await self.get_video_history(channel_id)
-            vhd = self.video_history.get_diff(videos)
-            self.video_history.extend(vhd)
+            _, diff = self.video_history.get_diff(videos)
+            self.video_history.extend(diff)
             self.channel_ids.add(channel_id)
         self.directed_data.setdefault(channel_id, set())
         self.directed_data[channel_id].add(guild_id)
@@ -189,8 +189,8 @@ class YtNoti:
     async def parse_youtube(self) -> None:
         for cid in self.channel_ids:
             videos = await self.get_video_history(cid)
-            vhd = self.video_history.get_diff(videos)
-            self.video_history.extend(vhd)
+            _, diff = self.video_history.get_diff(videos)
+            self.video_history.extend(diff)
 
         _log.trace('Started youtube parsing, cheking: %s, count of videos found: %s',
                    self.channel_ids,  len(self.video_history.videos))
