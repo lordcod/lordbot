@@ -1,4 +1,7 @@
 
+from sqlalchemy import false
+
+
 class DatePluralRussia:
     @staticmethod
     def plural(numbers: int, forms: list[str]) -> str:
@@ -71,15 +74,25 @@ def time_convert(timestamp: (int | float)) -> dict[str, int]:
     }
 
 
-def display_time(number: int, lang: str = "en", max_items: int = 3) -> str:
+def display_time(number: int, lang: str = "en", max_items: int = 3, with_rounding: bool = False) -> str:
     if number % 10 != 0:
         number = round(number + 5, -1)
 
     func = distributing.get(lang, distributing['en'])
 
     current_time = time_convert(number)
+    current_time = dict([(key, num) for key, num in current_time.items() if num != 0])
+
+    if with_rounding:
+        if max_items > len(current_time):
+            index = list(current_time.keys())[len(current_time)-1]
+            current_time[index] += 1
+        else:
+            index = list(current_time.keys())[max_items-1]
+            current_time[index] += 1
+
     time_strings = [func(num, key)
-                    for key, num in current_time.items() if num != 0]
+                    for key, num in current_time.items()]
 
     return ", ".join(time_strings[:max_items])
 

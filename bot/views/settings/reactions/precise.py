@@ -16,10 +16,26 @@ class ReactData(DefaultSettingsView):
     async def __init__(self, channel: nextcord.TextChannel, channel_data: dict) -> None:
         self.gdb = GuildDateBases(channel.guild.id)
         locale = await self.gdb.get('language')
+        color = await self.gdb.get('color')
         self.forum_message = await self.gdb.get('reactions')
 
         self.channel_data = channel_data
         self.channel = channel
+
+        self.embed = nextcord.Embed(
+            title=i18n.t(locale, 'settings.reactions.init.brief'),
+            description=i18n.t(locale, 'settings.reactions.init.description'),
+            color=color
+        )
+        self.embed.add_field(
+            name='',
+            value=i18n.t(
+                locale, 'settings.reactions.init.dddesc',
+                channel=channel.mention,
+                emojis=', '.join([emo for emo in channel_data])
+            )
+        )
+
         super().__init__()
 
         self.back.label = i18n.t(
@@ -54,5 +70,5 @@ class ReactData(DefaultSettingsView):
         self.forum_message.pop(channel_id)
         await self.gdb.set('reactions', self.forum_message)
 
-        view = reactions.AutoReactions(interaction.guild)
+        view = await reactions.AutoReactions(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

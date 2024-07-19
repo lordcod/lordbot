@@ -26,6 +26,25 @@ class MembersEvent(commands.Cog):
         super().__init__()
 
     @commands.Cog.listener()
+    async def on_member_remove(self, member: nextcord.Member):
+        guild = member.guild
+        gdb = GuildDateBases(member.guild.id)
+        farewell_message: dict = await gdb.get('farewell_message', {})
+        channel = guild.get_channel(farewell_message.get("channel_id"))
+
+        if not channel:
+            return
+
+        payload = utils.get_payload(member=member)
+
+        content: str = farewell_message.get('message')
+
+        message_format = utils.lord_format(content, payload)
+        message_data = await utils.generate_message(message_format)
+
+        await channel.send(**message_data)
+
+    @commands.Cog.listener()
     async def on_member_join(self, member: nextcord.Member):
         gdb = GuildDateBases(member.guild.id)
 
@@ -49,17 +68,16 @@ class MembersEvent(commands.Cog):
     async def auto_message(self, member: nextcord.Member, gdb: GuildDateBases):
         guild = member.guild
         greeting_message: dict = await gdb.get('greeting_message', {})
+        channel = guild.get_channel(greeting_message.get("channel_id"))
 
-        if not (channel := guild.get_channel(greeting_message.get("channel_id"))):
+        if not channel:
             return
 
-        member_payload = utils.MemberPayload(member)._to_dict()
-        guild_payload = utils.GuildPayload(guild)._to_dict()
-        data_payload = guild_payload | member_payload
+        payload = utils.get_payload(member=member)
 
         content: str = greeting_message.get('message')
 
-        message_format = utils.lord_format(content, data_payload)
+        message_format = utils.lord_format(content, payload)
         message_data = await utils.generate_message(message_format)
 
         if image_link := greeting_message.get('image'):

@@ -42,10 +42,23 @@ class DropDownBuilder(nextcord.ui.ChannelSelect):
 
 @AsyncSterilization
 class InstallEmojiView(DefaultSettingsView):
+    embed:  nextcord.Embed
+
     async def __init__(self, guild_id: int, channel_id: Optional[int] = None) -> None:
         self.channel_id = channel_id
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        color = await gdb.get('color')
+
+        self.embed = nextcord.Embed(
+            title=i18n.t(locale, 'settings.reactions.init.title'),
+            description=i18n.t(locale, 'settings.reactions.init.description'),
+            color=color
+        )
+        self.embed.add_field(
+            name='',
+            value='> Select a channel and then click set reactions'
+        )
 
         super().__init__()
 

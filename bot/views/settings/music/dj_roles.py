@@ -46,6 +46,19 @@ class DjRolesView(DefaultSettingsView):
         self.embed = music.MusicView(guild).embed
         self.gdb = GuildDateBases(guild.id)
         music_settings = await self.gdb.get("music_settings")
+        locale = await self.gdb.get('language')
+        color = await self.gdb.get('color')
+
+        self.embed = nextcord.Embed(
+            title=i18n.t(locale,
+                         'settings.music.title'),
+            description="The music module allows you to set the maximum queue length, control the volume, assign DJ roles and create playlists.",
+            color=color
+        )
+        self.embed.add_field(
+            name='',
+            value='> Select the roles that will be able to add and change music'
+        )
 
         super().__init__()
 

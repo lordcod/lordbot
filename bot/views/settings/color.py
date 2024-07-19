@@ -1,21 +1,24 @@
 import nextcord
 from bot.databases import GuildDateBases
 import re
-from bot.misc.utils import AsyncSterilization
+from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
+from bot.resources.ether import ColorType
 from bot.views import settings_menu
 from ._view import DefaultSettingsView
 from bot.resources.info import DEFAULT_COLOR
+from bot.resources.ether import every_emojis
 from bot.languages import i18n
 
 HEX_REGEX = re.compile(r'#?([0-9a-fA-F]{6})')
 
+system_emoji_colors = [{'value': item, 'label': name.capitalize()} for name, item in ColorType.__dict__.items() if isinstance(item, ColorType)]
+
 
 @AsyncSterilization
-class Modal(nextcord.ui.Modal):
+class ColorModal(nextcord.ui.Modal):
     async def __init__(self, guild_id) -> None:
         self.gdb = GuildDateBases(guild_id)
-
         color = await self.gdb.get("color")
         hex_color = f"#{color:0>6x}".upper()
 
@@ -40,7 +43,35 @@ class Modal(nextcord.ui.Modal):
         color = int(result.group(1), 16)
         await self.gdb.set("color", color)
 
-        view = ColorView(interaction.guild)
+        view = await ColorView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+
+@AsyncSterilization
+class EmojiDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        system_emoji = await gdb.get("system_emoji")
+
+        options = [
+            nextcord.SelectOption(
+                label=data['label'],
+                value=data['value'],
+                description=None,
+                emoji=every_emojis['settings'][data['value']],
+                default=data['value'] == system_emoji
+            )
+            for data in system_emoji_colors
+        ]
+        super().__init__(options=options)
+
+    async def callback(self, interaction: nextcord.Interaction):
+        value = self.values[0]
+
+        gdb = GuildDateBases(interaction.guild_id)
+        await gdb.set("system_emoji", value)
+
+        view = await ColorView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
@@ -66,6 +97,8 @@ class ColorView(DefaultSettingsView):
 
         super().__init__()
 
+        self.add_item(await EmojiDropDown(guild.id))
+
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.reset.label = i18n.t(locale, 'settings.button.reset')
@@ -83,7 +116,7 @@ class ColorView(DefaultSettingsView):
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction
                    ):
-        modal = await Modal(interaction.guild_id)
+        modal = await ColorModal(interaction.guild_id)
         await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label="Reset", style=nextcord.ButtonStyle.success)
@@ -93,5 +126,5 @@ class ColorView(DefaultSettingsView):
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set("color", DEFAULT_COLOR)
 
-        view = ColorView(interaction.guild)
+        view = await ColorView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

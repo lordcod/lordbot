@@ -1,6 +1,7 @@
 import nextcord
 from nextcord.ext import commands
 
+from bot.databases import localdb
 from bot.misc.lordbot import LordBot
 from bot.resources import check
 from bot.resources.ether import Emoji
@@ -82,6 +83,15 @@ class Teams(commands.Cog):
         query: str
     ):
         self.bot.engine.execute(query)
+        await ctx.message.add_reaction(Emoji.success)
+
+    @commands.command()
+    @check.team_only()
+    async def update_redis(
+        self,
+        ctx: commands.Context
+    ):
+        await localdb._update_db(__name__)
         await ctx.message.add_reaction(Emoji.success)
 
 

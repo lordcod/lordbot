@@ -67,6 +67,13 @@ class MusicView(DefaultSettingsView):
         locale = await gdb.get('language')
         color = await gdb.get('color')
 
+        self.embed = nextcord.Embed(
+            title=i18n.t(locale,
+                         'settings.music.title'),
+            description="The music module allows you to set the maximum queue length, control the volume, assign DJ roles and create playlists.",
+            color=color
+        )
+
         description = ''
 
         if max_size := music_settings.get("queue-max-size"):
@@ -82,12 +89,11 @@ class MusicView(DefaultSettingsView):
                                   'settings.music.dj-roles.value',
                                   roles=', '.join([role.mention for role_data in dj_role_ids if (role := guild.get_role(role_data))]))
 
-        self.embed = nextcord.Embed(
-            title=i18n.t(locale,
-                         'settings.music.title'),
-            description=description,
-            color=color
-        )
+        if description:
+            self.embed.add_field(
+                name="",
+                value=description
+            )
 
         super().__init__()
 

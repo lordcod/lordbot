@@ -1,5 +1,4 @@
 from __future__ import annotations
-from ast import arg
 import contextlib
 import functools
 import getopt
@@ -22,7 +21,7 @@ import orjson
 
 from asyncio import TimerHandle
 from collections import namedtuple
-from typing import (TYPE_CHECKING, Awaitable, Coroutine, Dict, Generic,  Optional,  Tuple, Type, Union,
+from typing import (TYPE_CHECKING, Callable,  Coroutine, Dict, Generic,  Optional,  Tuple,  Union,
                     Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
 from datetime import datetime
 from captcha.image import ImageCaptcha
@@ -31,11 +30,17 @@ from functools import lru_cache
 from dataclasses import dataclass, field
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
+from yandex_music import Video
 
 from bot.databases import GuildDateBases
 from cryptography.fernet import Fernet
-
+from bot.databases.varstructs import CategoryPayload
+from bot.resources import ether
 from bot.resources.ether import Emoji
+
+if TYPE_CHECKING:
+    from bot.misc.noti.twnoti import Stream as TwStream, User as TwUser
+    from bot.misc.noti.ytnoti import Video as YtVideo
 
 _log = logging.getLogger(__name__)
 T = TypeVar('T')
@@ -77,6 +82,29 @@ class TempletePayload:
         return base
 
 
+class StreamPayload(TempletePayload):
+    _prefix = 'stream'
+
+    def __init__(self, stream: TwStream, user: TwUser) -> None:
+        self.username = stream.user_name
+        self.title = stream.title
+        self.gameName = stream.game_name
+        self.thumbnailUrl = stream.thumbnail_url
+        self.avatarUrl = user.profile_image_url
+        self.url = stream.url
+
+
+class VideoPayload(TempletePayload):
+    _prefix = 'video'
+
+    def __init__(self, video: YtVideo) -> None:
+        self.username = video.channel.name
+        self.title = video.title
+        self.description = video.description
+        self.url = video.url
+        self.videoIcon = video.thumbnail.url
+
+
 class GuildPayload(TempletePayload):
     _prefix = 'guild'
     _as_prefix = True
@@ -116,6 +144,69 @@ class MemberPayload(TempletePayload):
 
     def __str__(self) -> str:
         return self.mention
+
+
+def parse_prefix(
+    prefix: str,
+    iterable: Union[Iterable[Tuple[Union[str, int], Any]],
+                    Dict[Union[str, int], Any],
+                    List[Any]]
+) -> Dict[str, Any]:
+    if isinstance(iterable, dict):
+        iterable = iterable.items()
+    if isinstance(iterable, list):
+        iterable = enumerate(iterable)
+
+    ret = {}
+    for key, value in iterable:
+        ret[f'{prefix}.{key}'] = value
+    return ret
+
+
+def get_payload(
+    *,
+    member: Optional[nextcord.Member] = None,
+    guild: Optional[nextcord.Guild] = None,
+    stream: Optional[TwStream] = None,
+    user: Optional[TwUser] = None,
+    video: Optional[YtVideo] = None,
+    category: Optional[CategoryPayload] = None,
+    inputs: Optional[Dict[str, str]] = None,
+    ticket_count: Optional[dict] = None,
+    voice_count: Optional[dict] = None,
+):
+    bot_payload = None
+    if member is not None and guild is None:
+        guild = member.guild
+    if guild is not None:
+        bot = guild._state._get_client().user
+        bot_payload = MemberPayload(bot)
+        bot_payload._prefix = 'bot'
+
+    data = {
+        'today_dt': datetime.today().isoformat()
+    }
+
+    if member is not None:
+        data.update(MemberPayload(member)._to_dict())
+    if guild is not None:
+        data.update(GuildPayload(guild)._to_dict())
+    if stream is not None and user is not None:
+        data.update(StreamPayload(stream, user)._to_dict())
+    if video is not None:
+        data.update(VideoPayload(video)._to_dict())
+    if bot_payload is not None:
+        data.update(bot_payload._to_dict())
+    if inputs is not None and inputs:
+        data.update(parse_prefix('ticket.forms', list(inputs.values())))
+    if category is not None and category:
+        data['ticket.category.name'] = category['label']
+    if ticket_count is not None:
+        data.update(parse_prefix('ticket.count', ticket_count))
+    if voice_count is not None:
+        data.update(parse_prefix('voice.count', voice_count))
+
+    return data
 
 
 class __LordFormatingTemplate(string.Template):
@@ -335,10 +426,11 @@ class TranslatorFlags:
     def __init__(self, longopts: list[str] = []):
         self.longopts = longopts
 
-    def __call__(self, text: str) -> Any:
+    async def convert(self, ctx: commands.Context, text: str) -> Any:
         args = text.split()
         self.flags = dict(map(lambda item: (item[0].removeprefix(
             '--'), item[1]), getopt.getopt(args, '', self.longopts)[0]))
+        return self
 
     def get(self, key: str):
         if key in self.flags and self.flags[key] == '':
@@ -347,6 +439,39 @@ class TranslatorFlags:
 
     def __class_getitem__(cls, *args: str):
         return cls(args)
+
+
+async def get_emoji(guild_id: int, name: str):
+    gdb = GuildDateBases(guild_id)
+    system_emoji = await gdb.get('system_emoji')
+    return ether.every_emojis[name][system_emoji]
+
+
+def get_emoji_as_color(system_emoji: int, name: str):
+    return ether.every_emojis[name][system_emoji]
+
+
+@overload
+async def get_emoji_wrap(gdb: GuildDateBases) -> Callable[[str], str]: ...
+
+
+@overload
+async def get_emoji_wrap(guild_id: int) -> Callable[[str], str]: ...
+
+
+async def get_emoji_wrap(guild_data: GuildDateBases | int) -> Callable[[str], str]:
+    if isinstance(guild_data, GuildDateBases):
+        gdb = guild_data
+    else:
+        gdb = GuildDateBases(guild_data)
+    system_emoji = await gdb.get('system_emoji')
+
+    def _get_emoji_inner(name: str):
+        try:
+            return ether.every_emojis[name][system_emoji]
+        except:
+            return Emoji.lordcord
+    return _get_emoji_inner
 
 
 async def clone_message(message: nextcord.Message) -> dict:
@@ -394,34 +519,17 @@ class LordTimerHandler:
         th.cancel()
 
 
-class FissionIterator:
-    def __init__(self, iterable: Iterable[Any], count: int) -> None:
-        self.iterable = list(iterable)
-        self.count = count
-        self.value = 0
-        self.max_value = False
-
-    def __iter__(self) -> Self:
-        return self
-
-    def __next__(self) -> Any:
-        if self.max_value:
-            raise StopIteration
-        items = []
-        stop = self.value+self.count
-        if stop >= len(self.iterable):
-            stop = len(self.iterable)
-            self.max_value = True
-        for item in self.iterable[self.value:stop]:
-            items.append(item)
-        self.value = stop
-        return items
-
-    def __getitem__(self, __value: Union[SupportsIndex, slice]) -> Any:
-        return list(iter(self))[__value]
-
-    def to_list(self):
-        return list(iter(self))
+def parse_fission(iterable: Iterable[T], count: int) -> list[list[T]]:
+    ret = []
+    for index, value in enumerate(iterable):
+        ret_index = int(index // count)
+        try:
+            values = ret[ret_index]
+        except IndexError:
+            values = []
+            ret.append(values)
+        values.append(value)
+    return ret
 
 
 class AsyncSterilization(Generic[T]):
@@ -435,13 +543,36 @@ class AsyncSterilization(Generic[T]):
         def __init__(self, *args, **kwargs):
             self.cls(*args, **kwargs)
 
+        __call__ = type[T]
+
     def __init__(self, cls) -> None:
         self.cls = cls
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} {self.cls.__name__}>"
 
     async def __call__(self, *args: Any, **kwds: Any) -> T:
         self = self.cls.__new__(self.cls)
         await self.__init__(*args, **kwds)
         return self
+
+
+@AsyncSterilization
+class GuildEmoji:
+    async def __init__(self, guild_data: GuildDateBases | int) -> None:
+        if isinstance(guild_data, GuildDateBases):
+            gdb = guild_data
+        else:
+            gdb = GuildDateBases(guild_data)
+        self.system_emoji = await gdb.get('system_emoji')
+        self.data = {}
+
+        for name, data in ether.every_emojis.items():
+            self.data[name] = data[self.system_emoji]
+            setattr(self, name, data[self.system_emoji])
+
+    def get(self, name: str) -> str:
+        return self.data[name]
 
 
 @dataclass

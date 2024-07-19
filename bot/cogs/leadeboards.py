@@ -6,13 +6,15 @@ from nextcord.ext import commands
 from typing import List, Self, Tuple, TypeVar
 
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import get_award, FissionIterator, AsyncSterilization
+from bot.misc.utils import get_award,  AsyncSterilization, parse_fission
 
 from bot.misc.time_transformer import display_time
+from bot.resources.ether import Emoji
 from bot.views import menus
 from bot.databases import GuildDateBases, EconomyMemberDB
 from bot.databases import localdb
 
+PEDESTAL_IMAGE_URL = 'https://i.postimg.cc/CKGc5k1d/pedestal.png'
 T = TypeVar("T")
 
 
@@ -27,33 +29,32 @@ def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
                 pass
 
 
-def clear_empty_ofter_leaderboard(guild: nextcord.Guild, leaderboard: list):
-    for member_id, value in leaderboard.copy():
-        member = guild.get_member(member_id)
-        if not member:
-            leaderboard.remove((member_id, value))
-
-
-def get_item_param(item: Tuple[int, T]) -> T:
-    return item[1]
-
-
-def register_key(key: int) -> None:
-    def wrapped(func):
-        func.__leaderboard_key__ = key
-        return func
-    return wrapped
+def clear_empty_leaderboard_adt(guild: nextcord.Guild, leaderboard: dict):
+    get_user = guild._state.get_user
+    for member_id, value in leaderboard.copy().items():
+        member = get_user(member_id)
+        if not member or 0 >= value:
+            leaderboard.pop(member_id, None)
 
 
 @AsyncSterilization
-class EconomyLeaderboardView(menus.Menus):
-    async def __init__(self, guild: nextcord.Guild, embed: nextcord.Embed, leaderboards: list, leaderboard_indexs: List[int]) -> Self:
-        self.guild = guild
+class PartialLeaderboardView(menus.Menus):
+    embed: nextcord.Embed
+
+    async def __init__(self, member: nextcord.Member, leaderboards: list, leaderboard_indexs: List[int]) -> Self:
+        guild = member.guild
+
         self.gdb = GuildDateBases(guild.id)
-        self.economy_settings = await self.gdb.get('economic_settings')
-        self.currency_emoji = self.economy_settings.get("emoji")
+        self.color = await self.gdb.get('color')
+
+        self.member = member
+        self.guild = guild
         self.leaderboard_indexs = leaderboard_indexs
-        self._embed = embed
+
+        try:
+            self.user_index = leaderboard_indexs.index(member.id)+1
+        except ValueError:
+            self.user_index = len(leaderboard_indexs) + 1
 
         super().__init__(leaderboards, timeout=300)
 
@@ -66,218 +67,164 @@ class EconomyLeaderboardView(menus.Menus):
 
         return self
 
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        return interaction.user == self.member
+
+    async def callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await interaction.response.edit_message(embed=self.embed, view=self)
+
+
+@AsyncSterilization
+class EconomyLeaderboardView(PartialLeaderboardView.cls):
+    async def __init__(self, *args) -> None:
+        await super().__init__(*args)
+
+        economic_settings: dict = await self.gdb.get('economic_settings')
+        self.currency_emoji = economic_settings.get('emoji')
+
     @property
     def embed(self) -> nextcord.Embed:
-        self._embed.clear_fields()
+        embed = nextcord.Embed(
+            title="List of leaders by balance",
+            description=f"**{self.member.display_name}**, Your position in the top: **{self.user_index}**",
+            color=self.color
+        )
+        embed.set_thumbnail(PEDESTAL_IMAGE_URL)
+        embed.set_footer(
+            text=self.guild.name,
+            icon_url=self.guild.icon
+        )
+
+        leaderboard_indexs = self.leaderboard_indexs
+        get_user = self.guild._state.get_user
+        currency_emoji = self.currency_emoji
         for (member_id, balance, bank, total) in self.value[self.index]:
-            member = self.guild._state.get_user(member_id)
-            index = self.leaderboard_indexs.index(member_id)+1
+            member = get_user(member_id)
+            index = leaderboard_indexs.index(member_id)+1
             award = get_award(index)
-            self._embed.add_field(
+            embed.add_field(
                 name=f"{award}. {member.display_name}",
                 value=(
-                    f"Cash: {balance}{self.currency_emoji} | In bank: {bank}{self.currency_emoji}\n"
-                    f"Total balance: {total}{self.currency_emoji}"
+                    f"Cash: {balance}{currency_emoji} | In bank: {bank}{currency_emoji}\n"
+                    f"Total balance: {total}{currency_emoji}"
                 ),
                 inline=False
             )
 
-        return self._embed
+        return embed
 
-    async def callback(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await interaction.response.edit_message(embed=self.embed, view=self)
+
+@AsyncSterilization
+class StateLeaderboardView(PartialLeaderboardView.cls):
+    async def __init__(self, state: str, *args) -> None:
+        await super().__init__(*args)
+
+        self.state = state
+
+    @property
+    def embed(self) -> nextcord.Embed:
+        embed = nextcord.Embed(
+            title=f"List of leaders by {self.state.replace('_', ' ').capitalize()}",
+            description=f"**{self.member.display_name}**, Your position in the top: **{self.user_index}**",
+            color=self.color
+        )
+        embed.set_thumbnail(PEDESTAL_IMAGE_URL)
+        embed.set_footer(
+            text=self.guild.name,
+            icon_url=self.guild.icon
+        )
+
+        get_user = self.guild._state.get_user
+        leaderboard_indexs = self.leaderboard_indexs
+        results = []
+        for member_id, value in self.value[self.index]:
+            member = get_user(member_id)
+            index = leaderboard_indexs.index(member_id)+1
+            award = get_award(index)
+            results.append(f"{award}. **{member.display_name}**: {self.parse_value(value)}\n")
+        embed.add_field(
+            name='',
+            value=''.join(results)
+        )
+
+        return embed
+
+    def parse_value(self, value: float | int):
+        if self.state == 'voice_time_state':
+            return display_time(value, max_items=1, with_rounding=True)
+        if self.state == 'message_state':
+            return f'{value} messages'
+        if self.state == 'score_state':
+            return f'{value:.0f} points'
+        raise TypeError("invalid state")
+
+
+class LeaderboardTypes:
+    def __init__(self, member: nextcord.Member, message: nextcord.Message) -> None:
+        self.member = member
+        self.guild = member.guild
+        self.message = message
+
+    async def parse_balance_lb(self):
+        emdb = EconomyMemberDB(self.guild.id, self.member.id)
+        leaderboard = await emdb.get_leaderboards()
+
+        clear_empty_leaderboard(self.guild, leaderboard)
+        fission_leaderboards = parse_fission(leaderboard, 6)
+        leaderboard_indexs = [self.member_id for (self.member_id, *_) in leaderboard]
+
+        view = await EconomyLeaderboardView(
+            self.member,
+            fission_leaderboards,
+            leaderboard_indexs
+        )
+
+        await self.message.edit(content=None, embed=view.embed, view=view)
+
+    async def parse_voicetime_lb(self):
+        await self._parse_score_state('voice_time_state')
+
+    async def parse_messages_lb(self):
+        await self._parse_score_state('self.message_state')
+
+    async def parse_score_lb(self):
+        await self._parse_score_state('score_state')
+
+    async def _parse_score_state(self, state: str):
+        gdb = GuildDateBases(self.guild.id)
+        state_db = await gdb.get(state)
+
+        clear_empty_leaderboard_adt(self.guild, state_db)
+        fission_leaderboards = parse_fission(state_db.items(), 6)
+        leaderboard_indexs = list(state_db.keys())
+        view = await StateLeaderboardView(
+            state,
+            self.member,
+            fission_leaderboards,
+            leaderboard_indexs
+        )
+
+        await self.message.edit(content=None, embed=view.embed, view=view)
 
 
 class LeaderboardDropDown(nextcord.ui.StringSelect):
     def __init__(self, guild_id: int) -> None:
         super().__init__(
             options=[
-                nextcord.SelectOption(label="Economy", value=0),
-                nextcord.SelectOption(label="Voice Time", value=1),
-                nextcord.SelectOption(label="Messages", value=2),
-                nextcord.SelectOption(label="Score", value=3)
+                nextcord.SelectOption(label="Economy", value='balance'),
+                nextcord.SelectOption(label="Voice Time", value='voicetime'),
+                nextcord.SelectOption(label="Messages", value='messages'),
+                nextcord.SelectOption(label="Score", value='score')
             ]
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        await LeaderboardTypes.set_as_key(int(self.values[0]), interaction.user, interaction.guild, interaction.message)
+        await interaction.response.edit_message(content=f"{Emoji.loading} Uploading data...", embed=None, view=None)
 
-
-class AddtionallyViewLeaderboardView(nextcord.ui.View):
-    def __init__(self, guild_id: int) -> None:
-        super().__init__()
-        self.add_item(LeaderboardDropDown(guild_id))
-
-
-class LeaderboardTypes:
-    @staticmethod
-    @register_key(0)
-    async def set_balance_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
-        gdb = GuildDateBases(guild.id)
-        color = await gdb.get("color")
-
-        emdb = EconomyMemberDB(guild.id, member.id)
-        leaderboard = await emdb.get_leaderboards()
-        clear_empty_leaderboard(guild, leaderboard)
-        fission_leaderboards = FissionIterator(leaderboard, 6).to_list()
-        leaderboard_indexs = [member_id for (member_id, *_) in leaderboard]
-        try:
-            user_index = leaderboard_indexs.index(member.id)+1
-        except ValueError:
-            user_index = len(leaderboard_indexs) + 1
-
-        file_pedestal = nextcord.File(
-            "assets/pedestal.png", filename="pedestal.png")
-        embed = nextcord.Embed(
-            title="List of leaders by balance",
-            description=f"**{member.display_name}**, Your position in the top: **{user_index}**",
-            color=color
-        )
-        embed.set_thumbnail(
-            "attachment://pedestal.png")
-        embed.set_footer(
-            text=guild.name,
-            icon_url=guild.icon
-        )
-
-        view = await EconomyLeaderboardView(
-            guild, embed, fission_leaderboards, leaderboard_indexs)
-
-        await message.edit(content="", embed=view.embed, view=view, file=file_pedestal)
-
-    @staticmethod
-    @register_key(1)
-    async def set_voicetime_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
-        gdb = GuildDateBases(guild.id)
-        color = await gdb.get("color")
-        locale = await gdb.get('language')
-        state = await localdb.get_table('voice_state')
-        items = (await state.fetch()).items()
-        leaderboard = sorted(items,
-                             key=get_item_param, reverse=True)
-        clear_empty_ofter_leaderboard(guild, leaderboard)
-        leaderboard_indexs = [member_id for member_id, _ in leaderboard]
-
-        try:
-            user_index = leaderboard_indexs.index(member.id) + 1
-        except ValueError:
-            user_index = len(leaderboard_indexs) + 1
-
-        file_pedestal = nextcord.File(
-            "assets/pedestal.png", filename="pedestal.png")
-        embed = nextcord.Embed(
-            title="List of leaders by voice time",
-            description=f"**{member.display_name}**, Your position in the top: **{user_index}**",
-            color=color
-        )
-        embed.set_thumbnail(
-            "attachment://pedestal.png")
-        embed.set_footer(
-            text=guild.name,
-            icon_url=guild.icon
-        )
-
-        for index, (member_id, voicetime) in enumerate(leaderboard[:10], start=1):
-            member = guild.get_member(member_id)
-            embed.add_field(
-                name=f"{get_award(index)}. {member.display_name}",
-                value=f"Voice time: **{display_time(voicetime, lang=locale, max_items=2)}**",
-                inline=False
-            )
-
-        await message.edit(content="", embed=embed, view=AddtionallyViewLeaderboardView(guild.id), file=file_pedestal)
-
-    @staticmethod
-    @register_key(2)
-    async def set_messages_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
-        gdb = GuildDateBases(guild.id)
-        color = await gdb.get("color")
-        locale = await gdb.get('language')
-        state = await localdb.get_table('messages')
-        items = (await state.fetch()).items()
-        leaderboard = sorted(items,
-                             key=get_item_param, reverse=True)
-        clear_empty_ofter_leaderboard(guild, leaderboard)
-        leaderboard_indexs = [member_id for member_id, _ in leaderboard]
-
-        try:
-            user_index = leaderboard_indexs.index(member.id) + 1
-        except ValueError:
-            user_index = len(leaderboard_indexs) + 1
-
-        file_pedestal = nextcord.File(
-            "assets/pedestal.png", filename="pedestal.png")
-        embed = nextcord.Embed(
-            title="List of leaders by message",
-            description=f"**{member.display_name}**, Your position in the top: **{user_index}**",
-            color=color
-        )
-        embed.set_thumbnail(
-            "attachment://pedestal.png")
-        embed.set_footer(
-            text=guild.name,
-            icon_url=guild.icon
-        )
-
-        for index, (member_id, count_message) in enumerate(leaderboard[:10], start=1):
-            member = guild.get_member(member_id)
-            embed.add_field(
-                name=f"{get_award(index)}. {member.display_name}",
-                value=f"Message count: **{count_message}**",
-                inline=False
-            )
-
-        await message.edit(content="", embed=embed, view=AddtionallyViewLeaderboardView(guild.id),  file=file_pedestal)
-
-    @staticmethod
-    @register_key(3)
-    async def set_score_lb(member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
-        gdb = GuildDateBases(guild.id)
-        color = await gdb.get("color")
-        locale = await gdb.get('language')
-        state = await localdb.get_table('score')
-        items = (await state.fetch()).items()
-        leaderboard = sorted(items,
-                             key=get_item_param, reverse=True)
-        clear_empty_ofter_leaderboard(guild, leaderboard)
-        leaderboard_indexs = [member_id for member_id, _ in leaderboard]
-
-        try:
-            user_index = leaderboard_indexs.index(member.id) + 1
-        except ValueError:
-            user_index = len(leaderboard_indexs) + 1
-
-        file_pedestal = nextcord.File(
-            "assets/pedestal.png", filename="pedestal.png")
-        embed = nextcord.Embed(
-            title="List of leaders by score",
-            description=f"**{member.display_name}**, Your position in the top: **{user_index}**",
-            color=color
-        )
-        embed.set_thumbnail(
-            "attachment://pedestal.png")
-        embed.set_footer(
-            text=guild.name,
-            icon_url=guild.icon
-        )
-
-        for index, (member_id, score) in enumerate(leaderboard[:10], start=1):
-            member = guild.get_member(member_id)
-            embed.add_field(
-                name=f"{get_award(index)}. {member.display_name}",
-                value=f"Score: **{score :.0f}**",
-                inline=False
-            )
-
-        await message.edit(content="", embed=embed, view=AddtionallyViewLeaderboardView(guild.id),  file=file_pedestal)
-
-    @classmethod
-    async def set_as_key(cls, key: int, member: nextcord.Member, guild: nextcord.Guild, message: nextcord.Message):
-        for _, item in inspect.getmembers(cls):
-            if not (hasattr(item, "__leaderboard_key__")
-                    and item.__leaderboard_key__ == key):
-                continue
-            await item(member, guild, message)
+        value = self.values[0]
+        lbt = LeaderboardTypes(interaction.user, interaction.message)
+        func = getattr(lbt, 'parse_'+value+'_lb')
+        await func()
 
 
 class Leaderboards(commands.Cog):
@@ -286,8 +233,9 @@ class Leaderboards(commands.Cog):
 
     @commands.command(name="leaderboard", aliases=["lb", "leaders", "top"])
     async def leaderboard(self, ctx: commands.Context):
-        message = await ctx.send("Uploading data...")
-        await LeaderboardTypes.set_balance_lb(ctx.author, ctx.guild, message)
+        message = await ctx.send(f"{Emoji.loading} Uploading data...")
+
+        await LeaderboardTypes(ctx.author, message).parse_balance_lb()
 
 
 def setup(bot):

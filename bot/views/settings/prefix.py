@@ -1,6 +1,7 @@
 import nextcord
 
 from bot.misc.utils import AsyncSterilization
+from bot.views.information_dd import get_info_dd
 
 
 from ._view import DefaultSettingsView
@@ -52,12 +53,13 @@ class PrefixView(DefaultSettingsView):
             description=i18n.t(locale, 'settings.prefix.description'),
             color=color
         )
-        self.embed.add_field(
-            name=i18n.t(locale, 'settings.prefix.current', prefix=prefix),
-            value=''
-        )
 
         super().__init__()
+
+        self.add_item(
+            get_info_dd(placeholder=i18n.t(locale, 'settings.prefix.current',
+                                           prefix=prefix))
+        )
 
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.edit.label = i18n.t(locale, 'settings.button.edit')

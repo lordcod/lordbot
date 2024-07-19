@@ -44,7 +44,6 @@ class BanDateBases:
 
         return data
 
-    @to_task
     @on_error()
     async def insert(self, time: int):
         await engine.execute(
@@ -54,7 +53,6 @@ class BanDateBases:
             (self.guild_id, self.member_id, time)
         )
 
-    @to_task
     @on_error()
     async def update(self, new_time: int):
         await engine.execute(
@@ -64,7 +62,6 @@ class BanDateBases:
             (new_time, self.guild_id, self.member_id)
         )
 
-    @to_task
     @on_error()
     async def delete(self):
         await engine.execute(
@@ -73,7 +70,6 @@ class BanDateBases:
             (self.guild_id, self.member_id)
         )
 
-    @to_task
     async def remove_ban(self, _state: ConnectionState, reason: Optional[str] = None):
         await self.delete()
         try:

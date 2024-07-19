@@ -15,6 +15,7 @@ class GuildsDB(Table):
     prefix = Colum(data_type=PostType.TEXT,
                    default=info.DEFAULT_PREFIX)
     color = Colum(data_type=PostType.BIGINT, default=info.DEFAULT_COLOR)
+    system_emoji = Colum(data_type=PostType.BIGINT, default=info.DEFAULT_BOT_COLOR)
     economic_settings = Colum(data_type=PostType.JSON,
                               default=info.DEFAULT_ECONOMY_SETTINGS_JSON)
     music_settings = Colum(data_type=PostType.JSON, default="{}")
@@ -32,9 +33,14 @@ class GuildsDB(Table):
     logs = Colum(data_type=PostType.JSON, default="{}")
     role_reactions = Colum(data_type=PostType.JSON, default="{}")
     delete_task = Colum(data_type=PostType.BIGINT, default="0")
-    # message_state = Colum(data_type=PostType.JSON, default="{}")
-    # voice_time_state = Colum(data_type=PostType.JSON, default="{}")
-    # score_state = Colum(data_type=PostType.JSON, default="{}")
+    tempvoice = Colum(data_type=PostType.JSON, default="{}")
+    twitch_notification = Colum(data_type=PostType.JSON, default="{}")
+    youtube_notification = Colum(data_type=PostType.JSON, default="{}")
+    farewell_message = Colum(data_type=PostType.JSON, default="{}")
+    message_state = Colum(data_type=PostType.JSON, default="{}")
+    voice_time_state = Colum(data_type=PostType.JSON, default="{}")
+    score_state = Colum(data_type=PostType.JSON, default="{}")
+    level_state = Colum(data_type=PostType.JSON, default="{}")
 
 
 class EconomicDB(Table):
