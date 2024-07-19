@@ -1,5 +1,5 @@
 
-from typing import List
+from typing import List, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -73,8 +73,19 @@ class VideoHistory:
                 return True
         return False
 
-    def get_diff(self, videos: List[Video]):
-        return [video for video in videos if video not in self.videos]
+    def get_diff(self, videos: List[Video]) -> Tuple[List[Video], List[Video]]:
+        ret = []
+        diff = []
+        include = True
+        for video in videos:
+            if video not in self.videos:
+                diff.append(video)
+                if include:
+                    ret.append(video)
+            else:
+                include = False
+
+        return ret, diff
 
     def extend(self, videos: List[Video]):
         return self.videos.extend(videos)

@@ -46,11 +46,6 @@ class YtNoti:
         _log.debug('%s publish new video: %s (%s)',
                    video.channel.name, video.title, video.url)
 
-        if datetime.today()-timedelta(hours=1) > video.timestamp.published:
-            _log.debug('load video error (queue violation)',
-                       video.channel.name, video.title, video.url)
-            return
-
         for gid in self.directed_data[video.channel.id]:
             guild = self.bot.get_guild(gid)
             gdb = GuildDateBases(gid)
@@ -207,8 +202,8 @@ class YtNoti:
             gvhd = []
             for cid in self.channel_ids:
                 videos = await self.get_video_history(cid)
-                vhd = self.video_history.get_diff(videos)
-                self.video_history.extend(vhd)
+                vhd, diff = self.video_history.get_diff(videos)
+                self.video_history.extend(diff)
                 gvhd.extend(vhd)
 
                 _log.trace('Fetched from %s data %s', cid, vhd)
