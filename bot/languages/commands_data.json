@@ -4,7 +4,7 @@
         "major": "👑",
         "music": "🎵",
         "moderation": "⚠",
-        "reactions": "🎭"
+        "interactions": "🎭"
     },
     "categories_name": {
         "economy": {
@@ -51,7 +51,7 @@
             "pl": "Moderacja",
             "tr": "Ilımlılık"
         },
-        "reactions": {
+        "interactions": {
             "da": "Reaktioner",
             "de": "Reaktionen",
             "en": "Reactions",
@@ -650,35 +650,6 @@
             "allowed_disabled": false
         },
         {
-            "name": "invite",
-            "category": "major",
-            "aliases": [],
-            "arguments": [],
-            "descriptrion": {
-                "en": "Issues a link inviting the bot to the server",
-                "ru": "Выдает ссылку, приглашающую бота на сервер",
-                "id": "Menerbitkan tautan yang mengundang bot ke server",
-                "da": "Udsteder et link, der inviterer bot til serveren",
-                "de": "Gibt einen Link aus, der den Bot zum Server einlädt",
-                "es": "Emite un enlace que invita al bot al servidor",
-                "fr": "Émet un lien invitant le bot sur le serveur",
-                "pl": "Wystawia link zapraszający bota na serwer",
-                "tr": "Botu sunucuya davet eden bir bağlantı verir"
-            },
-            "brief_descriptrion": {
-                "en": "Bot invitation link",
-                "ru": "Ссылка на приглашение бота",
-                "id": "Tautan undangan bot",
-                "da": "Bot invitation link",
-                "de": "Bot-Einladungslink",
-                "es": "Enlace de invitación de bots",
-                "fr": "Lien d'invitation de bot",
-                "pl": "Link do zaproszenia bota",
-                "tr": "Bot davet bağlantısı"
-            },
-            "allowed_disabled": false
-        },
-        {
             "name": "captcha",
             "category": "major",
             "aliases": [],
@@ -704,64 +675,6 @@
                 "fr": "Commande de test",
                 "pl": "Polecenie testowe",
                 "tr": "Test komutu"
-            },
-            "allowed_disabled": true
-        },
-        {
-            "name": "join",
-            "category": "music",
-            "aliases": [],
-            "arguments": [],
-            "descriptrion": {
-                "en": "Enters the channel with the user who called the command",
-                "ru": "Входит в канал с пользователем, который вызвал команду",
-                "id": "Memasuki saluran dengan pengguna yang memanggil perintah",
-                "da": "Går ind i kanalen med den bruger, der kaldte kommandoen",
-                "de": "Betritt den Kanal mit dem Benutzer, der den Befehl aufgerufen hat",
-                "es": "Ingresa al canal con el usuario que llamó al comando",
-                "fr": "Entre dans le canal avec l'utilisateur qui a appelé la commande",
-                "pl": "Wchodzi do kanału z użytkownikiem, który wywołał polecenie",
-                "tr": "Komutu çağıran kullanıcı ile kanala girer"
-            },
-            "brief_descriptrion": {
-                "en": "Enters the channel",
-                "ru": "Входит в канал",
-                "id": "Memasuki saluran",
-                "da": "Går ind i kanalen",
-                "de": "Betritt den Kanal",
-                "es": "Entra en el canal",
-                "fr": "Entre dans le canal",
-                "pl": "Wchodzi do kanału",
-                "tr": "Kanala girer"
-            },
-            "allowed_disabled": true
-        },
-        {
-            "name": "leave",
-            "category": "music",
-            "aliases": [],
-            "arguments": [],
-            "descriptrion": {
-                "en": "Comes out the channel with the user who called the command",
-                "ru": "Выходит канал с пользователем, который вызвал команду",
-                "id": "Keluar dari saluran dengan pengguna yang memanggil perintah",
-                "da": "Kommer ud af kanalen med den bruger, der kaldte kommandoen",
-                "de": "Gibt den Kanal mit dem Benutzer aus, der den Befehl aufgerufen hat",
-                "es": "Sale del canal con el usuario que llamó al comando",
-                "fr": "Sort le canal avec l'utilisateur qui a appelé la commande",
-                "pl": "Wychodzi kanał z użytkownikiem, który wywołał polecenie",
-                "tr": "Komutu çağıran kullanıcıyla birlikte kanaldan çıkar"
-            },
-            "brief_descriptrion": {
-                "en": "Comes out the channel",
-                "ru": "Выходит из канала",
-                "id": "Keluar dari saluran",
-                "da": "Kommer ud af kanalen",
-                "de": "Kommt aus dem Kanal",
-                "es": "Sale del canal",
-                "fr": "Sort le canal",
-                "pl": "Wychodzi z kanału",
-                "tr": "Kanaldan çıkıyor"
             },
             "allowed_disabled": true
         },
@@ -823,140 +736,6 @@
                 "fr": "Commence à jouer de la musique",
                 "pl": "Rozpoczyna odtwarzanie muzyki",
                 "tr": "Müzik çalmaya başlar"
-            },
-            "allowed_disabled": true
-        },
-        {
-            "name": "stop",
-            "category": "music",
-            "aliases": [],
-            "arguments": [],
-            "descriptrion": {
-                "en": "Stops the current music stream",
-                "ru": "Останавливает текущий музыкальный поток",
-                "id": "Menghentikan aliran musik saat ini",
-                "da": "Stopper den aktuelle musikstrøm",
-                "de": "Startet die Musikwiedergabe Stoppt den aktuellen Musikstream",
-                "es": "Detiene la transmisión de música actual",
-                "fr": "Arrête le flux de musique en cours",
-                "pl": "Zatrzymuje bieżący strumień muzyki",
-                "tr": "Geçerli müzik akışını durdurur"
-            },
-            "brief_descriptrion": {
-                "en": "Stops the music",
-                "ru": "Останавливает музыку",
-                "id": "Menghentikan musik",
-                "da": "Stopper musikken",
-                "de": "Stoppt die Musik",
-                "es": "Detiene la música",
-                "fr": "Arrête la musique",
-                "pl": "Zatrzymuje muzykę",
-                "tr": "Müziği durdurur"
-            },
-            "allowed_disabled": true
-        },
-        {
-            "name": "pause",
-            "category": "music",
-            "aliases": [],
-            "arguments": [],
-            "descriptrion": {
-                "en": "Stops the current music stream in the future which can be continued",
-                "ru": "Останавливает текущий музыкальный поток в будущем, который может быть продолжен",
-                "id": "Menghentikan aliran musik saat ini di masa mendatang yang dapat dilanjutkan",
-                "da": "Stopper den aktuelle musikstrøm i fremtiden, som kan fortsættes",
-                "de": "Stoppt den aktuellen Musikstream in der Zukunft, der fortgesetzt werden kann",
-                "es": "Detiene la transmisión de música actual en el futuro, que puede continuar",
-                "fr": "Arrête le flux de musique actuel à l'avenir qui peut être poursuivi",
-                "pl": "Zatrzymuje bieżący strumień muzyki w przyszłości, który może być kontynuowany",
-                "tr": "Gelecekte devam edebilecek mevcut müzik akışını durdurur"
-            },
-            "brief_descriptrion": {
-                "en": "Assigns a pause for music",
-                "ru": "Назначает музыкальную паузу",
-                "id": "Menetapkan jeda untuk musik",
-                "da": "Tildeler en pause til musik",
-                "de": "Weist eine Pause für Musik zu",
-                "es": "Asigna una pausa para la música",
-                "fr": "Attribue une pause pour la musique",
-                "pl": "Przypisuje pauzę dla muzyki",
-                "tr": "Müzik için bir duraklama atar"
-            },
-            "allowed_disabled": true
-        },
-        {
-            "name": "resume",
-            "category": "music",
-            "aliases": [],
-            "arguments": [],
-            "descriptrion": {
-                "en": "Resumes the music stream that was completed by the necessary means in order to continue in the future",
-                "ru": "Возобновляет музыкальный поток, который был завершен необходимыми средствами для продолжения в будущем",
-                "id": "Melanjutkan aliran musik yang diselesaikan dengan cara yang diperlukan untuk melanjutkan di masa mendatang",
-                "da": "Genoptager musikstrømmen, der blev afsluttet med de nødvendige midler for at fortsætte i fremtiden",
-                "de": "Setzt den Musikstream fort, der mit den erforderlichen Mitteln abgeschlossen wurde, um in Zukunft fortzufahren",
-                "es": "Reanuda la transmisión de música que se completó por los medios necesarios para continuar en el futuro",
-                "fr": "Reprend le flux de musique qui a été complété par les moyens nécessaires pour continuer à l'avenir",
-                "pl": "Wznawia strumień muzyczny, który został ukończony niezbędnymi środkami, aby kontynuować w przyszłości",
-                "tr": "Gelecekte de devam edebilmek için gerekli araçlarla tamamlanan müzik akışını sürdürür"
-            },
-            "brief_descriptrion": {
-                "en": "Resumes music",
-                "ru": "Возобновляет воспроизведение музыки",
-                "id": "Melanjutkan musik",
-                "da": "Genoptager Musik",
-                "de": "Setzt die Musik fort",
-                "es": "Reanuda la música",
-                "fr": "Reprend la musique",
-                "pl": "Wznawia muzykę",
-                "tr": "Müziğe devam eder"
-            },
-            "allowed_disabled": true
-        },
-        {
-            "name": "volume",
-            "category": "music",
-            "aliases": [],
-            "arguments": [
-                "<volume>"
-            ],
-            "examples": [
-                [
-                    "volume 100",
-                    {
-                        "en": "Sets the maximum volume for music.",
-                        "ru": "Устанавливает максимальную громкость музыки.",
-                        "id": "Mengatur volume maksimum untuk musik.",
-                        "da": "Indstiller den maksimale lydstyrke for musik.",
-                        "de": "Legt die maximale Lautstärke für Musik fest.",
-                        "es": "Establece el volumen máximo para la música.",
-                        "fr": "Définit le volume maximum de la musique.",
-                        "pl": "Ustawia maksymalną głośność muzyki.",
-                        "tr": "Müziğin maksimum ses düzeyini ayarlar."
-                    }
-                ]
-            ],
-            "descriptrion": {
-                "en": "Set the volume to the current music stream from 1 to 100",
-                "ru": "Установите громкость текущего музыкального потока в диапазоне от 1 до 100",
-                "id": "Atur volume ke aliran musik saat ini dari 1 hingga 100",
-                "da": "Indstil lydstyrken til den aktuelle musikstrøm fra 1 til 100",
-                "de": "Stellen Sie die Lautstärke auf den aktuellen Musikstream von 1 bis 100 ein",
-                "es": "Ajuste el volumen de la transmisión de música actual de 1 a 100",
-                "fr": "Réglez le volume sur le flux de musique actuel de 1 à 100",
-                "pl": "Ustaw głośność na bieżący strumień muzyki od 1 do 100",
-                "tr": "Ses seviyesini geçerli müzik akışına 1'den 100'e ayarlayın"
-            },
-            "brief_descriptrion": {
-                "en": "Sets the volume",
-                "ru": "Устанавливает громкость",
-                "id": "Mengatur volume",
-                "da": "Indstiller lydstyrken",
-                "de": "Stellt die Lautstärke ein",
-                "es": "Ajusta el volumen",
-                "fr": "Règle le volume",
-                "pl": "Ustawia głośność",
-                "tr": "Ses seviyesini ayarlar"
             },
             "allowed_disabled": true
         },
@@ -1456,35 +1235,6 @@
             "allowed_disabled": true
         },
         {
-            "name": "skip",
-            "category": "music",
-            "aliases": [],
-            "arguments": [],
-            "descriptrion": {
-                "en": "Stops playing the current song and starts playing the next one.",
-                "da": "Stop med at spille den aktuelle sang og begynder at spille den næste.",
-                "de": "Hört auf, das aktuelle Lied zu spielen und beginnt das nächste zu spielen.",
-                "es": "Deja de tocar la canción actual y comienza a tocar la siguiente.",
-                "fr": "Arrête de jouer la chanson actuelle et commence à jouer le suivant.",
-                "id": "Berhenti memainkan lagu saat ini dan mulai memainkan yang berikutnya.",
-                "pl": "Przestaje odtwarzać obecną piosenkę i zaczyna odtwarzać następną.",
-                "ru": "Прекращает играть в текущую песню и начинает играть следующую.",
-                "tr": "Mevcut şarkıyı oynamayı durdurur ve bir sonraki şarkıyı çalmaya başlar."
-            },
-            "brief_descriptrion": {
-                "en": "Stops playing the current song and starts playing the next one.",
-                "da": "Stop med at spille den aktuelle sang og begynder at spille den næste.",
-                "de": "Hört auf, das aktuelle Lied zu spielen und beginnt das nächste zu spielen.",
-                "es": "Deja de tocar la canción actual y comienza a tocar la siguiente.",
-                "fr": "Arrête de jouer la chanson actuelle et commence à jouer le suivant.",
-                "id": "Berhenti memainkan lagu saat ini dan mulai memainkan yang berikutnya.",
-                "pl": "Przestaje odtwarzać obecną piosenkę i zaczyna odtwarzać następną.",
-                "ru": "Прекращает играть в текущую песню и начинает играть следующую.",
-                "tr": "Mevcut şarkıyı oynamayı durdurur ve bir sonraki şarkıyı çalmaya başlar."
-            },
-            "allowed_disabled": true
-        },
-        {
             "name": "shop",
             "category": "economy",
             "aliases": [],
@@ -1585,92 +1335,7 @@
             "allowed_disabled": true
         },
         {
-            "name": "invites",
-            "category": "major",
-            "aliases": [],
-            "examples": [
-                [
-                    "invites",
-                    {
-                        "en": "Shows the latest invitations from the entire server",
-                        "da": "Viser de nyeste invitationer fra hele serveren",
-                        "de": "Zeigt die neuesten Einladungen vom gesamten Server an",
-                        "es": "Muestra las últimas invitaciones de todo el servidor",
-                        "fr": "Affiche les dernières invitations de l'ensemble du serveur",
-                        "id": "Menunjukkan undangan terbaru dari seluruh server",
-                        "pl": "Pokazuje najnowsze zaproszenia z całego serwera",
-                        "ru": "Показывает последние приглашения с всего сервера",
-                        "tr": "Tüm sunucudan en son davetiyeleri gösterir"
-                    }
-                ],
-                [
-                    "invites @lordcode",
-                    {
-                        "en": "It will show the latest invitations of the participant with the nickname @lordcode",
-                        "da": "Det viser de seneste invitationer fra deltageren med kaldenavnet @lordcode",
-                        "de": "Es wird die neuesten Einladungen des Teilnehmers mit dem Spitznamen @lordcode zeigen",
-                        "es": "Mostrará las últimas invitaciones del participante con el apodo @lordcode",
-                        "fr": "Il montrera les dernières invitations du participant avec le surnom @lordcode",
-                        "id": "Ini akan menunjukkan undangan terbaru dari peserta dengan nama panggilan @lordcode",
-                        "pl": "Pokaże najnowsze zaproszenia uczestnika z pseudonimem @LordCode",
-                        "ru": "Он покажет последние приглашения участника с прозвищем @lordcode",
-                        "tr": "@Lordcode takma adıyla katılımcının en son davetlerini gösterecek"
-                    }
-                ],
-                [
-                    "invites 636824998123798531",
-                    {
-                        "en": "It will show the latest invitations of the participant with the id 636824998123798531",
-                        "da": "Det viser de seneste invitationer af deltageren med ID 636824998123798531",
-                        "de": "Es wird die neuesten Einladungen des Teilnehmers mit der ID 636824998123798531 zeigen",
-                        "es": "Mostrará las últimas invitaciones del participante con la ID 636824998123798531",
-                        "fr": "Il montrera les dernières invitations du participant avec l'ID 636824998123798531",
-                        "id": "Ini akan menunjukkan undangan terbaru dari peserta dengan ID 636824998123798531",
-                        "pl": "Pokazuje najnowsze zaproszenia uczestnika z ID 636824998123798531",
-                        "ru": "Он покажет последние приглашения участника с ID 636824998123798531",
-                        "tr": "636824998123798531 ile katılımcının en son davetlerini gösterecektir."
-                    }
-                ]
-            ],
-            "arguments": [
-                {
-                    "en": "[member]",
-                    "da": "[medlem]",
-                    "de": "[Mitglied]",
-                    "es": "[miembro]",
-                    "fr": "[membre]",
-                    "id": "[anggota]",
-                    "pl": "[członek]",
-                    "ru": "[участник]",
-                    "tr": "[üye]"
-                }
-            ],
-            "descriptrion": {
-                "en": "Shows the participant's avatar!",
-                "da": "Viser deltagerens avatar!",
-                "de": "Zeigt den Avatar des Teilnehmers!",
-                "es": "¡Muestra el avatar del participante!",
-                "fr": "Montre l'avatar du participant!",
-                "id": "Menunjukkan avatar peserta!",
-                "pl": "Pokazuje awatar uczestnika!",
-                "ru": "Показывает аватар участника!",
-                "tr": "Katılımcının avatarını gösterir!"
-            },
-            "brief_descriptrion": {
-                "en": "Shows the participant's avatar!",
-                "da": "Viser deltagerens avatar!",
-                "de": "Zeigt den Avatar des Teilnehmers!",
-                "es": "¡Muestra el avatar del participante!",
-                "fr": "Montre l'avatar du participant!",
-                "id": "Menunjukkan avatar peserta!",
-                "pl": "Pokazuje awatar uczestnika!",
-                "ru": "Показывает аватар участника!",
-                "tr": "Katılımcının avatarını gösterir!"
-            },
-            "allowed_disabled": true
-        },
-        {
-            "name": "move",
+            "name": "move-to",
             "category": "music",
             "aliases": [],
             "arguments": [
@@ -1795,10 +1460,11 @@
             "allowed_disabled": true
         },
         {
-            "name": "reactions",
-            "category": "reactions",
+            "name": "interactions",
+            "category": "interactions",
             "aliases": [
-                "reacts"
+                "reacts",
+                "reactions"
             ],
             "arguments": [
                 {
@@ -2627,6 +2293,158 @@
                     "tr": "Evet."
                 }
             }
+        },
+        {
+            "name": "seek",
+            "category": "music",
+            "aliases": [],
+            "arguments": [
+                "<seconds>"
+            ],
+            "examples": [],
+            "descriptrion": {
+                "en": "With this command, you can rewind the track to the time you need in seconds, which allows you to accurately navigate to the moments you are interested in.  Specify the desired number of seconds you want to rewind and enjoy the selected moment.",
+                "da": "Med denne kommando kan du spole sporet tilbage til det tidspunkt, du har brug for på få sekunder, hvilket giver dig mulighed for nøjagtigt at navigere til de øjeblikke, du er interesseret i. Angiv det ønskede antal sekunder, du vil spole tilbage og nyde det valgte øjeblik.",
+                "de": "Mit diesem Befehl können Sie den Track auf die Zeit, die Sie in Sekunden benötigen, zurückspulen, sodass Sie genau zu den Momenten navigieren können, an denen Sie interessiert sind. Geben Sie die gewünschte Anzahl von Sekunden an, die Sie zurückspulen und den ausgewählten Moment genießen möchten.",
+                "es": "Con este comando, puede recuperar la pista hasta el tiempo que necesita en segundos, lo que le permite navegar con precisión hasta los momentos que le interesa. Especifique el número deseado de segundos que desea retroceder y disfrutar del momento seleccionado.",
+                "fr": "Avec cette commande, vous pouvez rembobiner la piste jusqu'au temps dont vous avez besoin en quelques secondes, ce qui vous permet de naviguer avec précision aux moments qui vous intéressent. Spécifiez le nombre souhaité de secondes que vous souhaitez rembobiner et profiter du moment sélectionné.",
+                "pl": "Dzięki temu poleceniu możesz przewijać utwór do czasu potrzebnego w sekundach, co pozwala dokładnie przejść do momentów, które Cię interesuje. Podaj pożądaną liczbę sekund, które chcesz przewidzieć i cieszyć się wybraną chwilą.",
+                "ru": "С помощью этой команды вы можете перемотать трек до того времени, которое вам нужно за считанные секунды, что позволяет вам точно перейти к заинтересованным вами моментам. Укажите желаемое количество секунд, которые вы хотите перемотать и насладиться выбранным моментом.",
+                "tr": "Bu komutla, parçayı saniyeler içinde ihtiyacınız olan zamana geri sarabilirsiniz, bu da ilgilendiğiniz anlarda doğru bir şekilde gezinmenizi sağlar. Seçilen anın tadını çıkarmak ve tadını çıkarmak istediğiniz istenen saniye sayısını belirtin."
+            },
+            "brief_descriptrion": {
+                "en": "With this command, you can rewind the track to the time you need in seconds, which allows you to accurately navigate to the moments you are interested in.  Specify the desired number of seconds you want to rewind and enjoy the selected moment.",
+                "da": "Med denne kommando kan du spole sporet tilbage til det tidspunkt, du har brug for på få sekunder, hvilket giver dig mulighed for nøjagtigt at navigere til de øjeblikke, du er interesseret i. Angiv det ønskede antal sekunder, du vil spole tilbage og nyde det valgte øjeblik.",
+                "de": "Mit diesem Befehl können Sie den Track auf die Zeit, die Sie in Sekunden benötigen, zurückspulen, sodass Sie genau zu den Momenten navigieren können, an denen Sie interessiert sind. Geben Sie die gewünschte Anzahl von Sekunden an, die Sie zurückspulen und den ausgewählten Moment genießen möchten.",
+                "es": "Con este comando, puede recuperar la pista hasta el tiempo que necesita en segundos, lo que le permite navegar con precisión hasta los momentos que le interesa. Especifique el número deseado de segundos que desea retroceder y disfrutar del momento seleccionado.",
+                "fr": "Avec cette commande, vous pouvez rembobiner la piste jusqu'au temps dont vous avez besoin en quelques secondes, ce qui vous permet de naviguer avec précision aux moments qui vous intéressent. Spécifiez le nombre souhaité de secondes que vous souhaitez rembobiner et profiter du moment sélectionné.",
+                "pl": "Dzięki temu poleceniu możesz przewijać utwór do czasu potrzebnego w sekundach, co pozwala dokładnie przejść do momentów, które Cię interesuje. Podaj pożądaną liczbę sekund, które chcesz przewidzieć i cieszyć się wybraną chwilą.",
+                "ru": "С помощью этой команды вы можете перемотать трек до того времени, которое вам нужно за считанные секунды, что позволяет вам точно перейти к заинтересованным вами моментам. Укажите желаемое количество секунд, которые вы хотите перемотать и насладиться выбранным моментом.",
+                "tr": "Bu komutla, parçayı saniyeler içinde ihtiyacınız olan zamana geri sarabilirsiniz, bu da ilgilendiğiniz anlarda doğru bir şekilde gezinmenizi sağlar. Seçilen anın tadını çıkarmak ve tadını çıkarmak istediğiniz istenen saniye sayısını belirtin."
+            },
+            "allowed_disabled": true
+        },
+        {
+            "name": "work",
+            "category": "economy",
+            "aliases": [],
+            "arguments": [],
+            "examples": [],
+            "descriptrion": {
+                "en": "A team that allows players to earn money by doing work.",
+                "da": "Et hold, der giver spillerne mulighed for at tjene penge ved at udføre arbejde.",
+                "de": "Ein Team, das es den Spielern ermöglicht, durch Arbeit Geld zu verdienen.",
+                "es": "Un equipo que permite a los jugadores ganar dinero haciendo trabajo.",
+                "fr": "Une équipe qui permet aux joueurs de gagner de l'argent en travaillant.",
+                "pl": "Zespół, który pozwala graczom zarabiać pieniądze poprzez pracę.",
+                "ru": "Команда, которая позволяет игрокам зарабатывать деньги, выполняя работу.",
+                "tr": "Oyuncuların iş yaparak para kazanmalarına izin veren bir ekip."
+            },
+            "brief_descriptrion": {
+                "en": "A team that allows players to earn money by doing work.",
+                "da": "Et hold, der giver spillerne mulighed for at tjene penge ved at udføre arbejde.",
+                "de": "Ein Team, das es den Spielern ermöglicht, durch Arbeit Geld zu verdienen.",
+                "es": "Un equipo que permite a los jugadores ganar dinero haciendo trabajo.",
+                "fr": "Une équipe qui permet aux joueurs de gagner de l'argent en travaillant.",
+                "pl": "Zespół, który pozwala graczom zarabiać pieniądze poprzez pracę.",
+                "ru": "Команда, которая позволяет игрокам зарабатывать деньги, выполняя работу.",
+                "tr": "Oyuncuların iş yaparak para kazanmalarına izin veren bir ekip."
+            },
+            "allowed_disabled": true
+        },
+        {
+            "name": "rob",
+            "category": "economy",
+            "aliases": [],
+            "arguments": [
+                "<member>"
+            ],
+            "examples": [],
+            "descriptrion": {
+                "en": "A team to carry out the theft of money from another player's balance, at the risk of getting fines or going to jail.",
+                "da": "Et hold til at udføre tyveri af penge fra en anden spillers balance, med risikoen for at få bøder eller gå i fængsel.",
+                "de": "Ein Team, um den Diebstahl von Geld aus dem Gleichgewicht eines anderen Spielers auszuführen, auf das Risiko, Geldstrafen zu bekommen oder ins Gefängnis zu gehen.",
+                "es": "Un equipo para llevar a cabo el robo de dinero del saldo de otro jugador, a riesgo de recibir multas o ir a la cárcel.",
+                "fr": "Une équipe pour réaliser le vol d'argent du solde d'un autre joueur, au risque d'obtenir des amendes ou d'aller en prison.",
+                "pl": "Zespół, który wykonuje kradzież pieniędzy z salda innego gracza, ryzykując grzywną lub pójściem do więzienia.",
+                "ru": "Команда, которая выполняет кражу денег из баланса другого игрока, рискует получить штрафы или отправиться в тюрьму.",
+                "tr": "Para hırsızlığı, para cezası alma veya hapse girme riski altında para hırsızlığı gerçekleştirecek bir ekip."
+            },
+            "brief_descriptrion": {
+                "en": "A team to carry out the theft of money from another player's balance, at the risk of getting fines or going to jail.",
+                "da": "Et hold til at udføre tyveri af penge fra en anden spillers balance, med risikoen for at få bøder eller gå i fængsel.",
+                "de": "Ein Team, um den Diebstahl von Geld aus dem Gleichgewicht eines anderen Spielers auszuführen, auf das Risiko, Geldstrafen zu bekommen oder ins Gefängnis zu gehen.",
+                "es": "Un equipo para llevar a cabo el robo de dinero del saldo de otro jugador, a riesgo de recibir multas o ir a la cárcel.",
+                "fr": "Une équipe pour réaliser le vol d'argent du solde d'un autre joueur, au risque d'obtenir des amendes ou d'aller en prison.",
+                "pl": "Zespół, który wykonuje kradzież pieniędzy z salda innego gracza, ryzykując grzywną lub pójściem do więzienia.",
+                "ru": "Команда, которая выполняет кражу денег из баланса другого игрока, рискует получить штрафы или отправиться в тюрьму.",
+                "tr": "Para hırsızlığı, para cezası alma veya hapse girme riski altında para hırsızlığı gerçekleştirecek bir ekip."
+            },
+            "allowed_disabled": true
+        },
+        {
+            "name": "roulette",
+            "category": "economy",
+            "aliases": [
+                "rou"
+            ],
+            "arguments": [
+                "<amount>"
+            ],
+            "examples": [],
+            "descriptrion": {
+                "ru": "Команда для игры в рулетку. Игроки ставят свои фишки на числа или цвета и ожидают, где остановится шарик.",
+                "da": "Et hold til at spille roulette.Spillere lægger deres chips på tal eller farver og forventer, hvor bolden stopper.",
+                "de": "Ein Team zum Spielen von Roulette.Die Spieler setzen ihre Chips auf Zahlen oder Farben und erwarten, wo der Ball aufhört.",
+                "en": "A team for playing roulette.Players put their chips on numbers or colors and expect where the ball will stop.",
+                "es": "Un equipo para jugar a la ruleta.Los jugadores ponen sus fichas en números o colores y esperan dónde se detendrá la pelota.",
+                "fr": "Une équipe pour jouer à la roulette.Les joueurs mettent leurs jetons sur des chiffres ou des couleurs et s'attendent à ce que le ballon s'arrête.",
+                "pl": "Drużyna do gry w ruletkę.Gracze umieszczają układy na liczbach lub kolorach i oczekują, gdzie piłka się zatrzyma.",
+                "tr": "Rulet oynamak için bir ekip.Oyuncular cipslerini sayılara veya renklere koyar ve topun nerede duracağını beklerler."
+            },
+            "brief_descriptrion": {
+                "ru": "Команда для игры в рулетку. Игроки ставят свои фишки на числа или цвета и ожидают, где остановится шарик.",
+                "da": "Et hold til at spille roulette.Spillere lægger deres chips på tal eller farver og forventer, hvor bolden stopper.",
+                "de": "Ein Team zum Spielen von Roulette.Die Spieler setzen ihre Chips auf Zahlen oder Farben und erwarten, wo der Ball aufhört.",
+                "en": "A team for playing roulette.Players put their chips on numbers or colors and expect where the ball will stop.",
+                "es": "Un equipo para jugar a la ruleta.Los jugadores ponen sus fichas en números o colores y esperan dónde se detendrá la pelota.",
+                "fr": "Une équipe pour jouer à la roulette.Les joueurs mettent leurs jetons sur des chiffres ou des couleurs et s'attendent à ce que le ballon s'arrête.",
+                "pl": "Drużyna do gry w ruletkę.Gracze umieszczają układy na liczbach lub kolorach i oczekują, gdzie piłka się zatrzyma.",
+                "tr": "Rulet oynamak için bir ekip.Oyuncular cipslerini sayılara veya renklere koyar ve topun nerede duracağını beklerler."
+            },
+            "allowed_disabled": true
+        },
+        {
+            "name": "blackjack",
+            "category": "economy",
+            "aliases": [
+                "bj"
+            ],
+            "arguments": [
+                "<amount>"
+            ],
+            "examples": [],
+            "descriptrion": {
+                "ru": "Команда для начала игры в блэкджек. Игроки должны ставить ставки и пытаться набрать 21 очко, обыгрывая дилера.",
+                "da": "Holdet begynder at spille blackjack.Spillere skal sætte væddemål og forsøge at score 21 point og spille forhandleren.",
+                "de": "Das Team, um Blackjack zu spielen.Die Spieler sollten Wetten setzen und versuchen, 21 Punkte zu erzielen und den Händler auszuspielen.",
+                "en": "The team to start playing Blackjack.Players should put bets and try to score 21 points, playing out the dealer.",
+                "es": "El equipo comenzará a jugar Blackjack.Los jugadores deben poner apuestas e intentar anotar 21 puntos, jugando al concesionario.",
+                "fr": "L'équipe pour commencer à jouer au blackjack.Les joueurs doivent mettre des paris et essayer de marquer 21 points, jouant le concessionnaire.",
+                "pl": "Drużyna zaczęła grać w Blackjacka.Gracze powinni postawić zakłady i spróbować zdobyć 21 punktów, grając w dealera.",
+                "tr": "Blackjack oynamaya başlayacak ekip.Oyuncular bahis koymalı ve satıcıyı oynayarak 21 puan almaya çalışmalıdır."
+            },
+            "brief_descriptrion": {
+                "ru": "Команда для начала игры в блэкджек. Игроки должны ставить ставки и пытаться набрать 21 очко, обыгрывая дилера.",
+                "da": "Holdet begynder at spille blackjack.Spillere skal sætte væddemål og forsøge at score 21 point og spille forhandleren.",
+                "de": "Das Team, um Blackjack zu spielen.Die Spieler sollten Wetten setzen und versuchen, 21 Punkte zu erzielen und den Händler auszuspielen.",
+                "en": "The team to start playing Blackjack.Players should put bets and try to score 21 points, playing out the dealer.",
+                "es": "El equipo comenzará a jugar Blackjack.Los jugadores deben poner apuestas e intentar anotar 21 puntos, jugando al concesionario.",
+                "fr": "L'équipe pour commencer à jouer au blackjack.Les joueurs doivent mettre des paris et essayer de marquer 21 points, jouant le concessionnaire.",
+                "pl": "Drużyna zaczęła grać w Blackjacka.Gracze powinni postawić zakłady i spróbować zdobyć 21 punktów, grając w dealera.",
+                "tr": "Blackjack oynamaya başlayacak ekip.Oyuncular bahis koymalı ve satıcıyı oynayarak 21 puan almaya çalışmalıdır."
+            },
+            "allowed_disabled": true
         }
     ]
 }

@@ -27,7 +27,7 @@ class BanDateBases:
 
     @on_error()
     async def get_as_guild(self):
-        datas = engine.fetchall(
+        datas = await engine.fetchall(
             ('SELECT member_id, time FROM bans '
              'WHERE guild_id = %s'),
             [self.guild_id])

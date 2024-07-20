@@ -303,8 +303,7 @@ class ConfirmView(nextcord.ui.View):
 
     @nextcord.ui.button(label="Approve",
                         style=nextcord.ButtonStyle.green,
-                        custom_id='ideas-confirm:confirm',
-                        row=1)
+                        custom_id='ideas-confirm:confirm')
     async def approve(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
@@ -313,8 +312,7 @@ class ConfirmView(nextcord.ui.View):
 
     @nextcord.ui.button(label="Deny",
                         style=nextcord.ButtonStyle.red,
-                        custom_id='ideas-confirm:cancel',
-                        row=1)
+                        custom_id='ideas-confirm:cancel')
     async def deny(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await DenyModal(interaction.guild_id)
         await interaction.response.send_modal(modal)
@@ -367,7 +365,7 @@ class ReactionConfirmView(nextcord.ui.View):
         if promoted_data is None or demoted_data is None:
             await self.load_data(message_id)
 
-    @nextcord.ui.button(label="0", emoji="👍", row=2, custom_id="reactions-ideas-confirm:promote")
+    @nextcord.ui.button(label="0", emoji="👍", row=1, custom_id="reactions-ideas-confirm:promote")
     async def promote(self, button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
         await self.check_data(interaction.message.id)
@@ -385,7 +383,7 @@ class ReactionConfirmView(nextcord.ui.View):
         await self.save_data(interaction.message.id)
         await interaction.response.edit_message(view=self)
 
-    @nextcord.ui.button(label="0", emoji="👎", row=2, custom_id="reactions-ideas-confirm:demote")
+    @nextcord.ui.button(label="0", emoji="👎", row=1, custom_id="reactions-ideas-confirm:demote")
     async def demote(self, button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
         await self.check_data(interaction.message.id)
@@ -406,7 +404,7 @@ class ReactionConfirmView(nextcord.ui.View):
     @nextcord.ui.button(label="Approve",
                         style=nextcord.ButtonStyle.green,
                         custom_id='ideas-confirm:confirm',
-                        row=1)
+                        row=0)
     async def approve(self,
                       button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
@@ -416,7 +414,7 @@ class ReactionConfirmView(nextcord.ui.View):
     @nextcord.ui.button(label="Deny",
                         style=nextcord.ButtonStyle.red,
                         custom_id='ideas-confirm:cancel',
-                        row=1)
+                        row=0)
     async def deny(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await DenyModal(interaction.guild_id)
         await interaction.response.send_modal(modal)

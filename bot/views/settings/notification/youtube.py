@@ -108,7 +108,7 @@ class YoutubeChooseView(nextcord.ui.View):
 
         self.add_item(await YoutubeChooseDropDown(guild, values, selected_id, data))
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = await YoutubeView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

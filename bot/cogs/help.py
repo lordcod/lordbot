@@ -5,7 +5,7 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.languages import help as help_info, i18n
-from bot.languages.help import get_command
+from bot.languages.help import CommandOption, get_command
 from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
 from bot.views.help import HelpView
@@ -26,13 +26,7 @@ def get_using(
     locale: str,
     command: help_info.CommandOption
 ) -> str:
-    _arguments = command.get('arguments')
-    arguments = []
-    for arg in _arguments:
-        if isinstance(arg, dict):
-            arguments.append(arg.get(locale))
-        else:
-            arguments.append(arg)
+    arguments = help_info.CommandOption.get_arguments(command, locale)
     return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(arguments) if arguments else ''}")
 
 

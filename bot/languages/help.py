@@ -60,7 +60,7 @@ with open("bot/languages/commands_data.json", "rb") as file:
     categories = {}
     for cmd in _commands["commands"]:
         categories.setdefault(cmd["category"], [])
-        categories[cmd["category"]].append(cmd)
+        categories[cmd["category"]].append(CommandOption(cmd))
 
 if __name__ == "__main__":
     translator = googletrans.Translator()

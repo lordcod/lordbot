@@ -1,6 +1,5 @@
 import logging
 from typing import Dict
-from emoji import emoji_list
 from nextcord.ext import commands
 import orjson
 

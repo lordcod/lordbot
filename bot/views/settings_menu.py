@@ -2,6 +2,7 @@ import nextcord
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
 from bot.databases import GuildDateBases
+from bot.resources.ether import Emoji
 from bot.views.settings import moduls
 from bot.views.settings._view import DefaultSettingsView
 from bot.languages import i18n
@@ -39,6 +40,11 @@ class SetDropdown(nextcord.ui.StringSelect):
                 label=i18n.t(locale, 'settings.module-name.music'),
                 emoji=get_emoji('music'),
                 value='Music'
+            ),
+            nextcord.SelectOption(
+                label=i18n.t(locale, 'settings.module-name.tickets'),
+                emoji=get_emoji('tickets'),
+                value='Tickets'
             ),
             nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.module-name.auto-roles'),

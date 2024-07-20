@@ -65,6 +65,7 @@ class RolesDB(Table):
     member_id = Colum(data_type=PostType.BIGINT, nullable=True)
     role_id = Colum(data_type=PostType.BIGINT, nullable=True)
     time = Colum(data_type=PostType.BIGINT, nullable=True)
+    system = Colum(data_type=PostType.BOOLEAN)
 
 
 class BansDB(Table):

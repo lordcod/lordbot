@@ -27,7 +27,7 @@ class RoleDateBases:
     async def get_as_guild(self):
         data = await engine.fetchall(
             ('SELECT member_id, role_id, time '
-             'FROM roles WHERE guild_id = %s'),
+             'FROM roles WHERE guild_id = %s AND (system IS NULL OR system = FALSE)'),
             [self.guild_id])
 
         return data
@@ -36,7 +36,7 @@ class RoleDateBases:
     async def get_as_member(self):
         data = await engine.fetchall(
             ('SELECT member_id, role_id, time FROM roles '
-             'WHERE guild_id = %s AND member_id = %s'),
+             'WHERE guild_id = %s AND member_id = %s AND (system IS NULL OR system = FALSE)'),
             (self.guild_id, self.member_id)
         )
 
@@ -46,8 +46,18 @@ class RoleDateBases:
     async def get_as_role(self, role_id: int):
         data = await engine.fetchone(
             ('SELECT time FROM roles '
-             'WHERE guild_id = %s AND member_id = %s AND role_id = %s'),
+             'WHERE guild_id = %s AND member_id = %s AND role_id = %s AND (system IS NULL OR system = FALSE)'),
             (self.guild_id, self.member_id, role_id)
+        )
+
+        return data
+
+    @on_error()
+    async def get_system(self):
+        data = await engine.fetchall(
+            ('SELECT member_id, role_id, time FROM roles '
+             'WHERE guild_id = %s AND member_id = %s AND system = TRUE'),
+            (self.guild_id, self.member_id)
         )
 
         return data

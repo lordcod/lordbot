@@ -1,5 +1,4 @@
 import contextlib
-import datetime
 from enum import IntEnum
 import logging
 import nextcord
@@ -20,7 +19,6 @@ from bot.views.tickets.modals import TicketsModal
 from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU, DEFAULT_TICKET_PERMISSIONS
 
 _log = logging.getLogger(__name__)
-MISSING = object()
 
 
 class TicketStatus(IntEnum):
@@ -86,18 +84,20 @@ class ModuleTicket:
         locale = await gdb.get('language')
 
         if ticket_data is None:
-            ticket_data = DEFAULT_TICKET_PAYLOAD_RU.copy(
-            ) if locale == 'ru' else DEFAULT_TICKET_PAYLOAD.copy()
+            ticket_data = (DEFAULT_TICKET_PAYLOAD_RU if locale == 'ru'
+                           else DEFAULT_TICKET_PAYLOAD).copy()
 
         panel_message = ticket_data.get('messages').get('panel')
         msg_data = await utils.generate_message(utils.lord_format(panel_message, get_payload(guild=channel.guild)))
         view = await FAQView(channel.guild.id, ticket_data)
         message = await channel.send(**msg_data, view=view)
 
+        ticket_data['enabled'] = True
         ticket_data['message_id'] = message.id
         ticket_data['channel_id'] = channel.id
-        if ticket_data.get('category_id', MISSING) is MISSING:
+        if 'category_id' in ticket_data:
             ticket_data['category_id'] = channel.category_id
+
         await gdb.set_on_json('tickets', message.id, ticket_data)
 
     @staticmethod
@@ -265,7 +265,7 @@ class ModuleTicket:
             )
             message['embeds'] = [embed]
             if msg_embed := message.pop('embed', None):
-                message['embeds'].append(msg_embed)
+                message['embeds'].insert(0, msg_embed)
 
         if ticket_type == 1:
             _log.trace('Getted category: %s, Channel category: %s',
