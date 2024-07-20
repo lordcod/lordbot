@@ -48,7 +48,13 @@ class GiveawaySettingsChannelDropDown(nextcord.ui.ChannelSelect):
         return interaction.user == self.member
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        self.giveaway_config.channel = self.values[0]
+        channel: nextcord.TextChannel = self.values[0]
+
+        if not channel.permissions_for(interaction.client).send_messages:
+            await interaction.response.send_message("У бота недостаточно прав")
+            return
+
+        self.giveaway_config.channel = channel
 
         view = await GiveawaySettingsView(
             self.member, interaction.guild_id, self.giveaway_config)

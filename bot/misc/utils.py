@@ -47,6 +47,8 @@ T = TypeVar('T')
 C_co = TypeVar("C_co", bound=type, covariant=True)
 wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
+REGEXP_FORMAT = regex.compile(r"(\{\s*([\.\|\s\-_a-zA-Z0-9]*)\s*\})")
+
 welcome_message_items = {
     "None": wel_mes("None", None, None),
     "my-image": wel_mes("My image", ..., "You will be able to enter a link to an image."),
@@ -207,20 +209,6 @@ def get_payload(
         data.update(parse_prefix('voice.count', voice_count))
 
     return data
-
-
-class __LordFormatingTemplate(string.Template):
-    pattern = r"""
-        \{(\s*)(?:
-        (?P<escaped>\{) |
-        (?P<named>[\._a-z][\._a-z0-9]*)(\s*)\} |
-        (?P<braced>[\._a-z][\._a-z0-9]*)(\s*)\} |
-        (?P<invalid>)
-        )
-    """
-
-    def format(self, __mapping: Mapping[str, object]):
-        return self.safe_substitute(__mapping)
 
 
 class Tokenizer:
@@ -413,13 +401,35 @@ class BlackjackGame:
         return val
 
 
-def lord_format(
-    __value: object,
-    __mapping: Mapping[str, object]
-) -> str:
-    if isinstance(__value, dict):
-        __value = orjson.dumps(__value).decode()
-    return __LordFormatingTemplate(__value).format(__mapping)
+class LordTemplate:
+    def findall(self, string: str) -> List[Tuple[str, str]]:
+        return REGEXP_FORMAT.findall(string)
+
+    def parse_key(self, var: str) -> Tuple[str, Optional[str]]:
+        if '|' not in var:
+            return var, None
+
+        key, default = map(str.strip, var.split('|'))
+        return key, default
+
+    def parse_value(self, variables: List[Tuple[str, str]], forms: dict) -> dict:
+        data = {}
+        for every, var in variables:
+            key, default = self.parse_key(var)
+            if key in forms:
+                data[every] = forms[key]
+            else:
+                data[every] = default or 'unspecified'
+        return data
+
+
+def lord_format(string: str, forms: dict) -> str:
+    template = LordTemplate()
+    variables = template.findall(string)
+    values = template.parse_value(variables, forms)
+    for old, new in values.items():
+        string = string.replace(old, str(new))
+    return string
 
 
 class TranslatorFlags:

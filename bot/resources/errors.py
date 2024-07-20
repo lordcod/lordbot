@@ -10,7 +10,7 @@ from nextcord.ext import commands
 from bot.misc.time_transformer import display_time
 from bot.databases import GuildDateBases
 from bot.languages import i18n
-from bot.languages.help import get_command
+from bot.languages.help import CommandOption, get_command
 
 from typing import TypeVar, Union
 
@@ -45,8 +45,8 @@ def attach_exception(*errors: type[ExceptionT]):
         func.__attachment_errors__ = errors
 
         @functools.wraps(func)
-        async def wrapped(self: CallbackCommandError, error: ExceptionT):
-            await func(self, error)
+        def wrapped(self: CallbackCommandError, error: ExceptionT):
+            return func(self, error)
         return func
     return inner
 
@@ -125,12 +125,12 @@ class CallbackCommandError:
         title = i18n.t(self.locale, 'errors.BadArgument')
         color = await self.gdb.get('color')
 
-        cmd_data = get_command(self.ctx.command.name)
+        cmd_data = get_command(self.ctx.command.qualified_name)
 
-        if cmd_data:
+        if cmd_data is None:
             return
 
-        using = f"`{cmd_data.get('name')}{' '+' '.join(cmd_data.get('arguments')) if cmd_data.get('arguments') else ''}`"
+        using = f"`{cmd_data.get('name')}{' '+' '.join(CommandOption.get_arguments(cmd_data ,self.locale)) if cmd_data.get('arguments') else ''}`"
 
         embed = nextcord.Embed(
             title=title,
@@ -159,10 +159,10 @@ class CallbackCommandError:
 
         cmd_data = get_command(self.ctx.command.name)
 
-        if cmd_data:
+        if cmd_data is None:
             return
 
-        using = f"`{cmd_data.get('name')}{' '+' '.join([arg.get(self.locale) for arg in cmd_data.get('arguments')]) if cmd_data.get('arguments') else ''}`"
+        using = f"`{cmd_data.get('name')}{' '+' '.join(CommandOption.get_arguments(cmd_data ,self.locale)) if cmd_data.get('arguments') else ''}`"
 
         embed = nextcord.Embed(
             title=title,

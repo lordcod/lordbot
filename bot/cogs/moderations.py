@@ -125,7 +125,7 @@ class Moderations(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.group(name='temp-role', invoke_without_command=True)
+    @commands.group(name='temp-role', aliases=['temprole'], invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
     async def temp_role(
         self,

@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import googletrans
 import orjson
 from typing import Optional, Dict, List
 
@@ -19,8 +20,11 @@ default_languages = ["da", "de", "en", "es", "fr",  "pl", "ru", "tr"]
 memoization_dict = {}
 resource_dict = {}
 
+translator = googletrans.Translator()
 
-def translate(text, dest, src): ...
+
+def translate(text, dest, src='auto'):
+    return translator.translate(text, dest, src).text
 
 
 def _load_file(filename: str) -> bytes:
@@ -200,7 +204,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
 if __name__ == "__main__":
     # from_file("./bot/languages/localization.json")
 
-    to_zip("./bot/languages/localization_any.json")
+    # to_zip("./bot/languages/localization_any.json")
 
     # for key, value in _parse_json(_load_file("add_temp_loc_ru.json")).items():
     #     add_translation(key, value, 'ru')
@@ -230,10 +234,10 @@ if __name__ == "__main__":
     #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    # data = translation_with_languages(
-    #     "en", "<time>", default_languages)
-    # print(data)
-    # print(orjson.dumps(data).decode())
+    data = translation_with_languages(
+        "ru", "Команда для начала игры в блэкджек. Игроки должны ставить ставки и пытаться набрать 21 очко, обыгрывая дилера.",
+        default_languages)
+    print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(

@@ -183,7 +183,7 @@ class InteractionsCommand(commands.Cog):
             json = await responce.json()
             return json['url']
 
-    @commands.command(name='interactions', aliases=['reactions'])
+    @commands.command(name='interactions', aliases=['reactions', 'reacts'])
     async def reactions(self, ctx: commands.Context, react_type: AllReactionsType, user: Optional[nextcord.Member] = None, *, comment: Optional[str] = None) -> None:
         gdb = GuildDateBases(ctx.guild.id)
         color = await gdb.get('color')

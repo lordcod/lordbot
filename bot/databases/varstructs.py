@@ -157,11 +157,9 @@ class PartialCategoryPayload(TypedDict):
     user_tickets_limit: Optional[int]
 
 
-class CategoryPayload(PartialCategoryPayload, total=True):
-    label: str
+class CategoryPayload(PartialCategoryPayload, ButtonPayload, total=True):
     channel_id: Optional[int] = None
     description: Optional[str] = None
-    emoji: Optional[str] = None
 
 
 class TicketsItemPayload(PartialCategoryPayload, total=True):
@@ -172,7 +170,7 @@ class TicketsItemPayload(PartialCategoryPayload, total=True):
     enabled: Optional[bool]
     global_user_tickets_limit: Optional[int]
     tickets_limit: Optional[int]
-    messages: Optional[List[dict]]
+    category_type: Optional[int]
 
 
 TicketsPayload = Dict[int, TicketsItemPayload]
@@ -186,6 +184,7 @@ class UserTicketPayload(TypedDict):
     inputs: Dict[str, str]
     status: int
     index: int
+    messages: Optional[List[dict]]
 
 
 class TempChannelsPayload(TypedDict):

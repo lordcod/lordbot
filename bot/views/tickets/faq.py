@@ -1,6 +1,6 @@
 import nextcord
 from bot.databases import GuildDateBases
-from bot.databases.varstructs import TicketsButtonsPayload, TicketsItemPayload, TicketsPayload, FaqItemPayload
+from bot.databases.varstructs import CategoryPayload, TicketsButtonsPayload, TicketsItemPayload, TicketsPayload, FaqItemPayload
 from bot.misc.utils import AsyncSterilization, generate_message, lord_format, get_payload
 from typing import List, Optional
 from bot.misc import tickettools
@@ -119,6 +119,28 @@ class FAQButtonCreate(nextcord.ui.Button):
 
 
 @AsyncSterilization
+class ButtonCategoryCreate(nextcord.ui.Button):
+    async def __init__(self, index: int, guild_id: Optional[int] = None,  button_data: Optional[CategoryPayload] = None) -> None:
+        if guild_id is None:
+            super().__init__(custom_id=f'tickets:faq:view:create:category:{index}')
+            return
+        super().__init__(
+            style=button_data.get('style', nextcord.ButtonStyle.secondary),
+            label=button_data.get('label'),
+            custom_id=f'tickets:faq:view:create:category:{index}',
+            emoji=button_data.get('emoji')
+        )
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        index = int(interaction.data['custom_id'].removeprefix('tickets:faq:view:create:category:'))
+        gdb = GuildDateBases(interaction.guild_id)
+        tickets: TicketsPayload = await gdb.get('tickets', {})
+        categories_data = tickets.get(interaction.message.id).get('categories')
+        category = categories_data[index]
+        await tickettools.ModuleTicket(interaction.user, interaction.message.id).create_after_category(interaction, category)
+
+
+@AsyncSterilization
 class FAQView(nextcord.ui.View):
     async def __init__(self, guild_id: Optional[int] = None, ticket_data: TicketsItemPayload = None):
         super().__init__(timeout=None)
@@ -126,26 +148,49 @@ class FAQView(nextcord.ui.View):
             self.add_item(await FAQCreateDropDown())
             self.add_item(await FAQButtonOpen())
             self.add_item(await FAQButtonCreate())
+            for i in range(15):
+                self.add_item(await ButtonCategoryCreate(i))
             return
 
         buttons = ticket_data.get('buttons')
-        faq = ticket_data.get('faq', {})
-        faq_type = faq.get('type')
-        faq_items = faq.get('items')
+        category_type = ticket_data.get('category_type', 1)
 
-        if faq and faq_type and faq_items:
-            if faq_type == 1:
-                self.add_item(await FAQCreateDropDown(guild_id, faq_items, buttons))
-                return
-            else:
-                self.add_item(await FAQButtonOpen(guild_id, buttons))
-        self.add_item(await FAQButtonCreate(guild_id, buttons))
+        if category_type == 1:
+            faq = ticket_data.get('faq', {})
+            faq_type = faq.get('type')
+            faq_items = faq.get('items')
+            if faq and faq_type and faq_items:
+                if faq_type == 1:
+                    self.add_item(await FAQCreateDropDown(guild_id, faq_items, buttons))
+                    return
+                else:
+                    self.add_item(await FAQButtonOpen(guild_id, buttons))
+            self.add_item(await FAQButtonCreate(guild_id, buttons))
+        elif category_type == 2:
+            faq = ticket_data.get('faq', {})
+            faq_type = faq.get('type')
+            faq_items = faq.get('items')
+            if faq and faq_type and faq_items:
+                categories_data = ticket_data.get('categories')
+
+                if faq_type == 1:
+                    if categories_data is None or len(categories_data) == 0:
+                        self.add_item(await FAQCreateDropDown(guild_id, faq_items, buttons))
+                        return
+                    self.add_item(await FAQDropDown(guild_id, faq_items, buttons))
+                else:
+                    self.add_item(await FAQButtonOpen(guild_id, buttons))
+
+            if (categories_data is None or len(categories_data) == 0) and faq_type != 1:
+                self.add_item(await FAQButtonCreate(guild_id, buttons))
+            for index, category in enumerate(categories_data):
+                self.add_item(await ButtonCategoryCreate(index, guild_id, category))
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets', {})
         ticket_data = tickets.get(interaction.message.id, {})
-        enabled = ticket_data.get('enabled', True)
+        enabled = ticket_data.get('enabled')
         if not enabled:
             await interaction.response.send_message('Tickets are disabled by the server administrators!', ephemeral=True)
             return False

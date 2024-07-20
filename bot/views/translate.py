@@ -7,9 +7,12 @@ from bot.databases import GuildDateBases
 import googletrans
 import jmespath
 
+from bot.misc.utils import AsyncSterilization
+
 translator = googletrans.Translator()
 
 
+@AsyncSterilization
 class TranslateDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, dest: Optional[str] = None) -> None:
         gdb = GuildDateBases(guild_id)
@@ -40,6 +43,7 @@ class TranslateDropDown(nextcord.ui.StringSelect):
         await interaction.edit_original_message(content=result.text, view=view)
 
 
+@AsyncSterilization
 class TranslateView(nextcord.ui.View):
     async def __init__(self, guild_id: int, dest: Optional[str] = None) -> None:
         super().__init__(timeout=None)

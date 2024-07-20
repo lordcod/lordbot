@@ -49,6 +49,7 @@
 
     "settings.module-name.notification": "Notification",
     "settings.module-name.tempvoice": "Temp Voice",
+    "settings.module-name.tickets": "Tickets",
 
     "economy.rob.disabled": "{Emoji.cross} Theft is disabled on this server!"
 

@@ -10,6 +10,7 @@ from ..misc.error_handler import on_error
 
 engine: DataBase = None
 reserved: dict[int, list[int]] = {}
+tasks = []
 _log = logging.getLogger(__name__)
 
 
@@ -30,11 +31,28 @@ class EconomyMemberDB:
         self.member_id = member_id
 
     async def register(self) -> None:
-        await self.get_data()
 
-    async def get_data(self) -> dict:
         data = await self._get()
+
+        val = (self.guild_id, self.member_id)
+
+        if data is None and val not in tasks:
+            tasks.append(val)
+            await self.insert()
+            tasks.remove(val)
+
+    @on_error()
+    async def _get(self):
+        data = await engine.fetchone_dict(
+            'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
+            (self.guild_id, self.member_id))
+
         return data
+
+    @on_error()
+    async def insert(self):
+        await engine.execute(
+            'INSERT INTO economic (guild_id, member_id) VALUES (%s, %s)', (self.guild_id, self.member_id))
 
     @on_error()
     async def get_leaderboards(self):
@@ -49,18 +67,6 @@ class EconomyMemberDB:
         return leaderboard
 
     @on_error()
-    async def _get(self):
-        data = await engine.fetchone_dict(
-            'SELECT * FROM economic WHERE guild_id = %s AND member_id = %s',
-            (self.guild_id, self.member_id))
-
-        if data is None:
-            await self.insert()
-            data = await self._get()
-
-        return data
-
-    @on_error()
     async def get_service(self, service: str):
         data = await engine.fetchvalue(
             'SELECT ' + service + ' FROM economic WHERE guild_id = %s AND member_id = %s',
@@ -68,11 +74,6 @@ class EconomyMemberDB:
         )
 
         return data
-
-    @on_error()
-    async def insert(self):
-        await engine.execute(
-            'INSERT INTO economic (guild_id, member_id) VALUES (%s, %s)', (self.guild_id, self.member_id))
 
     @on_error()
     async def update(self, arg, value):
