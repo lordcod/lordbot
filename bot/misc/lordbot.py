@@ -54,9 +54,12 @@ class LordBot(commands.AutoShardedBot):
         shard_count = int(shard_count)
         shard_ids = get_shard_list(shard_ids)
 
+        intents = nextcord.Intents.all()
+        intents.presences = False
+
         super().__init__(
             command_prefix=self.get_command_prefixs,
-            intents=nextcord.Intents.all(),
+            intents=intents,
             help_command=None,
             shard_ids=shard_ids,
             shard_count=shard_count,

@@ -530,16 +530,6 @@ class ModuleTicket:
         await self.ticket_channel.delete()
         await self.set_ticket_data()
 
-        content = '\n'.join([
-            f"{msg['username']}: {msg['content']}"
-            for msg in self.messages
-        ])
-        with open('words.txt', 'w+') as file:
-            file.write(content)
-        n_file = nextcord.File('words.txt', 'archive.txt')
-        channel = self.guild.get_channel(1263495679351849051)
-        await channel.send(file=n_file)
-
     def _is_verification(self, get_data, with_user: bool = True) -> Literal[1, 2]:
         mod_roles = get_data('moderation_roles')
         return (self.member == self.owner and with_user) or bool(mod_roles and set(self.member._roles) & set(mod_roles))

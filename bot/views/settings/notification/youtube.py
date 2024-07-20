@@ -108,12 +108,12 @@ class YoutubeChooseView(nextcord.ui.View):
 
         self.add_item(await YoutubeChooseDropDown(guild, values, selected_id, data))
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
+    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=0)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = await YoutubeView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Confirm', style=nextcord.ButtonStyle.success, disabled=True)
+    @nextcord.ui.button(label='Confirm', style=nextcord.ButtonStyle.success, disabled=True, row=0)
     async def confirm(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = await YoutubeItemView(interaction.guild, self.data['id'], self.data)
         await interaction.message.edit(embed=view.embed, view=view)
