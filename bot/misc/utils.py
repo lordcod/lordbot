@@ -407,7 +407,7 @@ class LordTemplate:
 
     def parse_key(self, var: str) -> Tuple[str, Optional[str]]:
         if '|' not in var:
-            return var, None
+            return var.strip(), None
 
         key, default = map(str.strip, var.split('|'))
         return key, default

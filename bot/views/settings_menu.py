@@ -2,7 +2,6 @@ import nextcord
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
 from bot.databases import GuildDateBases
-from bot.resources.ether import Emoji
 from bot.views.settings import moduls
 from bot.views.settings._view import DefaultSettingsView
 from bot.languages import i18n
