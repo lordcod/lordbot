@@ -106,9 +106,6 @@ class Cooldown:
         elif cooltype == BucketType.SERVER:
             token = str(message.guild.id)
         else:
-            token = None
-
-        if token is None:
             raise ValueError("cooltype %s was not found" % cooltype)
 
         return Cooldown(
