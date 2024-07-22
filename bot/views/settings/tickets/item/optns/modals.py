@@ -102,6 +102,9 @@ class TicketFormsModal(nextcord.ui.Modal):
             default_value=self.default_value.value
         )
         for key, value in data.items():
+            if key != 'label' and value.lower().strip() in ('none', '-'):
+                item.pop(key, None)
+                continue
             if value:
                 item[key] = value
 
@@ -115,8 +118,6 @@ class TicketFormsModal(nextcord.ui.Modal):
             self.selected_item = len(modals)
             modals.append(item)
 
-        ticket_data['modals'] = modals
-
         await gdb.set_on_json('tickets', self.message_id, ticket_data)
 
         view = await TicketFormsView(interaction.guild, self.message_id, self.selected_item)
@@ -129,6 +130,7 @@ class TicketFormsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, modals: Optional[List[ModalItemPayload]] = None, selected_item: Optional[int] = None) -> None:
         if modals is None:
             modals = []
+
         options = [
             nextcord.SelectOption(
                 label=item['label'],
@@ -146,12 +148,112 @@ class TicketFormsDropDown(nextcord.ui.StringSelect):
                 nextcord.SelectOption(label='SelectOption')
             )
 
-        super().__init__(options=options, disabled=disabled)
+        super().__init__(placeholder="Select the form to edit or delete.", options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = int(self.values[0])
 
         view = await TicketFormsView(interaction.guild, self.view.message_id, value)
+        embed = await view.get_embed(interaction.guild)
+        await interaction.response.edit_message(embed=embed, view=view)
+
+
+@AsyncSterilization
+class TicketFormsRequiredDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id: int, modal: Optional[ModalItemPayload], selected_item: Optional[int] = None) -> None:
+        self.selected_item = selected_item
+
+        if selected_item is None:
+            options = [nextcord.SelectOption(label='SelectOption')]
+            super().__init__(placeholder="Specify whether the data is required for the form.",
+                             options=options, disabled=True)
+            return
+
+        required = modal.get('required', True)
+
+        options = [
+            nextcord.SelectOption(
+                label='Required',
+                value=1,
+                description='The user will need to enter the data in the field.',
+                emoji=Emoji.online,
+                default=required
+            ),
+            nextcord.SelectOption(
+                label='Optional',
+                value=0,
+                description='The user can optionally enter data in the field.',
+                emoji=Emoji.offline,
+                default=not required
+            ),
+        ]
+
+        super().__init__(placeholder="Specify whether the data is required for the form.", options=options)
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        value = bool(int(self.values[0]))
+
+        gdb = GuildDateBases(interaction.guild_id)
+        tickets: TicketsPayload = await gdb.get('tickets')
+        ticket_data = tickets[self.view.message_id]
+
+        modals = ticket_data['modals']
+        modal = modals[self.selected_item]
+        modal['required'] = value
+
+        await gdb.set_on_json('tickets', self.view.message_id, ticket_data)
+
+        view = await TicketFormsView(interaction.guild, self.view.message_id, self.selected_item)
+        embed = await view.get_embed(interaction.guild)
+        await interaction.response.edit_message(embed=embed, view=view)
+
+
+@AsyncSterilization
+class TicketFormsStyleDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild_id: int, modal: Optional[ModalItemPayload], selected_item: Optional[int] = None) -> None:
+        self.selected_item = selected_item
+
+        if selected_item is None:
+            options = [nextcord.SelectOption(label='SelectOption')]
+            super().__init__(placeholder="Specify the short or paragraph form style",
+                             options=options, disabled=True)
+            return
+
+        style = modal.get('style', 1)
+
+        options = [
+            nextcord.SelectOption(
+                label='Short',
+                value=1,
+                description='Indicates the short style of the form.',
+                emoji=Emoji.online,
+                default=style == 1
+            ),
+            nextcord.SelectOption(
+                label='Paragraph',
+                value=2,
+                description='Displays the paragraph style of the form.',
+                emoji=Emoji.offline,
+                default=style == 2
+            ),
+        ]
+
+        super().__init__(placeholder="Specify the short or paragraph form style", options=options)
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        value = int(self.values[0])
+
+        gdb = GuildDateBases(interaction.guild_id)
+        tickets: TicketsPayload = await gdb.get('tickets')
+        ticket_data = tickets[self.view.message_id]
+
+        modals = ticket_data['modals']
+        modal = modals[self.selected_item]
+        modal['style'] = value
+
+        await gdb.set_on_json('tickets', self.view.message_id, ticket_data)
+
+        view = await TicketFormsView(interaction.guild, self.view.message_id, self.selected_item)
         embed = await view.get_embed(interaction.guild)
         await interaction.response.edit_message(embed=embed, view=view)
 
@@ -170,6 +272,7 @@ class TicketFormsView(ViewOptionItem):
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         ticket_index = list(tickets.keys()).index(message_id)+1
+        created_embed = ticket_data.get('creating_embed_inputs')
         modals = ticket_data.get('modals')
         item = None
 
@@ -187,6 +290,7 @@ class TicketFormsView(ViewOptionItem):
             self.embed.add_field(
                 name='',
                 value=join_args(
+                    ("— Creating embed inputs: ", get_emoji(ticket_data.get('creating_embed_inputs', True))),
                     ("— Label: ", item.get('label')),
                     ("— Placeholder: ", item.get('placeholder')),
                     ("— Default value: ", item.get('default_value')),
@@ -204,21 +308,33 @@ class TicketFormsView(ViewOptionItem):
         if selected_item is not None:
             self.edit.disabled = False
             self.remove.disabled = False
+        if created_embed:
+            self.switch_creating_embed_inputs.label = 'Disable creating embed inputs'
+            self.switch_creating_embed_inputs.style = nextcord.ButtonStyle.red
+        else:
+            self.switch_creating_embed_inputs.label = 'Enable creating embed inputs'
+            self.switch_creating_embed_inputs.style = nextcord.ButtonStyle.green
+
+        tfrdd = await TicketFormsRequiredDropDown(guild.id, item, selected_item)
+        self.add_item(tfrdd)
+
+        tfsdd = await TicketFormsStyleDropDown(guild.id, item, selected_item)
+        self.add_item(tfsdd)
 
         tfdd = await TicketFormsDropDown(guild.id, modals, selected_item)
         self.add_item(tfdd)
 
-    @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
+    @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green, row=0)
     async def add(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await TicketFormsModal(interaction.guild, self.message_id)
         await interaction.response.send_modal(modal)
 
-    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
+    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True, row=0)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await TicketFormsModal(interaction.guild, self.message_id, self.selected_item)
         await interaction.response.send_modal(modal)
 
-    @nextcord.ui.button(label='Remove', style=nextcord.ButtonStyle.red, disabled=True)
+    @nextcord.ui.button(label='Remove', style=nextcord.ButtonStyle.red, disabled=True, row=0)
     async def remove(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets')
@@ -231,7 +347,19 @@ class TicketFormsView(ViewOptionItem):
         embed = await view.get_embed(interaction.guild)
         await interaction.response.edit_message(embed=embed, view=view)
 
-    @nextcord.ui.button(label='Clear', style=nextcord.ButtonStyle.grey, disabled=True)
+    @nextcord.ui.button(label='Enable creating embed inputs', style=nextcord.ButtonStyle.grey, row=1)
+    async def switch_creating_embed_inputs(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        tickets: TicketsPayload = await gdb.get('tickets')
+        ticket_data = tickets[self.message_id]
+        ticket_data['creating_embed_inputs'] = not ticket_data.get('creating_embed_inputs')
+        await gdb.set_on_json('tickets', self.message_id, ticket_data)
+
+        view = await TicketFormsView(interaction.guild, self.message_id, self.selected_item)
+        embed = await view.get_embed(interaction.guild)
+        await interaction.response.edit_message(embed=embed, view=view)
+
+    @nextcord.ui.button(label='Clear', style=nextcord.ButtonStyle.grey, disabled=True, row=1)
     async def clear(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets')

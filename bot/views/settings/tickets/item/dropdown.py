@@ -3,13 +3,13 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.utils import AsyncSterilization
-from bot.views.settings.tickets.item.embeds import get_embed
 from bot.views.settings.tickets.item.optns.faq import TicketFAQView
 from bot.views.settings.tickets.item.optns.modals import TicketFormsView
+from bot.views.settings.tickets.item.optns.moderation_roles import TicketModRolesView
 from .optns.standart import OptionItem,  FunctionOptionItem, ViewOptionItem
 from .optns.ticket_type import TicketTypeView
 
-distribution: List[AsyncSterilization[OptionItem]] = [TicketTypeView, TicketFAQView, TicketFormsView]
+distribution: List[AsyncSterilization[OptionItem]] = [TicketTypeView, TicketFAQView, TicketFormsView, TicketModRolesView]
 distribution_keys: Dict[str, AsyncSterilization[OptionItem]] = {item.cls.__name__.lower(): item for item in distribution}
 
 

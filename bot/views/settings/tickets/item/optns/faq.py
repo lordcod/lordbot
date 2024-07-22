@@ -9,7 +9,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import FaqPayload, TicketsPayload
 from bot.misc.utils import AsyncSterilization
 from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
-from .standart import ViewOptionItem
+from .standart import OptionItem, ViewOptionItem
 
 
 @AsyncSterilization
@@ -104,11 +104,9 @@ class TicketFAQModal(nextcord.ui.Modal):
                 self.selected_faq_item = len(faq_items)
                 faq_items.append(faq_item_payload)
 
-        faq['items'] = faq_items
-        ticket_data['faq'] = faq
         await gdb.set_on_json('tickets', self.message_id, ticket_data)
 
-        await self.view.edit_panel(interaction)
+        await OptionItem.edit_panel(self, interaction)
 
         view = await TicketFAQView(interaction.guild, self.message_id, self.selected_faq_item)
         embed = await view.get_embed(interaction.guild)

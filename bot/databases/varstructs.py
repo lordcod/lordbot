@@ -125,7 +125,7 @@ class FaqPayload(TypedDict):
 class ModalItemPayload(TypedDict):
     label: str
     style: Optional[Literal[1, 2]]
-    required: Optional[str]
+    required: Optional[bool]
     placeholder: Optional[str]
     default_value: Optional[str]
     min_lenght: Optional[int]

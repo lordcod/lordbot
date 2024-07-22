@@ -138,12 +138,17 @@ class ModuleTicket:
         ret = []
 
         for i, ticket in enumerate(tickets):
+            if ticket is None:
+                keys.pop(i)
+                tickets.pop(i)
+                continue
             if ticket['owner_id'] == self.member.id:
                 if (ticket['status'] != TicketStatus.opened
                         or (category and ticket['category'] and category != ticket['category'])):
                     continue
                 ticket['channel_id'] = keys[i]
                 ret.append(ticket)
+        await tickets_data.multi_set(list(zip(keys, tickets)))
         return ret
 
     async def get_ticket_count(self):
@@ -383,7 +388,7 @@ class ModuleTicket:
         )
 
         buttons = get_data('buttons')
-        ticket_type = get_data('type', 1)
+        ticket_type = get_data('type', DEFAULT_TICKET_TYPE)
         user_closed = get_data('user_closed', True)
         name = get_data('names').get('close')
         message = get_data('messages')['close']

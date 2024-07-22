@@ -87,6 +87,9 @@ class FunctionOptionItem(OptionItem):
 class ViewOptionItem(DefaultSettingsView, OptionItem):
     embed: Optional[nextcord.Embed] = None
 
+    def edit_row_back(self, row: int) -> None:
+        self.back.__discord_ui_model_kwargs__['row'] = row
+
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,
