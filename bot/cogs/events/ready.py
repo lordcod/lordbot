@@ -1,3 +1,4 @@
+import contextlib
 import logging
 from typing import Dict
 from nextcord.ext import commands
@@ -70,7 +71,8 @@ class ReadyEvent(commands.Cog):
                 await tickettools.ModuleTicket.update_ticket_panel(guild, ticket_id)
             else:
                 channel = guild.get_channel(ticket_payload['channel_id'])
-                await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
+                with contextlib.suppress(BaseException):
+                    await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
 
     async def get_emojis(self):
         values = {}
