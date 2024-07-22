@@ -134,6 +134,10 @@ class YtNoti:
         url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
         async with self.bot.session.get(url) as res:
             body = await res.read()
+
+        if not res.ok:
+            return []
+
         json = xmltodict.parse(body.decode())
         return self.get_videos_from_body(json)
 
@@ -151,7 +155,9 @@ class YtNoti:
 
         async with self.bot.session.get(url, params=params) as res:
             json = await res.json()
-            res.raise_for_status()
+
+        if not res.ok:
+            return []
 
         for data in json['items']:
             ret.append(self.parse_channel(data))
@@ -174,7 +180,9 @@ class YtNoti:
 
         async with self.bot.session.get(url, params=params) as res:
             json = await res.json()
-            res.raise_for_status()
+
+        if not res.ok:
+            return []
 
         for data in json['items']:
             ret.append(self.parse_channel(data))

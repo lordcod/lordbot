@@ -93,8 +93,10 @@ class TwNoti:
             'grant_type': 'client_credentials'
         }
         async with self.bot.session.post(url, data=data) as response:
-            response.raise_for_status()
             json = await response.json()
+
+        if not response.ok:
+            return
 
         self.twitch_api_access_token_end = json['expires_in']+time.time()
         self.twitch_api_access_token = json['access_token']
