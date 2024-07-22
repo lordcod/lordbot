@@ -5,6 +5,8 @@ from bot.databases.varstructs import TicketsPayload
 from bot.misc.utils import AsyncSterilization
 from bot.views.settings import tickets
 from bot.views.settings._view import DefaultSettingsView
+from bot.views.settings.tickets.item.dropdown import TicketsItemDropDown
+from bot.views.settings.tickets.item.embeds import get_embed
 
 
 @AsyncSterilization
@@ -13,7 +15,6 @@ class TicketsItemView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild, message_id: int) -> None:
         gdb = GuildDateBases(guild.id)
-        color = await gdb.get('color')
         tickets: TicketsPayload = await gdb.get('tickets', {})
         ticket_data = tickets[message_id]
 
@@ -22,13 +23,11 @@ class TicketsItemView(DefaultSettingsView):
 
         enabled = self.ticket_data.get('enabled')
 
-        self.embed = nextcord.Embed(
-            title='Tickets',
-            color=color,
-            description='The tickets module allows you to create and manage support requests, helping participants to easily open tickets, and administrators to effectively track and solve them.'
-        )
-
+        self.embed = await get_embed(guild, message_id)
         super().__init__()
+
+        tidd = await TicketsItemDropDown(guild, message_id)
+        self.add_item(tidd)
 
         if enabled:
             self.switch.label = 'Disable'

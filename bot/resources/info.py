@@ -266,6 +266,10 @@ DEFAULT_TICKET_PERMISSIONS = {k: (v[0].value, v[1].value)
 DEFAULT_TWITCH_MESSAGE = '🎥 У {stream.username} начался новый стрим!\nПрисоединяйтесь к нам сейчас: {stream.url}'
 DEFAULT_YOUTUBE_MESSAGE = '🎥 Новое видео на YouTube от {video.username}!\nСмотрите прямо сейчас: {video.url}'
 
+DEFAULT_TICKET_TYPE = 2
+DEFAULT_TICKET_FAQ_TYPE = 2
+
+
 activities_list = [
     {
         'id': 880218394199220334,

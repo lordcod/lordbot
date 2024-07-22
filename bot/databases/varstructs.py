@@ -165,12 +165,11 @@ class CategoryPayload(PartialCategoryPayload, ButtonPayload, total=True):
 class TicketsItemPayload(PartialCategoryPayload, total=True):
     channel_id: int
     message_id: int
-    faq: Optional[FaqPayload]
-    categories: Optional[List[CategoryPayload]]
     enabled: Optional[bool]
-    global_user_tickets_limit: Optional[int]
-    tickets_limit: Optional[int]
+    faq: Optional[FaqPayload]
     category_type: Optional[int]
+    categories: Optional[List[CategoryPayload]]
+    global_user_tickets_limit: Optional[int]
 
 
 TicketsPayload = Dict[int, TicketsItemPayload]

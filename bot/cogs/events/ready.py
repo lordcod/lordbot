@@ -111,11 +111,11 @@ class ReadyEvent(commands.Cog):
         await asyncio.gather(
             self.get_emojis(),
             self.find_not_data_commands(),
-            self.process_tickets(),
+            # self.process_tickets(),
             self.process_temp_roles(),
             self.process_temp_bans(),
             self.process_giveaways(),
-            self.process_guild_delete_tasks()
+            self.process_guild_delete_tasks(),
         )
 
         views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,

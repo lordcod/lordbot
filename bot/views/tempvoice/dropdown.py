@@ -7,10 +7,8 @@ from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
-from bot.resources.info import DEFAULT_BOT_COLOR
 from .information import advance_dd_voice_items, simple_dd_voice_items, description
 from .functions import TempVoiceFunctioins
-from bot.resources.ether import temp_voice_emojis
 
 
 class VoiceStatus(IntEnum):

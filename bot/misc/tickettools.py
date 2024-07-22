@@ -16,7 +16,7 @@ from bot.views.tickets.closes import CloseTicketView
 from bot.views.tickets.delop import ControllerTicketView
 from bot.views.tickets.faq import FAQView
 from bot.views.tickets.modals import TicketsModal
-from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU, DEFAULT_TICKET_PERMISSIONS
+from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU, DEFAULT_TICKET_PERMISSIONS, DEFAULT_TICKET_TYPE
 
 _log = logging.getLogger(__name__)
 
@@ -239,7 +239,7 @@ class ModuleTicket:
         buttons = get_data('buttons')
         open_name = get_data('names').get('open')
         open_message = get_data('messages').get('open')
-        ticket_type = get_data('type', 1)
+        ticket_type = get_data('type', DEFAULT_TICKET_TYPE)
         channel_id = get_data('channel_id')
         payload = get_payload(
             member=self.member,
@@ -288,8 +288,9 @@ class ModuleTicket:
                 invitable=False,
             )
             msg = await thread.send(**message, view=view)
-            if mod_roles := get_data('moderation_roles'):
-                await thread.send(' '.join([role.mention for role_id in mod_roles if (role := self.guild.get_role(role_id))]),
+            if mod_roles := [role.mention for role_id in get_data('moderation_roles', [])
+                             if (role := self.guild.get_role(role_id))]:
+                await thread.send(' '.join(mod_roles),
                                   delete_after=1,
                                   flags=nextcord.MessageFlags(suppress_notifications=True))
 
@@ -449,7 +450,7 @@ class ModuleTicket:
             ticket_count=self.ticket_count
         )
 
-        ticket_type = get_data('type', 1)
+        ticket_type = get_data('type', DEFAULT_TICKET_TYPE)
         message = get_data('messages')['reopen']
         name = get_data('names')['open']
         close_name = get_data('names').get('close')

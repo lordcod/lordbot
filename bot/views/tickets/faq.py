@@ -4,6 +4,7 @@ from bot.databases.varstructs import CategoryPayload, TicketsButtonsPayload, Tic
 from bot.misc.utils import AsyncSterilization, generate_message, lord_format, get_payload
 from typing import List, Optional
 from bot.misc import tickettools
+from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
 
 
 @AsyncSterilization
@@ -155,11 +156,12 @@ class FAQView(nextcord.ui.View):
         buttons = ticket_data.get('buttons')
         category_type = ticket_data.get('category_type', 1)
 
+        faq = ticket_data.get('faq', {})
+        faq_type = faq.get('type', DEFAULT_TICKET_FAQ_TYPE)
+        faq_items = faq.get('items')
+
         if category_type == 1:
-            faq = ticket_data.get('faq', {})
-            faq_type = faq.get('type')
-            faq_items = faq.get('items')
-            if faq and faq_type and faq_items:
+            if faq and faq_items:
                 if faq_type == 1:
                     self.add_item(await FAQCreateDropDown(guild_id, faq_items, buttons))
                     return
@@ -167,10 +169,7 @@ class FAQView(nextcord.ui.View):
                     self.add_item(await FAQButtonOpen(guild_id, buttons))
             self.add_item(await FAQButtonCreate(guild_id, buttons))
         elif category_type == 2:
-            faq = ticket_data.get('faq', {})
-            faq_type = faq.get('type')
-            faq_items = faq.get('items')
-            if faq and faq_type and faq_items:
+            if faq and faq_items:
                 categories_data = ticket_data.get('categories')
 
                 if faq_type == 1:

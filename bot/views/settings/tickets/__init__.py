@@ -15,6 +15,12 @@ from bot.views import settings_menu
 from bot.languages import i18n
 
 
+def get_category_name(channel: nextcord.TextChannel):
+    if channel.category is None:
+        return ''
+    return f'({channel.category.name})'
+
+
 @AsyncSterilization
 class TicketsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild):
@@ -32,7 +38,7 @@ class TicketsDropDown(nextcord.ui.StringSelect):
             options.append(nextcord.SelectOption(
                 label=f'Ticket #{index}',
                 value=message_id,
-                description=str(channel),
+                description=f"#{channel} {get_category_name(channel)}",
                 emoji=get_emoji('tickets')
             ))
 
