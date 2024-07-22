@@ -1,5 +1,6 @@
 {
     "1178294479267045466": {
+        "enabled": true,
         "channel_id": 1260539083470405642,
         "total": false,
         "locale": "ru",
@@ -51,6 +52,7 @@
         ]
     },
     "1240692267744886816": {
+        "enabled": true,
         "channel_id": 1263191159132651620,
         "total": false,
         "locale": "ru",
@@ -116,6 +118,7 @@
         }
     },
     "1111917970059427912": {
+        "enabled": true,
         "channel_id": 1261470527218778173,
         "total": false,
         "locale": "ru",
