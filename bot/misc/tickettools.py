@@ -199,7 +199,13 @@ class ModuleTicket:
         self.selected_category = data['category']
         self.input_answer = data['inputs']
         self.status = TicketStatus(data['status'])
-        self.ticket_count = data['count']
+        try:
+            self.ticket_count = data['count']
+        except KeyError:
+            self.ticket_count = {
+                'total': data['index'],
+                'active': data['index']
+            }
         self.messages = data.get('messages', [])
 
     async def get_permissions(self, permission_data: Dict[int, Tuple[int, int]]):
