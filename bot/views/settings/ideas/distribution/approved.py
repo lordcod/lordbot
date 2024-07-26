@@ -1,6 +1,9 @@
+from httpx import delete
 import nextcord
 
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
+from bot.views.information_dd import get_info_dd
 
 
 from ... import ideas
@@ -20,8 +23,9 @@ class DropDown(nextcord.ui.ChannelSelect):
     ) -> None:
         self.gdb = GuildDateBases(guild_id)
         self.idea_data = await self.gdb.get('ideas')
+        locale = await self.gdb.get('language')
 
-        super().__init__(channel_types=[nextcord.ChannelType.text])
+        super().__init__(placeholder=i18n.t(locale, 'settings.ideas.channel.dropdown'), channel_types=[nextcord.ChannelType.text])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -39,24 +43,40 @@ class ApprovedView(DefaultSettingsView):
         self.idea_data: IdeasPayload = await self.gdb.get('ideas')
         channel_approved_id = self.idea_data.get('channel_approved_id')
         color = await self.gdb.get('color')
+        locale = await self.gdb.get('language')
 
         self.embed = nextcord.Embed(
-            title="Ideas",
-            description="The ideas module allows you to collect, discuss and evaluate user suggestions. It organizes ideas in one place, allows you to vote for them and track their status.",
+            title=i18n.t(locale, 'settings.ideas.init.title'),
+            description=i18n.t(locale, 'settings.ideas.init.description'),
             color=color
         )
         self.embed.add_field(
             name='',
-            value='> Choose a channel that will match the channel of approved ideas'
+            value=i18n.t(locale, 'settings.ideas.approved')
         )
 
         super().__init__()
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
         if channel is not None:
             self.channel = channel
             self.edit.disabled = False
         if channel_approved_id is not None:
             self.delete.disabled = False
+
+        if channel or (channel := guild.get_channel(channel_approved_id)):
+            self.add_item(get_info_dd(
+                placeholder=i18n.t(locale, 'settings.ideas.init.value.approved',
+                                   channel=f"#{channel.name}")
+            ))
+        else:
+            self.add_item(get_info_dd(
+                placeholder=i18n.t(locale, 'settings.ideas.init.value.approved',
+                                   channel=i18n.t(locale, 'settings.ideas.init.unspecified'))
+            ))
 
         cdd = await DropDown(guild.id)
         self.add_item(cdd)

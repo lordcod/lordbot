@@ -8,7 +8,7 @@ from bot.misc.lordbot import LordBot
 import os
 
 
-bot = LordBot(False)
+bot = LordBot(rollout_functions=False)
 
 
 def load_dir(dirpath: str) -> None:

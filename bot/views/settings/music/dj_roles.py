@@ -43,7 +43,6 @@ class DjRolesView(DefaultSettingsView):
         self,
         guild: nextcord.Guild
     ) -> None:
-        self.embed = music.MusicView(guild).embed
         self.gdb = GuildDateBases(guild.id)
         music_settings = await self.gdb.get("music_settings")
         locale = await self.gdb.get('language')
@@ -52,12 +51,13 @@ class DjRolesView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title=i18n.t(locale,
                          'settings.music.title'),
-            description="The music module allows you to set the maximum queue length, control the volume, assign DJ roles and create playlists.",
+            description=i18n.t(locale,
+                               'settings.music.description'),
             color=color
         )
         self.embed.add_field(
             name='',
-            value='> Select the roles that will be able to add and change music'
+            value=i18n.t('settings.music.djroles.select')
         )
 
         super().__init__()
@@ -65,11 +65,15 @@ class DjRolesView(DefaultSettingsView):
         rdp = RolesDropDown(guild)
         self.add_item(rdp)
 
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.disable.label = i18n.t(locale, 'settings.button.disable')
+        self.enable.label = i18n.t(locale, 'settings.button.enable')
+
         if music_settings.get('dj-roles') is None:
             rdp.disabled = True
-            self.remove_item(self.disabled)
+            self.remove_item(self.disable)
         else:
-            self.remove_item(self.enabled)
+            self.remove_item(self.enable)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -79,19 +83,19 @@ class DjRolesView(DefaultSettingsView):
 
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Enabled', style=nextcord.ButtonStyle.green)
-    async def enabled(self,
-                      button: nextcord.ui.Button,
-                      interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Enable', style=nextcord.ButtonStyle.green)
+    async def enable(self,
+                     button: nextcord.ui.Button,
+                     interaction: nextcord.Interaction):
         await self.gdb.set_on_json('music_settings', 'dj-roles', [])
 
         view = await DjRolesView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Disabled', style=nextcord.ButtonStyle.red)
-    async def disabled(self,
-                       button: nextcord.ui.Button,
-                       interaction: nextcord.Interaction):
+    @nextcord.ui.button(label='Disable', style=nextcord.ButtonStyle.red)
+    async def disable(self,
+                      button: nextcord.ui.Button,
+                      interaction: nextcord.Interaction):
         await self.gdb.set_on_json('music_settings', 'dj-roles', None)
 
         view = await DjRolesView(interaction.guild)

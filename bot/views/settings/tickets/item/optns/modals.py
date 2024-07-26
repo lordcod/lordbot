@@ -90,9 +90,10 @@ class TicketFormsModal(nextcord.ui.Modal):
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         modals = ticket_data.get('modals', [])
+        ticket_data['modals'] = modals
 
         if self.selected_item is not None:
-            item = modals[self.selected_item]
+            item = modals[self.selected_item].copy()
         else:
             item = {}
 

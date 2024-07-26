@@ -1,36 +1,4 @@
-description = {
-    'change_ghost': {'description': 'Hide/open the channel.', 'label': 'Ghost'},
-    'change_locked': {'description': 'Lock/unlock the channel.', 'label': 'Lock'},
-    'change_name': {'description': 'Change the channel name.', 'label': 'Name'},
-    'change_owner': {'description': 'Transfer ownership of the channel.',
-                     'label': 'Ownership'},
-    'ghost': {'description': 'Hide the channel.', 'label': 'Ghost'},
-    'give_access': {'description': 'Grant/withdraw access rights to the channel.',
-                    'label': 'Permit'},
-    'invite': {'description': 'Invite a participant to your voice.',
-               'label': 'Invite'},
-    'kick_member': {'description': 'Expel a participant from the voice.',
-                    'label': 'Kick'},
-    'lock': {'description': 'Lock the channel.', 'label': 'Lock'},
-    'mute_member': {'description': 'Enable/disable the microphone for the '
-                    'participant..',
-                    'label': 'Mute'},
-    'mute_member_fd': {'description': 'Disable the microphone for the '
-                       'participant..',
-                       'label': 'Mute'},
-    'permit': {'description': 'Grant access rights to the channel.',
-               'label': 'Permit'},
-    'reject': {'description': 'Withdraw access rights to the channel.',
-               'label': 'Reject'},
-    'set_bitrate': {'description': 'Change the channel bitrate.',
-                    'label': 'Bitrate'},
-    'set_limit': {'description': 'Set a channel limit.', 'label': 'Limit'},
-    'unghost': {'description': 'Open the channel.', 'label': 'Unghost'},
-    'unlock': {'description': 'Unlock the channel.', 'label': 'Unlock'},
-    'unmute_member_fd': {'description': 'Enable the microphone for the '
-                         'participant..',
-                         'label': 'Unmute'}
-}
+
 
 simple_dd_voice_items = [
     [

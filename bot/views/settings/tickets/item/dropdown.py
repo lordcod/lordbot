@@ -1,16 +1,44 @@
 from typing import Dict, List
 import nextcord
 
-from bot.databases.handlers.guildHD import GuildDateBases
+from bot.databases import GuildDateBases
 from bot.misc.utils import AsyncSterilization
-from bot.views.settings.tickets.item.optns.faq import TicketFAQView
-from bot.views.settings.tickets.item.optns.modals import TicketFormsView
-from bot.views.settings.tickets.item.optns.moderation_roles import TicketModRolesView
+from .optns.categories import TicketCategoriesView
+from .optns.channels import TicketChannelsView
+from .optns.messages import TicketMessagesView
+from .optns.name import TicketNameModal
+from .optns.limit import UserLimitModal
+from .optns.closed_user import ClosedUserFunction
+from .optns.allowed_roles import TicketAllowedRolesView
+from .optns.faq import TicketFAQView
+from .optns.modals import TicketFormsView
+from .optns.moderation_roles import TicketModRolesView
 from .optns.standart import OptionItem,  FunctionOptionItem, ViewOptionItem
 from .optns.ticket_type import TicketTypeView
 
-distribution: List[AsyncSterilization[OptionItem]] = [TicketTypeView, TicketFAQView, TicketFormsView, TicketModRolesView]
-distribution_keys: Dict[str, AsyncSterilization[OptionItem]] = {item.cls.__name__.lower(): item for item in distribution}
+#
+# TODO: Add Settings
+# Categories
+# Saving history
+# TAuto archived
+# Channel id, category id, closed category id
+#
+
+distribution: List[AsyncSterilization[OptionItem]] = [
+    TicketTypeView,
+    ClosedUserFunction,
+    TicketMessagesView,
+    TicketNameModal,
+    TicketChannelsView,
+    TicketFAQView,
+    TicketCategoriesView,
+    TicketFormsView,
+    UserLimitModal,
+    TicketModRolesView,
+    TicketAllowedRolesView,
+]
+distribution_keys: Dict[str, AsyncSterilization[OptionItem]] = {
+    item.cls.__name__.lower(): item for item in distribution}
 
 
 @AsyncSterilization
@@ -21,7 +49,10 @@ class TicketsItemDropDown(nextcord.ui.StringSelect):
         gdb = GuildDateBases(guild.id)
         system_emoji = await gdb.get('system_emoji')
 
-        self.items = {key: await item(guild, message_id) for key, item in distribution_keys.items()}
+        self.items: Dict[str, OptionItem] = {}
+        for key, item in distribution_keys.items():
+            self.items[key] = await item(guild, message_id)
+
         super().__init__(options=[
             nextcord.SelectOption(
                 label=item.label,

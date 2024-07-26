@@ -21,7 +21,8 @@ DEFAULT_LOGS = {
     'pyngrok': logging.ERROR,
     'git': logging.ERROR,
     'httpx': logging.ERROR,
-    'aiocache': logging.ERROR
+    'aiocache': logging.ERROR,
+    'colormath': logging.ERROR
 }
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)

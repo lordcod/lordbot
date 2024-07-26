@@ -14,6 +14,8 @@ from bot.languages.help import CommandOption, get_command
 
 from typing import TypeVar, Union
 
+from bot.resources.info import DISCORD_SUPPORT_SERVER
+
 _log = logging.getLogger(__name__)
 ExceptionT = TypeVar("ExceptionT", bound=BaseException)
 
@@ -213,3 +215,11 @@ class CallbackCommandError:
     async def OfterError(self, error):
         _log.error(
             "Ignoring exception in command %s", self.ctx.command, exc_info=error)
+
+        await self.ctx.author.send(
+            "There's been some kind of mistake!\n"
+            "Check if the bot has the necessary permissions to execute this command!\n"
+            f"Error ID (required for support): specify the name of the commands\n"
+            f"If you couldn't figure out what's going on, contact the [support server]({DISCORD_SUPPORT_SERVER})!",
+            flags=nextcord.MessageFlags(suppress_embeds=True, suppress_notifications=True)
+        )

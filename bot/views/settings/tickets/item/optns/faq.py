@@ -80,6 +80,9 @@ class TicketFAQModal(nextcord.ui.Modal):
         faq = ticket_data.get('faq', {})
         faq_items = faq.get('items', [])
 
+        faq['items'] = faq_items
+        ticket_data['faq'] = faq
+
         if self.faq_item:
             faq_item_payload = self.faq_item.copy()
         else:
@@ -92,17 +95,20 @@ class TicketFAQModal(nextcord.ui.Modal):
             response=self.response.value
         )
         for key, value in data.items():
+            if key != 'label' and value.lower().strip() in ('none', '-'):
+                faq_item_payload.pop(key, None)
+                continue
             if value:
                 faq_item_payload[key] = value
 
-        if self.selected_faq_item is None:
-            faq_items.append(faq_item_payload)
-        else:
+        if self.selected_faq_item is not None:
             try:
                 faq_items[self.selected_faq_item] = faq_item_payload
             except IndexError:
                 self.selected_faq_item = len(faq_items)
                 faq_items.append(faq_item_payload)
+        else:
+            faq_items.append(faq_item_payload)
 
         await gdb.set_on_json('tickets', self.message_id, ticket_data)
 

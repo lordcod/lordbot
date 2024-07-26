@@ -10,7 +10,7 @@ from bot.databases import GuildDateBases, CommandDB
 
 
 @AsyncSterilization
-class AllowRolesDropDown(nextcord.ui.RoleSelect):
+class DenyRolesDropDown(nextcord.ui.RoleSelect):
     async def __init__(
         self,
         guild: nextcord.Guild,
@@ -36,10 +36,10 @@ class AllowRolesDropDown(nextcord.ui.RoleSelect):
         cdb = CommandDB(interaction.guild_id)
         command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
-        command_data["distribution"]["allow-role"] = self.values.ids
+        command_data["distribution"]["deny-role"] = self.values.ids
         await cdb.update(self.command_name, command_data)
 
-        view = await AllowRolesView(
+        view = await DenyRolesView(
             interaction.guild,
             self.command_name
         )
@@ -47,7 +47,7 @@ class AllowRolesDropDown(nextcord.ui.RoleSelect):
 
 
 @AsyncSterilization
-class AllowRolesView(DefaultSettingsView):
+class DenyRolesView(DefaultSettingsView):
     embed: nextcord.Embed
 
     async def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
@@ -58,12 +58,13 @@ class AllowRolesView(DefaultSettingsView):
 
         cdb = CommandDB(guild.id)
         command_data = await cdb.get(self.command_name, {})
+        print(command_data)
         command_data.setdefault("distribution", {})
         role_ids = command_data["distribution"].get(
-            "allow-role", [])
+            "deny-role", [])
 
         self.embed = nextcord.Embed(
-            title="Allowed roles",
+            title="Denyed roles",
             description="The selected command will only work in the roles that you select",
             color=color
         )
@@ -77,7 +78,7 @@ class AllowRolesView(DefaultSettingsView):
 
         super().__init__()
 
-        cdd = await AllowRolesDropDown(
+        cdd = await DenyRolesDropDown(
             guild,
             command_name
         )
@@ -97,8 +98,8 @@ class AllowRolesView(DefaultSettingsView):
 
         command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
-        command_data["distribution"].pop("allow-role", None)
+        command_data["distribution"].pop("deny-role", None)
         await cdb.update(self.command_name, command_data)
 
-        view = await AllowRolesView(interaction.guild, self.command_name)
+        view = await DenyRolesView(interaction.guild, self.command_name)
         await interaction.response.edit_message(embed=view.embed, view=view)

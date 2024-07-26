@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 import asyncio
-import contextlib
 from dataclasses import dataclass
 import datetime
 from enum import IntEnum
 import functools
-from typing import Dict, List, Optional, Self, Tuple
+import logging
+from typing import Dict, List, Optional,  Tuple
 import nextcord
 
 from bot.databases import GuildDateBases
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import cut_back
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -22,11 +26,15 @@ class Message:
 
 
 class LogType(IntEnum):
+    # TODO: Create logs: voice state, tickets and tempvoice
     delete_message = 0
     edit_message = 1
     punishment = 2
     economy = 3
     ideas = 4
+    voice_state = 5
+    ticket = 6
+    tempvoice = 7
 
 
 def embed_to_text(embed: nextcord.Embed) -> str:
@@ -73,42 +81,58 @@ async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: i
         pass
 
 
+def on_logs(log_type: int):
+    def predicte(coro):
+        @functools.wraps(coro)
+        async def wrapped(self: Logs, *args, **kwargs) -> None:
+            if self.guild is None or self.gdb is None:
+                return
+
+            mes: Optional[Message] = await coro(self, *args, **kwargs)
+            guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
+
+            if mes is None or guild_data is None:
+                return
+
+            for channel_id, logs_types in guild_data.items():
+                if log_type not in logs_types:
+                    continue
+
+                channel = self.guild.get_channel(channel_id)
+                if not channel:
+                    continue
+
+                bot = self.guild.me
+                perms = channel.permissions_for(bot)
+                if not (perms.send_messages and perms.embed_links and perms.read_messages):
+                    continue
+
+                await channel.send(
+                    content=mes.content,
+                    embed=mes.embed,
+                    embeds=mes.embeds,
+                    file=mes.file,
+                    files=mes.files
+                )
+
+        return wrapped
+    return predicte
+
+
 class Logs:
-    def __init__(self, guild: nextcord.Guild):
-        self.guild = guild
-        self.gdb = GuildDateBases(guild.id)
-
-    @staticmethod
-    def on_logs(log_type: int):
-        def predicte(coro):
-            @functools.wraps(coro)
-            async def wrapped(self: Self, *args, **kwargs) -> None:
-                mes: Optional[Message] = await coro(self, *args, **kwargs)
-                guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
-
-                if mes is None or guild_data is None:
-                    return
-
-                for channel_id, logs_types in guild_data.items():
-                    if log_type not in logs_types:
-                        continue
-
-                    channel = self.guild.get_channel(channel_id)
-                    await channel.send(
-                        content=mes.content,
-                        embed=mes.embed,
-                        embeds=mes.embeds,
-                        file=mes.file,
-                        files=mes.files
-                    )
-
-            return wrapped
-        return predicte
+    def __init__(self, guild: Optional[nextcord.Guild]):
+        if guild is not None:
+            self.guild = guild
+            self.gdb = GuildDateBases(guild.id)
+        else:
+            self.guild = None
+            self.gdb = None
 
     @on_logs(LogType.delete_message)
     async def delete_message(self, message: nextcord.Message, moderator: Optional[nextcord.Member] = None):
         if message.author.bot:
             return
+
         embed = nextcord.Embed(
             title="Message deleted",
             color=nextcord.Colour.red(),
@@ -123,7 +147,7 @@ class Logs:
         if message.content:
             embed.add_field(
                 name="Message",
-                value=message.content
+                value=message.content[:1024]
             )
         if moderator:
             embed.set_footer(text=moderator,
@@ -141,6 +165,33 @@ class Logs:
     async def edit_message(self, before: nextcord.Message, after: nextcord.Message):
         if after.author.bot:
             return
+
+        if before.content == after.content:
+            editted = {}
+            for slot in nextcord.Message.__slots__:
+                if getattr(before, slot, None) != getattr(after, slot, None):
+                    editted[slot] = (getattr(before, slot, None), getattr(after, slot, None))
+            _log.trace('[%d] Eddited data: %s', after.id, editted)
+
+            if len(before.attachments) > 0 and len(after.attachments):
+                embed = nextcord.Embed(
+                    title="Message edited",
+                    color=nextcord.Colour.orange(),
+                    description=(
+                        f"> Channel: {before.channel.name} ({before.channel.mention})\n"
+                        f"> Message id: {before.id}\n"
+                        f"> Message author: {str(before.author)} ({before.author.mention})\n"
+                        f"> Message created: <t:{before.created_at.timestamp() :.0f}:f> (<t:{before.created_at.timestamp() :.0f}:R>)"
+                    ),
+                    timestamp=datetime.datetime.today()
+                )
+                embed.add_field(
+                    name='Action',
+                    value='Remove all attachments'
+                )
+                return Message(embed=embed)
+            return
+
         embed = nextcord.Embed(
             title="Message edited",
             color=nextcord.Colour.orange(),
@@ -154,11 +205,11 @@ class Logs:
         )
         embed.add_field(
             name="Before",
-            value=before.content
+            value=before.content[:1024]
         )
         embed.add_field(
             name="After",
-            value=after.content
+            value=after.content[:1024]
         )
         return Message(embed=embed)
 

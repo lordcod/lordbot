@@ -1,6 +1,8 @@
 import nextcord
 
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
+from bot.views.information_dd import get_info_dd
 
 
 from ... import ideas
@@ -17,19 +19,24 @@ class RolesDropDown(nextcord.ui.RoleSelect):
         guild: nextcord.Guild
     ) -> None:
         self.gdb = GuildDateBases(guild.id)
+        locale = await self.gdb.get('language')
+
         super().__init__(
+            placeholder=i18n.t(locale, 'settings.ideas.mod_role.dropdown'),
             min_values=1,
             max_values=15
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        locale = await self.gdb.get('language')
+
         for role in self.values.roles:
             if role.is_integration() or role.is_bot_managed():
                 await interaction.response.send_message(
-                    content=f"The {role.mention} role cannot be assigned and is used for integration or by a bot.",
+                    content=i18n.t(locale, 'settings.roles.error.integration', role=role.mention),
                     ephemeral=True
                 )
-                break
+                return
         else:
             await self.gdb.set_on_json('ideas', 'moderation_role_ids', self.values.ids)
 
@@ -43,24 +50,44 @@ class ModerationRolesView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
-        self.idea_datas: IdeasPayload = await self.gdb.get('ideas')
-        mod_role_ids = self.idea_datas.get('moderation_role_ids')
+        self.idea_data: IdeasPayload = await self.gdb.get('ideas')
+        mod_role_ids = self.idea_data.get('moderation_role_ids')
         color = await self.gdb.get('color')
+        locale = await self.gdb.get('language')
 
         self.embed = nextcord.Embed(
-            title="Ideas",
-            description="The ideas module allows you to collect, discuss and evaluate user suggestions. It organizes ideas in one place, allows you to vote for them and track their status.",
+            title=i18n.t(locale, 'settings.ideas.init.title'),
+            description=i18n.t(locale, 'settings.ideas.init.description'),
             color=color
         )
         self.embed.add_field(
             name='',
-            value='> Choose roles that can approve/reject ideas'
+            value=i18n.t(locale, 'settings.ideas.mod_role.field')
         )
 
         super().__init__()
 
         if mod_role_ids:
             self.delete.disabled = False
+
+            moderation_roles = filter(lambda item: item is not None,
+                                      map(guild.get_role,
+                                          mod_role_ids))
+            if moderation_roles:
+                self.add_item(get_info_dd(
+                    placeholder=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
+                                       roles=', '.join([role.mention for role in moderation_roles]))
+                ))
+            else:
+                self.add_item(get_info_dd(
+                    placeholder=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
+                                       roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
+                ))
+        else:
+            self.add_item(get_info_dd(
+                placeholder=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
+                                   roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
+            ))
 
         cdd = await RolesDropDown(guild)
         self.add_item(cdd)

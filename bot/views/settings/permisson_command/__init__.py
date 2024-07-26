@@ -3,7 +3,7 @@ import nextcord
 from bot.misc.utils import AsyncSterilization
 
 
-from .precise import CommandData
+from .precise import CommandView
 from bot.views.settings._view import DefaultSettingsView
 
 from bot.databases import GuildDateBases
@@ -24,7 +24,7 @@ class PermDropDown(nextcord.ui.StringSelect):
             selectOption = nextcord.SelectOption(
                 label=command.get('name'),
                 value=command.get('name'),
-                description=command.get('brief_descriptrion').get(locale),
+                description=command.get('brief_descriptrion').get(locale)[:100],
                 emoji=help.categories_emoji.get(name),
             )
             options.append(selectOption)
@@ -38,7 +38,7 @@ class PermDropDown(nextcord.ui.StringSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         command = self.values[0]
-        view = await CommandData(interaction.guild, command)
+        view = await CommandView(interaction.guild, command)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
@@ -68,9 +68,10 @@ class CommandsDataView(DefaultSettingsView):
         if 0 > self.step - 1:
             self.previous.disabled = True
 
-        dd = PermDropDown(guild.id, self.foundation[step])
-        self.add_item(dd)
         self.back.label = i18n.t(locale, 'settings.button.back')
+
+        pdd = await PermDropDown(guild.id, self.foundation[step])
+        self.add_item(pdd)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -81,7 +82,8 @@ class CommandsDataView(DefaultSettingsView):
         await interaction.response.edit_message(embed=view.embed, view=view)
 
     async def visual_handler(self, interaction: nextcord.Interaction):
-        view = await CommandData(interaction.guild, self.step)
+        view = await CommandsDataView(interaction.guild, self.step)
+
         await interaction.response.edit_message(embed=view.embed, view=view)
 
     @nextcord.ui.button(label='Previous', style=nextcord.ButtonStyle.grey)

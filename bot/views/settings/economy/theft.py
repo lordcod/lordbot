@@ -1,6 +1,7 @@
 from typing import Optional
 import nextcord
 from bot.databases import GuildDateBases
+from bot.languages import i18n
 from bot.misc.utils import TimeCalculator, AsyncSterilization
 
 from bot.resources.info import DEFAULT_ECONOMY_SETTINGS
@@ -15,12 +16,18 @@ class TheftView(DefaultSettingsView):
     async def __init__(self, guild: nextcord.Guild, value: Optional[str] = None) -> None:
         self.value = value
         self.embed = (await economy.Economy(guild)).embed
+        self.gdb = GuildDateBases(guild.id)
+        locale = await self.gdb.get('language')
 
         super().__init__()
 
         if value:
             self.edit.disabled = False
             self.reset.disabled = False
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.reset.label = i18n.t(locale, 'settings.button.edit')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -34,21 +41,9 @@ class TheftView(DefaultSettingsView):
                    button: nextcord.ui.Button,
                    interaction: nextcord.Interaction):
         return
-        if self.value in reward_names:
-            modal = await RewardBonusModal(interaction.guild, self.value)
-        if self.value == 'work':
-            modal = await WorkBonusModal(interaction.guild)
-        if self.value == 'bet':
-            modal = await BetBonusModal(interaction.guild)
-        await interaction.response.send_modal(modal)
 
     @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.blurple, disabled=True)
     async def reset(self,
                     button: nextcord.ui.Button,
                     interaction: nextcord.Interaction):
         return
-        gdb = GuildDateBases(interaction.guild_id)
-        await gdb.set_on_json('economic_settings', self.value, DEFAULT_ECONOMY_SETTINGS[self.value])
-
-        view = await BonusView(interaction.guild, self.value)
-        await interaction.message.edit(embed=view.embed, view=view)

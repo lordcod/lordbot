@@ -17,6 +17,7 @@ from bot.languages import i18n
 class TicketsSelectorDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
+        placeholder: str,
         channel_types: List[nextcord.ChannelType],
         guild: nextcord.Guild,
         selected_channel: Optional[nextcord.VoiceChannel] = None,
@@ -26,7 +27,7 @@ class TicketsSelectorDropDown(nextcord.ui.ChannelSelect):
         self.selected_channel = selected_channel
         self.selected_category = selected_category
 
-        super().__init__(channel_types=channel_types)
+        super().__init__(placeholder=placeholder, channel_types=channel_types)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         view = await TicketsSelectorView(
@@ -41,7 +42,7 @@ class TicketsSelectorDropDown(nextcord.ui.ChannelSelect):
 @AsyncSterilization
 class TicketsChannelDropDown(TicketsSelectorDropDown.cls):
     async def __init__(self, *args) -> None:
-        await super().__init__([nextcord.ChannelType.text], *args)
+        await super().__init__('Select the channel where the ticket will be', [nextcord.ChannelType.text], *args)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -52,7 +53,7 @@ class TicketsChannelDropDown(TicketsSelectorDropDown.cls):
 @AsyncSterilization
 class TicketsCategoryDropDown(TicketsSelectorDropDown.cls):
     async def __init__(self, *args) -> None:
-        await super().__init__([nextcord.ChannelType.category], *args)
+        await super().__init__('Select the category where the created tickets will fall', [nextcord.ChannelType.category], *args)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         category = self.values[0]

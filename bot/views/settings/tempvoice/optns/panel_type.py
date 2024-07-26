@@ -1,6 +1,7 @@
 import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 from bot.views.settings.tempvoice.optns.standart import ViewOptionItem
 
@@ -8,22 +9,25 @@ from bot.views.settings.tempvoice.optns.standart import ViewOptionItem
 @AsyncSterilization
 class TypePanelDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, type_panel: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         options = [
             nextcord.SelectOption(
-                label='None',
-                description='Disables the panel',
+                label=i18n.t(locale, 'settings.tempvoice.panel.type.none.label'),
+                description=i18n.t(locale, 'settings.tempvoice.panel.type.none.description'),
                 value=0,
                 default=type_panel == 0
             ),
             nextcord.SelectOption(
-                label='Button',
-                description='The panel will have buttons',
+                label=i18n.t(locale, 'settings.tempvoice.panel.type.button.label'),
+                description=i18n.t(locale, 'settings.tempvoice.panel.type.button.description'),
                 value=1,
                 default=type_panel == 1
             ),
             nextcord.SelectOption(
-                label='DropDown',
-                description='The panel will have a dropdown menu',
+                label=i18n.t(locale, 'settings.tempvoice.panel.type.dropdown.label'),
+                description=i18n.t(locale, 'settings.tempvoice.panel.type.dropdown.description'),
                 value=2,
                 default=type_panel == 2
             ),
@@ -36,28 +40,33 @@ class TypePanelDropDown(nextcord.ui.StringSelect):
         await gdb.set_on_json('tempvoice', 'type_panel', value)
 
         await self.view.edit_panel(interaction)
-        await self.view.update(interaction)
+
+        view = await TypePanelView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 @AsyncSterilization
 class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, type_message_panel: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         options = [
             nextcord.SelectOption(
-                label='Control panel',
-                description='Before that, select the channel panel',
+                label=i18n.t(locale, 'settings.tempvoice.panel.type_message.panel.label'),
+                description=i18n.t(locale, 'settings.tempvoice.panel.type_message.panel.description'),
                 value=1,
                 default=type_message_panel == 1
             ),
             nextcord.SelectOption(
-                label='In voice',
-                description='Sends a panel to the voice when it is created',
+                label=i18n.t(locale, 'settings.tempvoice.panel.type_message.voice.label'),
+                description=i18n.t(locale, 'settings.tempvoice.panel.type_message.voice.description'),
                 value=2,
                 default=type_message_panel == 2
             ),
             nextcord.SelectOption(
-                label='Everywhere',
-                description='Creates a panel in the voice and in the channel allocated for this purpose',
+                label=i18n.t(locale, 'settings.tempvoice.panel.type_message.every.label'),
+                description=i18n.t(locale, 'settings.tempvoice.panel.type_message.every.description'),
                 value=3,
                 default=type_message_panel == 3
             ),
@@ -70,13 +79,15 @@ class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
         await gdb.set_on_json('tempvoice', 'type_message_panel', value)
 
         await self.view.edit_panel(interaction)
-        await self.view.update(interaction)
+
+        view = await TypePanelView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 @AsyncSterilization
 class TypePanelView(ViewOptionItem):
-    label = 'Panel Type'
-    description = 'Open Panel Type Settings'
+    label = 'settings.tempvoice.panel.label'
+    description = 'settings.tempvoice.panel.description'
 
     async def __init__(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)

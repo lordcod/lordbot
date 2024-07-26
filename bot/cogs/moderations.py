@@ -31,34 +31,76 @@ class Moderations(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    @commands.has_permissions(manage_guild=True)
-    @commands.bot_has_permissions(send_messages=True)
-    async def say(self, ctx: commands.Context, *, message: str):
+    async def say(self, ctx: commands.Context, channel: Optional[nextcord.TextChannel] = None, *, message: str):
+        if channel is None and ctx.guild is None:
+            return
+        if channel is None:
+            channel = ctx.channel
+
+        guild = channel.guild
+        member = guild.get_member(ctx.author.id)
+
+        if member is None:
+            raise commands.MissingPermissions(['manage_guild'])
+
+        perms = channel.permissions_for(member)
+        if not perms.manage_guild:
+            raise commands.MissingPermissions(['manage_guild'])
+
+        bot_perms = channel.permissions_for(guild.me)
+        if not (bot_perms.send_messages or bot_perms.manage_messages or bot_perms.read_messages or bot_perms.embed_links):
+            raise commands.BotMissingPermissions(['send_messages', 'manage_messages', 'read_messages', 'embed_links'])
+
+        message = str(message)
+
         files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
                                        for attach in ctx.message.attachments])
 
-        res = await utils.generate_message(message)
+        res = utils.generate_message(message)
 
+        await ctx.send(**res, files=files)
+
+        await ctx.message.delete()
+
+    @commands.command()
+    async def edit(self, ctx: commands.Context, message: nextcord.Message, *, message_data: str):
+        guild = message.guild
+        channel = message.channel
+        member = guild.get_member(ctx.author.id)
+
+        if member is None or not channel.permissions_for(member).manage_guild:
+            raise commands.MissingPermissions(['manage_guild'])
+
+        bot_perms = channel.permissions_for(guild.me)
+        if not (bot_perms.send_messages and bot_perms.manage_messages and bot_perms.read_messages and bot_perms.embed_links):
+            raise commands.BotMissingPermissions(['send_messages', 'manage_messages', 'read_messages', 'embed_links'])
+
+        files = await asyncio.gather(*[attach.to_file(spoiler=attach.is_spoiler())
+                                       for attach in ctx.message.attachments])
+
+        res = utils.generate_message(message_data)
         await ctx.send(**res, files=files)
 
         await ctx.message.delete()
 
     @commands.command(aliases=["set", "setting"])
     @commands.has_permissions(manage_guild=True)
+    @commands.bot_has_permissions(manage_guild=True, send_messages=True, view_channel=True, embed_links=True)
     async def settings(self, ctx: commands.Context):
         view = await SettingsView(ctx.author)
 
         await ctx.send(embed=view.embed, view=view)
 
     @nextcord.slash_command(name="delete-category", default_member_permissions=48)
-    @application_checks.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True, send_messages=True, view_channel=True, embed_links=True)
     async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
         view = await DelCatView(interaction.user, category)
 
         await interaction.response.send_message(embed=view.embed, view=view)
 
     @commands.group(name='ban', aliases=["tempban"], invoke_without_command=True)
-    @commands.has_permissions(manage_roles=True)
+    @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(ban_members=True, send_messages=True, view_channel=True, embed_links=True)
     async def temp_ban(
         self,
         ctx: commands.Context,
@@ -109,11 +151,11 @@ class Moderations(commands.Cog):
         locale = await gdb.get('language')
 
         rsdb = BanDateBases(ctx.guild.id)
-        datas = await rsdb.get_as_guild()
+        data = await rsdb.get_as_guild()
 
         message = ""
 
-        for quantity, (member_id, ban_time) in enumerate(datas):
+        for quantity, (member_id, ban_time) in enumerate(data):
             message += f"{quantity}. <@{member_id}> (<t:{ban_time}:R>)\n"
 
         message = message or i18n.t(locale, 'tempban.list.nf')
@@ -127,6 +169,7 @@ class Moderations(commands.Cog):
 
     @commands.group(name='temp-role', aliases=['temprole'], invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True, send_messages=True, view_channel=True, embed_links=True)
     async def temp_role(
         self,
         ctx: commands.Context,
@@ -188,14 +231,14 @@ class Moderations(commands.Cog):
 
         if member is not None:
             rsdb = RoleDateBases(ctx.guild.id, member.id)
-            datas = await rsdb.get_as_member()
+            data = await rsdb.get_as_member()
         else:
             rsdb = RoleDateBases(ctx.guild.id)
-            datas = await rsdb.get_as_guild()
+            data = await rsdb.get_as_guild()
 
         message = ""
 
-        for quantity, (member_id, role_id, role_time) in enumerate(datas):
+        for quantity, (member_id, role_id, role_time) in enumerate(data):
             member = ctx.guild.get_member(member_id)
             role = ctx.guild.get_role(role_id)
 
@@ -227,6 +270,7 @@ class Moderations(commands.Cog):
         name='role',
         description='If you want to copy the role but still keep the rights, then this is the command for you'
     )
+    @application_checks.bot_has_permissions(manage_roles=True, send_messages=True, view_channel=True, embed_links=True)
     async def clone_role(
         self,
         interaction: nextcord.Interaction,
@@ -259,6 +303,7 @@ class Moderations(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=["clear", "clean"])
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True, send_messages=True, view_channel=True)
     async def purge(self, ctx: commands.Context, limit: int):
         gdb = GuildDateBases(ctx.guild.id)
         locale = await gdb.get('language')
@@ -295,6 +340,7 @@ class Moderations(commands.Cog):
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True, send_messages=True, view_channel=True)
     async def user(self, ctx: commands.Context, member: nextcord.Member, limit: int):
         gdb = GuildDateBases(ctx.guild.id)
         locale = await gdb.get('language')
@@ -333,6 +379,7 @@ class Moderations(commands.Cog):
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True, send_messages=True, view_channel=True)
     async def between(self, ctx: commands.Context,
                       message_start: nextcord.Message,
                       message_finish: nextcord.Message):
@@ -373,6 +420,7 @@ class Moderations(commands.Cog):
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True, send_messages=True, view_channel=True)
     async def until(self, ctx: commands.Context,
                     message_start: nextcord.Message):
         gdb = GuildDateBases(ctx.guild.id)

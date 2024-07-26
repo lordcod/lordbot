@@ -79,6 +79,8 @@ Message = Union[str, Dict[str, Any]]
 class TicketsMessagesPayload(TypedDict):
     panel: Message
     open: Message
+    category: Optional[Message]
+    controller: Message
     close: Message
     reopen: Message
     delete: Message
@@ -148,7 +150,6 @@ class PartialCategoryPayload(TypedDict):
     closed_category_id: Optional[int]
     moderation_roles: Optional[List[int]]
     user_closed: Optional[bool]
-    moderation_mention: Optional[bool]
     approved_roles: Optional[List[int]]
     saving_history: Optional[bool]
     auto_archived: Optional[int]

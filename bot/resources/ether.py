@@ -77,6 +77,12 @@ class Emoji(StrEnum):
     online = '<:online:1264700950585675776>'
     offline = '<:offline:1264700948702298192>'
 
+    envelope_complete = '<:envelope_complete:1265711863040053280>'
+    envelope_create = '<:envelope_create:1265711868165623922>'
+    envelope_panel = '<:envelope_panel:1265711869977690303>'
+    envelope = '<:envelope_default:1265711865187794996>'
+    garbage = '<:garbage:1265711866668122212>'
+
 
 every_emojis = {}
 

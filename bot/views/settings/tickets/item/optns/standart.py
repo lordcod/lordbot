@@ -1,5 +1,7 @@
 from abc import ABC
 
+import copy
+from functools import partial
 from typing import Any, Optional, overload
 import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
@@ -81,14 +83,30 @@ class OptionItem(ABC):
 
 
 class FunctionOptionItem(OptionItem):
-    ...
+    async def render_label(self, guild: nextcord.Guild, message_id: int):
+        pass
 
 
 class ViewOptionItem(DefaultSettingsView, OptionItem):
     embed: Optional[nextcord.Embed] = None
 
+    def __init__(
+        self,
+        *,
+        timeout: Optional[float] = 180,
+        auto_defer: bool = True,
+        prevent_update: bool = True
+    ) -> None:
+        super().__init__(timeout=timeout, auto_defer=auto_defer, prevent_update=prevent_update)
+
     def edit_row_back(self, row: int) -> None:
-        self.back.__discord_ui_model_kwargs__['row'] = row
+        old_row = self.back._rendered_row
+        self.back.row = row
+        self.back._rendered_row = row
+        if old_row is not None:
+            weights = self._View__weights
+            weights.weights[old_row] -= 1
+            weights.weights[row] += 1
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

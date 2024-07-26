@@ -200,7 +200,7 @@ class WelcomerView(DefaultSettingsView):
         content: str = greeting_message.get('message')
         payload = utils.get_payload(member=interaction.user)
         message_format = utils.lord_format(content, payload)
-        message_data = await utils.generate_message(message_format)
+        message_data = utils.generate_message(message_format)
 
         if image_link := greeting_message.get('image'):
             image_bytes = await utils.generate_welcome_image(interaction.user, image_link)

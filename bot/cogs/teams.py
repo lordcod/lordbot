@@ -18,7 +18,7 @@ class Teams(commands.Cog):
         self.bot.dispatch('disconnect')
         await self.bot.close()
 
-    @commands.command()
+    @commands.command(aliases=['sudo'])
     @commands.guild_only()
     @check.team_only()
     async def subo(
@@ -27,13 +27,13 @@ class Teams(commands.Cog):
         ctx.message.author = member
         await self.bot.process_with_str(ctx.message, command)
 
-    @commands.command()
+    @commands.command(aliases=['load_cog'])
     @check.team_only()
     async def load_extension(self, ctx: commands.Context, name):
         self.bot.load_extension(f"bot.cogs.{name}")
         await ctx.send(f"Service **{name}** successfully enabled")
 
-    @commands.command()
+    @commands.command(aliases=['api_config'])
     @check.team_only()
     async def get_api_config(self, ctx: commands.Context):
         api = self.bot.apisite
@@ -41,7 +41,7 @@ class Teams(commands.Cog):
                        f'Public url: {api.callback_url}\n'
                        f'Password: {api.password}')
 
-    @commands.command()
+    @commands.command(aliases=['unload_cog'])
     @check.team_only()
     async def unload_extension(self, ctx: commands.Context, name):
         if name == "teams":
@@ -50,13 +50,13 @@ class Teams(commands.Cog):
         self.bot.unload_extension(f"bot.cogs.{name}")
         await ctx.send(f"Service **{name}** successfully shut down")
 
-    @commands.command()
+    @commands.command(aliases=['reload_cog'])
     @check.team_only()
     async def reload_extension(self, ctx: commands.Context, name):
         self.bot.reload_extension(f"bot.cogs.{name}")
         await ctx.send(f"The **{name}** service has been successfully reloaded!")
 
-    @commands.command()
+    @commands.command(aliases=['reload_cogs', 'reload_all_cogs'])
     @check.team_only()
     async def reload_all_extensions(self, ctx: commands.Context):
         exts = self.bot.extensions
@@ -66,7 +66,7 @@ class Teams(commands.Cog):
 
         await ctx.send("All services have been successfully restarted")
 
-    @commands.command()
+    @commands.command(aliases=['cogs'])
     @check.team_only()
     async def extensions(self, ctx: commands.Context):
         exts = self.bot.extensions
@@ -85,7 +85,7 @@ class Teams(commands.Cog):
         self.bot.engine.execute(query)
         await ctx.message.add_reaction(Emoji.success)
 
-    @commands.command()
+    @commands.command(aliases=['update_db'])
     @check.team_only()
     async def update_redis(
         self,

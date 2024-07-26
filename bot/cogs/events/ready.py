@@ -154,18 +154,18 @@ class ReadyEvent(commands.Cog):
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
-        datas = await bsdb.get_all()
+        data = await bsdb.get_all()
 
-        for (guild_id, member_id, ban_time) in datas:
+        for (guild_id, member_id, ban_time) in data:
             mbrsd = BanDateBases(guild_id, member_id)
             self.bot.lord_handler_timer.create(
                 ban_time-time.time(), mbrsd.remove_ban(self.bot._connection), f"ban:{guild_id}:{member_id}")
 
     async def process_temp_roles(self):
         rsdb = RoleDateBases()
-        datas = await rsdb.get_all()
+        data = await rsdb.get_all()
 
-        for (guild_id, member_id, role_id, role_time) in datas:
+        for (guild_id, member_id, role_id, role_time) in data:
             if not (
                 (guild := self.bot.get_guild(guild_id))
                 and (member := guild.get_member(member_id))

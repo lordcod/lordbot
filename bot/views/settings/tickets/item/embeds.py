@@ -39,6 +39,7 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
     channel_id = ticket_data.get('channel_id')
     message_id = ticket_data.get('message_id')
     mod_roles = ticket_data.get('moderation_roles', [])
+    approved_roles = ticket_data.get('approved_roles')
     global_tickets_limit = ticket_data.get('global_user_tickets_limit')
     tickets_limit = ticket_data.get('user_tickets_limit')
     categories = ticket_data.get('categories')
@@ -69,20 +70,39 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
     else:
         modal_message = f'— Modals: {Emoji.offline}'
 
+    description_info = (
+        f'Linked Channel: {channel.mention}\n'
+        f'Linked Message: {message.jump_url}'
+    )
+
+    if ticket_type == 1:
+        category = guild.get_channel(ticket_data.get('category_id'))
+        closed_category = guild.get_channel(ticket_data.get('closed_category_id'))
+        if category is not None:
+            description_info += f'\nTicket Category: {category.mention}'
+        if closed_category is not None:
+            description_info += f'\nTicket Closed Category: {closed_category.mention}'
+
     embed = nextcord.Embed(
         title=f'Ticket #{ticket_index}',
         color=color,
         description=(
             'The tickets module allows you to create and manage support requests, '
             'helping participants to easily open tickets, and administrators to effectively track and solve them.\n\n'
-            f'Linked Channel: {channel.mention}\n'
-            f'Linked Message: {message.jump_url}'
+            f'{description_info}'
         )
     )
     embed.add_field(
         name='',
         value=join_args(
             ('— Enabled: ', get_emoji(enabled)),
+            ('— Closing by user:', get_emoji(user_closed)),
+            ('— Allowed roles: '+(', '.join([
+                role.mention
+                for role_id in approved_roles or []
+                if (role := guild.get_role(role_id))
+            ]) or 'There are no allowed'),
+                approved_roles is not None),
             ('— Agent roles: ', ', '.join([
                 role.mention
                 for role_id in mod_roles
@@ -91,7 +111,6 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
             ('― Ticket type: ', ticket_type_message),
             ('― Global ticket limit: ', global_tickets_limit),
             ('— Category ticket limit: ', tickets_limit),
-            ('— Closing by the user:', get_emoji(user_closed)),
             (faq_message, True),
             (cat_message, True),
             (modal_message, True),

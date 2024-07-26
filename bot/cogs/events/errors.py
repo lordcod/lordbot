@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import sys
 import nextcord
@@ -11,6 +12,7 @@ from bot.resources.errors import (CallbackCommandError,
                                   MissingRole,
                                   MissingChannel,
                                   CommandOnCooldown)
+from bot.resources.info import DISCORD_SUPPORT_SERVER
 
 _log = logging.getLogger(__name__)
 
@@ -78,6 +80,32 @@ class PermissionChecker:
             raise MissingChannel()
         return True
 
+    async def _is_denyed_role(self, data: dict) -> bool:
+        "The `is_allowed` subsection is needed to verify roles"
+        ctx = self.ctx
+        author = ctx.author
+        aut_roles_ids = author._roles
+
+        if not data:
+            return True
+
+        common = set(data) & set(aut_roles_ids)
+        if common:
+            raise MissingRole()
+        return True
+
+    async def _is_denyed_channel(self, data: dict) -> bool:
+        "The `is_allowed` subsection is needed to verify channels"
+        ctx = self.ctx
+        channel = ctx.channel
+        channels_ids = data.get("channels", [])
+        categories_ids = data.get("categories", [])
+
+        if (channel.id in channels_ids or
+                channel.category_id in categories_ids):
+            raise MissingChannel()
+        return True
+
     async def _is_cooldown(self, data: dict) -> bool:
         ctx = self.ctx
 
@@ -99,6 +127,8 @@ class PermissionChecker:
     allowed_types = {
         'allow-role': _is_allowed_role,
         'allow-channel': _is_allowed_channel,
+        'deny-channel': _is_denyed_channel,
+        'deny-role': _is_denyed_role,
         'cooldown': _is_cooldown
     }
 
@@ -106,14 +136,35 @@ class PermissionChecker:
 class CommandEvent(commands.Cog):
     def __init__(self, bot: LordBot) -> None:
         self.bot = bot
+
         super().__init__()
 
         bot.after_invoke(self.after_invoke)
         bot.set_event(self.on_error)
         bot.set_event(self.on_command_error)
         bot.set_event(self.on_application_command_error)
+        bot.set_event(self.on_application_item_error)
 
         bot.add_check(self.permission_check)
+
+    async def on_application_item_error(
+        self,
+        exception: Exception,
+        item: nextcord.ui.Item,
+        interaction: nextcord.Interaction,
+    ) -> None:
+        if interaction.is_expired() and not interaction.response.is_done():
+            with contextlib.suppress(nextcord.NotFound):
+                await interaction.response.send_message(
+                    "There's been some kind of mistake!\n"
+                    "Check if the bot has the necessary permissions to execute this command!\n"
+                    f"Error ID (required for support): {item.custom_id}\n"
+                    f"If you couldn't figure out what's going on, contact the [support server]({DISCORD_SUPPORT_SERVER})!",
+                    ephemeral=True,
+                    flags=nextcord.MessageFlags(suppress_embeds=True)
+                )
+
+        _log.error("Ignoring exception in item %s with custom id %s:", item, item.custom_id, exc_info=exception)
 
     async def on_application_command_error(
         self,
@@ -129,6 +180,14 @@ class CommandEvent(commands.Cog):
         cog = interaction.application_command.parent_cog
         if cog and cog.has_application_command_error_handler():
             return
+
+        if not interaction.response.is_done():
+            await interaction.response.send_message("There's been some kind of mistake!\n"
+                                                    "Check if the bot has the necessary permissions to execute this command!\n"
+                                                    f"Error ID (required for support): specify the name of the commands\n"
+                                                    f"If you couldn't figure out what's going on, contact the [support server]({DISCORD_SUPPORT_SERVER})!",
+                                                    ephemeral=True,
+                                                    flags=nextcord.MessageFlags(suppress_embeds=True))
 
         _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=exception)
 

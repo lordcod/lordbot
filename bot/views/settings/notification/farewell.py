@@ -1,5 +1,4 @@
 import random
-import re
 import string
 from typing import Optional
 import nextcord
@@ -21,13 +20,16 @@ class FarewellMessageModal(nextcord.ui.Modal):
     embed = None
 
     async def __init__(self, guild: nextcord.Guild, data: dict):
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.data = data
 
-        super().__init__('Farewell')
+        super().__init__(i18n.t(locale, 'settings.notifi.farewell.title'))
 
         self.message = nextcord.ui.TextInput(
-            label='Message',
-            placeholder='You can use embed-builder to create a message.',
+            label=i18n.t(locale, 'settings.notifi.message.title'),
+            placeholder=i18n.t(locale, 'settings.notifi.message.placeholder'),
             style=nextcord.TextInputStyle.paragraph
         )
         self.add_item(self.message)
@@ -43,9 +45,13 @@ class FarewellMessageModal(nextcord.ui.Modal):
 @AsyncSterilization
 class FarewellChannelDropDown(nextcord.ui.ChannelSelect):
     async def __init__(self, guild: nextcord.Guild, data: dict):
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.data = data
 
-        super().__init__()
+        super().__init__(placeholder=i18n.t(locale, 'settings.notifi.dropdown.channel'),
+                         channel_types=[nextcord.ChannelType.text, nextcord.ChannelType.news])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -66,9 +72,9 @@ class FarewellView(DefaultSettingsView):
         farewell_data = await gdb.get('farewell_message', {})
 
         self.embed = nextcord.Embed(
-            title='Farewell',
+            title=i18n.t(locale, 'settings.notifi.farewell.title'),
             color=color,
-            description='Sends personalized goodbyes, acknowledges contributions, and provides reminders, enhancing user experience with a friendly touch.'
+            description=i18n.t(locale, 'settings.notifi.farewell.description')
         )
 
         self.data = data
@@ -86,14 +92,19 @@ class FarewellView(DefaultSettingsView):
         if self.data and 'channel_id' in self.data:
             channel_name = guild.get_channel(self.data['channel_id']).name
         else:
-            channel_name = 'unspecified'
+            channel_name = i18n.t(locale, 'settings.notifi.unspecified')
 
         self.add_item(get_info_dd(
-            placeholder=f'Channel: {channel_name}'
+            placeholder=i18n.t(locale, 'settings.notifi.dropdown.info_channel',
+                               channel=channel_name)
         ))
         self.add_item(await FarewellChannelDropDown(guild, self.data))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
+        self.view_message.label = i18n.t(locale, 'settings.button.preview_message')
+        self.change_message.label = i18n.t(locale, 'settings.button.change_message')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=0)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -123,7 +134,7 @@ class FarewellView(DefaultSettingsView):
         payload = get_payload(member=interaction.user)
 
         message_format = lord_format(message, payload)
-        data = await generate_message(message_format)
+        data = generate_message(message_format)
         await interaction.response.send_message(**data, ephemeral=True)
 
     @nextcord.ui.button(label='Change message', style=nextcord.ButtonStyle.blurple, row=1)

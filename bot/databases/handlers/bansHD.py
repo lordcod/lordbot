@@ -22,17 +22,17 @@ class BanDateBases:
 
     @on_error()
     async def get_all(self):
-        datas = await engine.fetchall('SELECT guild_id, member_id, time FROM bans')
-        return datas
+        data = await engine.fetchall('SELECT guild_id, member_id, time FROM bans')
+        return data
 
     @on_error()
     async def get_as_guild(self):
-        datas = await engine.fetchall(
+        data = await engine.fetchall(
             ('SELECT member_id, time FROM bans '
              'WHERE guild_id = %s'),
             [self.guild_id])
 
-        return datas
+        return data
 
     @on_error()
     async def get_as_member(self):

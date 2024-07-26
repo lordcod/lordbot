@@ -1,5 +1,6 @@
 import nextcord
 
+from bot.languages import i18n
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
@@ -26,29 +27,29 @@ class ChooseDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label='Change the amount of bonuses',
+                label=i18n.t(locale, 'settings.economy.init.dropdown.bonus'),
                 emoji=Emoji.bagmoney,
                 value='bonus'
             ),
             nextcord.SelectOption(
-                label='Change the emoji',
+                label=i18n.t(locale, 'settings.economy.init.dropdown.emoji'),
                 emoji=Emoji.emoji,
                 value='emoji'
             ),
             nextcord.SelectOption(
-                label='Change the shop roles',
+                label=i18n.t(locale, 'settings.economy.init.dropdown.shop'),
                 emoji=Emoji.auto_role,
                 value='shop'
             ),
             nextcord.SelectOption(
-                label='Change the settings theft',
+                label=i18n.t(locale, 'settings.economy.init.dropdown.theft'),
                 emoji=Emoji.theft,
                 value='theft'
             ),
         ]
 
         super().__init__(
-            placeholder="Economy Settings:",
+            placeholder=i18n.t(locale, 'settings.economy.init.dropdown.placeholder'),
             min_values=1,
             max_values=1,
             options=options
@@ -76,43 +77,42 @@ class Economy(DefaultSettingsView):
         operate: bool = self.es.get('operate')
 
         self.embed = nextcord.Embed(
-            title='The economic system',
-            description=(
-                "The economic system will allow your server to rise to a completely different level.\n"
-                "Games, levels, promotions, contests and more.\n"
-                "All this is in our economic system."
-            ),
+            title=i18n.t(locale, 'settings.economy.init.embed.title'),
+            description=i18n.t(locale, 'settings.economy.init.embed.description'),
             color=color
         )
         self.embed.add_field(
-            name="Economy Information",
-            value=(
-                f"・Daily reward: {self.es.get('daily')}\n"
-                f"・Weekly reward: {self.es.get('weekly')}\n"
-                f"・Monthly reward: {self.es.get('monthly')}\n"
-                f"・Minimum bid: {self.es.get('bet', DEFAULT_ECONOMY_SETTINGS['bet']).get('min')}\n"
-                f"・Maximum bid: {self.es.get('bet', DEFAULT_ECONOMY_SETTINGS['bet']).get('max')}\n"
-                f"・Minimum payment for work: {self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('min')}\n"
-                f"・Maximum payment for work: {self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('max')}\n"
-                f"・Cooldown for work: {display_time(self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('cooldown'), locale)}"
+            name=i18n.t(locale, 'settings.economy.init.info.name'),
+            value=i18n.t(
+                locale, 'settings.economy.init.info.value',
+                daily=self.es.get('daily'),
+                weekly=self.es.get('weekly'),
+                monthly=self.es.get('monthly'),
+                bet_min=self.es.get('bet', DEFAULT_ECONOMY_SETTINGS['bet']).get('min'),
+                bet_max=self.es.get('bet', DEFAULT_ECONOMY_SETTINGS['bet']).get('max'),
+                work_min=self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('min'),
+                work_max=self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('max'),
+                cooldown=display_time(self.es.get('work', DEFAULT_ECONOMY_SETTINGS['work']).get('cooldown'), locale),
             )
         )
 
         super().__init__()
 
         self.add_item(get_info_dd(
-            label='Economy emoji',
+            label=i18n.t(locale, 'settings.economy.init.emoji'),
             emoji=self.es.get('emoji')
         ))
         economy_dd = await ChooseDropDown(guild.id)
         self.add_item(economy_dd)
 
+        self.back.label = i18n.t(locale, 'settings.button.back')
+
         if operate:
-            self.economy_switcher.label = "Disable"
+            self.economy_switcher.label = i18n.t(locale, 'settings.button.disable')
             self.economy_switcher.style = nextcord.ButtonStyle.red
             self.economy_switcher_value = False
         else:
-            self.economy_switcher.label = "Enable"
+            self.economy_switcher.label = i18n.t(locale, 'settings.button.enable')
             self.economy_switcher.style = nextcord.ButtonStyle.green
             self.economy_switcher_value = True
 

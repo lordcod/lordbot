@@ -6,8 +6,9 @@ import nextcord
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
+from bot.misc import tempvoice
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
-from .information import advance_dd_voice_items, simple_dd_voice_items, description
+from .information import advance_dd_voice_items, simple_dd_voice_items
 from .functions import TempVoiceFunctioins
 
 
@@ -52,9 +53,9 @@ class TempVoiceSettingDropDown(nextcord.ui.StringSelect):
                          placeholder=i18n.t(locale, 'tempvoice.dropdown.set'),
                          options=[
                              nextcord.SelectOption(
-                                 label=description[opt['value']]['label'],
+                                 label=i18n.t(locale, f"tempvoice.items.description.{opt['value']}.label"),
                                  value=opt['value'],
-                                 description=description[opt['value']]['description'],
+                                 description=i18n.t(locale, f"tempvoice.items.description.{opt['value']}.description"),
                                  emoji=get_emoji(opt['emoji']),
                              )
                              for opt in iterator[0]
@@ -63,10 +64,11 @@ class TempVoiceSettingDropDown(nextcord.ui.StringSelect):
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
         await TempVoiceFunctioins().run_interaction(interaction, value)
-        await interaction.message.edit(view=self.view)
+
+        await tempvoice.TempVoiceModule.edit_panel_message(interaction.message)
 
 
-@AsyncSterilization
+@ AsyncSterilization
 class TempVoicePersmissionsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: Optional[int] = None) -> None:
         if guild_id is None:
@@ -86,9 +88,9 @@ class TempVoicePersmissionsDropDown(nextcord.ui.StringSelect):
                          placeholder=i18n.t(locale, 'tempvoice.dropdown.perm'),
                          options=[
                              nextcord.SelectOption(
-                                 label=description[opt['value']]['label'],
+                                 label=i18n.t(locale, f"tempvoice.items.description.{opt['value']}.label"),
                                  value=opt['value'],
-                                 description=description[opt['value']]['description'],
+                                 description=i18n.t(locale, f"tempvoice.items.description.{opt['value']}.description"),
                                  emoji=get_emoji(opt['emoji']),
                              )
                              for opt in iterator[1]
@@ -100,7 +102,7 @@ class TempVoicePersmissionsDropDown(nextcord.ui.StringSelect):
         await interaction.message.edit(view=self.view)
 
 
-@AsyncSterilization
+@ AsyncSterilization
 class AdvancedTempVoiceView(nextcord.ui.View):
     embed: nextcord.Embed
 

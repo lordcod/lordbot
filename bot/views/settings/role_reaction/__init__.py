@@ -1,5 +1,4 @@
 from typing import Optional
-from httpx import delete
 import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import ReactionRolePayload

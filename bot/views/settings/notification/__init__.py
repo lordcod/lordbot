@@ -1,7 +1,6 @@
 
 import nextcord
 
-from bot.resources.ether import Emoji
 from bot.views.settings._view import DefaultSettingsView
 from bot.views.settings.notification.farewell import FarewellView
 from bot.views.settings.notification.twitch import TwitchView
@@ -20,39 +19,29 @@ distribution = {
     'twitch': TwitchView,
     'youtube': YoutubeView,
 }
+distribution_emoji = {
+    'welcomer': 'welcmes',
+    'farewell': 'reject',
+    'twitch': 'twitch',
+    'youtube': 'youtube'
+}
 
 
 @utils.AsyncSterilization
 class NotificationDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int) -> None:
         gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
         get_emoji = await utils.get_emoji_wrap(gdb)
 
         options = [
             nextcord.SelectOption(
-                label='Welcomer',
-                value='welcomer',
-                description='',
-                emoji=get_emoji('welcmes')
-            ),
-            nextcord.SelectOption(
-                label='Farewell',
-                value='farewell',
-                description='',
-                emoji=get_emoji('reject')
-            ),
-            nextcord.SelectOption(
-                label='Twitch',
-                value='twitch',
-                description='',
-                emoji=get_emoji('twitch')
-            ),
-            nextcord.SelectOption(
-                label='Youtube',
-                value='youtube',
-                description='',
-                emoji=get_emoji('youtube')
-            ),
+                label=i18n.t(locale, f'settings.notifi.init.dropdown.{value}.title'),
+                value=value,
+                description=i18n.t(locale, f'settings.notifi.init.dropdown.{value}.title'),
+                emoji=get_emoji(distribution_emoji[value])
+            )
+            for value in distribution
         ]
         super().__init__(options=options)
 
@@ -72,9 +61,9 @@ class NotificationView(DefaultSettingsView):
         color = await self.gdb.get('color')
 
         self.embed = nextcord.Embed(
-            title='Notification Control Panel',
+            title=i18n.t(locale, 'settings.notifi.init.title'),
             color=color,
-            description='The notification module is designed for automatic integration with popular streaming platforms such as Twitch and YouTube, and is also equipped with greetings to new members and farewells.'
+            description=i18n.t(locale, 'settings.notifi.init.description')
         )
 
         super().__init__()

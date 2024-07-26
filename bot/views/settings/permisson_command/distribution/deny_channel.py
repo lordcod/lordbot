@@ -1,3 +1,4 @@
+from typing import List
 import nextcord
 
 from bot.misc.utils import AsyncSterilization
@@ -10,36 +11,49 @@ from bot.databases import GuildDateBases, CommandDB
 
 
 @AsyncSterilization
-class AllowRolesDropDown(nextcord.ui.RoleSelect):
+class DenyChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
         guild: nextcord.Guild,
         command_name: str
     ) -> None:
-        self.command_name = command_name
-        self.gdb = GuildDateBases(guild.id)
 
+        self.command_name = command_name
         super().__init__(
+            placeholder="Select the channels in which the command will work",
             min_values=1,
             max_values=15,
+            channel_types=[
+                nextcord.ChannelType.text,
+                nextcord.ChannelType.voice,
+                nextcord.ChannelType.category,
+                nextcord.ChannelType.news,
+                nextcord.ChannelType.stage_voice,
+                nextcord.ChannelType.guild_directory,
+                nextcord.ChannelType.forum
+            ]
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        for role in self.values.roles:
-            if role.is_integration() or role.is_bot_managed():
-                await interaction.response.send_message(
-                    content=f"The {role.mention} role cannot be assigned and is used for integration or by a bot.",
-                    ephemeral=True
-                )
-                return
+        channels: List[int] = []
+        categories: List[int] = []
+
+        for channel in self.values.channels:
+            if channel.type == nextcord.ChannelType.category:
+                categories.append(channel.id)
+            else:
+                channels.append(channel.id)
 
         cdb = CommandDB(interaction.guild_id)
         command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
-        command_data["distribution"]["allow-role"] = self.values.ids
+        command_data["distribution"]["deny-channel"] = {
+            'channels': channels,
+            'categories': categories
+        }
         await cdb.update(self.command_name, command_data)
 
-        view = await AllowRolesView(
+        view = await DenyChannelsView(
             interaction.guild,
             self.command_name
         )
@@ -47,8 +61,8 @@ class AllowRolesDropDown(nextcord.ui.RoleSelect):
 
 
 @AsyncSterilization
-class AllowRolesView(DefaultSettingsView):
-    embed: nextcord.Embed
+class DenyChannelsView(DefaultSettingsView):
+    embed: nextcord.Embed = None
 
     async def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
         self.command_name = command_name
@@ -59,25 +73,36 @@ class AllowRolesView(DefaultSettingsView):
         cdb = CommandDB(guild.id)
         command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
-        role_ids = command_data["distribution"].get(
-            "allow-role", [])
+
+        deny_data = command_data["distribution"].get(
+            "deny-channel", {})
+
+        channel_ids = deny_data.get('channels')
+        category_ids = deny_data.get('categories')
 
         self.embed = nextcord.Embed(
-            title="Allowed roles",
-            description="The selected command will only work in the roles that you select",
+            title="Allowed channels",
+            description="The selected command will only work in the channels that you select",
             color=color
         )
-        if role_ids:
+        if category_ids:
             self.embed.add_field(
-                name="Selected roles:",
-                value=', '.join([role.mention
-                                 for role_id in role_ids
-                                 if (role := guild.get_role(role_id))])
+                name="Selected categories:",
+                value=', '.join([channel.mention
+                                 for category_id in category_ids
+                                 if (channel := guild.get_channel(category_id))])
+            )
+        if channel_ids:
+            self.embed.add_field(
+                name="Selected channels:",
+                value=', '.join([channel.mention
+                                 for channel_id in channel_ids
+                                 if (channel := guild.get_channel(channel_id))])
             )
 
         super().__init__()
 
-        cdd = await AllowRolesDropDown(
+        cdd = await DenyChannelsDropDown(
             guild,
             command_name
         )
@@ -94,11 +119,10 @@ class AllowRolesView(DefaultSettingsView):
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         cdb = CommandDB(interaction.guild_id)
-
         command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
-        command_data["distribution"].pop("allow-role", None)
+        command_data["distribution"].pop("deny-channel", None)
         await cdb.update(self.command_name, command_data)
 
-        view = await AllowRolesView(interaction.guild, self.command_name)
+        view = await DenyChannelsView(interaction.guild, self.command_name)
         await interaction.response.edit_message(embed=view.embed, view=view)

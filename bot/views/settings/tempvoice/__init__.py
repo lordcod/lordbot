@@ -24,9 +24,9 @@ class TempVoiceView(DefaultSettingsView):
         data = await gdb.get('tempvoice')
 
         self.embed = nextcord.Embed(
-            title='Temporary Private Channels',
+            title=i18n.t(locale, 'settings.tempvoice.init.title'),
             color=color,
-            description='Temporary channels are created automatically when entering the trigger channel and deleted when exiting the created channel.\nThe user who created the channel manages it, including changing settings and applying user fog inside this channel.'
+            description=i18n.t(locale, 'settings.tempvoice.init.description')
         )
 
         super().__init__()
@@ -39,15 +39,20 @@ class TempVoiceView(DefaultSettingsView):
             self.add_item(optns)
 
             if data.get('enabled'):
-                self.remove_item(self.enable)
+                self.switch.label = i18n.t(locale, 'settings.button.disable')
+                self.switch.style = nextcord.ButtonStyle.red
             else:
                 optns.disabled = True
-                self.remove_item(self.disable)
+                self.switch.label = i18n.t(locale, 'settings.button.enable')
+                self.switch.style = nextcord.ButtonStyle.green
         else:
-            self.remove_item(self.enable)
-            self.remove_item(self.disable)
+            self.remove_item(self.switch)
+            self.remove_item(self.delete)
 
         self.back.label = i18n.t(locale, 'settings.button.back')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
+        self.create.label = i18n.t(locale, 'settings.button.create')
+        self.select.label = i18n.t(locale, 'settings.button.select')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -56,15 +61,38 @@ class TempVoiceView(DefaultSettingsView):
         view = await settings_menu.SettingsView(interaction.user)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
+    @nextcord.ui.button(label='Switch', style=nextcord.ButtonStyle.red)
+    async def switch(self,
+                     button: nextcord.ui.Button,
+                     interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        data = await gdb.get('tempvoice')
+        enabled = data.get('enabled')
+        await gdb.set_on_json('tempvoice', 'enabled', not enabled)
+
+        view = await TempVoiceView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red)
+    async def delete(self,
+                     button: nextcord.ui.Button,
+                     interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        await gdb.set('tempvoice', {})
+
+        view = await TempVoiceView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
     @nextcord.ui.button(label='Create', style=nextcord.ButtonStyle.blurple)
     async def create(self,
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
 
-        category = await interaction.guild.create_category(name='Private Channels')
+        category = await interaction.guild.create_category(name=i18n.t(locale, 'settings.tempvoice.init.create.category'))
         panel_channel = await interaction.guild.create_text_channel(
-            name='Control panel',
+            name=i18n.t(locale, 'settings.tempvoice.init.create.panel'),
             category=category,
             overwrites={
                 interaction.guild.default_role: nextcord.PermissionOverwrite(view_channel=True,
@@ -73,7 +101,7 @@ class TempVoiceView(DefaultSettingsView):
             }
         )
         channel = await interaction.guild.create_voice_channel(
-            name='[+] Create channel',
+            name=i18n.t(locale, 'settings.tempvoice.init.create.name'),
             category=category,
             user_limit=2,
             overwrites={
@@ -102,24 +130,4 @@ class TempVoiceView(DefaultSettingsView):
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
         view = await TempVoiceSelectorView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
-
-    @nextcord.ui.button(label='Disable', style=nextcord.ButtonStyle.red)
-    async def disable(self,
-                      button: nextcord.ui.Button,
-                      interaction: nextcord.Interaction):
-        gdb = GuildDateBases(interaction.guild_id)
-        await gdb.set_on_json('tempvoice', 'enabled', False)
-
-        view = await TempVoiceView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
-
-    @nextcord.ui.button(label='Enable', style=nextcord.ButtonStyle.success)
-    async def enable(self,
-                     button: nextcord.ui.Button,
-                     interaction: nextcord.Interaction):
-        gdb = GuildDateBases(interaction.guild_id)
-        await gdb.set_on_json('tempvoice', 'enabled', True)
-
-        view = await TempVoiceView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

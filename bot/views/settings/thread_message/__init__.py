@@ -59,8 +59,9 @@ class DropDown(nextcord.ui.StringSelect):
                 locale, 'settings.thread.init.channel', channel=channel.mention),
             color=color
         )
+        view = await ThreadData(channel, channel_data)
         await interaction.response.edit_message(embed=embed,
-                                                view=ThreadData(channel, channel_data))
+                                                view=view)
 
 
 @AsyncSterilization
