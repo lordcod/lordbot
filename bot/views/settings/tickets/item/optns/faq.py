@@ -8,7 +8,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import FaqPayload, TicketsPayload
 from bot.languages import i18n
-from bot.misc.utils import AsyncSterilization
+from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
 from .standart import OptionItem, ViewOptionItem
 
@@ -126,6 +126,7 @@ class TicketFAQTypeDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, faq: FaqPayload) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(gdb)
 
         faq_type = faq.get('type', DEFAULT_TICKET_FAQ_TYPE)
         faq_items = faq.get('items')
@@ -137,7 +138,8 @@ class TicketFAQTypeDropDown(nextcord.ui.StringSelect):
                 description=i18n.t(
                     locale, 'settings.tickets.faq.dropdown.dropdown.description'),
                 value=1,
-                default=faq_type == 1
+                default=faq_type == 1,
+                emoji=get_emoji('buttondropdown')
             ),
             nextcord.SelectOption(
                 label=i18n.t(
@@ -145,7 +147,8 @@ class TicketFAQTypeDropDown(nextcord.ui.StringSelect):
                 description=i18n.t(
                     locale, 'settings.tickets.faq.dropdown.button.description'),
                 value=2,
-                default=faq_type == 2
+                default=faq_type == 2,
+                emoji=get_emoji('buttonbutton')
             ),
         ]
         super().__init__(placeholder=i18n.t(locale, 'settings.tickets.faq.dropdown.type'),
@@ -209,6 +212,7 @@ class TicketFAQItemsDropDown(nextcord.ui.StringSelect):
 class TicketFAQView(ViewOptionItem):
     label = 'settings.tickets.faq.title'
     description = 'settings.tickets.faq.description'
+    emoji = 'ticfaq'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, selected_faq_item: Optional[int] = None):
         self.message_id = message_id

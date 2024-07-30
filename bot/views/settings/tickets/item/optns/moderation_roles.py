@@ -75,6 +75,7 @@ class TicketModRolesDropDown(nextcord.ui.RoleSelect):
 class TicketModRolesView(ViewOptionItem):
     label = 'settings.tickets.mod_roles.label'
     description = 'settings.tickets.mod_roles.description'
+    emoji = 'ticmodroles'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id

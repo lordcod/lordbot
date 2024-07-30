@@ -18,6 +18,7 @@ logs_items: List[LogType] = [
     LogType.punishment,
     LogType.economy,
     LogType.ideas,
+    LogType.roles
 ]
 
 

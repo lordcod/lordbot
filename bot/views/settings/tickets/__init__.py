@@ -41,7 +41,7 @@ class TicketsDropDown(nextcord.ui.StringSelect):
                              index=len(options)+1),
                 value=message_id,
                 description=f"#{channel}{get_category_name(channel)}",
-                emoji=get_emoji('tickets')
+                emoji=get_emoji('tic')
             ))
 
         disabled = len(options) == 0

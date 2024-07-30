@@ -54,6 +54,8 @@ def parse_permissions_string(permission_data: dict, mod_roles: list, guild_id: i
 
 
 class ModuleTicket:
+    # TODO: Add logs
+
     locale: Optional[str] = None
     settings_message = None
     selected_category: Optional[CategoryPayload] = None

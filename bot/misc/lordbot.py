@@ -100,7 +100,7 @@ class LordBot(commands.AutoShardedBot):
         i18n.config['locale'] = 'en'
         i18n.from_file("./bot/languages/localization_any.json")
 
-        for lang in ('en', 'ru'):
+        for lang in ():
             json_resource = i18n._parse_json(i18n._load_file(f"temp_loc_{lang}.json"))
             i18n.resource_dict[lang].update(json_resource)
             i18n.parser(json_resource, lang)

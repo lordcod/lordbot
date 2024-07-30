@@ -24,11 +24,11 @@ class ClosedUserFunction(FunctionOptionItem):
         if self.closed_user:
             self.label = 'settings.tickets.closed_user.label.disable'
             self.description = 'settings.tickets.closed_user.description.disable'
-            self.emoji = Emoji.offline
+            self.emoji = 'ticlose'
         else:
             self.label = 'settings.tickets.closed_user.label.enable'
             self.description = 'settings.tickets.closed_user.description.enable'
-            self.emoji = Emoji.online
+            self.emoji = 'ticopen'
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild.id)

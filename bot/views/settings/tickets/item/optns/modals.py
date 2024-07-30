@@ -292,6 +292,7 @@ class TicketFormsStyleDropDown(nextcord.ui.StringSelect):
 class TicketFormsView(ViewOptionItem):
     label = 'settings.tickets.modals.label'
     description = 'settings.tickets.modals.description'
+    emoji = 'ticforms'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, selected_item: Optional[int] = None):
         self.message_id = message_id

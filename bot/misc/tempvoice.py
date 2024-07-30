@@ -26,6 +26,7 @@ class VoiceStatus(IntEnum):
 
 
 class TempVoiceModule:
+    # TODO: added tempvoice log
     def __init__(self, member: nextcord.Member) -> None:
         self.member = member
 

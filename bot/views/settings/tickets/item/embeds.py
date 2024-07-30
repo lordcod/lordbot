@@ -1,19 +1,19 @@
 
-from typing import Any, Literal, Optional, Tuple
+from typing import Any,  Optional, Tuple
 import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
 from bot.languages import i18n
-from bot.resources.ether import Emoji
+from bot.misc.utils import get_emoji_as_color, get_emojis_class
 from bot.resources.info import DEFAULT_TICKET_TYPE
 
 
-def get_emoji(value: Any) -> Literal[Emoji.online, Emoji.offline]:
+def get_emoji(system_emoji: str, value: Any) -> str:
     if value:
-        return Emoji.online
+        return get_emoji_as_color(system_emoji, 'ticon')
     else:
-        return Emoji.offline
+        return get_emoji_as_color(system_emoji, 'ticoff')
 
 
 def join_args(*args: Tuple[str, Optional[Any]]) -> str:
@@ -32,6 +32,8 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
     gdb = GuildDateBases(guild.id)
     color = await gdb.get('color')
     locale = await gdb.get('language')
+    system_emoji = await gdb.get('system_emoji')
+    emoji_cls = get_emojis_class(system_emoji)
     tickets: TicketsPayload = await gdb.get('tickets')
     ticket_data = tickets[message_id]
     ticket_index = list(tickets.keys()).index(message_id)+1
@@ -62,21 +64,27 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
 
     if faq and faq_items:
         faq_message = i18n.t(locale, 'settings.tickets.embeds.faq.info',
-                             count=len(faq_items))
+                             count=len(faq_items),
+                             emoji=emoji_cls)
     else:
-        faq_message = i18n.t(locale, 'settings.tickets.embeds.faq.woc')
+        faq_message = i18n.t(locale, 'settings.tickets.embeds.faq.woc',
+                             emoji=emoji_cls)
 
     if categories:
         cat_message = i18n.t(locale, 'settings.tickets.embeds.category.info',
-                             count=len(categories))
+                             count=len(categories),
+                             emoji=emoji_cls)
     else:
-        cat_message = i18n.t(locale, 'settings.tickets.embeds.category.woc')
+        cat_message = i18n.t(locale, 'settings.tickets.embeds.category.woc',
+                             emoji=emoji_cls)
 
     if modals:
         modal_message = i18n.t(locale, 'settings.tickets.embeds.modals.info',
-                               count=len(modals))
+                               count=len(modals),
+                               emoji=emoji_cls)
     else:
-        modal_message = i18n.t(locale, 'settings.tickets.embeds.modals.woc')
+        modal_message = i18n.t(locale, 'settings.tickets.embeds.modals.woc',
+                               emoji=emoji_cls)
 
     description_info = i18n.t(locale, 'settings.tickets.embeds.description_info',
                               channel=channel.mention,
@@ -107,9 +115,9 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
     embed.add_field(
         name='',
         value=join_args(
-            (i18n.t(locale, 'settings.tickets.embeds.enabled'), get_emoji(enabled)),
+            (i18n.t(locale, 'settings.tickets.embeds.enabled'), get_emoji(system_emoji, enabled)),
             (i18n.t(locale, 'settings.tickets.embeds.user_closed'),
-             get_emoji(user_closed)),
+             get_emoji(system_emoji, user_closed)),
             (i18n.t(locale, 'settings.tickets.embeds.allowed_roles.desc')+(', '.join([
                 role.mention
                 for role_id in approved_roles or []

@@ -102,6 +102,7 @@ class TicketAllowedRolesDropDown(nextcord.ui.RoleSelect):
 class TicketAllowedRolesView(ViewOptionItem):
     label = 'settings.tickets.allow_roles.label'
     description = 'settings.tickets.allow_roles.description'
+    emoji = 'ticallowedroles'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id

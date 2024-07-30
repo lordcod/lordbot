@@ -114,7 +114,7 @@ class TicketMessagesDropDown(nextcord.ui.StringSelect):
 class TicketMessagesView(ViewOptionItem):
     label: str = "settings.tickets.messages.label"
     description: str = "settings.tickets.messages.description"
-    emoji: str = Emoji.envelope
+    emoji: str = 'ticmes'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, selected_value: Optional[str] = None) -> None:
         gdb = GuildDateBases(guild.id)

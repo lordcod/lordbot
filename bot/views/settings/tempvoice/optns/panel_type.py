@@ -11,6 +11,7 @@ class TypePanelDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, type_panel: int) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(gdb)
 
         options = [
             nextcord.SelectOption(
@@ -19,7 +20,8 @@ class TypePanelDropDown(nextcord.ui.StringSelect):
                 description=i18n.t(
                     locale, 'settings.tempvoice.panel.type.none.description'),
                 value=0,
-                default=type_panel == 0
+                default=type_panel == 0,
+                emoji=get_emoji('buttonnone')
             ),
             nextcord.SelectOption(
                 label=i18n.t(
@@ -27,7 +29,8 @@ class TypePanelDropDown(nextcord.ui.StringSelect):
                 description=i18n.t(
                     locale, 'settings.tempvoice.panel.type.button.description'),
                 value=1,
-                default=type_panel == 1
+                default=type_panel == 1,
+                emoji=get_emoji('buttonbutton')
             ),
             nextcord.SelectOption(
                 label=i18n.t(
@@ -37,7 +40,8 @@ class TypePanelDropDown(nextcord.ui.StringSelect):
                 description=i18n.t(
                     locale, 'settings.tempvoice.panel.type.dropdown.description'),
                 value=2,
-                default=type_panel == 2
+                default=type_panel == 2,
+                emoji=get_emoji('buttondropdown')
             ),
         ]
         super().__init__(options=options)
@@ -58,6 +62,7 @@ class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, type_message_panel: int) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(gdb)
 
         options = [
             nextcord.SelectOption(
@@ -102,6 +107,7 @@ class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
 class TypePanelView(ViewOptionItem):
     label = 'settings.tempvoice.panel.label'
     description = 'settings.tempvoice.panel.description'
+    emoji = 'advanced'
 
     async def __init__(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)

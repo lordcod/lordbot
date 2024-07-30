@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from dataclasses import dataclass
 import datetime
 from enum import IntEnum
@@ -8,6 +9,7 @@ import functools
 import logging
 from typing import Dict, List, Optional,  Tuple
 import nextcord
+from numpy import add
 
 from bot.databases import GuildDateBases
 from bot.misc.time_transformer import display_time
@@ -35,6 +37,7 @@ class LogType(IntEnum):
     voice_state = 5
     ticket = 6
     tempvoice = 7
+    roles = 8
 
 
 def embed_to_text(embed: nextcord.Embed) -> str:
@@ -79,6 +82,63 @@ async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: i
         _message_log[(channel_id, author_id)].set_result(moderator)
     except KeyError:
         pass
+
+
+_roles_tasks = {}
+_roles_db: Dict[str, Tuple[List[nextcord.Role], List[nextcord.Role]]] = {}
+
+
+def _start_role_task():
+    loop = asyncio.get_event_loop()
+    future = loop.create_future()
+    th = loop.call_later(10, future.set_result, None)
+
+    def wrapped():
+        nonlocal th
+        th.cancel()
+        th = loop.call_later(10, future.set_result, None)
+    return future, wrapped
+
+
+async def _wait_change_role(future: asyncio.Future, member: nextcord.Member):
+    with contextlib.suppress(asyncio.TimeoutError):
+        await asyncio.wait_for(future, timeout=60)
+    key = f'{member.guild.id}:{member.id}'
+
+    _added, _removed = map(set, _roles_db[key])
+    _missing = _added & _removed
+    added, removed = map(list, (_added-_missing, _removed-_missing))
+    if added or removed:
+        await Logs(member.guild).change_role(member, added, removed)
+
+    del _roles_tasks[key]
+    del _roles_db[key]
+
+
+async def pre_add_role(member: nextcord.Member, role: nextcord.Role) -> None:
+    key = f'{member.guild.id}:{member.id}'
+    task = _roles_tasks.get(key)
+    if task is None:
+        future, up = _start_role_task()
+        _roles_tasks[key] = up
+        _roles_db[key] = ([], [])
+        asyncio.create_task(_wait_change_role(future, member))
+    else:
+        task()
+    _roles_db[key][0].append(role)
+
+
+async def pre_remove_role(member: nextcord.Member, role: nextcord.Role) -> None:
+    key = f'{member.guild.id}:{member.id}'
+    task = _roles_tasks.get(key)
+    if task is None:
+        future, up = _start_role_task()
+        _roles_tasks[key] = up
+        _roles_db[key] = ([], [])
+        asyncio.create_task(_wait_change_role(future, member))
+    else:
+        task()
+    _roles_db[key][1].append(role)
 
 
 def on_logs(log_type: int):
@@ -410,31 +470,24 @@ class Logs:
                          icon_url=moderator.display_avatar)
         return Message(embed=embed)
 
-    @on_logs
-    async def add_role(self, member: nextcord.Member, role: nextcord.Role): ...
-
-    @on_logs
-    async def remove_role(self, member: nextcord.Member,
-                          role: nextcord.Role): ...
-
-    @on_logs
-    async def change_role(self, *args): ...
-
-    @on_logs
-    async def delete_role(self, role: nextcord.Role): ...
-
-    @on_logs
-    async def add_channel(
-        self, channel: nextcord.abc.GuildChannel): ...
-
-    @on_logs
-    async def change_channel(
-        self, channel: nextcord.abc.GuildChannel): ...
-
-    @on_logs
-    async def delete_channel(
-        self, channel: nextcord.abc.GuildChannel): ...
-
-    @on_logs
-    async def change_bot_settings(
-        self, user: nextcord.User, *args): ...
+    @on_logs(LogType.roles)
+    async def change_role(self, member: nextcord.Member, added: List[nextcord.Role], removed: List[nextcord.Role]):
+        embed = nextcord.Embed(
+            title='Сhanging roles',
+            description=(
+                f'Member: **{member.name} ({member.id})**'
+            ),
+            color=nextcord.Colour.orange()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        if added:
+            embed.add_field(
+                name='Added roles',
+                value=', '.join([role.mention for role in added])
+            )
+        if removed:
+            embed.add_field(
+                name='Removed roles',
+                value=', '.join([role.mention for role in removed])
+            )
+        return Message(embed=embed)

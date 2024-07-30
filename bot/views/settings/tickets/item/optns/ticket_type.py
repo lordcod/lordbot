@@ -50,6 +50,7 @@ class TypeTicketDropDown(nextcord.ui.StringSelect['TicketTypeView']):
 class TicketTypeView(ViewOptionItem):
     label = 'settings.tickets.type.label'
     description = 'settings.tickets.type.description'
+    emoji = 'tictype'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id

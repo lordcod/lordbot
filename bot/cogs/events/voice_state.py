@@ -18,6 +18,7 @@ class VoiceStateEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: nextcord.Member, before: nextcord.VoiceState, after: nextcord.VoiceState) -> None:
+        # add connect, disconnect, mute, unmmute, etc. log
         if before.channel is None and after.channel is not None:
             await asyncio.gather(
                 self.connect_to_voice(member)

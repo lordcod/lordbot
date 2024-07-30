@@ -498,6 +498,17 @@ class TranslatorFlags:
         return cls(args)
 
 
+class AdditEmoji:
+    ...
+
+
+def get_emojis_class(system_emoji: int):
+    obj = AdditEmoji()
+    for name, data in ether.every_emojis.items():
+        setattr(obj, name, data[system_emoji])
+    return obj
+
+
 async def get_emoji(guild_id: int, name: str):
     gdb = GuildDateBases(guild_id)
     system_emoji = await gdb.get('system_emoji')

@@ -12,7 +12,7 @@ from .standart import OptionItem
 class UserLimitModal(nextcord.ui.Modal, OptionItem):
     label = 'settings.tickets.limit.label'
     description = 'settings.tickets.limit.description'
-    emoji = 'limit'
+    emoji = 'ticlimit'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id

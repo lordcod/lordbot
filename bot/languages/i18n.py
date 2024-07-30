@@ -181,7 +181,7 @@ def parser(
     prefix: Optional[str] = None,
     loadable: bool = True,
 ) -> None:
-    for key, value in json_resource.items():
+    for key, value in list(json_resource.items()):
         if isinstance(value, dict):
             parser(
                 value, locale, f"{prefix+'.' if prefix else ''}{key}", loadable=loadable
@@ -209,11 +209,24 @@ def t(locale: Optional[str] = None, path: Optional[str] = None, **kwargs) -> str
     if not data:
         return data
 
-    return data.format(**kwargs, Emoji=Emoji)
+    if 'emoji' in kwargs:
+        kwargs['Emoji'] = kwargs.pop('emoji')
+    else:
+        kwargs['Emoji'] = Emoji
+
+    return data.format(**kwargs)
 
 
 if __name__ == "__main__":
     # from_file("./bot/languages/localization.json")
+
+    # load i18n key
+    # filecontent = _load_file("./bot/languages/localization_any.json")
+    # json_resource = _parse_json(filecontent)
+    # for lang in json_resource:
+    #     print(lang)
+    #     data = json_resource[lang]
+    #     parser(data, lang, loadable=False)
 
     # to_zip("./bot/languages/localization_any.json")
 
@@ -245,10 +258,10 @@ if __name__ == "__main__":
     #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    data = translation_with_languages(
-        "ru", "Команда для начала игры в блэкджек. Игроки должны ставить ставки и пытаться набрать 21 очко, обыгрывая дилера.",
-        default_languages)
-    print(orjson.dumps(data).decode())
+    # data = translation_with_languages(
+    #     "ru", "Команда для начала игры в блэкджек. Игроки должны ставить ставки и пытаться набрать 21 очко, обыгрывая дилера.",
+    #     default_languages)
+    # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(
@@ -263,4 +276,4 @@ if __name__ == "__main__":
     # To i18n format as any locales format
     # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    # to_file("./bot/languages/localization_test.json")
+    to_file("localization_test.json")
