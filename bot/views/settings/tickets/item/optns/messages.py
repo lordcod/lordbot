@@ -4,6 +4,7 @@ import orjson
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, generate_message, get_payload, lord_format
 from bot.resources.ether import Emoji
 from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU
@@ -11,15 +12,15 @@ from .standart import OptionItem, ViewOptionItem
 
 messages_data = {
     'panel': {
-        'label': 'Panel',
+        'label': 'settings.tickets.messages.panel',
         'emoji': Emoji.envelope_panel
     },
     'open': {
-        'label': 'Open',
+        'label': 'settings.tickets.messages.open',
         'emoji': Emoji.envelope_create
     },
     'category': {
-        'label': 'Category',
+        'label': 'settings.tickets.messages.category',
         'emoji': Emoji.envelope_complete
     }
 }
@@ -33,6 +34,9 @@ class TicketMessagesModal(nextcord.ui.Modal, OptionItem):
         message_id: int,
         selected_value: str
     ):
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.message_id = message_id
         self.selected_value = selected_value
 
@@ -45,9 +49,10 @@ class TicketMessagesModal(nextcord.ui.Modal, OptionItem):
         if not isinstance(message, str):
             message = orjson.dumps(message).decode()
 
-        label = messages_data[selected_value]['label']
+        label = i18n.t(locale, messages_data[selected_value]['label'])
 
-        super().__init__(f"Tickets {label} Message")
+        super().__init__(i18n.t(locale, 'settings.tickets.messages.modal',
+                                label=label))
 
         self.message = nextcord.ui.TextInput(
             label=label,
@@ -80,17 +85,21 @@ class TicketMessagesDropDown(nextcord.ui.StringSelect):
         message_id: int,
         selected_value: Optional[str] = None
     ) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         options = [
             nextcord.SelectOption(
-                label=data['label'],
+                label=i18n.t(locale, data['label']),
                 value=key,
                 default=key == selected_value,
                 emoji=data.get('emoji'),
-                description=data.get('description')
+                description=i18n.t(locale, data.get('description')) if data.get(
+                    'description') else None
             )
             for key, data in messages_data.items()
         ]
-        super().__init__(placeholder='Select the message you want to change',
+        super().__init__(placeholder=i18n.t(locale, 'settings.tickets.messages.dropdown'),
                          options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -103,11 +112,14 @@ class TicketMessagesDropDown(nextcord.ui.StringSelect):
 
 @AsyncSterilization
 class TicketMessagesView(ViewOptionItem):
-    label: str = "Ticket Messages"
-    description: str = "Change the standard messages to your own"
+    label: str = "settings.tickets.messages.label"
+    description: str = "settings.tickets.messages.description"
     emoji: str = Emoji.envelope
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, selected_value: Optional[str] = None) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.message_id = message_id
         self.selected_value = selected_value
 
@@ -121,9 +133,15 @@ class TicketMessagesView(ViewOptionItem):
         tmdd = await TicketMessagesDropDown(guild, message_id, selected_value)
         self.add_item(tmdd)
 
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.preview.label = i18n.t(locale, 'settings.button.preview')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.reset.label = i18n.t(locale, 'settings.button.reset')
+
     @nextcord.ui.button(label='Preview', style=nextcord.ButtonStyle.grey, disabled=True)
     async def preview(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         messages = ticket_data.get('messages', {})
@@ -131,9 +149,10 @@ class TicketMessagesView(ViewOptionItem):
         message_data = messages.get(self.selected_value)
         if message_data is not None and len(message_data) > 0:
             payload = get_payload(member=interaction.user)
-            message = generate_message(lord_format(message_data, payload), with_empty=True)
-        else:
-            message = {'content': f'{Emoji.cross} The message is not seated!'}
+            message = generate_message(lord_format(message_data, payload))
+        if message_data is None or len(message) == 0:
+            message = {'content': i18n.t(
+                locale, 'settings.tickets.messages.error.null')}
 
         await interaction.response.send_message(**message, ephemeral=True)
 

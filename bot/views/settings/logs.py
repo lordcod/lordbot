@@ -31,7 +31,8 @@ class ChannelSetDropDown(nextcord.ui.StringSelect):
             nextcord.SelectOption(
                 label=channel.name,
                 value=channel_id,
-                description=', '.join([log_item.name for log_item in logs_items if log_item.id in log_ids])[:100],
+                description=', '.join(
+                    [i18n.t(locale, f'settings.logs.items.{log_item.name}.title') for log_item in logs_items if log_item.value in log_ids])[:100],
                 emoji=Emoji.channel_text,
                 default=channel_id == selected_channel_id
             )
@@ -83,7 +84,8 @@ class LogsDropDown(nextcord.ui.StringSelect):
         options = [
             nextcord.SelectOption(
                 label=i18n.t(locale, f'settings.logs.items.{log.name}.title'),
-                description=i18n.t(locale, f'settings.logs.items.{log.name}.description'),
+                description=i18n.t(
+                    locale, f'settings.logs.items.{log.name}.description')[:100],
                 value=log.value,
                 default=log.value in channel_data
             )
@@ -139,7 +141,7 @@ class LogsView(DefaultSettingsView):
         self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
 
-        self.add_item(await ChannelSetDropDown(guild))
+        self.add_item(await ChannelSetDropDown(guild, selected_channel_id))
         self.add_item(await ChannelDropDown(guild.id))
         self.add_item(await LogsDropDown(
             guild.id, selected_channel_id, selected_logs))

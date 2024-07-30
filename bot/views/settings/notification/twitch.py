@@ -13,7 +13,8 @@ from bot.views.settings import notification
 from bot.views.settings._view import DefaultSettingsView
 
 
-def generate_hex(): return ''.join([random.choice(string.hexdigits) for _ in range(18)])
+def generate_hex(): return ''.join(
+    [random.choice(string.hexdigits) for _ in range(18)])
 
 
 @AsyncSterilization
@@ -59,7 +60,8 @@ class TwitchItemModal(nextcord.ui.Modal):
 
         self.username = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.notifi.twitch.modal.label'),
-            placeholder=i18n.t(locale, 'settings.notifi.twitch.modal.description'),
+            placeholder=i18n.t(
+                locale, 'settings.notifi.twitch.modal.description'),
         )
         self.add_item(self.username)
 
@@ -141,15 +143,18 @@ class TwitchItemView(nextcord.ui.View):
             else:
                 userinfo = await bot.twnoti.get_user_info(username)
 
-        user = f'{userinfo.display_name} ({userinfo.login})' if userinfo else i18n.t('settings.notifi.unspecified')
-        channel_name = channel.mention if (channel := guild.get_channel(data.get('channel_id'))) else i18n.t('settings.notifi.unspecified')
+        user = f'{userinfo.display_name} ({userinfo.login})' if userinfo else i18n.t(
+            'settings.notifi.unspecified')
+        channel_name = channel.mention if (channel := guild.get_channel(
+            data.get('channel_id'))) else i18n.t('settings.notifi.unspecified')
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.notifi.twitch.title'),
             color=color,
             description=i18n.t(locale, 'settings.notifi.twitch.description')
         )
-        self.embed.set_thumbnail(userinfo.profile_image_url if userinfo else None)
+        self.embed.set_thumbnail(
+            userinfo.profile_image_url if userinfo else None)
         self.embed.add_field(
             name='',
             value=i18n.t(locale, 'settings.notifi.twitch.field',
@@ -171,9 +176,12 @@ class TwitchItemView(nextcord.ui.View):
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
-        self.view_message.label = i18n.t(locale, 'settings.button.preview_message')
-        self.change_message.label = i18n.t(locale, 'settings.button.change_message')
-        self.change_username.label = i18n.t(locale, 'settings.button.change_username')
+        self.view_message.label = i18n.t(
+            locale, 'settings.button.preview_message')
+        self.change_message.label = i18n.t(
+            locale, 'settings.button.change_message')
+        self.change_username.label = i18n.t(
+            locale, 'settings.button.change_username')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -234,7 +242,8 @@ class TwitchItemsDropDown(nextcord.ui.StringSelect):
         if disabled:
             options.append(nextcord.SelectOption(label='SelectOption'))
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.notifi.twitch.dropdown'), options=options, disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale, 'settings.notifi.twitch.dropdown'),
+                         options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
@@ -263,7 +272,7 @@ class TwitchView(DefaultSettingsView):
         self.add_item(await TwitchItemsDropDown(guild))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.back.label = i18n.t(locale, 'settings.button.add')
+        self.add.label = i18n.t(locale, 'settings.button.add')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

@@ -1,0 +1,31 @@
+{
+    "GlobalUpdates": [
+        0,
+        []
+    ],
+    "WasCorrupted": false,
+    "UserIds": [
+        2433209918
+    ],
+    "RobloxMetaData": [],
+    "MetaData": {
+        "SessionLoadCount": 9,
+        "ProfileCreateTime": 1722120336,
+        "LastUpdate": 1722331945,
+        "MetaTags": []
+    },
+    "Data": {
+        "Cars": [],
+        "Statistics": {
+            "Level": 1,
+            "EXP": 0
+        },
+        "Money": 570000,
+        "UsedPromocodes": [
+            "SORRY"
+        ],
+        "Tokens": 0,
+        "MaxCars": 5,
+        "Logs": []
+    }
+}

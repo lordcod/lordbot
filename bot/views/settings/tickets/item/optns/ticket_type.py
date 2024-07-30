@@ -2,6 +2,7 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.resources.info import DEFAULT_TICKET_TYPE
 from .standart import ViewOptionItem
@@ -10,16 +11,23 @@ from .standart import ViewOptionItem
 @AsyncSterilization
 class TypeTicketDropDown(nextcord.ui.StringSelect['TicketTypeView']):
     async def __init__(self, guild_id: int, ticket_type: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         options = [
             nextcord.SelectOption(
-                label='Channels',
-                description='A channel is created with access for the moderator and participant.',
+                label=i18n.t(
+                    locale, 'settings.tickets.type.dropdown.channel.label'),
+                description=i18n.t(
+                    locale, 'settings.tickets.type.dropdown.channel.description'),
                 value=1,
                 default=ticket_type == 1
             ),
             nextcord.SelectOption(
-                label='Threads',
-                description='A thread is created, to which moderators and participants are added.',
+                label=i18n.t(
+                    locale, 'settings.tickets.type.dropdown.thread.label'),
+                description=i18n.t(
+                    locale, 'settings.tickets.type.dropdown.thread.description'),
                 value=2,
                 default=ticket_type == 2
             ),
@@ -40,8 +48,8 @@ class TypeTicketDropDown(nextcord.ui.StringSelect['TicketTypeView']):
 
 @AsyncSterilization
 class TicketTypeView(ViewOptionItem):
-    label = 'Ticket Type'
-    description = 'Specifies the preferred way to create a request: through a channel or through a thread.'
+    label = 'settings.tickets.type.label'
+    description = 'settings.tickets.type.description'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id

@@ -221,7 +221,7 @@ def get_payload(
     if member is not None and isinstance(member, nextcord.Member) and guild is None:
         guild = member.guild
     if guild is not None:
-        bot = guild._state._get_client().user
+        bot = guild._state.user
         bot_payload = MemberPayload(bot)
         bot_payload._prefix = 'bot'
 
@@ -458,6 +458,8 @@ class LordTemplate:
             key, default = self.parse_key(var)
             if key in forms:
                 data[every] = forms[key]
+                if not data[every] and default is not None:
+                    data[every] = default
             elif default is not None:
                 data[every] = default
         return data
@@ -623,7 +625,7 @@ class GuildEmoji:
 
 def to_rgb(color: str | int):
     if isinstance(color, str):
-        color = hex_int(f"{color.strip(' #0x'):0>6}"[:6])
+        color = hex_int(color.strip(' #0x')[:6])
 
     def _get_byte(byte: int) -> int:
         return (color >> (8 * byte)) & 0xFF
@@ -1024,9 +1026,11 @@ class GeneratorMessage:
             timestamp = data["timestamp"]
             if isinstance(timestamp, (int, float)):
                 try:
-                    data["timestamp"] = datetime.fromtimestamp(float(timestamp)).isoformat()
+                    data["timestamp"] = datetime.fromtimestamp(
+                        float(timestamp)).isoformat()
                 except OSError:
-                    data["timestamp"] = datetime.fromtimestamp(float(timestamp)//1000).isoformat()
+                    data["timestamp"] = datetime.fromtimestamp(
+                        float(timestamp)//1000).isoformat()
 
         with contextlib.suppress(KeyError):
             color = data["color"]

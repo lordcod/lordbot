@@ -36,9 +36,11 @@ class NotificationDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=i18n.t(locale, f'settings.notifi.init.dropdown.{value}.title'),
+                label=i18n.t(
+                    locale, f'settings.notifi.init.dropdown.{value}.title'),
                 value=value,
-                description=i18n.t(locale, f'settings.notifi.init.dropdown.{value}.title'),
+                description=i18n.t(
+                    locale, f'settings.notifi.init.dropdown.{value}.description'),
                 emoji=get_emoji(distribution_emoji[value])
             )
             for value in distribution

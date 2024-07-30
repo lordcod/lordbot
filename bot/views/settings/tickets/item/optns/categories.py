@@ -4,6 +4,7 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.resources.ether import Emoji
 from .standart import ViewOptionItem
@@ -21,6 +22,7 @@ class TicketCategoriesModal(nextcord.ui.Modal):
         self.selected_value = selected_value
 
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[message_id]
         categories = ticket_data.get('categories', [])
@@ -29,10 +31,10 @@ class TicketCategoriesModal(nextcord.ui.Modal):
             if selected_value is not None:
                 return categories[selected_value].get(name)
 
-        super().__init__('Ticket Category Item')
+        super().__init__(i18n.t(locale, 'settings.tickets.categories.modal.title'))
 
         self.label = nextcord.ui.TextInput(
-            label='Label',
+            label=i18n.t(locale, 'settings.tickets.categories.modal.label'),
             max_length=128,
             placeholder=get_data('label')
         )
@@ -41,7 +43,7 @@ class TicketCategoriesModal(nextcord.ui.Modal):
         self.add_item(self.label)
 
         self.emoji = nextcord.ui.TextInput(
-            label='Emoji',
+            label=i18n.t(locale, 'settings.tickets.categories.modal.emoji'),
             required=False,
             max_length=128,
             placeholder=get_data('emoji')
@@ -49,7 +51,8 @@ class TicketCategoriesModal(nextcord.ui.Modal):
         self.add_item(self.emoji)
 
         self.description = nextcord.ui.TextInput(
-            label='Description',
+            label=i18n.t(
+                locale, 'settings.tickets.categories.modal.description'),
             style=nextcord.TextInputStyle.paragraph,
             required=False,
             max_length=1024,
@@ -107,6 +110,7 @@ class TicketCategoriesDropDown(nextcord.ui.StringSelect):
         selected_value: Optional[str] = None
     ) -> None:
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[message_id]
         categories = ticket_data.get('categories', [])
@@ -126,7 +130,7 @@ class TicketCategoriesDropDown(nextcord.ui.StringSelect):
         if disabled:
             options.append(nextcord.SelectOption(label='SelectOption'))
 
-        super().__init__(placeholder='Select the category you want to change',
+        super().__init__(placeholder=i18n.t(locale, 'settings.tickets.categories.dropdown'),
                          options=options,
                          disabled=disabled)
 
@@ -140,11 +144,14 @@ class TicketCategoriesDropDown(nextcord.ui.StringSelect):
 
 @AsyncSterilization
 class TicketCategoriesView(ViewOptionItem):
-    label: str = "Ticket Categories"
-    description: str = "Select a category to edit or delete."
+    label: str = "settings.tickets.categories.title"
+    description: str = "settings.tickets.categories.description"
     emoji: str = Emoji.envelope_complete
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, selected_value: Optional[str] = None) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.message_id = message_id
         self.selected_value = selected_value
 
@@ -156,6 +163,11 @@ class TicketCategoriesView(ViewOptionItem):
 
         tсdd = await TicketCategoriesDropDown(guild, message_id, selected_value)
         self.add_item(tсdd)
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.add.label = i18n.t(locale, 'settings.button.add')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.success)
     async def add(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

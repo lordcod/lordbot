@@ -13,7 +13,8 @@ from bot.views.settings import notification
 from bot.views.settings._view import DefaultSettingsView
 
 
-def generate_hex(): return ''.join([random.choice(string.hexdigits) for _ in range(18)])
+def generate_hex(): return ''.join(
+    [random.choice(string.hexdigits) for _ in range(18)])
 
 
 @AsyncSterilization
@@ -65,7 +66,8 @@ class YoutubeChooseDropDown(nextcord.ui.StringSelect):
             )
             for ch in values
         ]
-        super().__init__(placeholder=i18n.t(locale, 'settings.notifi.youtube.choose.placeholder'), options=options)
+        super().__init__(placeholder=i18n.t(
+            locale, 'settings.notifi.youtube.choose.placeholder'), options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
@@ -144,7 +146,8 @@ class YoutubeItemModal(nextcord.ui.Modal):
 
         self.username = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.notifi.youtube.modal.label'),
-            placeholder=i18n.t(locale, 'settings.notifi.youtube.modal.description'),
+            placeholder=i18n.t(
+                locale, 'settings.notifi.youtube.modal.description'),
         )
         self.add_item(self.username)
 
@@ -194,7 +197,7 @@ class YoutubeItemView(nextcord.ui.View):
     async def __init__(self, guild: nextcord.Guild, selected_id: str, data: Optional[dict] = None):
         gdb = GuildDateBases(guild.id)
         color = await gdb.get('color')
-        locale = await gdb.get('locale')
+        locale = await gdb.get('language')
         youtube_data = await gdb.get('youtube_notification')
 
         if selected_id in youtube_data and not data:
@@ -205,8 +208,10 @@ class YoutubeItemView(nextcord.ui.View):
         userinfo = None
 
         if 'yt_id' in data:
-            cid: int = data['yt_id']
+            cid = data['yt_id']
             bot: LordBot = guild._state._get_client()
+
+            print(cid)
 
             if cid in bot.ytnoti.user_info:
                 userinfo = bot.ytnoti.user_info[cid]
@@ -215,8 +220,10 @@ class YoutubeItemView(nextcord.ui.View):
                 if len(response) > 0:
                     userinfo = response[0]
 
-        user = f'{userinfo.name} ({userinfo.id})' if userinfo else i18n.t('settings.notifi.unspecified')
-        channel_name = channel.mention if (channel := guild.get_channel(data.get('channel_id'))) else 'unspecified'
+        user = f'{userinfo.name} ({userinfo.id})' if userinfo else i18n.t(
+            'settings.notifi.unspecified')
+        channel_name = channel.mention if (channel := guild.get_channel(
+            data.get('channel_id'))) else 'unspecified'
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.notifi.youtube.title'),
@@ -245,9 +252,12 @@ class YoutubeItemView(nextcord.ui.View):
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
-        self.view_message.label = i18n.t(locale, 'settings.button.preview_message')
-        self.change_message.label = i18n.t(locale, 'settings.button.change_message')
-        self.change_username.label = i18n.t(locale, 'settings.button.change_username')
+        self.view_message.label = i18n.t(
+            locale, 'settings.button.preview_message')
+        self.change_message.label = i18n.t(
+            locale, 'settings.button.change_message')
+        self.change_username.label = i18n.t(
+            locale, 'settings.button.change_username')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=1)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -292,7 +302,7 @@ class YoutubeItemView(nextcord.ui.View):
 class YoutubeItemsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
-        locale = await gdb.get('locale')
+        locale = await gdb.get('language')
         youtube_data = await gdb.get('youtube_notification')
 
         options = [
@@ -308,7 +318,8 @@ class YoutubeItemsDropDown(nextcord.ui.StringSelect):
         if disabled:
             options.append(nextcord.SelectOption(label='SelectOption'))
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.notifi.youtube.dropdown'), options=options, disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale, 'settings.notifi.youtube.dropdown'),
+                         options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.values[0]
@@ -337,7 +348,7 @@ class YoutubeView(DefaultSettingsView):
         self.add_item(await YoutubeItemsDropDown(guild))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.back.label = i18n.t(locale, 'settings.button.add')
+        self.add.label = i18n.t(locale, 'settings.button.add')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

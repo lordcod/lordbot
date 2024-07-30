@@ -2,27 +2,29 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from .standart import OptionItem
 
 
 @AsyncSterilization
 class TicketNameModal(nextcord.ui.Modal, OptionItem):
-    label = 'Ticket name'
-    description = 'Change the default ticket name when opening'
+    label = 'settings.tickets.name.label'
+    description = 'settings.tickets.name.description'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id
 
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[message_id]
         name = ticket_data.get('names').get('open')
 
-        super().__init__('Tickets Name')
+        super().__init__(i18n.t(locale, 'settings.tickets.name.modal.title'))
 
         self.name = nextcord.ui.TextInput(
-            label='Name',
+            label=i18n.t(locale, 'settings.tickets.name.modal.label'),
             placeholder=name,
             max_length=128
         )

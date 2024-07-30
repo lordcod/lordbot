@@ -2,6 +2,7 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.resources.ether import Emoji
 from .standart import FunctionOptionItem
@@ -21,12 +22,12 @@ class ClosedUserFunction(FunctionOptionItem):
         self.closed_user = ticket_data.get('user_closed', True)
 
         if self.closed_user:
-            self.label = 'Disable closing by user'
-            self.description = 'Click to prohibit users from closing the ticket.'
+            self.label = 'settings.tickets.closed_user.label.disable'
+            self.description = 'settings.tickets.closed_user.description.disable'
             self.emoji = Emoji.offline
         else:
-            self.label = 'Enable closing by user'
-            self.description = 'Click to allow users to close the ticket.'
+            self.label = 'settings.tickets.closed_user.label.enable'
+            self.description = 'settings.tickets.closed_user.description.enable'
             self.emoji = Emoji.online
 
     async def callback(self, interaction: nextcord.Interaction) -> None:

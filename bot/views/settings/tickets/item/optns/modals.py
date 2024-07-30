@@ -7,6 +7,7 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import ModalItemPayload, TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.resources.ether import Emoji
 from .standart import ViewOptionItem
@@ -19,11 +20,11 @@ def get_emoji(value: Any) -> Literal[Emoji.online, Emoji.offline]:
         return Emoji.offline
 
 
-def get_style(value: Literal[1, 2]) -> str:
+def get_style(locale: str, value: Literal[1, 2]) -> str:
     if value == 1:
-        return 'Short'
+        return i18n.t(locale, 'settings.tickets.modals.style.short')
     else:
-        return 'Long'
+        return i18n.t(locale, 'settings.tickets.modals.style.long')
 
 
 def join_args(*args: Tuple[str, Optional[Any]]) -> str:
@@ -45,6 +46,7 @@ class TicketFormsModal(nextcord.ui.Modal):
         self.selected_item = selected_item
 
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         modals = ticket_data.get('modals')
@@ -52,16 +54,20 @@ class TicketFormsModal(nextcord.ui.Modal):
 
         if selected_item is not None:
             item = modals[selected_item]
-            super().__init__(f"Ticket Froms #{selected_item+1}")
+            style_num = item.get('style', nextcord.TextInputStyle.short.value)
+            style = nextcord.TextInputStyle(style_num)
+            super().__init__(i18n.t(locale, 'settings.tickets.modals.modal.title.info',
+                                    index=selected_item+1))
         else:
-            super().__init__("Ticket Froms")
+            style = nextcord.TextInputStyle.short
+            super().__init__(i18n.t(locale, 'settings.tickets.modals.modal.title.iwoi'))
 
         def get_data(name):
             if selected_item is not None:
                 return item.get(name)
 
         self.label = nextcord.ui.TextInput(
-            label='Label',
+            label=i18n.t(locale, 'settings.tickets.modals.modal.label'),
             max_length=128,
             placeholder=get_data('label')
         )
@@ -70,7 +76,8 @@ class TicketFormsModal(nextcord.ui.Modal):
         self.add_item(self.label)
 
         self.placeholder = nextcord.ui.TextInput(
-            label='Placeholder',
+            label=i18n.t(locale, 'settings.tickets.modals.modal.placeholder'),
+            style=style,
             max_length=128,
             required=False,
             placeholder=get_data('placeholder')
@@ -78,7 +85,8 @@ class TicketFormsModal(nextcord.ui.Modal):
         self.add_item(self.placeholder)
 
         self.default_value = nextcord.ui.TextInput(
-            label='Default value',
+            label=i18n.t(locale, 'settings.tickets.modals.modal.default'),
+            style=style,
             max_length=128,
             required=False,
             placeholder=get_data('default_value')
@@ -129,6 +137,9 @@ class TicketFormsModal(nextcord.ui.Modal):
 @AsyncSterilization
 class TicketFormsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, modals: Optional[List[ModalItemPayload]] = None, selected_item: Optional[int] = None) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         if modals is None:
             modals = []
 
@@ -149,7 +160,8 @@ class TicketFormsDropDown(nextcord.ui.StringSelect):
                 nextcord.SelectOption(label='SelectOption')
             )
 
-        super().__init__(placeholder="Select the form to edit or delete.", options=options, disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale, 'settings.tickets.modals.dropdown.forms'),
+                         options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = int(self.values[0])
@@ -162,11 +174,14 @@ class TicketFormsDropDown(nextcord.ui.StringSelect):
 @AsyncSterilization
 class TicketFormsRequiredDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, modal: Optional[ModalItemPayload], selected_item: Optional[int] = None) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         self.selected_item = selected_item
 
         if selected_item is None:
             options = [nextcord.SelectOption(label='SelectOption')]
-            super().__init__(placeholder="Specify whether the data is required for the form.",
+            super().__init__(placeholder=i18n.t(locale, 'settings.tickets.modals.dropdown.required.placeholder'),
                              options=options, disabled=True)
             return
 
@@ -174,22 +189,27 @@ class TicketFormsRequiredDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label='Required',
+                label=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.required.required.label'),
                 value=1,
-                description='The user will need to enter the data in the field.',
+                description=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.required.required.description'),
                 emoji=Emoji.online,
                 default=required
             ),
             nextcord.SelectOption(
-                label='Optional',
+                label=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.required.optional.label'),
                 value=0,
-                description='The user can optionally enter data in the field.',
+                description=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.required.optional.description'),
                 emoji=Emoji.offline,
                 default=not required
             ),
         ]
 
-        super().__init__(placeholder="Specify whether the data is required for the form.", options=options)
+        super().__init__(placeholder=i18n.t(locale,
+                                            'settings.tickets.modals.dropdown.required.placeholder'), options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = bool(int(self.values[0]))
@@ -212,34 +232,43 @@ class TicketFormsRequiredDropDown(nextcord.ui.StringSelect):
 @AsyncSterilization
 class TicketFormsStyleDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, modal: Optional[ModalItemPayload], selected_item: Optional[int] = None) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         self.selected_item = selected_item
 
         if selected_item is None:
             options = [nextcord.SelectOption(label='SelectOption')]
-            super().__init__(placeholder="Specify the short or paragraph form style",
-                             options=options, disabled=True)
+            super().__init__(placeholder=i18n.t(
+                locale, 'settings.tickets.modals.dropdown.style.placeholder'),
+                options=options, disabled=True)
             return
 
         style = modal.get('style', 1)
 
         options = [
             nextcord.SelectOption(
-                label='Short',
+                label=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.style.paragraph.label'),
                 value=1,
-                description='Indicates the short style of the form.',
+                description=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.style.paragraph.description'),
                 emoji=Emoji.online,
                 default=style == 1
             ),
             nextcord.SelectOption(
-                label='Paragraph',
+                label=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.style.short.label'),
                 value=2,
-                description='Displays the paragraph style of the form.',
+                description=i18n.t(
+                    locale, 'settings.tickets.modals.dropdown.style.short.description'),
                 emoji=Emoji.offline,
                 default=style == 2
             ),
         ]
 
-        super().__init__(placeholder="Specify the short or paragraph form style", options=options)
+        super().__init__(placeholder=i18n.t(
+            locale, 'settings.tickets.modals.dropdown.style.placeholder'), options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = int(self.values[0])
@@ -261,8 +290,8 @@ class TicketFormsStyleDropDown(nextcord.ui.StringSelect):
 
 @AsyncSterilization
 class TicketFormsView(ViewOptionItem):
-    label = 'Ticket Forms'
-    description = 'Set up the forms and its type.'
+    label = 'settings.tickets.modals.label'
+    description = 'settings.tickets.modals.description'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, selected_item: Optional[int] = None):
         self.message_id = message_id
@@ -270,6 +299,7 @@ class TicketFormsView(ViewOptionItem):
 
         gdb = GuildDateBases(guild.id)
         color = await gdb.get('color')
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         ticket_index = list(tickets.keys()).index(message_id)+1
@@ -278,12 +308,11 @@ class TicketFormsView(ViewOptionItem):
         item = None
 
         self.embed = nextcord.Embed(
-            title=f'Ticket #{ticket_index}',
+            title=i18n.t(locale, 'settings.tickets.modals.embed.title',
+                         index=ticket_index),
             color=color,
-            description=(
-                'The tickets module allows you to create and manage support requests, '
-                'helping participants to easily open tickets, and administrators to effectively track and solve them.'
-            )
+            description=i18n.t(
+                locale, 'settings.tickets.modals.embed.description')
         )
 
         if selected_item is not None:
@@ -291,12 +320,18 @@ class TicketFormsView(ViewOptionItem):
             self.embed.add_field(
                 name='',
                 value=join_args(
-                    ("— Creating embed inputs: ", get_emoji(ticket_data.get('creating_embed_inputs', True))),
-                    ("— Label: ", item.get('label')),
-                    ("— Placeholder: ", item.get('placeholder')),
-                    ("— Default value: ", item.get('default_value')),
-                    ("— Style: ", get_style(item.get('style', 1))),
-                    ("— Required: ", get_emoji(item.get('required', True)))
+                    (i18n.t(locale, 'settings.tickets.modals.info.embed'), get_emoji(
+                        ticket_data.get('creating_embed_inputs', True))),
+                    (i18n.t(locale, 'settings.tickets.modals.info.label'),
+                     item.get('label')),
+                    (i18n.t(locale, 'settings.tickets.modals.info.placeholder'),
+                     item.get('placeholder')),
+                    (i18n.t(locale, 'settings.tickets.modals.info.default'),
+                     item.get('default_value')),
+                    (i18n.t(locale, 'settings.tickets.modals.info.style'),
+                     get_style(locale, item.get('style', 1))),
+                    (i18n.t(locale, 'settings.tickets.modals.info.required'),
+                     get_emoji(item.get('required', True)))
                 )
             )
 
@@ -310,10 +345,12 @@ class TicketFormsView(ViewOptionItem):
             self.edit.disabled = False
             self.remove.disabled = False
         if created_embed:
-            self.switch_creating_embed_inputs.label = 'Disable creating embed inputs'
+            self.switch_creating_embed_inputs.label = i18n.t(
+                locale, 'settings.tickets.modals.button.create_embeds.disable')
             self.switch_creating_embed_inputs.style = nextcord.ButtonStyle.red
         else:
-            self.switch_creating_embed_inputs.label = 'Enable creating embed inputs'
+            self.switch_creating_embed_inputs.label = i18n.t(
+                locale, 'settings.tickets.modals.button.create_embeds.enable')
             self.switch_creating_embed_inputs.style = nextcord.ButtonStyle.green
 
         tfrdd = await TicketFormsRequiredDropDown(guild.id, item, selected_item)
@@ -324,6 +361,12 @@ class TicketFormsView(ViewOptionItem):
 
         tfdd = await TicketFormsDropDown(guild.id, modals, selected_item)
         self.add_item(tfdd)
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.add.label = i18n.t(locale, 'settings.button.add')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.remove.label = i18n.t(locale, 'settings.button.remove')
+        self.clear.label = i18n.t(locale, 'settings.button.clear')
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green, row=0)
     async def add(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -353,7 +396,8 @@ class TicketFormsView(ViewOptionItem):
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
-        ticket_data['creating_embed_inputs'] = not ticket_data.get('creating_embed_inputs')
+        ticket_data['creating_embed_inputs'] = not ticket_data.get(
+            'creating_embed_inputs')
         await gdb.set_on_json('tickets', self.message_id, ticket_data)
 
         view = await TicketFormsView(interaction.guild, self.message_id, self.selected_item)

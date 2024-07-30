@@ -1,6 +1,7 @@
 import os
 import random
 import string
+from threading import local
 import googletrans
 import orjson
 from typing import Optional, Dict, List
@@ -158,7 +159,8 @@ def to_file(filename: str) -> str:
 def to_zip(filename: str) -> str:
     import shutil
     import os
-    dirname = '_temp_localization_'+''.join([random.choice(string.hexdigits) for _ in range(4)])
+    dirname = '_temp_localization_' + \
+        ''.join([random.choice(string.hexdigits) for _ in range(4)])
     os.mkdir(dirname)
 
     filecontent = _load_file(filename)
@@ -190,13 +192,22 @@ def parser(
             )
 
 
-def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
-    if locale not in memoization_dict:
+def t(locale: Optional[str] = None, path: Optional[str] = None, **kwargs) -> str:
+    if path is None:
+        return
+
+    lang = locale
+
+    if locale not in memoization_dict or path not in memoization_dict[locale]:
         locale = config.get("locale")
-    if path not in memoization_dict[locale]:
-        data = memoization_dict[config.get("locale")][path]
-    else:
+
+    try:
         data = memoization_dict[locale][path]
+    except KeyError:
+        return f'{lang}.{path}'
+
+    if not data:
+        return data
 
     return data.format(**kwargs, Emoji=Emoji)
 

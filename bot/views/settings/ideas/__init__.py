@@ -21,15 +21,18 @@ class DropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=i18n.t(locale, f'settings.ideas.init.dropdown.{value}.description'),
+                label=i18n.t(
+                    locale, f'settings.ideas.init.dropdown.{value}.title'),
                 value=value,
-                description=i18n.t(locale, f'settings.ideas.init.dropdown.{value}.description')
+                description=i18n.t(
+                    locale, f'settings.ideas.init.dropdown.{value}.description')
             )
             for value in {'approved', 'mod_roles', 'offers', 'suggest', 'cooldown'}
         ]
 
         super().__init__(
-            placeholder=i18n.t(locale, 'settings.ideas.init.dropdown.placeholder'),
+            placeholder=i18n.t(
+                locale, 'settings.ideas.init.dropdown.placeholder'),
             min_values=1,
             max_values=1,
             options=options,
@@ -63,10 +66,12 @@ class IdeasView(DefaultSettingsView):
         description = ''
 
         if channel_suggest := guild.get_channel(ideas.get("channel_suggest_id")):
-            description += i18n.t(locale, 'settings.ideas.init.value.suggest', channel=channel_suggest.mention)
+            description += i18n.t(locale, 'settings.ideas.init.value.suggest',
+                                  channel=channel_suggest.mention)
 
         if channel_offers := guild.get_channel(ideas.get("channel_offers_id")):
-            description += i18n.t(locale, 'settings.ideas.init.value.offers', channel=channel_offers.mention)
+            description += i18n.t(locale, 'settings.ideas.init.value.offers',
+                                  channel=channel_offers.mention)
 
         if channel_approved := guild.get_channel(
                 ideas.get("channel_approved_id")):
@@ -99,8 +104,10 @@ class IdeasView(DefaultSettingsView):
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.enable.label = i18n.t(locale, 'settings.button.enable')
         self.disable.label = i18n.t(locale, 'settings.button.disable')
-        self.allow_image.label = i18n.t(locale, 'settings.ideas.button.allow_image')
-        self.thread_delete.label = i18n.t(locale, 'settings.ideas.button.thread_delete')
+        self.allow_image.label = i18n.t(
+            locale, 'settings.ideas.button.allow_image')
+        self.thread_delete.label = i18n.t(
+            locale, 'settings.ideas.button.thread_delete')
 
         if enabled:
             self.remove_item(self.enable)

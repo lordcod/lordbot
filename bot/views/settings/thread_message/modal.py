@@ -22,7 +22,8 @@ class ModalBuilder(nextcord.ui.Modal):
             label=i18n.t(
                 locale, 'settings.thread.modal.label'),
             placeholder=i18n.t(
-                locale, 'settings.thread.modal.placeholder')
+                locale, 'settings.thread.modal.placeholder'),
+            style=nextcord.TextInputStyle.paragraph
         )
 
         self.add_item(self.content)

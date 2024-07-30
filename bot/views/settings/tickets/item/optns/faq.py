@@ -7,6 +7,7 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import FaqPayload, TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
 from .standart import OptionItem, ViewOptionItem
@@ -19,6 +20,7 @@ class TicketFAQModal(nextcord.ui.Modal):
         self.selected_faq_item = selected_faq_item
 
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets_data: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets_data[message_id]
         faq = ticket_data.get('faq', {})
@@ -34,12 +36,12 @@ class TicketFAQModal(nextcord.ui.Modal):
                 return faq_item.get(name)
 
         if faq_item is None:
-            super().__init__('Ticket FAQ Item')
+            super().__init__(i18n.t(locale, 'settings.tickets.faq.modal.iwoi'))
         else:
-            super().__init__(f'Ticket FAQ Item #{selected_faq_item+1}')
+            super().__init__(i18n.t(locale, 'settings.tickets.faq.modal.item', index=selected_faq_item+1))
 
         self.label = nextcord.ui.TextInput(
-            label='Label',
+            label=i18n.t(locale, 'settings.tickets.faq.modal.label'),
             max_length=128,
             placeholder=get_data('label')
         )
@@ -48,7 +50,7 @@ class TicketFAQModal(nextcord.ui.Modal):
         self.add_item(self.label)
 
         self.emoji = nextcord.ui.TextInput(
-            label='Emoji',
+            label=i18n.t(locale, 'settings.tickets.faq.modal.emoji'),
             required=False,
             max_length=128,
             placeholder=get_data('emoji')
@@ -56,7 +58,7 @@ class TicketFAQModal(nextcord.ui.Modal):
         self.add_item(self.emoji)
 
         self.description = nextcord.ui.TextInput(
-            label='Description',
+            label=i18n.t(locale, 'settings.tickets.faq.modal.description'),
             style=nextcord.TextInputStyle.paragraph,
             required=False,
             max_length=1024,
@@ -65,7 +67,7 @@ class TicketFAQModal(nextcord.ui.Modal):
         self.add_item(self.description)
 
         self.response = nextcord.ui.TextInput(
-            label='Answer',
+            label=i18n.t(locale, 'settings.tickets.faq.modal.answer'),
             style=nextcord.TextInputStyle.paragraph,
             placeholder=get_data('response')
         )
@@ -122,24 +124,32 @@ class TicketFAQModal(nextcord.ui.Modal):
 @AsyncSterilization
 class TicketFAQTypeDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, faq: FaqPayload) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+
         faq_type = faq.get('type', DEFAULT_TICKET_FAQ_TYPE)
         faq_items = faq.get('items')
 
         options = [
             nextcord.SelectOption(
-                label='Dropdown',
-                description='Create a ticket through the last item in the drop-down menu with FAQ.',
+                label=i18n.t(
+                    locale, 'settings.tickets.faq.dropdown.dropdown.label'),
+                description=i18n.t(
+                    locale, 'settings.tickets.faq.dropdown.dropdown.description'),
                 value=1,
                 default=faq_type == 1
             ),
             nextcord.SelectOption(
-                label='Button',
-                description='You will have 2 FAQ buttons and create ticket.',
+                label=i18n.t(
+                    locale, 'settings.tickets.faq.dropdown.button.label'),
+                description=i18n.t(
+                    locale, 'settings.tickets.faq.dropdown.button.description'),
                 value=2,
                 default=faq_type == 2
             ),
         ]
-        super().__init__(options=options, disabled=not faq_items)
+        super().__init__(placeholder=i18n.t(locale, 'settings.tickets.faq.dropdown.type'),
+                         options=options, disabled=not faq_items)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = int(self.values[0])
@@ -162,6 +172,8 @@ class TicketFAQTypeDropDown(nextcord.ui.StringSelect):
 @AsyncSterilization
 class TicketFAQItemsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, faq: FaqPayload, selected_faq_item: Optional[int] = None) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
         faq_items = faq.get('items', [])
 
         options = [
@@ -181,7 +193,9 @@ class TicketFAQItemsDropDown(nextcord.ui.StringSelect):
                 nextcord.SelectOption(label='SelectOption')
             )
 
-        super().__init__(options=options, disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale,
+                                            'settings.tickets.faq.dropdown.items'),
+                         options=options, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = int(self.values[0])
@@ -193,14 +207,15 @@ class TicketFAQItemsDropDown(nextcord.ui.StringSelect):
 
 @AsyncSterilization
 class TicketFAQView(ViewOptionItem):
-    label = 'Ticket FAQ'
-    description = 'Set up the FAQ and its type.'
+    label = 'settings.tickets.faq.title'
+    description = 'settings.tickets.faq.description'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int, selected_faq_item: Optional[int] = None):
         self.message_id = message_id
         self.selected_faq_item = selected_faq_item
 
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets_data: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets_data[message_id]
         faq = ticket_data.get('faq', {})
@@ -220,6 +235,11 @@ class TicketFAQView(ViewOptionItem):
         self.add_item(ttdd)
         tidd = await TicketFAQItemsDropDown(guild.id, faq, selected_faq_item)
         self.add_item(tidd)
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.add.label = i18n.t(locale, 'settings.button.add')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.clear.label = i18n.t(locale, 'settings.button.clear')
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)
     async def add(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

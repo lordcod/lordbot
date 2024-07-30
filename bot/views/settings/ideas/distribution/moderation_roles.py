@@ -2,8 +2,6 @@ import nextcord
 
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
-from bot.views.information_dd import get_info_dd
-
 
 from ... import ideas
 from bot.views.settings._view import DefaultSettingsView
@@ -33,7 +31,8 @@ class RolesDropDown(nextcord.ui.RoleSelect):
         for role in self.values.roles:
             if role.is_integration() or role.is_bot_managed():
                 await interaction.response.send_message(
-                    content=i18n.t(locale, 'settings.roles.error.integration', role=role.mention),
+                    content=i18n.t(
+                        locale, 'settings.roles.error.integration', role=role.mention),
                     ephemeral=True
                 )
                 return
@@ -74,20 +73,23 @@ class ModerationRolesView(DefaultSettingsView):
                                       map(guild.get_role,
                                           mod_role_ids))
             if moderation_roles:
-                self.add_item(get_info_dd(
-                    placeholder=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
-                                       roles=', '.join([role.mention for role in moderation_roles]))
-                ))
+                self.embed.add_field(
+                    name='',
+                    value=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
+                                 roles=', '.join([role.mention for role in moderation_roles]))
+                )
             else:
-                self.add_item(get_info_dd(
-                    placeholder=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
-                                       roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
-                ))
+                self.embed.add_field(
+                    name='',
+                    value=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
+                                 roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
+                )
         else:
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
-                                   roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
-            ))
+            self.embed.add_field(
+                name='',
+                value=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
+                             roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
+            )
 
         cdd = await RolesDropDown(guild)
         self.add_item(cdd)

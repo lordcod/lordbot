@@ -4,8 +4,9 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
+from bot.languages import i18n
 from bot.resources.ether import Emoji
-from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE, DEFAULT_TICKET_TYPE
+from bot.resources.info import DEFAULT_TICKET_TYPE
 
 
 def get_emoji(value: Any) -> Literal[Emoji.online, Emoji.offline]:
@@ -30,6 +31,7 @@ def join_args(*args: Tuple[str, Optional[Any]]) -> str:
 async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
     gdb = GuildDateBases(guild.id)
     color = await gdb.get('color')
+    locale = await gdb.get('language')
     tickets: TicketsPayload = await gdb.get('tickets')
     ticket_data = tickets[message_id]
     ticket_index = list(tickets.keys()).index(message_id)+1
@@ -51,66 +53,77 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
     channel = guild.get_channel(channel_id)
     message = channel.get_partial_message(message_id)
 
-    ticket_type_message = 'Channels' if ticket_type == 1 else 'Threads'
+    ticket_type_message = (
+        i18n.t(locale, 'settings.tickets.embeds.msg_type.channels')
+        if ticket_type == 1
+        else i18n.t(
+            locale, 'settings.tickets.embeds.msg_type.threads')
+    )
 
     if faq and faq_items:
-        faq_message = (
-            f'— FAQ: {Emoji.online} (Count: {len(faq_items)})'
-        )
+        faq_message = i18n.t(locale, 'settings.tickets.embeds.faq.info',
+                             count=len(faq_items))
     else:
-        faq_message = f'— FAQ: {Emoji.offline}'
+        faq_message = i18n.t(locale, 'settings.tickets.embeds.faq.woc')
 
     if categories:
-        cat_message = f'— Categories: {Emoji.online} (Count: {len(categories)})'
+        cat_message = i18n.t(locale, 'settings.tickets.embeds.category.info',
+                             count=len(categories))
     else:
-        cat_message = f'— Categories: {Emoji.offline}'
+        cat_message = i18n.t(locale, 'settings.tickets.embeds.category.woc')
 
     if modals:
-        modal_message = f'— Modals: {Emoji.online} (Count: {len(modals)})'
+        modal_message = i18n.t(locale, 'settings.tickets.embeds.modals.info',
+                               count=len(modals))
     else:
-        modal_message = f'— Modals: {Emoji.offline}'
+        modal_message = i18n.t(locale, 'settings.tickets.embeds.modals.woc')
 
-    description_info = (
-        f'Linked Channel: {channel.mention}\n'
-        f'Linked Message: {message.jump_url}'
-    )
+    description_info = i18n.t(locale, 'settings.tickets.embeds.description_info',
+                              channel=channel.mention,
+                              message=message.jump_url
+                              )
 
     if ticket_type == 1:
         category = guild.get_channel(ticket_data.get('category_id'))
-        closed_category = guild.get_channel(ticket_data.get('closed_category_id'))
+        closed_category = guild.get_channel(
+            ticket_data.get('closed_category_id'))
         if category is not None:
-            description_info += f'\nTicket Category: {category.mention}'
+            description_info += i18n.t(locale,
+                                       'settings.tickets.embeds.category',
+                                       category=category.mention)
         if closed_category is not None:
-            description_info += f'\nTicket Closed Category: {closed_category.mention}'
+            description_info += i18n.t(locale,
+                                       'settings.tickets.embeds.closed_category',
+                                       category=closed_category.mention)
 
     embed = nextcord.Embed(
-        title=f'Ticket #{ticket_index}',
+        title=i18n.t(locale, 'settings.tickets.init.ticket',
+                             index=ticket_index),
         color=color,
-        description=(
-            'The tickets module allows you to create and manage support requests, '
-            'helping participants to easily open tickets, and administrators to effectively track and solve them.\n\n'
-            f'{description_info}'
-        )
+        description=i18n.t(locale, 'settings.tickets.embeds.description',
+                           info=description_info),
     )
+
     embed.add_field(
         name='',
         value=join_args(
-            ('— Enabled: ', get_emoji(enabled)),
-            ('— Closing by user:', get_emoji(user_closed)),
-            ('— Allowed roles: '+(', '.join([
+            (i18n.t(locale, 'settings.tickets.embeds.enabled'), get_emoji(enabled)),
+            (i18n.t(locale, 'settings.tickets.embeds.user_closed'),
+             get_emoji(user_closed)),
+            (i18n.t(locale, 'settings.tickets.embeds.allowed_roles.desc')+(', '.join([
                 role.mention
                 for role_id in approved_roles or []
                 if (role := guild.get_role(role_id))
-            ]) or 'There are no allowed'),
+            ]) or i18n.t(locale, 'settings.tickets.embeds.allowed_roles.nf')),
                 approved_roles is not None),
-            ('— Agent roles: ', ', '.join([
+            (i18n.t(locale, 'settings.tickets.embeds.agent_roles'), ', '.join([
                 role.mention
                 for role_id in mod_roles
                 if (role := guild.get_role(role_id))
             ])),
-            ('― Ticket type: ', ticket_type_message),
-            ('― Global ticket limit: ', global_tickets_limit),
-            ('— Category ticket limit: ', tickets_limit),
+            (i18n.t(locale, 'settings.tickets.embeds.ticket_type'), ticket_type_message),
+            (i18n.t(locale, 'settings.tickets.embeds.global_limit'), global_tickets_limit),
+            (i18n.t(locale, 'settings.tickets.embeds.category_limit'), tickets_limit),
             (faq_message, True),
             (cat_message, True),
             (modal_message, True),

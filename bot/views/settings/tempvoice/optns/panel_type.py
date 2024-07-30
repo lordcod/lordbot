@@ -14,20 +14,28 @@ class TypePanelDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.tempvoice.panel.type.none.label'),
-                description=i18n.t(locale, 'settings.tempvoice.panel.type.none.description'),
+                label=i18n.t(
+                    locale, 'settings.tempvoice.panel.type.none.label'),
+                description=i18n.t(
+                    locale, 'settings.tempvoice.panel.type.none.description'),
                 value=0,
                 default=type_panel == 0
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.tempvoice.panel.type.button.label'),
-                description=i18n.t(locale, 'settings.tempvoice.panel.type.button.description'),
+                label=i18n.t(
+                    locale, 'settings.tempvoice.panel.type.button.label'),
+                description=i18n.t(
+                    locale, 'settings.tempvoice.panel.type.button.description'),
                 value=1,
                 default=type_panel == 1
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.tempvoice.panel.type.dropdown.label'),
-                description=i18n.t(locale, 'settings.tempvoice.panel.type.dropdown.description'),
+                label=i18n.t(
+                    locale,
+                    'settings.tempvoice.panel.type.dropdown.label'
+                ),
+                description=i18n.t(
+                    locale, 'settings.tempvoice.panel.type.dropdown.description'),
                 value=2,
                 default=type_panel == 2
             ),
@@ -53,20 +61,26 @@ class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.tempvoice.panel.type_message.panel.label'),
-                description=i18n.t(locale, 'settings.tempvoice.panel.type_message.panel.description'),
+                label=i18n.t(
+                    locale, 'settings.tempvoice.panel.type_message.panel.label'),
+                description=i18n.t(
+                    locale, 'settings.tempvoice.panel.type_message.panel.description'),
                 value=1,
                 default=type_message_panel == 1
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.tempvoice.panel.type_message.voice.label'),
-                description=i18n.t(locale, 'settings.tempvoice.panel.type_message.voice.description'),
+                label=i18n.t(
+                    locale, 'settings.tempvoice.panel.type_message.voice.label'),
+                description=i18n.t(
+                    locale, 'settings.tempvoice.panel.type_message.voice.description'),
                 value=2,
                 default=type_message_panel == 2
             ),
             nextcord.SelectOption(
-                label=i18n.t(locale, 'settings.tempvoice.panel.type_message.every.label'),
-                description=i18n.t(locale, 'settings.tempvoice.panel.type_message.every.description'),
+                label=i18n.t(
+                    locale, 'settings.tempvoice.panel.type_message.every.label'),
+                description=i18n.t(
+                    locale, 'settings.tempvoice.panel.type_message.every.description'),
                 value=3,
                 default=type_message_panel == 3
             ),
@@ -91,6 +105,7 @@ class TypePanelView(ViewOptionItem):
 
     async def __init__(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         data = await gdb.get('tempvoice')
         type_panel = data.get('type_panel', 1)
         type_message_panel = data.get('type_message_panel', 1)
@@ -119,14 +134,17 @@ class TypePanelView(ViewOptionItem):
             tmpdd.disabled = True
             self.edit.disabled = True
 
+        self.edit.style = nextcord.ButtonStyle.blurple
         if self.advance_panel:
             self.edit.emoji = get_emoji('simple')
-            self.edit.label = 'Enable simple panel'
-            self.edit.style = nextcord.ButtonStyle.blurple
+            self.edit.label = i18n.t(locale, 'settings.tempvoice.panel.simple')
         else:
             self.edit.emoji = get_emoji('advanced')
-            self.edit.label = 'Enable extended panel'
-            self.edit.style = nextcord.ButtonStyle.blurple
+            self.edit.label = i18n.t(
+                locale, 'settings.tempvoice.panel.extend')
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
 
     @nextcord.ui.button()
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction) -> None:

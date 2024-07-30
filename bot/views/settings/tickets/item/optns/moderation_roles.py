@@ -3,6 +3,7 @@ import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, find_color_emoji
 
 from .standart import ViewOptionItem
@@ -11,6 +12,9 @@ from .standart import ViewOptionItem
 @AsyncSterilization
 class TicketModRolesDeleteDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild: nextcord.Guild, mod_roles: Optional[list]) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         if mod_roles is None:
             mod_roles = []
 
@@ -29,13 +33,15 @@ class TicketModRolesDeleteDropDown(nextcord.ui.StringSelect):
                 nextcord.SelectOption(label='SelectOption')
             )
 
-        super().__init__(placeholder='Select the moderator roles to delete', options=options[:25], max_values=min(25, len(options)), row=0, disabled=disabled)
+        super().__init__(placeholder=i18n.t(locale, 'settings.tickets.mod_roles.dropdown.remove'),
+                         options=options[:25], max_values=min(25, len(options)), row=0, disabled=disabled)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.view.message_id]
-        ticket_data['moderation_roles'] = list(set(ticket_data.get('moderation_roles', [])) - set(map(int, self.values)))
+        ticket_data['moderation_roles'] = list(
+            set(ticket_data.get('moderation_roles', [])) - set(map(int, self.values)))
         await gdb.set_on_json('tickets', self.view.message_id, ticket_data)
 
         view = await TicketModRolesView(interaction.guild, self.view.message_id)
@@ -46,13 +52,18 @@ class TicketModRolesDeleteDropDown(nextcord.ui.StringSelect):
 @AsyncSterilization
 class TicketModRolesDropDown(nextcord.ui.RoleSelect):
     async def __init__(self, guild: nextcord.Guild) -> None:
-        super().__init__(placeholder='Select moderator roles to add', max_values=25, row=1)
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
+        super().__init__(placeholder=i18n.t(
+            locale, 'settings.tickets.mod_roles.dropdown.add'), max_values=25, row=1)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.view.message_id]
-        ticket_data['moderation_roles'] = list(set(ticket_data.get('moderation_roles', [])) | set(self.values.ids))
+        ticket_data['moderation_roles'] = list(
+            set(ticket_data.get('moderation_roles', [])) | set(self.values.ids))
         await gdb.set_on_json('tickets', self.view.message_id, ticket_data)
 
         view = await TicketModRolesView(interaction.guild, self.view.message_id)
@@ -62,13 +73,14 @@ class TicketModRolesDropDown(nextcord.ui.RoleSelect):
 
 @AsyncSterilization
 class TicketModRolesView(ViewOptionItem):
-    label = 'Ticket Moderation Roles'
-    description = 'Assign moderators to automatically add to all applications.'
+    label = 'settings.tickets.mod_roles.label'
+    description = 'settings.tickets.mod_roles.description'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id
 
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[message_id]
         mod_roles = ticket_data.get('moderation_roles')
@@ -84,6 +96,9 @@ class TicketModRolesView(ViewOptionItem):
         self.add_item(tmrdd)
         tmrdd = await TicketModRolesDeleteDropDown(guild, mod_roles)
         self.add_item(tmrdd)
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.clear.label = i18n.t(locale, 'settings.button.clear')
 
     @nextcord.ui.button(label='Clear', style=nextcord.ButtonStyle.red, disabled=True, row=2)
     async def clear(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

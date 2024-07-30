@@ -2,6 +2,7 @@ from typing import Dict, List
 import nextcord
 
 from bot.databases import GuildDateBases
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from .optns.categories import TicketCategoriesView
 from .optns.channels import TicketChannelsView
@@ -18,9 +19,9 @@ from .optns.ticket_type import TicketTypeView
 
 #
 # TODO: Add Settings
-# Categories
+# Categories (Advanced settings)
 # Saving history
-# TAuto archived
+# Auto archived
 # Channel id, category id, closed category id
 #
 
@@ -47,6 +48,7 @@ class TicketsItemDropDown(nextcord.ui.StringSelect):
         self.message_id = message_id
 
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         system_emoji = await gdb.get('system_emoji')
 
         self.items: Dict[str, OptionItem] = {}
@@ -55,9 +57,9 @@ class TicketsItemDropDown(nextcord.ui.StringSelect):
 
         super().__init__(options=[
             nextcord.SelectOption(
-                label=item.label,
+                label=i18n.t(locale, item.label),
                 value=key,
-                description=item.description,
+                description=i18n.t(locale, item.description),
                 emoji=item.get_emoji(system_emoji)
             )
             for key, item in self.items.items()

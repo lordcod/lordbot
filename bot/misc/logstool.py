@@ -170,10 +170,11 @@ class Logs:
             editted = {}
             for slot in nextcord.Message.__slots__:
                 if getattr(before, slot, None) != getattr(after, slot, None):
-                    editted[slot] = (getattr(before, slot, None), getattr(after, slot, None))
+                    editted[slot] = (getattr(before, slot, None),
+                                     getattr(after, slot, None))
             _log.trace('[%d] Eddited data: %s', after.id, editted)
 
-            if len(before.attachments) > 0 and len(after.attachments):
+            if len(before.attachments) > 0 and len(after.attachments) == 0:
                 embed = nextcord.Embed(
                     title="Message edited",
                     color=nextcord.Colour.orange(),

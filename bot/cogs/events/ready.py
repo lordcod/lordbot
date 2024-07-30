@@ -75,7 +75,8 @@ class ReadyEvent(commands.Cog):
     async def get_emojis(self):
         values = {}
         json_values = {}
-        names = ('aqua', 'mala', 'barh', 'lava', 'perl', 'yant', 'sume', 'sliv')
+        names = ('aqua', 'mala', 'barh', 'lava',
+                 'perl', 'yant', 'sume', 'sliv')
 
         def get_color(name: str) -> str:
             for prefix in names:
@@ -135,7 +136,11 @@ class ReadyEvent(commands.Cog):
         await self.bot._LordBot__session.close()
         await localdb._update_db(__name__)
         await localdb.cache.close()
-        self.bot.engine.get_connection().close()
+
+        conn = self.bot.engine
+        if conn.__connection and not conn.__connection.closed:
+            await conn.__connection.close()
+
         _log.critical("Bot is disconnect")
 
     async def on_shard_disconnect(self, shard_id: int):

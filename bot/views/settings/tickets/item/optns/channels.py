@@ -16,7 +16,10 @@ class TicketChannelDropDown(nextcord.ui.ChannelSelect):
         self,
         guild: nextcord.Guild
     ) -> None:
-        super().__init__(placeholder='Select the channel where the created tickets will fall',
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
+        super().__init__(placeholder=i18n.t(locale, 'settings.tickets.channels.dropdown.channel'),
                          channel_types=[nextcord.ChannelType.text])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -27,8 +30,10 @@ class TicketChannelDropDown(nextcord.ui.ChannelSelect):
         ticket_data = tickets[self.view.message_id]
 
         with contextlib.suppress(KeyError, AttributeError, nextcord.NotFound):
-            old_channel = interaction.guild.get_channel(ticket_data['channel_id'])
-            old_message = old_channel.get_partial_message(ticket_data['message_id'])
+            old_channel = interaction.guild.get_channel(
+                ticket_data['channel_id'])
+            old_message = old_channel.get_partial_message(
+                ticket_data['message_id'])
             await old_message.delete()
 
         message = await ModuleTicket.update_message(channel, ticket_data)
@@ -51,7 +56,10 @@ class TicketCategoryDropDown(nextcord.ui.ChannelSelect):
         self,
         guild: nextcord.Guild
     ) -> None:
-        super().__init__(placeholder='Select the category where the created tickets will fall',
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
+        super().__init__(placeholder=i18n.t(locale, 'settings.tickets.channels.dropdown.category'),
                          channel_types=[nextcord.ChannelType.category])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -73,8 +81,12 @@ class TicketClosedCategoryDropDown(nextcord.ui.ChannelSelect):
         self,
         guild: nextcord.Guild
     ) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         super().__init__(
-            placeholder='Select the closed category where the closed tickets will fall',
+            placeholder=i18n.t(
+                locale, 'settings.tickets.channels.dropdown.closed'),
             channel_types=[nextcord.ChannelType.category]
         )
 
@@ -93,8 +105,8 @@ class TicketClosedCategoryDropDown(nextcord.ui.ChannelSelect):
 
 @AsyncSterilization
 class TicketChannelsView(ViewOptionItem):
-    label: str = 'Channels and ticket categories'
-    description: str = 'Change the categories or channels of the ticket where tickets will be created or transferred'
+    label: str = 'settings.tickets.channels.title'
+    description: str = 'settings.tickets.channels.description'
 
     async def __init__(
         self,

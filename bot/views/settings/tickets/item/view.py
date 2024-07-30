@@ -4,6 +4,7 @@ import nextcord
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload, UserTicketPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.resources.info import DEFAULT_TICKET_TYPE
 from bot.views.settings import tickets as tickets_view
@@ -35,6 +36,7 @@ class TicketsItemView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild, message_id: int) -> None:
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets', {})
         ticket_data = tickets[message_id]
 
@@ -50,11 +52,14 @@ class TicketsItemView(DefaultSettingsView):
         self.add_item(tidd)
 
         if enabled:
-            self.switch.label = 'Disable'
+            self.switch.label = i18n.t(locale, 'settings.button.disable')
             self.switch.style = nextcord.ButtonStyle.danger
         else:
-            self.switch.label = 'Enable'
+            self.switch.label = i18n.t(locale, 'settings.button.enable')
             self.switch.style = nextcord.ButtonStyle.success
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -107,7 +112,8 @@ class TicketsItemView(DefaultSettingsView):
 
         channels.append(channel)
 
-        category = interaction.guild.get_channel(ticket_data.get('category_id'))
+        category = interaction.guild.get_channel(
+            ticket_data.get('category_id'))
         if len(set(category.channels)-set(channels)) == 0:
             await category.delete()
 

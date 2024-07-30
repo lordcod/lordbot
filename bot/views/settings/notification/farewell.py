@@ -12,7 +12,8 @@ from bot.views.settings import notification
 from bot.views.settings._view import DefaultSettingsView
 
 
-def generate_hex(): return ''.join([random.choice(string.hexdigits) for _ in range(18)])
+def generate_hex(): return ''.join(
+    [random.choice(string.hexdigits) for _ in range(18)])
 
 
 @AsyncSterilization
@@ -103,8 +104,10 @@ class FarewellView(DefaultSettingsView):
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
-        self.view_message.label = i18n.t(locale, 'settings.button.preview_message')
-        self.change_message.label = i18n.t(locale, 'settings.button.change_message')
+        self.view_message.label = i18n.t(
+            locale, 'settings.button.preview_message')
+        self.change_message.label = i18n.t(
+            locale, 'settings.button.change_message')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red, row=0)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

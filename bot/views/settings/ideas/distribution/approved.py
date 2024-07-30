@@ -25,7 +25,8 @@ class DropDown(nextcord.ui.ChannelSelect):
         self.idea_data = await self.gdb.get('ideas')
         locale = await self.gdb.get('language')
 
-        super().__init__(placeholder=i18n.t(locale, 'settings.ideas.channel.dropdown'), channel_types=[nextcord.ChannelType.text])
+        super().__init__(placeholder=i18n.t(locale, 'settings.ideas.channel.dropdown'),
+                         channel_types=[nextcord.ChannelType.text])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]

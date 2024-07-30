@@ -64,14 +64,14 @@ class UpdatedCache(aiocache.SimpleMemoryCache):
         return self._cache
 
     async def callback(self) -> None:
-        global last_updated, handler
-        loop = asyncio.get_event_loop()
+        global handler
         current_updated_task[self.__tablename__] = self._cache
 
         if handler:
             return
 
         if last_updated > time.time():
+            loop = asyncio.get_event_loop()
             handler = loop.call_later(
                 last_updated-time.time(), asyncio.create_task, _update_db(self.__tablename__))
             return

@@ -7,6 +7,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import CategoryPayload, TicketsItemPayload, TicketsPayload, UserTicketPayload
 from typing import Dict,  List, Literal, Optional, Self, Tuple
 
+from bot.languages import i18n
 from bot.misc import utils
 from bot.misc.utils import generate_message, get_payload, lord_format
 from bot.misc.lordbot import LordBot
@@ -53,7 +54,7 @@ def parse_permissions_string(permission_data: dict, mod_roles: list, guild_id: i
 
 
 class ModuleTicket:
-    # TODO: Adding localization to system messages
+    locale: Optional[str] = None
     settings_message = None
     selected_category: Optional[CategoryPayload] = None
     input_answer: Optional[Dict[str, str]] = None
@@ -70,9 +71,16 @@ class ModuleTicket:
         client: LordBot = guild._state._get_client()
         self.member = member
         self.guild = guild
+        self.gdb = GuildDateBases(guild.id)
         self.lord_handler = client.lord_handler_timer
         self.loop = guild._state.loop
         self.message_id = message_id
+
+    async def get_locale(self) -> str:
+        if self.locale is not None:
+            return self.locale
+
+        self.locale = await self.gdb.get('language')
 
     @classmethod
     async def from_channel_id(cls, member: nextcord.Member, channel: nextcord.TextChannel) -> Self:
@@ -118,7 +126,8 @@ class ModuleTicket:
     @staticmethod
     async def update_message(channel: nextcord.TextChannel, ticket_data: TicketsItemPayload, message_id: Optional[int] = None) -> nextcord.Message:
         panel_message = ticket_data['messages']['panel']
-        msg_data = utils.generate_message(utils.lord_format(panel_message, get_payload(guild=channel.guild)))
+        msg_data = utils.generate_message(utils.lord_format(
+            panel_message, get_payload(guild=channel.guild)))
         view = await FAQView(channel.guild.id, ticket_data)
 
         message = None
@@ -129,7 +138,7 @@ class ModuleTicket:
             try:
                 message = await message.edit(**msg_data, view=view)
             except nextcord.NotFound:
-                pass
+                return
 
         if message is None:
             message = await channel.send(**msg_data, view=view)
@@ -254,6 +263,7 @@ class ModuleTicket:
     async def create(self) -> None:
         ticket_data = await self.fetch_guild_ticket()
         self.ticket_count = await self.get_ticket_count()
+        locale = await self.get_locale()
         category_payload = self.selected_category
 
         if category_payload:
@@ -275,21 +285,23 @@ class ModuleTicket:
         )
 
         name = utils.lord_format(open_name, payload)
-        message = utils.generate_message(utils.lord_format(open_message, payload))
+        message = utils.generate_message(
+            utils.lord_format(open_message, payload))
         view = await CloseTicketView(self.guild.id, buttons)
 
         channel: nextcord.TextChannel = self.guild.get_channel(channel_id)
 
         if self.input_answer and get_data('creating_embed_inputs'):
             embed = nextcord.Embed(
-                title='Modal Controller',
+                title=i18n.t(locale, 'tickets.modal'),
                 color=2829617,
                 description='\n'.join(
                     f"**{label}**```\n{res}```"
                     for label, res in self.input_answer.items()
                 )
             )
-            message['embeds'] = [embed]
+            msg_embeds = message.pop('embeds', [])
+            msg_embeds.append(embed)
             if msg_embed := message.pop('embed', None):
                 message['embeds'].insert(0, msg_embed)
 
@@ -302,7 +314,8 @@ class ModuleTicket:
             self.ticket_channel = channel = await self.guild.create_text_channel(
                 name=name,
                 category=category,
-                topic=f'Ticket created by {self.member.name}',
+                topic=i18n.t(locale, 'tickets.topic.open',
+                             member=self.member.name),
                 overwrites=await self.get_permissions(get_data('permissions'))
             )
             msg = await channel.send(**message, view=view)
@@ -327,7 +340,7 @@ class ModuleTicket:
         await msg.pin()
         await self.set_ticket_data()
         await self.increment_ticket_count()
-        await self.settings_message.edit(f'The channel has been successfully created {self.ticket_channel.mention}',
+        await self.settings_message.edit(i18n.t(locale, 'tickets.message.open', channel=self.ticket_channel.mention),
                                          embeds=[], view=None)
 
     async def create_after_modals(self, interaction: nextcord.Interaction, modals: Optional[dict] = None):
@@ -342,6 +355,7 @@ class ModuleTicket:
     async def create_after_category(self, interaction: nextcord.Interaction, category: Optional[CategoryPayload] = None):
         tickets = await self.get_ticket_data_from_member(category)
         ticket_data = await self.fetch_guild_ticket()
+        locale = await self.get_locale()
         categories_data = ticket_data.get('categories')
         buttons = ticket_data.get('buttons')
         user_tickets_limit = (category and category.get(
@@ -370,14 +384,18 @@ class ModuleTicket:
                 return interaction.response.send_message(content, ephemeral=True)
 
         if approved_roles is not None and not set(interaction.user._roles) & set(approved_roles):
-            await send_message(f"In order to write a message, you need one of these roles: {', '.join([role.mention for role_id in approved_roles if (role := interaction.guild.get_role(role_id))])}")
+            await send_message(i18n.t(locale, 'tickets.error.approved_roles',
+                                      roles=', '.join([role.mention for role_id in approved_roles if (role := interaction.guild.get_role(role_id))])))
             return
 
         if len(tickets) >= user_tickets_limit:
             if category is not None:
-                await send_message(f"You have exceeded the number of possible tickets for the user in category {category.get('label')} (maximum: {len(tickets)})")
+                await send_message(i18n.t(locale, 'tickets.error.limit.category',
+                                          category=category.get('label'),
+                                          count=len(tickets)))
             else:
-                await send_message(f"You have exceeded the number of possible tickets for the user (maximum: {len(tickets)})")
+                await send_message(i18n.t(locale, 'tickets.error.limit.global',
+                                          count=len(tickets)))
             return
 
         if not modals:
@@ -394,17 +412,19 @@ class ModuleTicket:
     async def create_after_faq(self, interaction: nextcord.Interaction):
         tickets = await self.get_ticket_data_from_member()
         ticket_data = await self.fetch_guild_ticket()
+        locale = await self.get_locale()
         categories_data = ticket_data.get('categories')
         modals = ticket_data.get('modals')
         buttons = ticket_data.get('buttons')
         category_message = ticket_data.get('messages').get('category')
 
         if ticket_data.get('global_user_tickets_limit') and len(tickets) >= ticket_data.get('global_user_tickets_limit'):
-            await interaction.response.send_message(f"You have exceeded the number of possible tickets for the user (maximum: {len(tickets)})",
+            await interaction.response.send_message(i18n.t(locale, 'tickets.error.limit.global',
+                                                           count=len(tickets)),
                                                     ephemeral=True)
             return
         if not modals or categories_data:
-            self.settings_message = await interaction.response.send_message(f'{Emoji.loading} Loading...', ephemeral=True)
+            self.settings_message = await interaction.response.send_message(i18n.t(locale, 'tickets.message.loading'), ephemeral=True)
         if not categories_data:
             await self.create_after_category(interaction)
             return
@@ -422,6 +442,7 @@ class ModuleTicket:
 
     async def close(self):
         ticket_data = await self.fetch_guild_ticket()
+        locale = await self.get_locale()
         category_payload = self.selected_category
 
         if category_payload:
@@ -444,8 +465,10 @@ class ModuleTicket:
         message = get_data('messages')['close']
         ctrl_message_data = get_data('messages')['controller']
 
-        ctrl_message = utils.generate_message(utils.lord_format(ctrl_message_data, payload))
-        close_message = utils.generate_message(utils.lord_format(message, payload))
+        ctrl_message = utils.generate_message(
+            utils.lord_format(ctrl_message_data, payload))
+        close_message = utils.generate_message(
+            utils.lord_format(message, payload))
         close_name = name and utils.lord_format(name, payload)
 
         view = await ControllerTicketView(self.guild.id, buttons)
@@ -462,26 +485,20 @@ class ModuleTicket:
         if ticket_type == 1:
             closed_category_id = get_data('closed_category_id')
             closed_category = self.guild.get_channel(closed_category_id)
+            editted_data = dict(
+                name=close_name,
+                topic=self.ticket_channel.topic +
+                i18n.t(locale, 'tickets.topic.close', member=self.member.name)
+            )
             if closed_category:
-                editted_data = dict(
-                    name=close_name,
-                    topic=f'{self.ticket_channel.topic} | the ticket is closing by {self.member.name}',
-                    category=closed_category
-                )
-            else:
-                editted_data = dict(
-                    name=close_name,
-                    topic=f'{self.ticket_channel.topic} | the ticket is closing by {self.member.name}'
-                )
+                editted_data['category'] = closed_category
         elif ticket_type == 2:
             editted_data = dict(name=close_name)
 
         if name is None:
             editted_data.pop('name')
         if editted_data:
-            _log.trace('Start update')
             await self.ticket_channel.edit(**editted_data)
-            _log.trace('Fin update')
 
         self.status = TicketStatus.closed
         await self.set_ticket_data()
@@ -490,6 +507,7 @@ class ModuleTicket:
         self.lord_handler.close(f'ticket-delete:{self.ticket_channel.id}')
 
         ticket_data = await self.fetch_guild_ticket()
+        locale = await self.get_locale()
         category_payload = self.selected_category
 
         if category_payload:
@@ -510,7 +528,8 @@ class ModuleTicket:
         name = get_data('names')['open']
         close_name = get_data('names').get('close')
 
-        reopen_message = utils.generate_message(utils.lord_format(message, payload))
+        reopen_message = utils.generate_message(
+            utils.lord_format(message, payload))
         reopen_name = utils.lord_format(name, payload)
 
         if not (self._is_verification(get_data)
@@ -525,17 +544,13 @@ class ModuleTicket:
             closed_category_id = get_data('closed_category_id')
             category_id = get_data('category_id')
             category = self.guild.get_channel(category_id)
+            editted_data = dict(
+                name=reopen_name,
+                topic=self.ticket_channel.topic +
+                i18n.t(locale, 'tickets.topic.reopen', member=self.member.name)
+            )
             if closed_category_id and category:
-                editted_data = dict(
-                    name=reopen_name,
-                    topic=f'{self.ticket_channel.topic} | the ticket reopened by {self.member.name}',
-                    category=category
-                )
-            else:
-                editted_data = dict(
-                    name=reopen_name,
-                    topic=f'{self.ticket_channel.topic} | the ticket reopened by {self.member.name}'
-                )
+                editted_data['category'] = category
         elif ticket_type == 2:
             editted_data = dict(name=reopen_name)
 
@@ -568,7 +583,8 @@ class ModuleTicket:
         user_closed = get_data('user_closed', True)
         message = get_data('messages')['delete']
 
-        delete_message = utils.generate_message(utils.lord_format(message, payload))
+        delete_message = utils.generate_message(
+            utils.lord_format(message, payload))
 
         if (not self._is_verification(get_data, user_closed)
                 or self.status != TicketStatus.closed):
@@ -592,6 +608,8 @@ class ModuleTicket:
 
     @classmethod
     async def archive_message(cls, message: nextcord.Message):
+        return
+
         if message.author.bot:
             return
 
