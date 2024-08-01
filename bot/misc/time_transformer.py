@@ -1,6 +1,4 @@
 
-from sqlalchemy import false
-
 
 class DatePluralRussia:
     @staticmethod
@@ -81,7 +79,8 @@ def display_time(number: int, lang: str = "en", max_items: int = 3, with_roundin
     func = distributing.get(lang, distributing['en'])
 
     current_time = time_convert(number)
-    current_time = dict([(key, num) for key, num in current_time.items() if num != 0])
+    current_time = dict([(key, num)
+                        for key, num in current_time.items() if num != 0])
 
     if with_rounding:
         if max_items > len(current_time):

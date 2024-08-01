@@ -73,7 +73,7 @@ class CoolModal(nextcord.ui.Modal):
 
 @AsyncSterilization
 class CooltypeDropDown(nextcord.ui.StringSelect):
-    def __init__(
+    async def __init__(
         self,
         guild_id: int,
         command_name: str
@@ -160,7 +160,7 @@ class CooldownsView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await permisson_command.precise.CommandData(
+        view = await permisson_command.precise.CommandView(
             interaction.guild,
             self.command_name
         )

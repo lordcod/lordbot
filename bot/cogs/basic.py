@@ -1,7 +1,6 @@
 import logging
 import nextcord
 from nextcord.ext import commands, application_checks
-from nextcord.utils import oauth_url, format_dt
 
 from bot.resources.ether import Emoji
 from bot.misc import utils
@@ -80,7 +79,7 @@ class Basic(commands.Cog):
         gdb = GuildDateBases(ctx.guild.id)
         locale = await gdb.get('language')
 
-        invite_link = oauth_url(client_id=self.bot.user.id)
+        invite_link = f"https://discord.com/oauth2/authorize?client_id={self.bot.user.id}"
         await ctx.send(i18n.t(locale, 'basic.invite.description', invite_link=invite_link))
 
     @commands.command()

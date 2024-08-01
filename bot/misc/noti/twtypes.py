@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 
@@ -31,9 +31,10 @@ class Stream:
     tag_ids: list
     tags: list
     is_mature: bool
+    url: str = field(init=False)
     game_name: Optional[str] = None
     game_id: Optional[str] = None
 
-    @property
-    def url(self):
-        return f'https://www.twitch.tv/{self.user_login}'
+    def __post_init__(self):
+        self.thumbnail_url = self.thumbnail_url.format(width=1920, height=1080)
+        self.url = f'https://www.twitch.tv/{self.user_login}'

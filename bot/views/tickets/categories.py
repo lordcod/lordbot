@@ -36,11 +36,6 @@ class CategoryDropDown(nextcord.ui.StringSelect):
         ticket_data = await self.ticket.fetch_guild_ticket()
         categories_data = ticket_data.get('categories')
         value = categories_data[int(self.values[0])]
-        approved_roles = value.get('approved_roles') or ticket_data.get('approved_roles')
-        if approved_roles and not set(interaction.user._roles) & set(approved_roles):
-            await interaction.response.send_message(f"In order to write a message, you need one of these roles: {', '.join([role.mention for role_id in approved_roles if (role := interaction.guild.get_role(role_id))])}",
-                                                    ephemeral=True)
-            return
         await self.ticket.create_after_category(interaction, value)
 
 

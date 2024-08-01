@@ -1,15 +1,20 @@
+from __future__ import annotations
+
 import asyncio
 import contextlib
 from dataclasses import dataclass
 import datetime
 from enum import IntEnum
 import functools
-from typing import Dict, List, Optional, Self, Tuple
+import logging
+from typing import Dict, List, Optional,  Tuple
 import nextcord
 
 from bot.databases import GuildDateBases
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import cut_back
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -22,11 +27,16 @@ class Message:
 
 
 class LogType(IntEnum):
+    # TODO: Create log: tempvoice
     delete_message = 0
     edit_message = 1
     punishment = 2
     economy = 3
     ideas = 4
+    voice_state = 5
+    tickets = 6
+    # tempvoice = 7
+    roles = 8
 
 
 def embed_to_text(embed: nextcord.Embed) -> str:
@@ -73,42 +83,115 @@ async def set_message_delete_audit_log(moderator: nextcord.Member, channel_id: i
         pass
 
 
+_roles_tasks = {}
+_roles_db: Dict[str, Tuple[List[nextcord.Role], List[nextcord.Role]]] = {}
+
+
+def _start_role_task():
+    loop = asyncio.get_event_loop()
+    future = loop.create_future()
+    th = loop.call_later(10, future.set_result, None)
+
+    def wrapped():
+        nonlocal th
+        th.cancel()
+        th = loop.call_later(10, future.set_result, None)
+    return future, wrapped
+
+
+async def _wait_change_role(future: asyncio.Future, member: nextcord.Member):
+    with contextlib.suppress(asyncio.TimeoutError):
+        await asyncio.wait_for(future, timeout=60)
+    key = f'{member.guild.id}:{member.id}'
+
+    _added, _removed = map(set, _roles_db[key])
+    _missing = _added & _removed
+    added, removed = map(list, (_added-_missing, _removed-_missing))
+    if added or removed:
+        await Logs(member.guild).change_role(member, added, removed)
+
+    del _roles_tasks[key]
+    del _roles_db[key]
+
+
+async def pre_add_role(member: nextcord.Member, role: nextcord.Role) -> None:
+    key = f'{member.guild.id}:{member.id}'
+    task = _roles_tasks.get(key)
+    if task is None:
+        future, up = _start_role_task()
+        _roles_tasks[key] = up
+        _roles_db[key] = ([], [])
+        asyncio.create_task(_wait_change_role(future, member))
+    else:
+        task()
+    _roles_db[key][0].append(role)
+
+
+async def pre_remove_role(member: nextcord.Member, role: nextcord.Role) -> None:
+    key = f'{member.guild.id}:{member.id}'
+    task = _roles_tasks.get(key)
+    if task is None:
+        future, up = _start_role_task()
+        _roles_tasks[key] = up
+        _roles_db[key] = ([], [])
+        asyncio.create_task(_wait_change_role(future, member))
+    else:
+        task()
+    _roles_db[key][1].append(role)
+
+
+def on_logs(log_type: int):
+    def predicte(coro):
+        @functools.wraps(coro)
+        async def wrapped(self: Logs, *args, **kwargs) -> None:
+            if self.guild is None or self.gdb is None:
+                return
+
+            mes: Optional[Message] = await coro(self, *args, **kwargs)
+            guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
+
+            if mes is None or guild_data is None:
+                return
+
+            for channel_id, logs_types in guild_data.items():
+                if log_type not in logs_types:
+                    continue
+
+                channel = self.guild.get_channel(channel_id)
+                if not channel:
+                    continue
+
+                bot = self.guild.me
+                perms = channel.permissions_for(bot)
+                if not (perms.send_messages and perms.embed_links and perms.read_messages):
+                    continue
+
+                await channel.send(
+                    content=mes.content,
+                    embed=mes.embed,
+                    embeds=mes.embeds,
+                    file=mes.file,
+                    files=mes.files
+                )
+
+        return wrapped
+    return predicte
+
+
 class Logs:
-    def __init__(self, guild: nextcord.Guild):
-        self.guild = guild
-        self.gdb = GuildDateBases(guild.id)
-
-    @staticmethod
-    def on_logs(log_type: int):
-        def predicte(coro):
-            @functools.wraps(coro)
-            async def wrapped(self: Self, *args, **kwargs) -> None:
-                mes: Optional[Message] = await coro(self, *args, **kwargs)
-                guild_data: Dict[int, List[LogType]] = await self.gdb.get('logs')
-
-                if mes is None or guild_data is None:
-                    return
-
-                for channel_id, logs_types in guild_data.items():
-                    if log_type not in logs_types:
-                        continue
-
-                    channel = self.guild.get_channel(channel_id)
-                    await channel.send(
-                        content=mes.content,
-                        embed=mes.embed,
-                        embeds=mes.embeds,
-                        file=mes.file,
-                        files=mes.files
-                    )
-
-            return wrapped
-        return predicte
+    def __init__(self, guild: Optional[nextcord.Guild]):
+        if guild is not None:
+            self.guild = guild
+            self.gdb = GuildDateBases(guild.id)
+        else:
+            self.guild = None
+            self.gdb = None
 
     @on_logs(LogType.delete_message)
     async def delete_message(self, message: nextcord.Message, moderator: Optional[nextcord.Member] = None):
         if message.author.bot:
             return
+
         embed = nextcord.Embed(
             title="Message deleted",
             color=nextcord.Colour.red(),
@@ -123,7 +206,7 @@ class Logs:
         if message.content:
             embed.add_field(
                 name="Message",
-                value=message.content
+                value=message.content[:1024]
             )
         if moderator:
             embed.set_footer(text=moderator,
@@ -141,6 +224,34 @@ class Logs:
     async def edit_message(self, before: nextcord.Message, after: nextcord.Message):
         if after.author.bot:
             return
+
+        if before.content == after.content:
+            editted = {}
+            for slot in nextcord.Message.__slots__:
+                if getattr(before, slot, None) != getattr(after, slot, None):
+                    editted[slot] = (getattr(before, slot, None),
+                                     getattr(after, slot, None))
+            _log.trace('[%d] Eddited data: %s', after.id, editted)
+
+            if len(before.attachments) > 0 and len(after.attachments) == 0:
+                embed = nextcord.Embed(
+                    title="Message edited",
+                    color=nextcord.Colour.orange(),
+                    description=(
+                        f"> Channel: {before.channel.name} ({before.channel.mention})\n"
+                        f"> Message id: {before.id}\n"
+                        f"> Message author: {str(before.author)} ({before.author.mention})\n"
+                        f"> Message created: <t:{before.created_at.timestamp() :.0f}:f> (<t:{before.created_at.timestamp() :.0f}:R>)"
+                    ),
+                    timestamp=datetime.datetime.today()
+                )
+                embed.add_field(
+                    name='Action',
+                    value='Remove all attachments'
+                )
+                return Message(embed=embed)
+            return
+
         embed = nextcord.Embed(
             title="Message edited",
             color=nextcord.Colour.orange(),
@@ -154,11 +265,11 @@ class Logs:
         )
         embed.add_field(
             name="Before",
-            value=before.content
+            value=before.content[:1024]
         )
         embed.add_field(
             name="After",
-            value=after.content
+            value=after.content[:1024]
         )
         return Message(embed=embed)
 
@@ -173,11 +284,12 @@ class Logs:
             title='Timeout',
             color=nextcord.Colour.red(),
             description=(
-                f'Member: {member} ({member.id})\n'
-                f'Disabled on: {display_time(duration)}\n'
-                f'Moderator: {moderator} ({moderator.id})\n'
-                f"{f'Reason: {reason}' if reason else ''}"
-            )
+                f'> Member: {member} ({member.id})\n'
+                f'> Disabled on: {display_time(duration)}\n'
+                f'> Moderator: {moderator} ({moderator.id})\n'
+                f"{f'> Reason: {reason}' if reason else ''}"
+            ),
+            timestamp=datetime.datetime.today()
         )
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
@@ -191,14 +303,15 @@ class Logs:
         embed = nextcord.Embed(
             title='Untimeout',
             color=nextcord.Colour.red(),
-            description=f"Member: {member} ({member.id})"
+            description=f"> Member: {member} ({member.id})",
+            timestamp=datetime.datetime.today()
         )
         if duration:
-            embed.description += f'\nSpent in the mute: {display_time(duration)}'
+            embed.description += f'\n> Spent in the mute: {display_time(duration)}'
         if moderator:
-            embed.description += f'\nModerator: {moderator} ({moderator.id})'
+            embed.description += f'\n> Moderator: {moderator} ({moderator.id})'
         if reason:
-            embed.description += f'\nReason: {reason}'
+            embed.description += f'\n> Reason: {reason}'
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
@@ -209,10 +322,11 @@ class Logs:
             title='Kick',
             color=nextcord.Colour.red(),
             description=(
-                f'Member: {user} ({user.id})\n'
-                f'Moderator: {moderator} ({moderator.id})\n'
-                f"{f'Reason: {reason}' if reason else ''}"
-            )
+                f'> Member: {user} ({user.id})\n'
+                f'> Moderator: {moderator} ({moderator.id})\n'
+                f"{f'> Reason: {reason}' if reason else ''}"
+            ),
+            timestamp=datetime.datetime.today()
         )
         embed.set_thumbnail(user.display_avatar)
         return Message(embed=embed)
@@ -224,10 +338,11 @@ class Logs:
             title='Ban',
             color=nextcord.Colour.red(),
             description=(
-                f'Member: {user} ({user.id})\n'
-                f'Moderator: {moderator} ({moderator.id})\n'
-                f"{f'Reason: {reason}' if reason else ''}"
-            )
+                f'> Member: {user} ({user.id})\n'
+                f'> Moderator: {moderator} ({moderator.id})\n'
+                f"{f'> Reason: {reason}' if reason else ''}"
+            ),
+            timestamp=datetime.datetime.today()
         )
         embed.set_thumbnail(user.display_avatar)
         return Message(embed=embed)
@@ -239,10 +354,11 @@ class Logs:
             title='Unbam',
             color=nextcord.Colour.red(),
             description=(
-                f'Member: {user} ({user.id})\n'
-                f'Moderator: {moderator} ({moderator.id})\n'
-                f"{f'Reason: {reason}' if reason else ''}"
-            )
+                f'> Member: {user} ({user.id})\n'
+                f'> Moderator: {moderator} ({moderator.id})\n'
+                f"{f'> Reason: {reason}' if reason else ''}"
+            ),
+            timestamp=datetime.datetime.today()
         )
         embed.set_thumbnail(user.display_avatar)
         return Message(embed=embed)
@@ -256,14 +372,15 @@ class Logs:
             title='Currency received',
             color=nextcord.Colour.brand_green(),
             description=(
-                f'Member: {member} ({member.id})\n'
-                f'Amount: {amount :,}{currency_emoji}'
-            )
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Amount: *{amount :,}*{currency_emoji}'
+            ),
+            timestamp=datetime.datetime.today()
         )
         if moderator:
-            embed.description += f'\nModerator: {moderator} ({moderator.id})'
+            embed.description += f'\n> Moderator: **{moderator.name}** (**{moderator.id}**)'
         if reason:
-            embed.description += f'\nReason: {reason}'
+            embed.description += f'\n> Reason: {reason}'
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
@@ -276,14 +393,15 @@ class Logs:
             title='Currency received',
             color=nextcord.Colour.brand_green(),
             description=(
-                f'Role: {role.mention} ({role.id})\n'
-                f'Amount: {amount :,}{currency_emoji}'
-            )
+                f'> Role: {role.mention} (**{role.id}**)\n'
+                f'> Amount: *{amount :,}*{currency_emoji}'
+            ),
+            timestamp=datetime.datetime.today()
         )
         if moderator:
-            embed.description += f'\nModerator: {moderator} ({moderator.id})'
+            embed.description += f'\n> Moderator: **{moderator.name}** (**{moderator.id}**)'
         if reason:
-            embed.description += f'\nReason: {reason}'
+            embed.description += f'\n> Reason: {reason}'
         embed.set_thumbnail(role.icon)
         return Message(embed=embed)
 
@@ -296,14 +414,15 @@ class Logs:
             title='Currency was taken',
             color=nextcord.Colour.red(),
             description=(
-                f'Member: {member} ({member.id})\n'
-                f'Amount: {amount :,}{currency_emoji}'
-            )
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Amount: *{amount :,}*{currency_emoji}'
+            ),
+            timestamp=datetime.datetime.today()
         )
         if moderator:
-            embed.description += f'\nModerator: {moderator} ({moderator.id})'
+            embed.description += f'\n> Moderator: **{moderator.name}** (**{moderator.id}**)'
         if reason:
-            embed.description += f'\nReason: {reason}'
+            embed.description += f'\n> Reason: {reason}'
         embed.set_thumbnail(member.display_avatar)
         return Message(embed=embed)
 
@@ -312,10 +431,11 @@ class Logs:
         embed = nextcord.Embed(
             title='Created new idea',
             description=(
-                f'Member: {member} ({member.id})\n'
-                f'Idea: {idea}'
+                f'> Member: {member} ({member.id})\n'
+                f'> Idea: {idea}'
             ),
-            color=nextcord.Colour.orange()
+            color=nextcord.Colour.orange(),
+            timestamp=datetime.datetime.today()
         )
         embed.set_thumbnail(member.display_avatar)
         embed.set_image(image)
@@ -326,17 +446,18 @@ class Logs:
         embed = nextcord.Embed(
             title='Approved idea',
             description='\n'.join(filter_bool([
-                f'Member: {member} ({member.id})',
-                f'Moderator: {moderator} ({moderator.id})',
-                'Reason: '+reason if reason else '',
-                f'Idea: {idea}'
+                f'> Member: **{member.name}** (**{member.id}**)',
+                f'> Moderator: **{moderator.name}** (**{moderator.id}**)',
+                '> Reason: '+reason if reason else '',
+                f'> Idea: {idea}'
             ])),
-            color=nextcord.Colour.brand_green()
+            color=nextcord.Colour.brand_green(),
+            timestamp=datetime.datetime.today()
         )
         embed.set_thumbnail(member.display_avatar)
         if image:
             embed.set_image(image)
-        embed.set_footer(text=str(moderator),
+        embed.set_footer(text=str(moderator.name),
                          icon_url=moderator.display_avatar)
         return Message(embed=embed)
 
@@ -345,44 +466,208 @@ class Logs:
         embed = nextcord.Embed(
             title='Denied idea',
             description=(
-                f'Member: {member} ({member.id})\n'
-                f'Moderator: {moderator} ({moderator.id})'
-                f'Idea: {idea}'
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Moderator: **{moderator.name}** (**{moderator.id}**)'
+                f'> Idea: {idea}'
             ),
-            color=nextcord.Colour.red()
+            color=nextcord.Colour.red(),
+            timestamp=datetime.datetime.today()
         )
         embed.set_thumbnail(member.display_avatar)
         if image:
             embed.set_image(image)
-        embed.set_footer(text=str(moderator),
+        embed.set_footer(text=str(moderator.name),
                          icon_url=moderator.display_avatar)
         return Message(embed=embed)
 
-    @on_logs
-    async def add_role(self, member: nextcord.Member, role: nextcord.Role): ...
+    @on_logs(LogType.roles)
+    async def change_role(self, member: nextcord.Member, added: List[nextcord.Role], removed: List[nextcord.Role]):
+        embed = nextcord.Embed(
+            title='Сhanging roles',
+            description=(
+                f'> Member: **{member.name} ({member.id})**'
+            ),
+            color=nextcord.Colour.orange(),
+            timestamp=datetime.datetime.today()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        if added:
+            embed.add_field(
+                name='Added roles',
+                value=', '.join([role.mention for role in added])
+            )
+        if removed:
+            embed.add_field(
+                name='Removed roles',
+                value=', '.join([role.mention for role in removed])
+            )
+        return Message(embed=embed)
 
-    @on_logs
-    async def remove_role(self, member: nextcord.Member,
-                          role: nextcord.Role): ...
+    @on_logs(LogType.voice_state)
+    async def connect_voice(self, member: nextcord.Member, channel: nextcord.VoiceChannel):
+        embed = nextcord.Embed(
+            title='Connecting to voice',
+            description=(
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Channel: {channel.mention} (**{channel.id}**)'
+            ),
+            color=nextcord.Colour.brand_green(),
+            timestamp=datetime.datetime.today()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        return Message(embed=embed)
 
-    @on_logs
-    async def change_role(self, *args): ...
+    @on_logs(LogType.voice_state)
+    async def disconnect_voice(self, member: nextcord.Member, channel: nextcord.VoiceChannel):
+        embed = nextcord.Embed(
+            title='Disconnecting to voice',
+            description=(
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Channel: {channel.mention} (**{channel.id}**)'
+            ),
+            color=nextcord.Colour.brand_red(),
+            timestamp=datetime.datetime.today()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        return Message(embed=embed)
 
-    @on_logs
-    async def delete_role(self, role: nextcord.Role): ...
+    @on_logs(LogType.voice_state)
+    async def move_voice(self, member: nextcord.Member, before: nextcord.VoiceChannel, after: nextcord.VoiceChannel):
+        embed = nextcord.Embed(
+            title='Moving to voice',
+            description=(
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Old channel: {before.mention} (**{before.id}**)\n'
+                f'> New channel: {after.mention} (**{after.id}**)'
+            ),
+            color=nextcord.Colour.orange(),
+            timestamp=datetime.datetime.today()
+        )
+        embed.set_thumbnail(member.display_avatar)
+        return Message(embed=embed)
 
-    @on_logs
-    async def add_channel(
-        self, channel: nextcord.abc.GuildChannel): ...
+    @on_logs(LogType.tickets)
+    async def create_ticket(
+        self,
+        member: nextcord.Member,
+        panel_channel_id: int,
+        channel: nextcord.TextChannel,
+        inputs: Optional[dict[str, str]],
+        category_name: Optional[str],
+        ticket_count: Optional[dict[str, int]]
+    ):
+        panel_channel = self.guild.get_channel(panel_channel_id)
 
-    @on_logs
-    async def change_channel(
-        self, channel: nextcord.abc.GuildChannel): ...
+        embeds = []
+        embed = nextcord.Embed(
+            title='Create ticket',
+            description=(
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Panel channel: {panel_channel.mention} (**{panel_channel.id}**)\n'
+                f'> Channel: {channel.mention} (**{channel.id}**)'
+            ),
+            color=nextcord.Colour.orange(),
+            timestamp=datetime.datetime.today()
+        )
+        if category_name:
+            embed.description += f'\n> Category: {category_name}'
+        if ticket_count:
+            embed.description += f"\n> Active ticket count: {ticket_count['active']}"
+            embed.description += f"\n> Total ticket count: {ticket_count['total']}"
 
-    @on_logs
-    async def delete_channel(
-        self, channel: nextcord.abc.GuildChannel): ...
+        embeds.append(embed)
 
-    @on_logs
-    async def change_bot_settings(
-        self, user: nextcord.User, *args): ...
+        if inputs:
+            input_embed = nextcord.Embed(
+                color=nextcord.Colour.orange(),
+                description='\n'.join(
+                    f"**{label}**```\n{res}```"
+                    for label, res in inputs.items()
+                ),
+                timestamp=datetime.datetime.today()
+            )
+            embeds.append(input_embed)
+
+        embed.set_thumbnail(member.display_avatar)
+        return Message(embed=embed)
+
+    @on_logs(LogType.tickets)
+    async def close_ticket(
+        self,
+        owner: nextcord.Member,
+        member: nextcord.Member,
+        panel_channel_id: int,
+        channel: nextcord.TextChannel
+    ):
+        panel_channel = self.guild.get_channel(panel_channel_id)
+
+        embeds = []
+        embed = nextcord.Embed(
+            title='Close ticket',
+            description=(
+                f'> Owner: **{owner.name}** (**{owner.id}**)\n'
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Panel channel: {panel_channel.mention} (**{panel_channel.id}**)\n'
+                f'> Channel: {channel.mention} (**{channel.id}**)'
+            ),
+            color=nextcord.Colour.brand_red(),
+            timestamp=datetime.datetime.today()
+        )
+
+        embeds.append(embed)
+        embed.set_thumbnail(member.display_avatar)
+        return Message(embed=embed)
+
+    @on_logs(LogType.tickets)
+    async def reopen_ticket(
+        self,
+        owner: nextcord.Member,
+        member: nextcord.Member,
+        panel_channel_id: int,
+        channel: nextcord.TextChannel
+    ):
+        panel_channel = self.guild.get_channel(panel_channel_id)
+
+        embeds = []
+        embed = nextcord.Embed(
+            title='Reopen ticket',
+            description=(
+                f'> Owner: **{owner.name}** (**{owner.id}**)\n'
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Panel channel: {panel_channel.mention} (**{panel_channel.id}**)\n'
+                f'> Channel: {channel.mention} (**{channel.id}**)'
+            ),
+            color=nextcord.Colour.brand_green(),
+            timestamp=datetime.datetime.today()
+        )
+
+        embeds.append(embed)
+        embed.set_thumbnail(member.display_avatar)
+        return Message(embed=embed)
+
+    @on_logs(LogType.tickets)
+    async def delete_ticket(
+        self,
+        owner: nextcord.Member,
+        member: nextcord.Member,
+        panel_channel_id: int,
+        channel: nextcord.TextChannel
+    ):
+        panel_channel = self.guild.get_channel(panel_channel_id)
+
+        embeds = []
+        embed = nextcord.Embed(
+            title='Delete ticket',
+            description=(
+                f'> Owner: **{owner.name}** (**{owner.id}**)\n'
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Panel channel: {panel_channel.mention} (**{panel_channel.id}**)\n'
+                f'> Channel: **{channel.name}** (**{channel.id}**)'
+            ),
+            color=nextcord.Colour.brand_red(),
+            timestamp=datetime.datetime.today()
+        )
+
+        embeds.append(embed)
+        embed.set_thumbnail(member.display_avatar)
+        return Message(embed=embed)

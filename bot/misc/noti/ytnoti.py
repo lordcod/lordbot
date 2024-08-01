@@ -5,9 +5,8 @@ import logging
 import time
 from typing import List,  TYPE_CHECKING,  Dict
 import os
-import nextcord
 import xmltodict
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.utils import get_payload, generate_message, lord_format
@@ -22,10 +21,6 @@ if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
 _log = logging.getLogger(__name__)
-handler = logging.FileHandler(f"logs/{__name__}.log")
-handler.setFormatter(logging.Formatter(
-    '[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
-_log.addHandler(handler)
 
 
 class YtNoti:
@@ -54,7 +49,7 @@ class YtNoti:
                 if data['yt_id'] == video.channel.id:
                     channel = self.bot.get_channel(data['channel_id'])
                     payload = get_payload(guild=guild, video=video)
-                    mes_data = await generate_message(lord_format(data.get('message', DEFAULT_YOUTUBE_MESSAGE), payload))
+                    mes_data = generate_message(lord_format(data.get('message', DEFAULT_YOUTUBE_MESSAGE), payload))
                     await channel.send(**mes_data)
 
     def parse_channel(self, data: dict) -> Channel:
@@ -168,12 +163,12 @@ class YtNoti:
         ret = []
 
         url = 'https://www.googleapis.com/youtube/v3/channels'
-        params = list({
-            'part': 'snippet,id',
-            'type': 'channel',
-            'maxResults': 15,
-            'key': self.apikey
-        }.items())
+        params = [
+            ('part', 'snippet,id'),
+            ('type', 'channel'),
+            ('maxResults', 15),
+            ('key', self.apikey)
+        ]
 
         for id in ids:
             params.append(('id', id))
@@ -209,13 +204,17 @@ class YtNoti:
 
             gvhd = []
             for cid in self.channel_ids:
-                videos = await self.get_video_history(cid)
+                try:
+                    videos = await self.get_video_history(cid)
+                except Exception as exp:
+                    _log.error('An error was received when executing the request (%s)',
+                               cid,
+                               exc_info=exp)
+                    videos = []
+
                 vhd, diff = self.video_history.get_diff(videos)
                 self.video_history.extend(diff)
                 gvhd.extend(vhd)
 
                 _log.trace('Fetched from %s data %s', cid, vhd)
-                if videos:
-                    _log.trace('%s last video: %s',
-                               videos[0].channel.name, videos[0].url)
             await asyncio.gather(*[self.callback(v) for v in gvhd])

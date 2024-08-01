@@ -1,6 +1,3 @@
-
-
-from dataclasses import dataclass
 from typing import List, Optional
 
 from bot.databases.varstructs import LogsPayload
@@ -15,40 +12,10 @@ from ._view import DefaultSettingsView
 from bot.misc.logstool import LogType
 
 
-@dataclass
-class LogItem:
-    id: int
-    name: str
-    description: str
-    emoji: Optional[str] = None
-
-
-logs_items = [
-    LogItem(
-        LogType.delete_message,
-        "Удаление сообщения",
-        "Действия с удаленными сообщениями: Этот лог содержит информацию о всех удаленных сообщениях в системе. Он помогает отслеживать, кто и когда удалил сообщение, и обеспечивает прозрачность в отношении удаленных данных.",
-    ),
-    LogItem(
-        LogType.edit_message,
-        "Редактирование сообщения",
-        "Редактированные сообщения: Этот лог содержит информацию о всех сообщениях, которые были изменены после отправки. Он предоставляет возможность просмотра истории изменений сообщений, что полезно для контроля целостности коммуникации.",
-    ),
-    LogItem(
-        LogType.punishment,
-        "Нарушение правил и наказание",
-        "Примененные наказания за нарушения: Этот лог включает информацию о примененных наказаниях в ответ на нарушения правил. Он помогает поддерживать порядок и дисциплину в системе, обеспечивая справедливость и последовательность в применении мер дисциплинарного воздействия.",
-    ),
-    LogItem(
-        LogType.economy,
-        "Транзакция или изменения в экономике",
-        "Транзакции или изменения в экономике: Этот лог отражает все транзакции и изменения в экономике системы. Он предоставляет информацию о всех финансовых операциях, произошедших в системе, и помогает отслеживать денежные потоки и изменения в экономической ситуации.",
-    ),
-    LogItem(
-        LogType.ideas,
-        "Предложение или идея",
-        "Рассмотренные предложения и идеи: Этот лог содержит информацию о всех предложенных идеях и предложениях, которые были рассмотрены в системе. Он помогает отслеживать процесс развития идей и принятия решений на основе предложений от участников.",
-    )
+logs_items: List[LogType] = [
+    log
+    for log in LogType.__dict__.values()
+    if isinstance(log, LogType)
 ]
 
 
@@ -62,7 +29,8 @@ class ChannelSetDropDown(nextcord.ui.StringSelect):
             nextcord.SelectOption(
                 label=channel.name,
                 value=channel_id,
-                description=', '.join([log_item.name for log_item in logs_items if log_item.id in log_ids])[:100],
+                description=', '.join(
+                    [i18n.t(locale, f'settings.logs.items.{log_item.name}.title') for log_item in logs_items if log_item.value in log_ids]).capitalize()[:100],
                 emoji=Emoji.channel_text,
                 default=channel_id == selected_channel_id
             )
@@ -113,10 +81,11 @@ class LogsDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=log.name,
-                value=log.id,
-                emoji=log.emoji,
-                default=log.id in channel_data
+                label=i18n.t(locale, f'settings.logs.items.{log.name}.title'),
+                description=i18n.t(
+                    locale, f'settings.logs.items.{log.name}.description')[:100],
+                value=log.value,
+                default=log.value in channel_data
             )
             for log in logs_items
         ]
@@ -170,7 +139,7 @@ class LogsView(DefaultSettingsView):
         self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
 
-        self.add_item(await ChannelSetDropDown(guild))
+        self.add_item(await ChannelSetDropDown(guild, selected_channel_id))
         self.add_item(await ChannelDropDown(guild.id))
         self.add_item(await LogsDropDown(
             guild.id, selected_channel_id, selected_logs))

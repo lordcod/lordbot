@@ -6,7 +6,6 @@ import time
 import logging
 from typing import TYPE_CHECKING, Optional, Tuple
 
-from aiohttp.web_exceptions import HTTPUnauthorized
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_TWITCH_MESSAGE
@@ -20,10 +19,6 @@ if TYPE_CHECKING:
     from bot.misc.lordbot import LordBot
 
 _log = logging.getLogger(__name__)
-handler = logging.FileHandler(f"logs/{__name__}.log")
-handler.setFormatter(logging.Formatter(
-    '[%(asctime)s][%(name)s][%(levelname)s]  %(message)s (%(filename)s:%(lineno)d)', '%m-%d-%Y %H:%M:%S'))
-_log.addHandler(handler)
 
 
 class TwNoti:
@@ -65,7 +60,7 @@ class TwNoti:
                 if data['username'] == stream.user_name:
                     channel = self.bot.get_channel(data['channel_id'])
                     payload = get_payload(guild=guild, stream=stream, user=user)
-                    mes_data = await generate_message(lord_format(data.get('message', DEFAULT_TWITCH_MESSAGE), payload))
+                    mes_data = generate_message(lord_format(data.get('message', DEFAULT_TWITCH_MESSAGE), payload))
                     await channel.send(**mes_data)
 
     async def callback_on_stop(self, username: str):
@@ -168,7 +163,13 @@ class TwNoti:
 
             tasks = []
             for uid in self.usernames:
-                with_started, data = await self.is_streaming(uid)
+                try:
+                    with_started, data = await self.is_streaming(uid)
+                except Exception as exp:
+                    _log.error('An error was received when executing the request (%s)',
+                               uid,
+                               exc_info=exp)
+                    with_started, data = False, None
 
                 _log.trace('Fetched from %s data %s %s',
                            uid, with_started, data)

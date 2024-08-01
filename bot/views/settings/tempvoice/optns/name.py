@@ -1,25 +1,27 @@
 import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.views.settings.tempvoice.optns.standart import OptionItem
 
 
 @AsyncSterilization
 class NameModal(nextcord.ui.Modal, OptionItem):
-    label = 'Channel name'
-    description = 'Change the default channel name'
+    label = 'settings.tempvoice.name.label'
+    description = 'settings.tempvoice.name.description'
     emoji = 'name'
 
     async def __init__(self, guild: nextcord.Guild):
         gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
         data = await gdb.get('tempvoice')
         name = data.get('name', '{voice.count.active}-{member.username}')
 
-        super().__init__('TempVoice')
+        super().__init__(i18n.t(locale, 'settings.tempvoice.brief_title'))
 
         self.name = nextcord.ui.TextInput(
-            label='Voice Name',
+            label=i18n.t(locale, 'settings.tempvoice.name.label'),
             placeholder=name
         )
         self.add_item(self.name)

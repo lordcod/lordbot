@@ -8,7 +8,7 @@ from bot.misc.lordbot import LordBot
 import os
 
 
-bot = LordBot(False)
+bot = LordBot(rollout_functions=False, test_bot=True)
 
 
 def load_dir(dirpath: str) -> None:
@@ -25,7 +25,7 @@ def load_dir(dirpath: str) -> None:
 
 def start_bot():
     flags = dict(map(lambda item: (item[0].removeprefix(
-        '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards='])[0]))
+        '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards=', 'log_level='])[0]))
 
     load_dir("./bot/cogs")
 

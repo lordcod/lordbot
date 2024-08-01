@@ -52,7 +52,7 @@ class ThreadData(DefaultSettingsView):
             await interaction.response.send_message(i18n.t(
                 locale, 'settings.thread.thread.mes-not-found'))
 
-        content = await utils.generate_message(channel_content)
+        content = utils.generate_message(channel_content)
         await interaction.response.send_message(**content, ephemeral=True)
 
     @nextcord.ui.button(label='Edit message',

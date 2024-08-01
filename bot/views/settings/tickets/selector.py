@@ -17,6 +17,7 @@ from bot.languages import i18n
 class TicketsSelectorDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
+        placeholder: str,
         channel_types: List[nextcord.ChannelType],
         guild: nextcord.Guild,
         selected_channel: Optional[nextcord.VoiceChannel] = None,
@@ -26,7 +27,11 @@ class TicketsSelectorDropDown(nextcord.ui.ChannelSelect):
         self.selected_channel = selected_channel
         self.selected_category = selected_category
 
-        super().__init__(channel_types=channel_types)
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
+        super().__init__(placeholder=i18n.t(locale, placeholder),
+                         channel_types=channel_types)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         view = await TicketsSelectorView(
@@ -41,7 +46,7 @@ class TicketsSelectorDropDown(nextcord.ui.ChannelSelect):
 @AsyncSterilization
 class TicketsChannelDropDown(TicketsSelectorDropDown.cls):
     async def __init__(self, *args) -> None:
-        await super().__init__([nextcord.ChannelType.text], *args)
+        await super().__init__('settings.tickets.selector.channel', [nextcord.ChannelType.text], *args)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -52,7 +57,7 @@ class TicketsChannelDropDown(TicketsSelectorDropDown.cls):
 @AsyncSterilization
 class TicketsCategoryDropDown(TicketsSelectorDropDown.cls):
     async def __init__(self, *args) -> None:
-        await super().__init__([nextcord.ChannelType.category], *args)
+        await super().__init__('settings.tickets.selector.category', [nextcord.ChannelType.category], *args)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         category = self.values[0]
@@ -85,6 +90,7 @@ class TicketsSelectorView(DefaultSettingsView):
             self.create.disabled = False
 
         self.back.label = i18n.t(locale, 'settings.button.back')
+        self.create.label = i18n.t(locale, 'settings.button.create')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

@@ -79,6 +79,8 @@ Message = Union[str, Dict[str, Any]]
 class TicketsMessagesPayload(TypedDict):
     panel: Message
     open: Message
+    category: Optional[Message]
+    controller: Message
     close: Message
     reopen: Message
     delete: Message
@@ -125,7 +127,7 @@ class FaqPayload(TypedDict):
 class ModalItemPayload(TypedDict):
     label: str
     style: Optional[Literal[1, 2]]
-    required: Optional[str]
+    required: Optional[bool]
     placeholder: Optional[str]
     default_value: Optional[str]
     min_lenght: Optional[int]
@@ -148,7 +150,6 @@ class PartialCategoryPayload(TypedDict):
     closed_category_id: Optional[int]
     moderation_roles: Optional[List[int]]
     user_closed: Optional[bool]
-    moderation_mention: Optional[bool]
     approved_roles: Optional[List[int]]
     saving_history: Optional[bool]
     auto_archived: Optional[int]
@@ -165,12 +166,11 @@ class CategoryPayload(PartialCategoryPayload, ButtonPayload, total=True):
 class TicketsItemPayload(PartialCategoryPayload, total=True):
     channel_id: int
     message_id: int
-    faq: Optional[FaqPayload]
-    categories: Optional[List[CategoryPayload]]
     enabled: Optional[bool]
-    global_user_tickets_limit: Optional[int]
-    tickets_limit: Optional[int]
+    faq: Optional[FaqPayload]
     category_type: Optional[int]
+    categories: Optional[List[CategoryPayload]]
+    global_user_tickets_limit: Optional[int]
 
 
 TicketsPayload = Dict[int, TicketsItemPayload]

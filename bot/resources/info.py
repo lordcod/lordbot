@@ -2,6 +2,10 @@ import nextcord
 import orjson
 from bot.resources.ether import ColorType, Emoji
 
+DISCORD_SUPPORT_SERVER = 'https://discord.com/invite/np6RhahkZH'
+SITE = 'https://lordcord.fun'
+
+
 DEFAULT_BOT_COLOR = ColorType.sliv
 
 DEFAULT_PREFIX = 'l.'
@@ -59,10 +63,13 @@ COUNT_ROLES_PAGE = 5
 DEFAULT_TICKET_PAYLOAD = {
     'names': {
         'open': '{ticket.count.total}-ticket',
-        'close': '{ticket.count.total}-closed'
+        'close': None
+        # Disabled until the problem is resolved
+        # 'close': '{ticket.count.total}-closed'
     },
     'messages': {
-        'panel': orjson.dumps({
+        'panel': {
+            "content": None,
             "title": "Tickets",
             "description": "If you have a question about the operation of the server, click on interaction to create a request.",
             "color": "{guild.color}",
@@ -71,39 +78,40 @@ DEFAULT_TICKET_PAYLOAD = {
                 "timestamp": "{today_dt}",
                 'icon_url': '{bot.avatar}'
             }, "thumbnail": ""
-        }).decode(),
-        'controller': orjson.dumps({
+        },
+        'controller': {
             "title": "Support team ticket controls",
             "color": "{guild.color}",
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
-        'close': orjson.dumps({
+        },
+        'close': {
             "title": "Action",
             "description": "The ticket is closed by {member.mention}",
             "color": 16765743,
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
-        'reopen': orjson.dumps({
+        },
+        'reopen': {
             "title": "Action",
             "description": "The ticket is opened by {member.mention}",
             "color": 53380,
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
-        'delete': orjson.dumps({
+        },
+        'delete': {
             "title": "Action",
             "description": 'Ticket will be deleted in a few seconds',
             "color": 16718362,
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
+        },
         'open': '{member} Welcome!',
+        'category': None,
     },
     'buttons': {
         'category_placeholder': 'Select the category of the request',
@@ -143,14 +151,16 @@ DEFAULT_TICKET_PAYLOAD = {
     }
 }
 
-
 DEFAULT_TICKET_PAYLOAD_RU = {
     'names': {
         'open': '{ticket.count.total}-ticket',
-        'close': '{ticket.count.total}-closed'
+        'close': None,
+        # Disabled until the problem is resolved
+        # 'close': '{ticket.count.total}-closed'
     },
     'messages': {
-        'panel': orjson.dumps({
+        'panel': {
+            "content": None,
             "title": "Тикет",
             "description": "Если у вас есть вопросы о работе сервера, нажмите на взаимодействие, чтобы создать запрос.",
             "color": "{guild.color}",
@@ -158,40 +168,43 @@ DEFAULT_TICKET_PAYLOAD_RU = {
                 "text": "{bot.displayName}",
                 "timestamp": "{today_dt}",
                 'icon_url': '{bot.avatar}'
-            }, "thumbnail": ""
-        }).decode(),
-        'controller': orjson.dumps({
+            },
+            "thumbnail": ""
+        },
+        'open': '{member} Привет!',
+        'category': None,
+        'controller': {
             "title": "Контроль заявок в службе поддержки",
             "color": "{guild.color}",
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
-        'close': orjson.dumps({
+        },
+        'close': {
             "title": "Действие",
             "description": "Заявка закрыта {member.mention}",
             "color": 16765743,
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
-        'reopen': orjson.dumps({
+        },
+        'reopen': {
             "title": "Действие",
             "description": "Тикет открывается с помощью {member.mention}",
             "color": 53380,
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
-        'delete': orjson.dumps({
+        },
+        'delete': {
             "title": "Действие",
             "description": 'Тикет будет удален через несколько секунд',
             "color": 16718362,
             "footer": {
                 "timestamp": "{today_dt}"
             },
-        }).decode(),
-        'open': '{member} Привет!',
+        },
+
     },
     'buttons': {
         'category_placeholder': 'Выберите категорию запроса',
@@ -265,6 +278,11 @@ DEFAULT_TICKET_PERMISSIONS = {k: (v[0].value, v[1].value)
 
 DEFAULT_TWITCH_MESSAGE = '🎥 У {stream.username} начался новый стрим!\nПрисоединяйтесь к нам сейчас: {stream.url}'
 DEFAULT_YOUTUBE_MESSAGE = '🎥 Новое видео на YouTube от {video.username}!\nСмотрите прямо сейчас: {video.url}'
+
+DEFAULT_TICKET_TYPE = 2
+DEFAULT_TICKET_FAQ_TYPE = 2
+DEFAULT_TICKET_LIMIT = 5
+
 
 activities_list = [
     {

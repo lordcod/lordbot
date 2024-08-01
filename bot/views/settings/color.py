@@ -66,7 +66,7 @@ class EmojiDropDown(nextcord.ui.StringSelect):
         super().__init__(options=options)
 
     async def callback(self, interaction: nextcord.Interaction):
-        value = self.values[0]
+        value = int(self.values[0])
 
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set("system_emoji", value)

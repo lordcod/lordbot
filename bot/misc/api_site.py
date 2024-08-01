@@ -25,6 +25,7 @@ class ApiSite:
     password: str
     callback_url: str
     app: FastAPI
+    __running: bool = False
 
     def __init__(self,
                  bot: LordBot,
@@ -35,10 +36,17 @@ class ApiSite:
     async def on_ready(self):
         _log.info('ApiSite is ready, public url: %s, password: %s', self.callback_url, self.password)
 
+    def is_running(self) -> bool:
+        return self.__running
+
     async def __run(self,
                     *,
                     endpoint: str = '/',
                     port: int = 8000) -> None:
+        if self.__running:
+            return
+
+        self.__running = True
         server = self._setup(endpoint=endpoint, port=port)
         try:
             server.config.setup_event_loop()

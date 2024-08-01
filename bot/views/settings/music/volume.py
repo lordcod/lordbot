@@ -42,7 +42,6 @@ class VolumeView(DefaultSettingsView):
     embed: nextcord.Embed
 
     async def __init__(self, guild: nextcord.Guild) -> None:
-        self.embed = (await music.MusicView(guild)).embed
         self.gdb = GuildDateBases(guild.id)
         locale = await self.gdb.get('language')
         color = await self.gdb.get('color')
@@ -50,12 +49,13 @@ class VolumeView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title=i18n.t(locale,
                          'settings.music.title'),
-            description="The music module allows you to set the maximum queue length, control the volume, assign DJ roles and create playlists.",
+            description=i18n.t(locale,
+                               'settings.music.description'),
             color=color
         )
         self.embed.add_field(
             name='',
-            value='> Specify the default volume'
+            value=i18n.t(locale, 'settings.music.volume.select')
         )
 
         super().__init__()

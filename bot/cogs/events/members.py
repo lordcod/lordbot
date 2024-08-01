@@ -27,6 +27,9 @@ class MembersEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: nextcord.Member):
+        if self.bot.user == member:
+            return
+
         guild = member.guild
         gdb = GuildDateBases(member.guild.id)
         farewell_message: dict = await gdb.get('farewell_message', {})
@@ -40,7 +43,7 @@ class MembersEvent(commands.Cog):
         content: str = farewell_message.get('message')
 
         message_format = utils.lord_format(content, payload)
-        message_data = await utils.generate_message(message_format)
+        message_data = utils.generate_message(message_format)
 
         await channel.send(**message_data)
 
@@ -78,7 +81,7 @@ class MembersEvent(commands.Cog):
         content: str = greeting_message.get('message')
 
         message_format = utils.lord_format(content, payload)
-        message_data = await utils.generate_message(message_format)
+        message_data = utils.generate_message(message_format)
 
         if image_link := greeting_message.get('image'):
             image_bytes = await utils.generate_welcome_image(member, image_link)

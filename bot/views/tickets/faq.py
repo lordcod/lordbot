@@ -1,9 +1,11 @@
 import nextcord
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import CategoryPayload, TicketsButtonsPayload, TicketsItemPayload, TicketsPayload, FaqItemPayload
+from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, generate_message, lord_format, get_payload
 from typing import List, Optional
 from bot.misc import tickettools
+from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
 
 
 @AsyncSterilization
@@ -35,7 +37,8 @@ class FAQDropDown(nextcord.ui.StringSelect):
         tickets: TicketsPayload = await gdb.get('tickets', {})
         items = tickets.get(interaction.message.id).get('faq').get('items')
         response = items[int(self.values[0])]
-        data = await generate_message(lord_format(response['response'], get_payload(member=interaction.user)))
+        data = generate_message(lord_format(
+            response['response'], get_payload(member=interaction.user)))
         await interaction.response.send_message(**data, ephemeral=True)
 
 
@@ -49,7 +52,8 @@ class FAQTempDropDown(FAQDropDown.cls):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         response = self.faq_items[int(self.values[0])]
-        data = await generate_message(lord_format(response['response'], get_payload(member=interaction.user)))
+        data = generate_message(lord_format(
+            response['response'], get_payload(member=interaction.user)))
         await interaction.response.send_message(**data, ephemeral=True)
 
 
@@ -122,7 +126,8 @@ class FAQButtonCreate(nextcord.ui.Button):
 class ButtonCategoryCreate(nextcord.ui.Button):
     async def __init__(self, index: int, guild_id: Optional[int] = None,  button_data: Optional[CategoryPayload] = None) -> None:
         if guild_id is None:
-            super().__init__(custom_id=f'tickets:faq:view:create:category:{index}')
+            super().__init__(
+                custom_id=f'tickets:faq:view:create:category:{index}')
             return
         super().__init__(
             style=button_data.get('style', nextcord.ButtonStyle.secondary),
@@ -132,7 +137,8 @@ class ButtonCategoryCreate(nextcord.ui.Button):
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        index = int(interaction.data['custom_id'].removeprefix('tickets:faq:view:create:category:'))
+        index = int(interaction.data['custom_id'].removeprefix(
+            'tickets:faq:view:create:category:'))
         gdb = GuildDateBases(interaction.guild_id)
         tickets: TicketsPayload = await gdb.get('tickets', {})
         categories_data = tickets.get(interaction.message.id).get('categories')
@@ -155,11 +161,12 @@ class FAQView(nextcord.ui.View):
         buttons = ticket_data.get('buttons')
         category_type = ticket_data.get('category_type', 1)
 
+        faq = ticket_data.get('faq', {})
+        faq_type = faq.get('type', DEFAULT_TICKET_FAQ_TYPE)
+        faq_items = faq.get('items')
+
         if category_type == 1:
-            faq = ticket_data.get('faq', {})
-            faq_type = faq.get('type')
-            faq_items = faq.get('items')
-            if faq and faq_type and faq_items:
+            if faq and faq_items:
                 if faq_type == 1:
                     self.add_item(await FAQCreateDropDown(guild_id, faq_items, buttons))
                     return
@@ -167,10 +174,7 @@ class FAQView(nextcord.ui.View):
                     self.add_item(await FAQButtonOpen(guild_id, buttons))
             self.add_item(await FAQButtonCreate(guild_id, buttons))
         elif category_type == 2:
-            faq = ticket_data.get('faq', {})
-            faq_type = faq.get('type')
-            faq_items = faq.get('items')
-            if faq and faq_type and faq_items:
+            if faq and faq_items:
                 categories_data = ticket_data.get('categories')
 
                 if faq_type == 1:
@@ -188,10 +192,11 @@ class FAQView(nextcord.ui.View):
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
         gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
         tickets: TicketsPayload = await gdb.get('tickets', {})
         ticket_data = tickets.get(interaction.message.id, {})
         enabled = ticket_data.get('enabled')
         if not enabled:
-            await interaction.response.send_message('Tickets are disabled by the server administrators!', ephemeral=True)
+            await interaction.response.send_message(i18n.t(locale, 'tickets.error.disabled'), ephemeral=True)
             return False
         return True

@@ -1,6 +1,5 @@
 from __future__ import annotations
 import contextlib
-import functools
 import getopt
 import logging
 import nextcord
@@ -22,7 +21,7 @@ import orjson
 from asyncio import TimerHandle
 from collections import namedtuple
 from typing import (TYPE_CHECKING, Callable,  Coroutine, Dict, Generic,  Optional,  Tuple,  Union,
-                    Mapping, Any, Iterable, SupportsIndex, Self, List, TypeVar, overload)
+                    Any, Iterable,  Self, List, TypeVar, overload)
 from datetime import datetime
 from captcha.image import ImageCaptcha
 from io import BytesIO
@@ -30,33 +29,73 @@ from functools import lru_cache
 from dataclasses import dataclass, field
 from PIL import Image, ImageDraw, ImageFont
 from easy_pil import Editor, Font, load_image_async
-from yandex_music import Video
 
 from bot.databases import GuildDateBases
 from cryptography.fernet import Fernet
 from bot.databases.varstructs import CategoryPayload
 from bot.resources import ether
 from bot.resources.ether import Emoji
+from functools import partial
+import numpy as np
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
 
 if TYPE_CHECKING:
+    from bot.misc.lordbot import LordBot
     from bot.misc.noti.twnoti import Stream as TwStream, User as TwUser
     from bot.misc.noti.ytnoti import Video as YtVideo
 
 _log = logging.getLogger(__name__)
 T = TypeVar('T')
 C_co = TypeVar("C_co", bound=type, covariant=True)
-wel_mes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
+WelMes = namedtuple("WelcomeMessageItem", ["name", "link", "description"])
 
 REGEXP_FORMAT = regex.compile(r"(\{\s*([\.\|\s\-_a-zA-Z0-9]*)\s*\})")
+MISSING = nextcord.utils._MissingSentinel()
+
 
 welcome_message_items = {
-    "None": wel_mes("None", None, None),
-    "my-image": wel_mes("My image", ..., "You will be able to enter a link to an image."),
-    "view-from-mountain": wel_mes("View from mountain", "https://i.postimg.cc/Hnpz0ycb/view-from-mountain.jpg", "Summer vibes, mountain views, sunset - all adds charm."),
-    "autumn-street": wel_mes("Autumn street", "https://i.postimg.cc/sXnQ8QHY/autumn-street.jpg", "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn."),
-    "winter-day": wel_mes("Winter day", "https://i.postimg.cc/qBhyYQ0g/winter-day.jpg", "Dazzling winter day, majestic mountain, small buildings, sparkling highway, snow-white covers."),
-    "magic-city": wel_mes("Magic city", "https://i.postimg.cc/hjJzk4kN/magic-city.jpg", "The beautiful atmosphere and scenic views from the boat."),
-    "city-dawn": wel_mes("City dawn", "https://i.postimg.cc/13J84NPL/city-dawn.jpg", "Starry sky, breeze, rustling leaves, crickets, fireflies, bonfire - perfect night.")
+    "None": WelMes("None", None, None),
+    "my-image": WelMes("My image", ..., "You will be able to enter a link to an image."),
+    "view-from-mountain": WelMes("View from mountain", "https://i.postimg.cc/Hnpz0ycb/view-from-mountain.jpg", "Summer vibes, mountain views, sunset - all adds charm."),
+    "autumn-street": WelMes("Autumn street", "https://i.postimg.cc/sXnQ8QHY/autumn-street.jpg", "The joy of a bright autumn morning, surrounded by a stunning building and the atmosphere of autumn."),
+    "winter-day": WelMes("Winter day", "https://i.postimg.cc/qBhyYQ0g/winter-day.jpg", "Dazzling winter day, majestic mountain, small buildings, sparkling highway, snow-white covers."),
+    "magic-city": WelMes("Magic city", "https://i.postimg.cc/hjJzk4kN/magic-city.jpg", "The beautiful atmosphere and scenic views from the boat."),
+    "city-dawn": WelMes("City dawn", "https://i.postimg.cc/13J84NPL/city-dawn.jpg", "Starry sky, breeze, rustling leaves, crickets, fireflies, bonfire - perfect night.")
+}
+
+hex_int = partial(int, base=16)
+
+
+def patch_asscalar(a):
+    return a.item()
+
+
+setattr(np, "asscalar", patch_asscalar)
+
+
+colors = {
+    '#58b99d': '<:lzelrole:1265262139266826332>',
+    '#3a7e6b': '<:dzelrole:1265262043385036852>',
+    '#65c97a': '<:lsalrole:1265262146481295463>',
+    '#448952': '<:dsalrole:1265262039111041054>',
+    '#5296d5': '<:lgolrole:1265262047931924580>',
+    '#356590': '<:dgolrole:1265262030693072967>',
+    '#925cb1': '<:lfiorole:1265262140697083905>',
+    '#693986': '<:dfiorole:1265262029271203980>',
+    '#d63864': '<:lmalrole:1265262051463401482>',
+    '#9f2756': '<:dmalrole:1265262034014961714>',
+    '#eac644': '<:ljolrole:1265262142098243720>',
+    '#b87f2e': '<:djolrole:1265262032299757630>',
+    '#d8833a': '<:lorarole:1265262144702779463>',
+    '#9c491a': '<:dorarole:1265262035399213056>',
+    '#d65745': '<:lredrole:1265262054772707452>',
+    '#8d3528': '<:dredrole:1265262037060030578>',
+    '#98a5a6': '<:lserrole:1265262058639851602>',
+    '#989c9f': '<:dserrole:1265262040432513054>',
+    '#667c89': '<:ltserole:1265262061399707738>',
+    '#596d79': '<:dtserole:1265262041921486912>'
 }
 
 
@@ -139,6 +178,7 @@ class MemberPayload(TempletePayload):
         self.id: int = member.id
         self.mention: str = member.mention
         self.username: str = member.name
+        self.name: str = member.name
         self.displayName: str = member.display_name
         self.discriminator: str = member.discriminator
         self.tag = f'{member.name}#{member.discriminator}'
@@ -167,7 +207,7 @@ def parse_prefix(
 
 def get_payload(
     *,
-    member: Optional[nextcord.Member] = None,
+    member: Optional[Union[nextcord.Member, nextcord.User]] = None,
     guild: Optional[nextcord.Guild] = None,
     stream: Optional[TwStream] = None,
     user: Optional[TwUser] = None,
@@ -178,10 +218,10 @@ def get_payload(
     voice_count: Optional[dict] = None,
 ):
     bot_payload = None
-    if member is not None and guild is None:
+    if member is not None and isinstance(member, nextcord.Member) and guild is None:
         guild = member.guild
     if guild is not None:
-        bot = guild._state._get_client().user
+        bot = guild._state.user
         bot_payload = MemberPayload(bot)
         bot_payload._prefix = 'bot'
 
@@ -409,8 +449,8 @@ class LordTemplate:
         if '|' not in var:
             return var.strip(), None
 
-        key, default = map(str.strip, var.split('|'))
-        return key, default
+        key, *defaults = var.split('|')
+        return key.strip(), '|'.join(defaults).strip()
 
     def parse_value(self, variables: List[Tuple[str, str]], forms: dict) -> dict:
         data = {}
@@ -418,12 +458,19 @@ class LordTemplate:
             key, default = self.parse_key(var)
             if key in forms:
                 data[every] = forms[key]
-            else:
-                data[every] = default or 'unspecified'
+                if not data[every] and default is not None:
+                    data[every] = default
+            elif default is not None:
+                data[every] = default
         return data
 
+# TODO: Fix formating
 
-def lord_format(string: str, forms: dict) -> str:
+
+def lord_format(string: Any, forms: dict) -> str:
+    if not isinstance(string, str):
+        string = orjson.dumps(string).decode()
+
     template = LordTemplate()
     variables = template.findall(string)
     values = template.parse_value(variables, forms)
@@ -449,6 +496,17 @@ class TranslatorFlags:
 
     def __class_getitem__(cls, *args: str):
         return cls(args)
+
+
+class AdditEmoji:
+    ...
+
+
+def get_emojis_class(system_emoji: int):
+    obj = AdditEmoji()
+    for name, data in ether.every_emojis.items():
+        setattr(obj, name, data[system_emoji])
+    return obj
 
 
 async def get_emoji(guild_id: int, name: str):
@@ -477,10 +535,7 @@ async def get_emoji_wrap(guild_data: GuildDateBases | int) -> Callable[[str], st
     system_emoji = await gdb.get('system_emoji')
 
     def _get_emoji_inner(name: str):
-        try:
-            return ether.every_emojis[name][system_emoji]
-        except:
-            return Emoji.lordcord
+        return ether.every_emojis[name][system_emoji]
     return _get_emoji_inner
 
 
@@ -547,19 +602,13 @@ class AsyncSterilization(Generic[T]):
         cls: type[T]
 
         def __new__(_cls, cls: type[T], *args, **kwargs) -> AsyncSterilization[T]:
-            self = cls.__new__(cls)
-            return self
-
-        def __init__(self, *args, **kwargs):
-            self.cls(*args, **kwargs)
-
-        __call__ = type[T]
+            ...
 
     def __init__(self, cls) -> None:
         self.cls = cls
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} {self.cls.__name__}>"
+        return f"<{type(self).__name__} {self.cls!r}>"
 
     async def __call__(self, *args: Any, **kwds: Any) -> T:
         self = self.cls.__new__(self.cls)
@@ -583,6 +632,40 @@ class GuildEmoji:
 
     def get(self, name: str) -> str:
         return self.data[name]
+
+
+def to_rgb(color: str | int):
+    if isinstance(color, str):
+        color = hex_int(color.strip(' #0x')[:6])
+
+    def _get_byte(byte: int) -> int:
+        return (color >> (8 * byte)) & 0xFF
+    rgb = _get_byte(2), _get_byte(1), _get_byte(0)
+    return rgb
+
+
+def get_distance(color1_lab, color2):
+    color2_rgb = sRGBColor(*to_rgb(color2))
+    color2_lab = convert_color(color2_rgb, LabColor)
+    dist = delta_e_cie2000(color1_lab, color2_lab)
+    return dist
+
+
+@lru_cache()
+def find_color_emoji(color):
+    if not isinstance(color, tuple):
+        color = to_rgb(color)
+    color1_rgb = sRGBColor(*color)
+    color1_lab = convert_color(color1_rgb, LabColor)
+
+    res = []
+    for clr in colors:
+        dist = get_distance(color1_lab, clr)
+        res.append(dist)
+
+    min_dist = min(res)
+    hex_color = list(colors.keys())[res.index(min_dist)]
+    return colors[hex_color]
 
 
 @dataclass
@@ -842,67 +925,171 @@ def randfloat(a: float | int, b: float | int, scope: int = 14) -> float:
     return random.randint(int(a*10**scope), int(b*10**scope)) / 10**scope
 
 
-async def generate_message(content: str) -> dict:
-    message = {}
-    try:
-        if not isinstance(content, dict):
-            content: dict = orjson.loads(content)
+class GeneratorMessageDictPop(dict):
+    def __init__(self, data):
+        self.data = data
+        super().__init__(data)
 
-        message_content = content.get('plainText')
-        message['content'] = message_content
+    if not TYPE_CHECKING:
+        def get(self, key, default=None):
+            return self.data.pop(key, default)
 
-        title = content.get('title')
-        description = content.get('description')
-        color = None
-        url = content.get('url')
-        fields = content.get('fields', [])
+        def __getitem__(self, key: Any) -> Any:
+            return self.data.pop(key)
 
-        with contextlib.suppress(ValueError, TypeError):
-            color = int(content.get('color'))
 
-        embed = nextcord.Embed(
-            title=title,
-            description=description,
-            color=color,
-            url=url
-        )
+class GeneratorMessage:
+    def __init__(self, data: Union[str, dict]) -> None:
+        self.data = data
 
-        if thumbnail := content.get('thumbnail'):
-            embed.set_thumbnail(thumbnail)
+    @staticmethod
+    def check_empty(data: dict) -> bool:
+        plain_text = data.get('plainText')
+        content = data.get('content')
+        embed = data.get('embed')
+        embeds = data.get('embeds')
+        return not any((
+            content,
+            plain_text,
+            embed,
+            embeds
+        ))
 
-        if author := content.get('author'):
-            embed.set_author(
-                name=author.get('name'),
-                url=author.get('url'),
-                icon_url=author.get('icon_url'),
+    def decode_data(self):
+        if not isinstance(self.data, dict):
+            try:
+                decode_data = orjson.loads(self.data)
+            except orjson.JSONDecodeError:
+                decode_data = self.data
+        else:
+            decode_data = self.data.copy()
+        if not isinstance(decode_data, dict):
+            decode_data = str(decode_data)
+        return decode_data
+
+    def get_error(self, error_status: Optional[int] = None):
+
+        if error_status == 5415:
+            content = (
+                f'{Emoji.cross} **Content** and **plain text** cannot be combined.\n'
+                'If you see this message somewhere in the components, contact the server administrators.'
             )
-
-        if footer := content.get('footer'):
-            if dt := footer.get('timestamp'):
-                embed.timestamp = datetime.fromisoformat(dt)
-            embed.set_footer(
-                text=footer.get('text'),
-                icon_url=footer.get('icon_url'),
+        elif error_status == 5410:
+            content = (
+                f'{Emoji.cross} **Embed** and **embeds** cannot be combined.\n'
+                'If you see this message somewhere in the components, contact the server administrators.'
             )
-
-        if image := content.get('image'):
-            embed.set_image(image)
-
-        for field in fields:
-            embed.add_field(
-                name=field.get('name', None),
-                value=field.get('value', None),
-                inline=field.get('inline', None)
+        elif error_status == 404:
+            content = (
+                f'{Emoji.cross} The message is empty.\n'
+                'If you see this message somewhere in the components, contact the server administrators.'
             )
+        else:
+            content = f'{Emoji.cross} If you see this message somewhere in the components, contact the server administrators.'
+        return {
+            "content": content
+        }
 
-        if (title or description or image or thumbnail
-                or author or footer or fields):
-            message['embed'] = embed
-        elif not message_content:
-            raise ValueError
-    except (TypeError, ValueError, orjson.JSONDecodeError) as exc:
-        message['content'] = str(content)
-    return message
+    def parse(self, with_empty: bool = False):
+        data = self.decode_data()
+        ret = {}
+
+        if isinstance(data, str):
+            return {'content': data}
+
+        data.pop('attachments', MISSING)
+        plain_text = data.pop('plainText', MISSING)
+        content = data.pop('content', MISSING)
+        embed = self.parse_embed(data)
+        embeds = self.parse_embeds(data.pop('embeds', MISSING))
+        flags = data.pop('flags', MISSING)
+
+        if content is not MISSING and plain_text is not MISSING:
+            return self.get_error(5415)
+        if embed is not MISSING and embeds is not MISSING:
+            return self.get_error(5410)
+
+        if content is not MISSING:
+            ret['content'] = content
+        if plain_text is not MISSING:
+            ret['content'] = plain_text
+
+        if embed is not MISSING:
+            ret['embed'] = embed
+        if embeds is not MISSING:
+            ret['embeds'] = embeds
+        if flags is not MISSING:
+            ret['flags'] = nextcord.MessageFlags._from_value(flags)
+
+        if data:
+            _log.trace('Message data: %s', ret)
+            _log.trace('Exclude data: %s', data)
+
+        if with_empty and self.check_empty(ret):
+            return self.get_error(404)
+
+        return ret
+
+    def parse_embed(self, data: dict):
+        new_data = GeneratorMessageDictPop(data)
+
+        with contextlib.suppress(KeyError):
+            timestamp = data["timestamp"]
+            if isinstance(timestamp, (int, float)):
+                try:
+                    data["timestamp"] = datetime.fromtimestamp(
+                        float(timestamp)).isoformat()
+                except OSError:
+                    data["timestamp"] = datetime.fromtimestamp(
+                        float(timestamp)//1000).isoformat()
+
+        with contextlib.suppress(KeyError):
+            color = data["color"]
+            if isinstance(color, str):
+                if color.startswith(('0x', '#')):
+                    color = int(color.removeprefix('#').removeprefix('0x'), 16)
+            data["color"] = int(color)
+
+        for arg in ('thumbnail', 'image'):
+            with contextlib.suppress(KeyError):
+                url = data[arg]
+                if not url:
+                    del data[arg]
+                    continue
+                if isinstance(url, str):
+                    data[arg] = {
+                        'url': url
+                    }
+
+        embed = nextcord.Embed.from_dict(new_data)
+
+        if new_data.data:
+            _log.trace('Exclude embed data: %s', new_data.data)
+
+        if embed:
+            return embed
+        else:
+            return MISSING
+
+    def parse_embeds(self, data):
+        if data is MISSING:
+            return MISSING
+
+        if data is None or not isinstance(data, list):
+            return []
+
+        embeds = []
+        for item in data:
+            embed = self.parse_embed(item)
+            if embed is not MISSING:
+                embeds.append(embed)
+
+        return embeds
+
+
+def generate_message(content: str, *, with_empty: bool = False) -> dict:
+    message = GeneratorMessage(content)
+    return message.parse(with_empty)
 
 
 async def generator_captcha(num):
@@ -967,7 +1154,7 @@ def add_gradient(
 
 
 async def generate_welcome_image(member: nextcord.Member, background_link: str) -> bytes:
-    bot = member._state._get_client()
+    bot: LordBot = member._state._get_client()
     session = bot.session
 
     background_image = await load_image_async(background_link, session=session)
@@ -1008,3 +1195,19 @@ async def generate_welcome_image(member: nextcord.Member, background_link: str) 
     )
 
     return background.image_bytes
+
+
+def replace_dict_key(data: dict, old, new) -> dict:
+    data_keys = list(data.keys())
+    index = data_keys.index(old)
+    data_keys[index] = new
+
+    new_data = dict.fromkeys(data_keys)
+
+    for key in data_keys:
+        if key == new:
+            new_data[key] = data[old]
+        else:
+            new_data[key] = data[key]
+
+    return new_data

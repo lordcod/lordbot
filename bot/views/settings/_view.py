@@ -11,7 +11,7 @@ class DefaultSettingsView(nextcord.ui.View):
     ) -> bool:
         if not interaction.user.guild_permissions.manage_guild:
             gdb = GuildDateBases(interaction.guild_id)
-            locale = gdb.get('language')
+            locale = await gdb.get('language')
             await interaction.response.send_message(
                 i18n.t(locale, 'settings.permission.denied'),
                 ephemeral=True

@@ -14,24 +14,12 @@ class PunishmentsEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_audit_log_entry_create(self, entry: nextcord.AuditLogEntry):
-        if entry.action == nextcord.AuditLogAction.ban:
-            await logstool.Logs(entry.guild).ban(
-                entry.user.guild,
-                entry._state.get_user(int(entry._target_id)),
-                entry.user,
-                entry.reason
-            )
-        elif entry.action == nextcord.AuditLogAction.unban:
-            await logstool.Logs(entry.guild).unban(
-                entry.user.guild,
-                entry._state.get_user(int(entry._target_id)),
-                entry.user,
-                entry.reason
-            )
-        elif entry.action == nextcord.AuditLogAction.kick:
-            await logstool.Logs(entry.guild).kick(
-                entry.user.guild,
-                entry._state.get_user(int(entry._target_id)),
+        get_user = entry._state.get_user
+        if entry.action in {nextcord.AuditLogAction.ban,  nextcord.AuditLogAction.unban, nextcord.AuditLogAction.kick}:
+            wrap = getattr(logstool.Logs(entry.guild), entry.action.name, None)
+            await wrap(
+                entry.guild,
+                get_user(int(entry._target_id)),
                 entry.user,
                 entry.reason
             )

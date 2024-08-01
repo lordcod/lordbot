@@ -12,7 +12,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import get_payload, get_emoji_wrap, lord_format
 from bot.views.tempvoice.view import TempVoiceView
-from bot.views.tempvoice.dropdown import AdvancedTempVoiceView
+from bot.views.tempvoice import dropdown as dropdown_item
 
 
 _log = logging.getLogger(__name__)
@@ -26,6 +26,7 @@ class VoiceStatus(IntEnum):
 
 
 class TempVoiceModule:
+    # TODO: added tempvoice log
     def __init__(self, member: nextcord.Member) -> None:
         self.member = member
 
@@ -78,7 +79,7 @@ class TempVoiceModule:
             if type_panel == 1:
                 view = await TempVoiceView(guild.id)
             elif type_panel == 2:
-                view = await AdvancedTempVoiceView(guild.id)
+                view = await dropdown_item.AdvancedTempVoiceView(guild.id)
             else:
                 view = None
 
@@ -92,7 +93,6 @@ class TempVoiceModule:
         gdb = GuildDateBases(guild.id)
         data = await gdb.get('tempvoice')
         panel_channel = guild.get_channel(data.get('panel_channel_id'))
-        type_panel = data.get('type_panel', 1)
         panel_message_id = data.get('panel_message_id')
 
         if panel_message_id is None:
@@ -100,18 +100,8 @@ class TempVoiceModule:
             return
 
         if data.get('type_message_panel', 1) in {1, 3} and panel_channel:
-            if type_panel == 1:
-                view = await TempVoiceView(guild.id)
-            elif type_panel == 2:
-                view = await AdvancedTempVoiceView(guild.id)
-            else:
-                view = None
-
-            if view is not None:
-                message = panel_channel.get_partial_message(panel_message_id)
-
-                embed = await cls.get_embed(guild)
-                await message.edit(embed=embed, view=view)
+            panel_message = panel_channel.get_partial_message(panel_message_id)
+            await cls.edit_panel_message(panel_message)
 
     @staticmethod
     async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
@@ -128,6 +118,25 @@ class TempVoiceModule:
             timestamp=datetime.today()
         )
         return embed
+
+    @classmethod
+    async def edit_panel_message(cls, message: nextcord.Message):
+        guild = message.guild
+
+        gdb = GuildDateBases(guild.id)
+        data = await gdb.get('tempvoice')
+        type_panel = data.get('type_panel', 1)
+
+        if type_panel == 1:
+            view = await TempVoiceView(guild.id)
+        elif type_panel == 2:
+            view = await dropdown_item.AdvancedTempVoiceView(guild.id)
+        else:
+            view = None
+
+        if view is not None:
+            embed = await cls.get_embed(guild)
+            await message.edit(embed=embed, view=view)
 
     async def check_user(self, channel: nextcord.VoiceChannel):
         gdb = GuildDateBases(self.member.guild.id)
@@ -228,7 +237,7 @@ class TempVoiceModule:
             if type_panel == 1:
                 view = await TempVoiceView(self.member.guild.id)
             elif type_panel == 2:
-                view = await AdvancedTempVoiceView(self.member.guild.id)
+                view = await dropdown_item.AdvancedTempVoiceView(self.member.guild.id)
             else:
                 view = None
             if view is not None:

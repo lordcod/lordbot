@@ -11,7 +11,7 @@ from bot.databases import GuildDateBases, CommandDB
 
 
 @AsyncSterilization
-class ChannelsDropDown(nextcord.ui.ChannelSelect):
+class AllowChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
         guild: nextcord.Guild,
@@ -53,7 +53,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         }
         await cdb.update(self.command_name, command_data)
 
-        view = await ChannelsView(
+        view = await AllowChannelsView(
             interaction.guild,
             self.command_name
         )
@@ -61,7 +61,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
 
 
 @AsyncSterilization
-class ChannelsView(DefaultSettingsView):
+class AllowChannelsView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
     async def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
@@ -74,11 +74,11 @@ class ChannelsView(DefaultSettingsView):
         command_data = await cdb.get(self.command_name, {})
         command_data.setdefault("distribution", {})
 
-        allow_datas = command_data["distribution"].get(
+        allow_data = command_data["distribution"].get(
             "allow-channel", {})
 
-        channel_ids = allow_datas.get('channels')
-        category_ids = allow_datas.get('categories')
+        channel_ids = allow_data.get('channels')
+        category_ids = allow_data.get('categories')
 
         self.embed = nextcord.Embed(
             title="Allowed channels",
@@ -102,7 +102,7 @@ class ChannelsView(DefaultSettingsView):
 
         super().__init__()
 
-        cdd = await ChannelsDropDown(
+        cdd = await AllowChannelsDropDown(
             guild,
             command_name
         )
@@ -110,7 +110,7 @@ class ChannelsView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await permisson_command.precise.CommandData(
+        view = await permisson_command.precise.CommandView(
             interaction.guild,
             self.command_name
         )
@@ -124,5 +124,5 @@ class ChannelsView(DefaultSettingsView):
         command_data["distribution"].pop("allow-channel", None)
         await cdb.update(self.command_name, command_data)
 
-        view = await ChannelsView(interaction.guild, self.command_name)
+        view = await AllowChannelsView(interaction.guild, self.command_name)
         await interaction.response.edit_message(embed=view.embed, view=view)

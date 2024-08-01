@@ -70,7 +70,7 @@ class MusicView(DefaultSettingsView):
         self.embed = nextcord.Embed(
             title=i18n.t(locale,
                          'settings.music.title'),
-            description="The music module allows you to set the maximum queue length, control the volume, assign DJ roles and create playlists.",
+            description=i18n.t(locale, 'settings.music.description'),
             color=color
         )
 
