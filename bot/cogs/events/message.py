@@ -24,6 +24,7 @@ release_sha = repo.head.object.hexsha[:8]
 release_date = repo.head.object.committed_date
 release_tag = repo.tags[-1].name
 
+
 translator = googletrans.Translator()
 
 BETWEEN_MESSAGES_TIME = {}
