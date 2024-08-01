@@ -4,8 +4,10 @@ from bot.misc.utils import AsyncSterilization
 
 
 from .. import permisson_command
-from .distribution.allow_channel import ChannelsView
-from .distribution.allow_role import RolesView
+from .distribution.allow_channel import AllowChannelsView
+from .distribution.allow_role import AllowRolesView
+from .distribution.deny_channel import DenyChannelsView
+from .distribution.deny_role import DenyRolesView
 from .distribution.cooldown import CooldownsView
 from bot.views.settings._view import DefaultSettingsView
 
@@ -22,13 +24,29 @@ class DistrubDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label='Channel', emoji=Emoji.channel_text, value='channel'
+                label='Cooldown',
+                emoji=Emoji.cooldown,
+                value='cooldown'
             ),
             nextcord.SelectOption(
-                label='Role', emoji=Emoji.auto_role, value='role'
+                label='Allow Channel',
+                emoji=Emoji.channel_text,
+                value='allow_channel'
             ),
             nextcord.SelectOption(
-                label='Cooldown', emoji=Emoji.cooldown, value='cooldown'
+                label='Allow Role',
+                emoji=Emoji.auto_role,
+                value='allow_role'
+            ),
+            nextcord.SelectOption(
+                label='Deny Channel',
+                emoji=Emoji.channel_text,
+                value='deny_channel'
+            ),
+            nextcord.SelectOption(
+                label='Deny Role',
+                emoji=Emoji.auto_role,
+                value='deny_role'
             ),
         ]
 
@@ -38,8 +56,10 @@ class DistrubDropDown(nextcord.ui.StringSelect):
         value = self.values[0]
 
         objections = {
-            'channel': ChannelsView,
-            'role': RolesView,
+            'deny_channel': DenyChannelsView,
+            'deny_role': DenyRolesView,
+            'allow_channel': AllowChannelsView,
+            'allow_role': AllowRolesView,
             'cooldown': CooldownsView
         }
         classification = objections.get(value)
@@ -52,7 +72,7 @@ class DistrubDropDown(nextcord.ui.StringSelect):
 
 
 @AsyncSterilization
-class CommandData(DefaultSettingsView):
+class CommandView(DefaultSettingsView):
     embed: nextcord.Embed = None
 
     async def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
@@ -63,8 +83,8 @@ class CommandData(DefaultSettingsView):
         locale: str = await self.gdb.get('language')
 
         self.cdb = CommandDB(guild.id)
-        self.command_data: dict = get_command(command_name)
         self.command_info: dict = await self.cdb.get(command_name, {})
+        self.command_data = get_command(command_name)
 
         self.operate = self.command_info.get("operate", 1)
 
@@ -119,5 +139,5 @@ class CommandData(DefaultSettingsView):
         command_info['operate'] = desperate
         await self.cdb.update(self.command_name, command_info)
 
-        view = await CommandData(interaction.guild, self.command_name)
+        view = await CommandView(interaction.guild, self.command_name)
         await interaction.response.edit_message(embed=view.embed, view=view)

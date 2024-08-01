@@ -2,24 +2,15 @@
 import nextcord
 
 from bot.databases import GuildDateBases
+from bot.languages import i18n
 from bot.resources.info import DEFAULT_EMOJI
-from bot.misc.utils import is_emoji, AsyncSterilization
+from bot.misc.utils import AsyncSterilization
 
+from bot.views.information_dd import get_info_dd
 from bot.views.settings.set_reaction import fetch_reaction
 
 from .. import economy
 from .._view import DefaultSettingsView
-
-
-class SelectedEmojiDropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild: nextcord.Guild, emoji: str) -> None:
-        super().__init__(options=[
-            nextcord.SelectOption(
-                label="The current emoji",
-                emoji=emoji,
-                default=True
-            )
-        ])
 
 
 @AsyncSterilization
@@ -29,15 +20,13 @@ class EmojiView(DefaultSettingsView):
     async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
         color = await gdb.get('color', 1974050)
+        locale = await gdb.get('language')
         economy_settings: dict = await gdb.get('economic_settings')
         emoji = economy_settings.get("emoji")
 
         self.embed = nextcord.Embed(
-            title='Custom emoji',
-            description=(
-                "You are on the way to creating a good economy.\n"
-                "You can set emojis for your economy"
-            ),
+            title=i18n.t(locale, 'settings.economy.emoji.title'),
+            description=i18n.t(locale, 'settings.economy.emoji.description'),
             color=color
         )
 
@@ -46,7 +35,11 @@ class EmojiView(DefaultSettingsView):
         if emoji != DEFAULT_EMOJI:
             self.reset.disabled = False
 
-        self.add_item(SelectedEmojiDropDown(guild, emoji))
+        self.add_item(get_info_dd(label=i18n.t(locale, 'settings.economy.emoji.dropdown'), emoji=emoji))
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.install.label = i18n.t(locale, 'settings.button.set')
+        self.reset.label = i18n.t(locale, 'settings.button.reset')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

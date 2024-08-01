@@ -1,5 +1,3 @@
-
-from collections import defaultdict
 import time
 import nextcord
 from nextcord.ext import commands

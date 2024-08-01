@@ -1,6 +1,5 @@
 from __future__ import annotations
 import asyncio
-import contextlib
 import getopt
 import logging
 import sys
@@ -19,7 +18,7 @@ from bot.databases.config import host, port, user, password, db_name
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
-from bot.misc.utils import LordTimeHandler, TranslatorFlags
+from bot.misc.utils import LordTimeHandler
 from bot.languages import i18n
 from bot.misc.noti import TwitchNotification, YoutubeNotification
 
@@ -45,9 +44,18 @@ class LordBot(commands.AutoShardedBot):
     timeouts = {}
     guild_timer_handlers = {}
 
-    def __init__(self, rollout_functions: bool = True) -> None:
+    def __init__(
+        self,
+        *,
+        rollout_functions: bool = True,
+        allow_bot_command: bool = False,
+        test_bot: bool = False
+    ) -> None:
+        self.test_bot = test_bot
+        self.allow_bot_command = allow_bot_command
+
         flags = dict(map(lambda item: (item[0].removeprefix(
-            '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards='])[0]))
+            '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards=', 'log_level='])[0]))
 
         shard_ids, shard_count = (flags.get(
             'shards') or os.getenv('shards') or input("Shared info: ")).split("/")
@@ -61,22 +69,21 @@ class LordBot(commands.AutoShardedBot):
             command_prefix=self.get_command_prefixs,
             intents=intents,
             help_command=None,
+            max_messages=None,
             shard_ids=shard_ids,
+            enable_debug_events=True,
             shard_count=shard_count,
             rollout_associate_known=rollout_functions,
             rollout_delete_unknown=rollout_functions,
             rollout_register_new=rollout_functions,
-            rollout_update_known=rollout_functions,
-            rollout_all_guilds=rollout_functions
+            rollout_update_known=rollout_functions
         )
 
-        loop = asyncio.get_event_loop()
+        self.load_i18n_config()
 
-        i18n.from_file("./bot/languages/localization_any.json")
-        json_resource = i18n._parse_json(i18n._load_file("temp_loc_en.json"))
-        i18n.resource_dict['en'].update(json_resource)
-        i18n.parser(json_resource, 'en')
-        i18n.config['locale'] = 'en'
+        self._connection._chunk_tasks
+
+        loop = asyncio.get_event_loop()
 
         self.__session = None
         self.apisite = ApiSite(self, handlers)
@@ -89,16 +96,54 @@ class LordBot(commands.AutoShardedBot):
 
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(loop)
 
+        if not test_bot:
+            self.add_listener(self.apisite._ApiSite__run, 'on_ready')
         self.add_listener(self.listen_on_ready, 'on_ready')
-        self.add_listener(self.apisite._ApiSite__run, 'on_ready')
         self.add_listener(self.twnoti.parse_twitch, 'on_ready')
         self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
+
+    def load_i18n_config(self) -> None:
+        i18n.config['locale'] = 'en'
+        i18n.from_file("./bot/languages/localization_any.json")
+
+        for lang in ('en',):
+            json_resource = i18n._parse_json(i18n._load_file(f"temp_loc_{lang}.json"))
+            i18n.resource_dict[lang].update(json_resource)
+            i18n.parser(json_resource, lang)
 
     @property
     def session(self) -> aiohttp.ClientSession:
         if self.__session is None or self.__session.closed:
             self.__session = aiohttp.ClientSession()
         return self.__session
+
+    async def process_commands(self, message: nextcord.Message) -> None:
+        """|coro|
+
+        This function processes the commands that have been registered
+        to the bot and other groups. Without this coroutine, none of the
+        commands will be triggered.
+
+        By default, this coroutine is called inside the :func:`.on_message`
+        event. If you choose to override the :func:`.on_message` event, then
+        you should invoke this coroutine as well.
+
+        This is built using other low level tools, and is equivalent to a
+        call to :meth:`~.Bot.get_context` followed by a call to :meth:`~.Bot.invoke`.
+
+        This also checks if the message's author is a bot and doesn't
+        call :meth:`~.Bot.get_context` or :meth:`~.Bot.invoke` if so.
+
+        Parameters
+        ----------
+        message: :class:`nextcord.Message`
+            The message to process commands for.
+        """
+        if not self.allow_bot_command and message.author.bot:
+            return
+
+        ctx = await self.get_context(message)
+        await self.invoke(ctx)
 
     @staticmethod
     async def get_command_prefixs(
@@ -144,6 +189,9 @@ class LordBot(commands.AutoShardedBot):
         setattr(self, name, coro)
 
     async def register_jino(self):
+        if not self.test_bot:
+            return
+
         async with self.session.get('https://ifconfig.me/ip') as response:
             ipb = await response.read()
             ip = ipb.decode()
@@ -170,8 +218,28 @@ class LordBot(commands.AutoShardedBot):
             _log.warning(
                 'The JINO token needs to be updated. The IP address was not added to the database.')
 
+    async def update_api_config(self):
+        api = self.apisite
+        url = 'https://api.lordcord.fun/post-api-config'
+        headers = {
+            'Authorization': os.environ.get('API_SECRET_TOKEN')
+        }
+        data = {
+            'url': api.callback_url,
+            'password': api.password
+        }
+
+        async with self.session.post(url, json=data, headers=headers) as response:
+            if response.status == 204:
+                _log.debug('Successful api update')
+            else:
+                _log.warning('Failed api update')
+
     async def listen_on_ready(self) -> None:
         _log.debug('Listen on ready')
+
+        if not self.test_bot:
+            await self.update_api_config()
 
         await self.register_jino()
         try:
@@ -194,6 +262,8 @@ class LordBot(commands.AutoShardedBot):
 
         for event_data in self.__with_ready_events__:
             self.dispatch(event_data[0], *event_data[1], **event_data[2])
+
+        _log.debug(f"{self._connection._background_tasks=} {self._connection._ready_task=} {self._connection._chunk_tasks=} {self._ready=}")
 
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         if not self.__with_ready__.done() and event_name.lower() != 'ready':

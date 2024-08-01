@@ -1,5 +1,9 @@
 import nextcord
 
+from bot.languages import i18n
+from bot.misc.time_transformer import display_time
+from bot.views.information_dd import get_info_dd
+
 from ... import ideas
 from bot.views.settings._view import DefaultSettingsView
 from bot.databases import GuildDateBases
@@ -11,20 +15,22 @@ from bot.misc.utils import TimeCalculator, AsyncSterilization
 class CooldownModal(nextcord.ui.Modal):
     async def __init__(self, guild_id: int):
         self.gdb = GuildDateBases(guild_id)
+        locale = await self.gdb.get('language')
 
         super().__init__("Cooldown")
 
         self.coldtime = nextcord.ui.TextInput(
-            "Enter the time to delay between ideas",
+            i18n.t(locale, 'settings.ideas.cooldown.modal.title'),
             max_length=100
         )
         self.add_item(self.coldtime)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
+        locale = await self.gdb.get('language')
         try:
             cooltime = TimeCalculator[False].convert(self.coldtime.value)
         except ValueError:
-            await interaction.response.send_message("It is necessary to write the time in the `1d2h10m` format")
+            await interaction.response.send_message(i18n.t(locale, 'settings.ideas.cooldown.modal.error'))
             return
         await self.gdb.set_on_json('ideas', 'cooldown', cooltime)
 
@@ -38,27 +44,51 @@ class CooldownView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
-        self.idea_datas: IdeasPayload = await self.gdb.get('ideas')
+        self.idea_data: IdeasPayload = await self.gdb.get('ideas')
         color = await self.gdb.get('color')
+        locale = await self.gdb.get('language')
+        cooldown = self.idea_data.get('cooldown')
 
         self.embed = nextcord.Embed(
-            title="Ideas",
-            description="The ideas module allows you to collect, discuss and evaluate user suggestions. It organizes ideas in one place, allows you to vote for them and track their status.",
+            title=i18n.t(locale, 'settings.ideas.init.title'),
+            description=i18n.t(locale, 'settings.ideas.init.description'),
             color=color
         )
         self.embed.add_field(
             name='',
-            value='> Set the delay time between publishing ideas'
+            value=i18n.t(locale, 'settings.ideas.cooldown.field')
         )
 
         super().__init__()
+
+        if cooldown is not None:
+            self.add_item(get_info_dd(
+                placeholder=i18n.t(locale, 'settings.ideas.init.value.cooldown',
+                                   cooldown=display_time(cooldown, locale, max_items=2))
+            ))
+        else:
+            self.add_item(get_info_dd(
+                placeholder=i18n.t(locale, 'settings.ideas.init.value.cooldown',
+                                   cooldown=i18n.t(locale, 'settings.ideas.init.unspecified'))
+            ))
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.reset.label = i18n.t(locale, 'settings.button.reset')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         view = await ideas.IdeasView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
-    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple)
+    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.success)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await CooldownModal(interaction.guild_id)
         await interaction.response.send_modal(modal)
+
+    @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.blurple)
+    async def reset(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.gdb.set_on_json('ideas', 'cooldown', None)
+
+        view = await ideas.IdeasView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)

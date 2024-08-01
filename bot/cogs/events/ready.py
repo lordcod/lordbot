@@ -51,7 +51,7 @@ class ReadyEvent(commands.Cog):
             gdb = GuildDateBases(guild_id)
             tickets = await gdb.get('tickets')
 
-            if ticket_payload.pop('total', True) == False:
+            if ticket_payload.pop('total', True) is False:
                 locale = ticket_payload.pop('locale', 'ru')
                 ticket_payload.update(info.DEFAULT_TICKET_PAYLOAD_RU.copy(
                 ) if locale == 'ru' else info.DEFAULT_TICKET_PAYLOAD.copy())
@@ -77,7 +77,8 @@ class ReadyEvent(commands.Cog):
     async def get_emojis(self):
         values = {}
         json_values = {}
-        names = ('aqua', 'mala', 'barh', 'lava', 'perl', 'yant', 'sume', 'sliv')
+        names = ('aqua', 'mala', 'barh', 'lava',
+                 'perl', 'yant', 'sume', 'sliv')
 
         def get_color(name: str) -> str:
             for prefix in names:
@@ -113,11 +114,11 @@ class ReadyEvent(commands.Cog):
         await asyncio.gather(
             self.get_emojis(),
             self.find_not_data_commands(),
-            self.process_tickets(),
+            # self.process_tickets(),
             self.process_temp_roles(),
             self.process_temp_bans(),
             self.process_giveaways(),
-            self.process_guild_delete_tasks()
+            self.process_guild_delete_tasks(),
         )
 
         views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
@@ -129,15 +130,17 @@ class ReadyEvent(commands.Cog):
                 rs = view()
             self.bot.add_view(rs)
 
-        # await GuildDateBases(1179069504186232852).set('tempvoice', {})
-
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def on_disconnect(self):
         await self.bot._LordBot__session.close()
         await localdb._update_db(__name__)
         await localdb.cache.close()
-        self.bot.engine.get_connection().close()
+
+        conn = self.bot.engine._DataBase__connection
+        if conn and not conn.closed:
+            await conn.close()
+
         _log.critical("Bot is disconnect")
 
     async def on_shard_disconnect(self, shard_id: int):
@@ -156,18 +159,18 @@ class ReadyEvent(commands.Cog):
 
     async def process_temp_bans(self):
         bsdb = BanDateBases()
-        datas = await bsdb.get_all()
+        data = await bsdb.get_all()
 
-        for (guild_id, member_id, ban_time) in datas:
+        for (guild_id, member_id, ban_time) in data:
             mbrsd = BanDateBases(guild_id, member_id)
             self.bot.lord_handler_timer.create(
                 ban_time-time.time(), mbrsd.remove_ban(self.bot._connection), f"ban:{guild_id}:{member_id}")
 
     async def process_temp_roles(self):
         rsdb = RoleDateBases()
-        datas = await rsdb.get_all()
+        data = await rsdb.get_all()
 
-        for (guild_id, member_id, role_id, role_time) in datas:
+        for (guild_id, member_id, role_id, role_time) in data:
             if not (
                 (guild := self.bot.get_guild(guild_id))
                 and (member := guild.get_member(member_id))

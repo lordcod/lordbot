@@ -5,6 +5,7 @@ import nextcord
 from bot.misc.tempvoice import TempVoiceModule
 from bot.misc.utils import get_emoji_as_color
 from bot.views.settings import tempvoice
+from bot.views.settings._view import DefaultSettingsView
 
 
 class OptionItem(ABC):
@@ -38,7 +39,7 @@ class FunctionOptionItem(OptionItem):
     ...
 
 
-class ViewOptionItem(nextcord.ui.View, OptionItem):
+class ViewOptionItem(DefaultSettingsView, OptionItem):
     embed: Optional[nextcord.Embed] = None
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)

@@ -1,6 +1,7 @@
 import os
 import random
 import string
+from threading import local
 import googletrans
 import orjson
 from typing import Optional, Dict, List
@@ -12,6 +13,7 @@ except ImportError:
 
 try:
     from bot.resources.ether import Emoji
+    from bot.misc.utils import AdditEmoji
 except ImportError:
     Emoji = None
 
@@ -158,7 +160,8 @@ def to_file(filename: str) -> str:
 def to_zip(filename: str) -> str:
     import shutil
     import os
-    dirname = '_temp_localization_'+''.join([random.choice(string.hexdigits) for _ in range(4)])
+    dirname = '_temp_localization_' + \
+        ''.join([random.choice(string.hexdigits) for _ in range(4)])
     os.mkdir(dirname)
 
     filecontent = _load_file(filename)
@@ -179,7 +182,7 @@ def parser(
     prefix: Optional[str] = None,
     loadable: bool = True,
 ) -> None:
-    for key, value in json_resource.items():
+    for key, value in list(json_resource.items()):
         if isinstance(value, dict):
             parser(
                 value, locale, f"{prefix+'.' if prefix else ''}{key}", loadable=loadable
@@ -190,19 +193,41 @@ def parser(
             )
 
 
-def t(locale: Optional[str] = None, path: Optional[str] = "", **kwargs) -> str:
-    if locale not in memoization_dict:
-        locale = config.get("locale")
-    if path not in memoization_dict[locale]:
-        data = memoization_dict[config.get("locale")][path]
-    else:
-        data = memoization_dict[locale][path]
+def t(locale: Optional[str] = None, path: Optional[str] = None, **kwargs) -> str:
+    if path is None:
+        return
 
-    return data.format(**kwargs, Emoji=Emoji)
+    lang = locale
+
+    if locale not in memoization_dict or path not in memoization_dict[locale]:
+        locale = config.get("locale")
+
+    try:
+        data = memoization_dict[locale][path]
+    except KeyError:
+        return f'{lang}.{path}'
+
+    if not data:
+        return data
+
+    if 'emoji' in kwargs and isinstance(kwargs['emoji'], AdditEmoji):
+        kwargs['Emoji'] = kwargs.pop('emoji')
+    else:
+        kwargs['Emoji'] = Emoji
+
+    return data.format(**kwargs)
 
 
 if __name__ == "__main__":
     # from_file("./bot/languages/localization.json")
+
+    # load i18n key
+    # filecontent = _load_file("./bot/languages/localization_any.json")
+    # json_resource = _parse_json(filecontent)
+    # for lang in json_resource:
+    #     print(lang)
+    #     data = json_resource[lang]
+    #     parser(data, lang, loadable=False)
 
     # to_zip("./bot/languages/localization_any.json")
 
@@ -234,10 +259,10 @@ if __name__ == "__main__":
     #     parser(trd, lang, "delcat", loadable=False)
 
     # Translate to default languages
-    data = translation_with_languages(
-        "ru", "Команда для начала игры в блэкджек. Игроки должны ставить ставки и пытаться набрать 21 очко, обыгрывая дилера.",
-        default_languages)
-    print(orjson.dumps(data).decode())
+    # data = translation_with_languages(
+    #     "ru", "Команда для начала игры в блэкджек. Игроки должны ставить ставки и пытаться набрать 21 очко, обыгрывая дилера.",
+    #     default_languages)
+    # print(orjson.dumps(data).decode())
 
     # Translation to default languages and added
     # add_dict_translations(
@@ -252,4 +277,4 @@ if __name__ == "__main__":
     # To i18n format as any locales format
     # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    # to_file("./bot/languages/localization_test.json")
+    to_file("localization_test.json")

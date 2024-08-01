@@ -12,7 +12,6 @@ from bot.misc.lordbot import LordBot
 from bot.misc.tickettools import ModuleTicket
 from bot.misc.utils import is_emoji
 from bot.languages import i18n
-from bot.resources.ether import Emoji
 from bot.views.translate import AutoTranslateView
 
 import googletrans
@@ -178,7 +177,7 @@ class MessageEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_audit_log_entry_create(self, entry: nextcord.AuditLogEntry):
-        if entry.action != nextcord.AuditLogAction.message_delete or entry.target.id is None:
+        if entry.action != nextcord.AuditLogAction.message_delete or entry.target is None:
             return
         await logstool.set_message_delete_audit_log(entry.user, entry.extra.channel.id, entry.target.id)
 

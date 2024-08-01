@@ -17,6 +17,13 @@ class IdeasModeration(commands.Cog):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context) -> bool:
+        gdb = GuildDateBases(ctx.guild.id)
+        ideas: IdeasPayload = await gdb.get('ideas')
+        mod_roles = ideas.get('moderation_role_ids')
+
+        if not set(ctx.author._roles) & set(mod_roles) or ctx.author.guild_permissions.administrator:
+            raise commands.MissingPermissions('manage_roles')
+
         return True
 
     @commands.group(invoke_without_command=True)

@@ -21,11 +21,14 @@ class TempVoiceSelectorChannelDropDown(nextcord.ui.ChannelSelect):
         selected_channel_panel: Optional[nextcord.TextChannel] = None,
         selected_category: Optional[nextcord.CategoryChannel] = None,
     ) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.selected_channel = selected_channel
         self.selected_channel_panel = selected_channel_panel
         self.selected_category = selected_category
 
-        super().__init__(channel_types=[nextcord.ChannelType.voice])
+        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.channel'), channel_types=[nextcord.ChannelType.voice])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -47,11 +50,14 @@ class TempVoiceSelectorChannelPanelDropDown(nextcord.ui.ChannelSelect):
         selected_channel_panel: Optional[nextcord.TextChannel] = None,
         selected_category: Optional[nextcord.CategoryChannel] = None,
     ) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.selected_channel = selected_channel
         self.selected_channel_panel = selected_channel_panel
         self.selected_category = selected_category
 
-        super().__init__(channel_types=[nextcord.ChannelType.text, nextcord.ChannelType.news])
+        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.panel'), channel_types=[nextcord.ChannelType.text, nextcord.ChannelType.news])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
@@ -73,11 +79,14 @@ class TempVoiceSelectorCategoryDropDown(nextcord.ui.ChannelSelect):
         selected_channel_panel: Optional[nextcord.TextChannel] = None,
         selected_category: Optional[nextcord.CategoryChannel] = None,
     ) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.selected_channel = selected_channel
         self.selected_channel_panel = selected_channel_panel
         self.selected_category = selected_category
 
-        super().__init__(channel_types=[nextcord.ChannelType.category])
+        super().__init__(placeholder=i18n.t(locale, 'settings.tempvoice.select.category'), channel_types=[nextcord.ChannelType.category])
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         category = self.values[0]
@@ -101,6 +110,9 @@ class TempVoiceSelectorView(DefaultSettingsView):
         selected_channel_panel: Optional[nextcord.TextChannel] = None,
         selected_category: Optional[nextcord.CategoryChannel] = None,
     ) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
         self.selected_channel = selected_channel
         self.selected_channel_panel = selected_channel_panel
         self.selected_category = selected_category
@@ -123,6 +135,7 @@ class TempVoiceSelectorView(DefaultSettingsView):
                                                               selected_category))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
+        self.create.label = i18n.t(locale, 'settings.button.create')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

@@ -7,9 +7,14 @@ import sys
 import traceback
 import aiohttp
 import asyncio
+import getopt
 
 log_webhook = os.environ.get('log_webhook')
 loop = asyncio.get_event_loop()
+
+
+flags = dict(map(lambda item: (item[0].removeprefix(
+    '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards=', 'log_level='])[0]))
 
 TRACE = logging.DEBUG - 5
 CORE = logging.INFO + 5
@@ -17,11 +22,12 @@ CORE = logging.INFO + 5
 DEFAULT_LOG = TRACE
 DEFAULT_DISCORD_LOG = logging.INFO
 DEFAULT_LOGS = {
-    'nextcord': logging.ERROR,
+    'nextcord': getattr(logging, flags.get('log_level', 'ERROR'), logging.ERROR),
     'pyngrok': logging.ERROR,
     'git': logging.ERROR,
     'httpx': logging.ERROR,
-    'aiocache': logging.ERROR
+    'aiocache': logging.ERROR,
+    'colormath': logging.ERROR
 }
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)

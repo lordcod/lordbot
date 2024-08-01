@@ -21,7 +21,7 @@ from bot.languages import i18n
 
 
 _log = logging.getLogger(__name__)
-REGEXP_URL = re.compile(r'https?:\/\/(.+)')
+REGEXP_URL = re.compile(r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)")
 
 timeout_data: Dict[int, Dict[int, float]] = {}
 
@@ -295,7 +295,7 @@ class ConfirmView(nextcord.ui.View):
                 locale, 'ideas.globals.ideas_disabled'), ephemeral=True)
             return False
 
-        if not role_ids & moderation_roles:
+        if not role_ids & moderation_roles and not interaction.user.guild_permissions.administrator:
             await interaction.response.defer(ephemeral=True)
             return False
 

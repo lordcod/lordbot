@@ -10,7 +10,7 @@ from bot.databases import GuildDateBases, CommandDB
 
 
 @AsyncSterilization
-class RolesDropDown(nextcord.ui.RoleSelect):
+class AllowRolesDropDown(nextcord.ui.RoleSelect):
     async def __init__(
         self,
         guild: nextcord.Guild,
@@ -39,7 +39,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
         command_data["distribution"]["allow-role"] = self.values.ids
         await cdb.update(self.command_name, command_data)
 
-        view = RolesView(
+        view = await AllowRolesView(
             interaction.guild,
             self.command_name
         )
@@ -47,7 +47,7 @@ class RolesDropDown(nextcord.ui.RoleSelect):
 
 
 @AsyncSterilization
-class RolesView(DefaultSettingsView):
+class AllowRolesView(DefaultSettingsView):
     embed: nextcord.Embed
 
     async def __init__(self, guild: nextcord.Guild, command_name: str) -> None:
@@ -77,7 +77,7 @@ class RolesView(DefaultSettingsView):
 
         super().__init__()
 
-        cdd = await RolesDropDown(
+        cdd = await AllowRolesDropDown(
             guild,
             command_name
         )
@@ -85,7 +85,7 @@ class RolesView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await permisson_command.precise.CommandData(
+        view = await permisson_command.precise.CommandView(
             interaction.guild,
             self.command_name
         )
@@ -100,5 +100,5 @@ class RolesView(DefaultSettingsView):
         command_data["distribution"].pop("allow-role", None)
         await cdb.update(self.command_name, command_data)
 
-        view = await RolesView(interaction.guild, self.command_name)
+        view = await AllowRolesView(interaction.guild, self.command_name)
         await interaction.response.edit_message(embed=view.embed, view=view)

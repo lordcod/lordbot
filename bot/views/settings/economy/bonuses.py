@@ -1,6 +1,7 @@
 from typing import Optional
 import nextcord
 from bot.databases import GuildDateBases
+from bot.languages import i18n
 from bot.misc.utils import TimeCalculator, AsyncSterilization
 
 from bot.resources.info import DEFAULT_ECONOMY_SETTINGS
@@ -8,23 +9,26 @@ from .. import economy
 from .._view import DefaultSettingsView
 
 
-reward_names = {
-    'daily': 'Daily reward',
-    'weekly': 'Weekly reward',
-    'monthly': 'Monthly reward'
-}
+reward_names = [
+    'daily',
+    'weekly',
+    'monthly'
+]
 
 
 @AsyncSterilization
 class RewardBonusModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild, value: str) -> None:
         self.gdb = GuildDateBases(guild.id)
+        locale = await self.gdb.get('language')
         self.economy_settings = await self.gdb.get('economic_settings', {})
         self.value = value
         previous = self.economy_settings.get(value)
-        super().__init__(reward_names[value], timeout=300)
+
+        label = i18n.t(locale, 'settings.economy.bonus.'+value)
+        super().__init__(label, timeout=300)
         self.bonus = nextcord.ui.TextInput(
-            label=reward_names[value],
+            label=label,
             placeholder=previous,
             max_length=6
         )
@@ -48,6 +52,7 @@ class WorkBonusModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild) -> None:
         super().__init__('Work', timeout=300)
         self.gdb = GuildDateBases(guild.id)
+        locale = await self.gdb.get('language')
         self.economy_settings = await self.gdb.get('economic_settings', {})
         work_data = self.economy_settings.get('work')
         _min_work_previous = work_data.get('min')
@@ -55,7 +60,7 @@ class WorkBonusModal(nextcord.ui.Modal):
         _cooldwon_previous = work_data.get('cooldown')
 
         self.min_work = nextcord.ui.TextInput(
-            label='Minimum payment for work',
+            label=i18n.t(locale, 'settings.economy.bonus.min_work'),
             placeholder=_min_work_previous,
             required=False,
             max_length=6
@@ -63,7 +68,7 @@ class WorkBonusModal(nextcord.ui.Modal):
         self.add_item(self.min_work)
 
         self.max_work = nextcord.ui.TextInput(
-            label='Maximum payment for work',
+            label=i18n.t(locale, 'settings.economy.bonus.max_work'),
             placeholder=_max_work_previous,
             required=False,
             max_length=6
@@ -71,7 +76,7 @@ class WorkBonusModal(nextcord.ui.Modal):
         self.add_item(self.max_work)
 
         self.cooldown = nextcord.ui.TextInput(
-            label='Cooldown',
+            label=i18n.t(locale, 'settings.economy.bonus.cooldown'),
             placeholder=_cooldwon_previous,
             required=False,
             max_length=20
@@ -80,19 +85,20 @@ class WorkBonusModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
         cooldown = None
 
         if not (self.min_work.value or self.min_work.value or self.cooldown.value):
-            await interaction.response.send_message("At least one value must be filled in", ephemeral=True)
+            await interaction.response.send_message(i18n.t(locale, 'settings.economy.error.no_selected'), ephemeral=True)
             return
         if (self.min_work.value and not self.min_work.value.isdigit()) or (self.max_work.value and not self.max_work.value.isdigit()):
-            await interaction.response.send_message("The value must be an integer number", ephemeral=True)
+            await interaction.response.send_message(i18n.t(locale, 'settings.economy.error.type'), ephemeral=True)
             return
         if self.cooldown.value:
             try:
                 cooldown = TimeCalculator().convert(self.cooldown.value)
             except TypeError:
-                await interaction.response.send_message("Incorrect time format", ephemeral=True)
+                await interaction.response.send_message(i18n.t(locale, 'settings.economy.error.type_time'), ephemeral=True)
                 return
 
         economy_settings = await gdb.get('economic_settings')
@@ -117,13 +123,14 @@ class BetBonusModal(nextcord.ui.Modal):
     async def __init__(self, guild: nextcord.Guild) -> None:
         super().__init__('Bet', timeout=300)
         self.gdb = GuildDateBases(guild.id)
+        locale = await self.gdb.get('language')
         self.economy_settings = await self.gdb.get('economic_settings', {})
         work_data = self.economy_settings.get('bet')
         _min_bet_previous = work_data.get('min')
         _max_bet_previous = work_data.get('max')
 
         self.min_bet = nextcord.ui.TextInput(
-            label='Minimum bid',
+            label=i18n.t(locale, 'settings.economy.bonus.min_bet'),
             placeholder=_min_bet_previous,
             required=False,
             max_length=6
@@ -131,7 +138,7 @@ class BetBonusModal(nextcord.ui.Modal):
         self.add_item(self.min_bet)
 
         self.max_bet = nextcord.ui.TextInput(
-            label='Maximum bid',
+            label=i18n.t(locale, 'settings.economy.bonus.max_bet'),
             placeholder=_max_bet_previous,
             required=False,
             max_length=6
@@ -140,12 +147,13 @@ class BetBonusModal(nextcord.ui.Modal):
 
     async def callback(self, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
 
         if not (self.min_bet.value or self.min_bet.value):
-            await interaction.response.send_message("At least one value must be filled in", ephemeral=True)
+            await interaction.response.send_message(i18n.t(locale, 'settings.economy.error.no_selected'), ephemeral=True)
             return
         if (self.min_bet.value and not self.min_bet.value.isdigit()) or (self.max_bet.value and not self.max_bet.value.isdigit()):
-            await interaction.response.send_message("The value must be an integer number", ephemeral=True)
+            await interaction.response.send_message(i18n.t(locale, 'settings.economy.error.type'), ephemeral=True)
             return
 
         economy_settings = await gdb.get('economic_settings')
@@ -166,37 +174,38 @@ class BetBonusModal(nextcord.ui.Modal):
 class BonusDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, selected_value: Optional[str] = None):
         self.gdb = GuildDateBases(guild_id)
+        locale = await self.gdb.get('language')
         self.economy_settings = await self.gdb.get('economic_settings', {})
         options = [
             nextcord.SelectOption(
-                label='Daily reward',
+                label=i18n.t(locale, 'settings.economy.bonus.daily'),
                 value='daily',
                 default='daily' == selected_value
             ),
             nextcord.SelectOption(
-                label='Weekly reward',
+                label=i18n.t(locale, 'settings.economy.bonus.weekly'),
                 value='weekly',
                 default='weekly' == selected_value
             ),
             nextcord.SelectOption(
-                label='Monthly reward',
+                label=i18n.t(locale, 'settings.economy.bonus.monthly'),
                 value='monthly',
                 default='monthly' == selected_value
             ),
             nextcord.SelectOption(
-                label='Work',
+                label=i18n.t(locale, 'settings.economy.bonus.work'),
                 value='work',
                 default='work' == selected_value
             ),
             nextcord.SelectOption(
-                label='Bet',
+                label=i18n.t(locale, 'settings.economy.bonus.bet'),
                 value='bet',
                 default='bet' == selected_value
             )
         ]
 
         super().__init__(
-            placeholder="Setting up bonus amounts",
+            placeholder=i18n.t(locale, 'settings.economy.bonus.dropdown.placeholder'),
             min_values=1,
             max_values=1,
             options=options
@@ -215,6 +224,8 @@ class BonusView(DefaultSettingsView):
     async def __init__(self, guild: nextcord.Guild, value: Optional[str] = None) -> None:
         self.value = value
         self.embed = (await economy.Economy(guild)).embed
+        self.gdb = GuildDateBases(guild.id)
+        locale = await self.gdb.get('language')
 
         super().__init__()
 
@@ -222,6 +233,10 @@ class BonusView(DefaultSettingsView):
             self.edit.disabled = False
             self.reset.disabled = False
         self.add_item(await BonusDropDown(guild.id, value))
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.reset.label = i18n.t(locale, 'settings.button.reset')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

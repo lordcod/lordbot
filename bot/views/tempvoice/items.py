@@ -367,7 +367,7 @@ class BitrateSettingsModal(nextcord.ui.Modal):
             return
 
         voice = await get_voice(interaction)
-        await voice.edit(bitrate=bitrate*1000)
+        await voice.edit(bitrate=int(bitrate)*1000)
         await interaction.response.send_message(i18n.t(locale, 'tempvoice.items.modal.bitrate.success'),
                                                 ephemeral=True)
 

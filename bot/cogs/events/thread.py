@@ -21,7 +21,7 @@ class ThreadEvent(commands.Cog):
         if not thread_data:
             return
 
-        content = await utils.generate_message(thread_data)
+        content = utils.generate_message(thread_data)
         await thread.send(**content)
 
 
