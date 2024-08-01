@@ -773,7 +773,6 @@ class Economy(commands.Cog):
         return embed
 
     @commands.command()
-    @check.team_only()
     async def slots(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
         color = await gdb.get('color')
