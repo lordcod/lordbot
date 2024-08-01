@@ -48,7 +48,7 @@ class Moderations(commands.Cog):
             raise commands.MissingPermissions(['manage_guild'])
 
         bot_perms = channel.permissions_for(guild.me)
-        if not (bot_perms.send_messages or bot_perms.manage_messages or bot_perms.read_messages or bot_perms.embed_links):
+        if not (bot_perms.send_messages and bot_perms.manage_messages and bot_perms.read_messages and bot_perms.embed_links):
             raise commands.BotMissingPermissions(['send_messages', 'manage_messages', 'read_messages', 'embed_links'])
 
         message = str(message)
@@ -79,20 +79,20 @@ class Moderations(commands.Cog):
                                        for attach in ctx.message.attachments])
 
         res = utils.generate_message(message_data)
-        await ctx.send(**res, files=files)
+        await message.edit(**res, files=files)
 
         await ctx.message.delete()
 
     @commands.command(aliases=["set", "setting"])
     @commands.has_permissions(manage_guild=True)
-    @commands.bot_has_permissions(manage_guild=True, send_messages=True, view_channel=True, embed_links=True)
+    @commands.bot_has_permissions(manage_guild=True)
     async def settings(self, ctx: commands.Context):
         view = await SettingsView(ctx.author)
 
         await ctx.send(embed=view.embed, view=view)
 
     @nextcord.slash_command(name="delete-category", default_member_permissions=48)
-    @commands.bot_has_permissions(manage_channels=True, send_messages=True, view_channel=True, embed_links=True)
+    @commands.bot_has_permissions(manage_channels=True)
     async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
         view = await DelCatView(interaction.user, category)
 
@@ -100,7 +100,7 @@ class Moderations(commands.Cog):
 
     @commands.group(name='ban', aliases=["tempban"], invoke_without_command=True)
     @commands.has_permissions(ban_members=True)
-    @commands.bot_has_permissions(ban_members=True, send_messages=True, view_channel=True, embed_links=True)
+    @commands.bot_has_permissions(ban_members=True)
     async def temp_ban(
         self,
         ctx: commands.Context,
@@ -169,7 +169,7 @@ class Moderations(commands.Cog):
 
     @commands.group(name='temp-role', aliases=['temprole'], invoke_without_command=True)
     @commands.has_permissions(manage_roles=True)
-    @commands.bot_has_permissions(manage_roles=True, send_messages=True, view_channel=True, embed_links=True)
+    @commands.bot_has_permissions(manage_roles=True)
     async def temp_role(
         self,
         ctx: commands.Context,
@@ -270,7 +270,7 @@ class Moderations(commands.Cog):
         name='role',
         description='If you want to copy the role but still keep the rights, then this is the command for you'
     )
-    @application_checks.bot_has_permissions(manage_roles=True, send_messages=True, view_channel=True, embed_links=True)
+    @application_checks.bot_has_permissions(manage_roles=True)
     async def clone_role(
         self,
         interaction: nextcord.Interaction,
@@ -303,7 +303,7 @@ class Moderations(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=["clear", "clean"])
     @commands.has_permissions(manage_messages=True)
-    @commands.bot_has_permissions(manage_messages=True, send_messages=True, view_channel=True)
+    @commands.bot_has_permissions(manage_messages=True)
     async def purge(self, ctx: commands.Context, limit: int):
         gdb = GuildDateBases(ctx.guild.id)
         locale = await gdb.get('language')

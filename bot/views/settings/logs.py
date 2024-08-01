@@ -13,12 +13,9 @@ from bot.misc.logstool import LogType
 
 
 logs_items: List[LogType] = [
-    LogType.delete_message,
-    LogType.edit_message,
-    LogType.punishment,
-    LogType.economy,
-    LogType.ideas,
-    LogType.roles
+    log
+    for log in LogType.__dict__.values()
+    if isinstance(log, LogType)
 ]
 
 
@@ -33,7 +30,7 @@ class ChannelSetDropDown(nextcord.ui.StringSelect):
                 label=channel.name,
                 value=channel_id,
                 description=', '.join(
-                    [i18n.t(locale, f'settings.logs.items.{log_item.name}.title') for log_item in logs_items if log_item.value in log_ids])[:100],
+                    [i18n.t(locale, f'settings.logs.items.{log_item.name}.title') for log_item in logs_items if log_item.value in log_ids]).capitalize()[:100],
                 emoji=Emoji.channel_text,
                 default=channel_id == selected_channel_id
             )

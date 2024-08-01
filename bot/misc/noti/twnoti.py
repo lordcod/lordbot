@@ -161,7 +161,13 @@ class TwNoti:
 
             tasks = []
             for uid in self.usernames:
-                with_started, data = await self.is_streaming(uid)
+                try:
+                    with_started, data = await self.is_streaming(uid)
+                except Exception as exp:
+                    _log.error('An error was received when executing the request (%s)',
+                               uid,
+                               exc_info=exp)
+                    with_started, data = False, None
 
                 _log.trace('Fetched from %s data %s %s',
                            uid, with_started, data)

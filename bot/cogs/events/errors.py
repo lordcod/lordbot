@@ -3,6 +3,8 @@ import logging
 import sys
 import nextcord
 from nextcord.ext import commands
+from bot.databases.handlers.guildHD import GuildDateBases
+from bot.languages import i18n
 from bot.misc.lordbot import LordBot
 
 from bot.misc.ratelimit import Cooldown
@@ -154,12 +156,11 @@ class CommandEvent(commands.Cog):
         interaction: nextcord.Interaction,
     ) -> None:
         if interaction.is_expired() and not interaction.response.is_done():
+            gdb = GuildDateBases(interaction.guild_id)
+            locale = await gdb.get('language')
             with contextlib.suppress(nextcord.NotFound):
                 await interaction.response.send_message(
-                    "There's been some kind of mistake!\n"
-                    "Check if the bot has the necessary permissions to execute this command!\n"
-                    f"Error ID (required for support): {item.custom_id}\n"
-                    f"If you couldn't figure out what's going on, contact the [support server]({DISCORD_SUPPORT_SERVER})!",
+                    i18n.t(locale, 'interaction.error.item', custom_id=item.custom_id, DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
                     ephemeral=True,
                     flags=nextcord.MessageFlags(suppress_embeds=True)
                 )
@@ -182,12 +183,14 @@ class CommandEvent(commands.Cog):
             return
 
         if not interaction.response.is_done():
-            await interaction.response.send_message("There's been some kind of mistake!\n"
-                                                    "Check if the bot has the necessary permissions to execute this command!\n"
-                                                    f"Error ID (required for support): specify the name of the commands\n"
-                                                    f"If you couldn't figure out what's going on, contact the [support server]({DISCORD_SUPPORT_SERVER})!",
-                                                    ephemeral=True,
-                                                    flags=nextcord.MessageFlags(suppress_embeds=True))
+            gdb = GuildDateBases(interaction.guild_id)
+            locale = await gdb.get('language')
+            with contextlib.suppress(nextcord.NotFound):
+                await interaction.response.send_message(
+                    i18n.t(locale, 'interaction.error.command', DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+                    ephemeral=True,
+                    flags=nextcord.MessageFlags(suppress_embeds=True)
+                )
 
         _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=exception)
 
@@ -199,6 +202,10 @@ class CommandEvent(commands.Cog):
             "Ignoring exception in event %s", event, exc_info=sys.exc_info())
 
     async def permission_check(self, ctx: commands.Context):
+        permission = ctx.channel.permissions_for(ctx.guild.me)
+        if not (permission.read_messages and permission.send_messages and permission.embed_links):
+            return False
+
         perch = PermissionChecker(ctx)
         answer = await perch.process()
 

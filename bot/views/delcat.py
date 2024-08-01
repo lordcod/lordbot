@@ -1,5 +1,4 @@
 import asyncio
-from typing import TYPE_CHECKING, Any, Coroutine
 import nextcord
 
 from bot.languages import i18n
@@ -45,7 +44,7 @@ class DelCatView(nextcord.ui.View):
             i18n.t(self.locale, "delcat.accept.title",
                    category=self.category.name),
             description=i18n.t(
-                self.locale, "delcat.accept.description", count=len(self.category.channels)),
+                self.locale, "delcat.accept.description", count=len(tasks)-1),
             color=0x57F287
         )
 

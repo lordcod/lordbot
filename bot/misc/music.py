@@ -208,9 +208,25 @@ class MusicPlayer:
 
     async def point_not_user(self) -> None:
         if self.voice.is_playing():
+            gdb = GuildDateBases(self.guild_id)
+            locale = await gdb.get('language')
+
             self.voice.pause()
             self.updated_task.cancel()
             self.stopped_at = time.time()-self.started_at
+            self.leaved_task = self.get_leaved_task()
+            await self.message.edit(
+                content=i18n.t(locale, 'music.player.out.not_user', time=time.time()+180),
+                embeds=[],
+                view=None
+            )
+
+    async def point_user(self) -> None:
+        if self.voice.is_paused() and self.leaved_task is not None and queue.has(self.guild_id, self.index):
+            self.leaved_task.cancel()
+            self.voice.resume()
+            self.started_at = time.time()-self.stopped_at
+            self.updated_task = self.get_updated_task()
             await self.update_message()
 
     async def update_message(self):

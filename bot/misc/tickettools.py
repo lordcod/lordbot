@@ -8,7 +8,7 @@ from bot.databases.varstructs import CategoryPayload, TicketsItemPayload, Ticket
 from typing import Dict,  List, Literal, Optional, Self, Tuple
 
 from bot.languages import i18n
-from bot.misc import utils
+from bot.misc import logstool, utils
 from bot.misc.utils import generate_message, get_payload, lord_format
 from bot.misc.lordbot import LordBot
 from bot.resources.ether import Emoji
@@ -32,6 +32,7 @@ class TicketStatus(IntEnum):
     opened = 1
     closed = 2
     deleted = 3
+    predelete = 4
 
 
 def parse_permissions_string(permission_data: dict, mod_roles: list, guild_id: int, owner_id: int):
@@ -345,6 +346,15 @@ class ModuleTicket:
         await self.settings_message.edit(i18n.t(locale, 'tickets.message.open', channel=self.ticket_channel.mention),
                                          embeds=[], view=None)
 
+        await logstool.Logs(self.guild).create_ticket(
+            self.member,
+            ticket_data.get('channel_id'),
+            self.ticket_channel,
+            self.input_answer,
+            self.selected_category and self.selected_category['label'],
+            self.ticket_count
+        )
+
     async def create_after_modals(self, interaction: nextcord.Interaction, modals: Optional[dict] = None):
         if self.settings_message is None:
             self.settings_message = await interaction.response.send_message(f'{Emoji.loading} Loading...', ephemeral=True)
@@ -505,6 +515,13 @@ class ModuleTicket:
         self.status = TicketStatus.closed
         await self.set_ticket_data()
 
+        await logstool.Logs(self.guild).close_ticket(
+            self.owner,
+            self.member,
+            ticket_data.get('channel_id'),
+            self.ticket_channel
+        )
+
     async def reopen(self, inter_message: nextcord.PartialInteractionMessage):
         self.lord_handler.close(f'ticket-delete:{self.ticket_channel.id}')
 
@@ -535,7 +552,7 @@ class ModuleTicket:
         reopen_name = utils.lord_format(name, payload)
 
         if not (self._is_verification(get_data)
-                and self.status == TicketStatus.closed):
+                and self.status in (TicketStatus.closed, TicketStatus.predelete)):
             return
 
         await self.ticket_channel.send(**reopen_message)
@@ -564,6 +581,13 @@ class ModuleTicket:
         self.status = TicketStatus.opened
         await self.set_ticket_data()
         await inter_message.delete()
+
+        await logstool.Logs(self.guild).reopen_ticket(
+            self.owner,
+            self.member,
+            ticket_data.get('channel_id'),
+            self.ticket_channel
+        )
 
     async def delete(self):
         ticket_data = await self.fetch_guild_ticket()
@@ -599,10 +623,20 @@ class ModuleTicket:
             f'ticket-delete:{self.ticket_channel.id}'
         )
 
+        self.status = TicketStatus.predelete
+        await self.set_ticket_data()
+
+        await logstool.Logs(self.guild).delete_ticket(
+            self.owner,
+            self.member,
+            ticket_data.get('channel_id'),
+            self.ticket_channel
+        )
+
     async def __delete(self):
         self.status = TicketStatus.deleted
-        await self.ticket_channel.delete()
         await self.set_ticket_data()
+        await self.ticket_channel.delete()
 
     def _is_verification(self, get_data, with_user: bool = True) -> Literal[1, 2]:
         mod_roles = get_data('moderation_roles')

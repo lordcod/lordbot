@@ -13,6 +13,7 @@ except ImportError:
 
 try:
     from bot.resources.ether import Emoji
+    from bot.misc.utils import AdditEmoji
 except ImportError:
     Emoji = None
 
@@ -209,7 +210,7 @@ def t(locale: Optional[str] = None, path: Optional[str] = None, **kwargs) -> str
     if not data:
         return data
 
-    if 'emoji' in kwargs:
+    if 'emoji' in kwargs and isinstance(kwargs['emoji'], AdditEmoji):
         kwargs['Emoji'] = kwargs.pop('emoji')
     else:
         kwargs['Emoji'] = Emoji

@@ -46,6 +46,9 @@ class Voice(commands.Cog):
             return
         if voice is None:
             channel = ctx.message.author.voice.channel
+            permission = channel.permissions_for(ctx.guild.me)
+            if not (permission.connect and permission.speak and permission.priority_speaker):
+                raise commands.MissingPermissions(['connect', 'speak', 'priority_speaker'])
             voice = await channel.connect()
             if voice.channel in ctx.guild.stage_channels:
                 await ctx.guild.me.edit(suppress=False)

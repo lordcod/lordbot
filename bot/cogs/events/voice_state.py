@@ -6,6 +6,7 @@ from nextcord.ext import commands
 
 from bot.databases import localdb
 from bot.databases.handlers.guildHD import GuildDateBases
+from bot.misc import logstool
 from bot.misc.lordbot import LordBot
 from bot.misc.music import current_players
 from bot.misc.tempvoice import TempVoiceModule
@@ -19,23 +20,41 @@ class VoiceStateEvent(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: nextcord.Member, before: nextcord.VoiceState, after: nextcord.VoiceState) -> None:
         # add connect, disconnect, mute, unmmute, etc. log
+        tasks = []
         if before.channel is None and after.channel is not None:
-            await asyncio.gather(
-                self.connect_to_voice(member)
-            )
+            tasks.extend((
+                self.connect_to_voice(member),
+                self.check_bot_player_conn(after.channel),
+                logstool.Logs(member.guild).connect_voice(member, after.channel)
+            ))
         if before.channel is not None and after.channel is None:
-            await asyncio.gather(
+            tasks.extend((
                 self.disconnect_from_voice(member),
-                self.check_bot_player(before.channel)
-            )
+                self.check_bot_player(before.channel),
+                logstool.Logs(member.guild).disconnect_voice(member, before.channel)
+            ))
         if before.channel != after.channel:
-            await TempVoiceModule(member).process(before.channel, after.channel)
+            tasks.append(TempVoiceModule(member).process(before.channel, after.channel))
+        if (
+            before.channel is not None
+            and after.channel is not None
+            and before.channel != after.channel
+        ):
+            tasks.append(logstool.Logs(member.guild).move_voice(member, before.channel, after.channel))
+
+        await asyncio.gather(*tasks)
 
     async def check_bot_player(self, channel: nextcord.VoiceChannel):
         if (1 == len(channel.members)
             and self.bot.user == channel.members[0]
                 and channel.guild.id in current_players):
             await current_players[channel.guild.id].point_not_user()
+
+    async def check_bot_player_conn(self, channel: nextcord.VoiceChannel):
+        if (2 == len(channel.members)
+            and self.bot.user in channel.members
+                and channel.guild.id in current_players):
+            await current_players[channel.guild.id].point_user()
 
     async def connect_to_voice(self, member: nextcord.Member) -> None:
         state = await localdb.get_table('temp_voice_state')

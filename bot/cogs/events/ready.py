@@ -50,7 +50,7 @@ class ReadyEvent(commands.Cog):
             gdb = GuildDateBases(guild_id)
             tickets = await gdb.get('tickets')
 
-            if ticket_payload.pop('total', True) == False:
+            if ticket_payload.pop('total', True) is False:
                 locale = ticket_payload.pop('locale', 'ru')
                 ticket_payload.update(info.DEFAULT_TICKET_PAYLOAD_RU.copy(
                 ) if locale == 'ru' else info.DEFAULT_TICKET_PAYLOAD.copy())
@@ -128,8 +128,6 @@ class ReadyEvent(commands.Cog):
                 rs = view()
             self.bot.add_view(rs)
 
-        # await GuildDateBases(1179069504186232852).set('tempvoice', {})
-
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def on_disconnect(self):
@@ -137,9 +135,9 @@ class ReadyEvent(commands.Cog):
         await localdb._update_db(__name__)
         await localdb.cache.close()
 
-        conn = self.bot.engine
-        if conn.__connection and not conn.__connection.closed:
-            await conn.__connection.close()
+        conn = self.bot.engine._DataBase__connection
+        if conn and not conn.closed:
+            await conn.close()
 
         _log.critical("Bot is disconnect")
 

@@ -157,12 +157,12 @@ class YtNoti:
         ret = []
 
         url = 'https://www.googleapis.com/youtube/v3/channels'
-        params = list({
-            'part': 'snippet,id',
-            'type': 'channel',
-            'maxResults': 15,
-            'key': self.apikey
-        }.items())
+        params = [
+            ('part', 'snippet,id'),
+            ('type', 'channel'),
+            ('maxResults', 15),
+            ('key', self.apikey)
+        ]
 
         for id in ids:
             params.append(('id', id))
@@ -196,13 +196,17 @@ class YtNoti:
 
             gvhd = []
             for cid in self.channel_ids:
-                videos = await self.get_video_history(cid)
+                try:
+                    videos = await self.get_video_history(cid)
+                except Exception as exp:
+                    _log.error('An error was received when executing the request (%s)',
+                               cid,
+                               exc_info=exp)
+                    videos = []
+
                 vhd, diff = self.video_history.get_diff(videos)
                 self.video_history.extend(diff)
                 gvhd.extend(vhd)
 
                 _log.trace('Fetched from %s data %s', cid, vhd)
-                if videos:
-                    _log.trace('%s last video: %s',
-                               videos[0].channel.name, videos[0].url)
             await asyncio.gather(*[self.callback(v) for v in gvhd])
