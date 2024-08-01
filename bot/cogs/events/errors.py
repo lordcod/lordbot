@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import logging
 import sys
@@ -155,12 +156,12 @@ class CommandEvent(commands.Cog):
         item: nextcord.ui.Item,
         interaction: nextcord.Interaction,
     ) -> None:
-        if interaction.is_expired() and not interaction.response.is_done():
+        if not interaction.is_expired() and not interaction.response.is_done():
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')
-            with contextlib.suppress(nextcord.NotFound):
+            with contextlib.suppress(Exception):
                 await interaction.response.send_message(
-                    i18n.t(locale, 'interaction.error.item', custom_id=item.custom_id, DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+                    i18n.t(locale, 'interaction.error.item', custom_id=item.custom_id[:8], DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
                     ephemeral=True,
                     flags=nextcord.MessageFlags(suppress_embeds=True)
                 )
