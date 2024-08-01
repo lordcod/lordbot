@@ -16,7 +16,6 @@ from typing import Callable, Dict, List, Optional, Tuple, TypedDict, Union, Lite
 from bot.databases import EconomyMemberDB, GuildDateBases
 from bot.languages import i18n
 from bot.misc import logstool
-from bot.resources import check
 from bot.views.economy_shop import EconomyShopView
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import TranslatorFlags, clamp, randfloat
@@ -773,7 +772,6 @@ class Economy(commands.Cog):
         return embed
 
     @commands.command()
-    @check.team_only()
     async def slots(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)
         color = await gdb.get('color')
