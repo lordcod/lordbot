@@ -87,8 +87,8 @@ class GuildDateBases:
     async def _insert(self, guild_id):
         await engine.execute('INSERT INTO guilds (id) VALUES (%s)', (guild_id,))
 
-    @check_registration
     @on_error()
+    @check_registration
     async def get(self, service: str, default: T | None = None) -> Union[T, Any]:
         cch = cache.get(self.guild_id, service)
 

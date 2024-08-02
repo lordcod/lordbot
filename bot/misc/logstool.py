@@ -7,10 +7,10 @@ import datetime
 from enum import IntEnum
 import functools
 import logging
-from typing import Dict, List, Optional,  Tuple
+from typing import Any, Dict, List, Optional,  Tuple
 import nextcord
 
-from bot.databases import GuildDateBases
+from bot.databases import GuildDateBases, localdb
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import cut_back
 
@@ -24,6 +24,12 @@ class Message:
     embeds: Optional[List[nextcord.Embed]] = None
     file: Optional[nextcord.File] = None
     files: Optional[List[nextcord.File]] = None
+
+    def keys(self) -> List[str]:
+        return [k for k, v in self.__dict__.items() if v is not None]
+
+    def __getitem__(self, key: str) -> Any:
+        return getattr(self, key, None)
 
 
 class LogType(IntEnum):
@@ -140,8 +146,51 @@ async def pre_remove_role(member: nextcord.Member, role: nextcord.Role) -> None:
     _roles_db[key][1].append(role)
 
 
+async def get_webhook(channel: nextcord.TextChannel) -> nextcord.Webhook:
+    client = channel._state._get_client()
+    webhooks_db = await localdb.get_table('logs_webhooks')
+    webhook_data = await webhooks_db.get(channel.id)
+    _log.trace(webhook_data)
+
+    if webhook_data is not None:
+        webhook_data['type'] = 1
+        cache_webhook = nextcord.Webhook.from_state(webhook_data, channel._state)
+        _log.trace(cache_webhook)
+
+        with contextlib.suppress(nextcord.NotFound):
+            webhook = await cache_webhook.fetch(prefer_auth=False)
+            _log.trace(webhook)
+            if webhook.channel_id == channel.id:
+                return webhook
+
+    if not channel.permissions_for(channel.guild.me).manage_webhooks:
+        return None
+
+    webhook = await channel.create_webhook(
+        name=f'{client.user.name} Logs',
+        avatar=client.user.avatar
+    )
+    await webhooks_db.set(channel.id, {'id': webhook.id, 'token': webhook.token})
+
+    return webhook
+
+
 def on_logs(log_type: int):
     def predicte(coro):
+        async def send_log(self: Logs, mes: Message, channel_id: int, logs_types: List[LogType]):
+            if log_type not in logs_types:
+                return
+
+            channel = self.guild.get_channel(channel_id)
+            if channel is None:
+                return
+
+            webhook = await get_webhook(channel)
+            if webhook is None:
+                return
+
+            await webhook.send(**mes)
+
         @functools.wraps(coro)
         async def wrapped(self: Logs, *args, **kwargs) -> None:
             if self.guild is None or self.gdb is None:
@@ -154,25 +203,7 @@ def on_logs(log_type: int):
                 return
 
             for channel_id, logs_types in guild_data.items():
-                if log_type not in logs_types:
-                    continue
-
-                channel = self.guild.get_channel(channel_id)
-                if not channel:
-                    continue
-
-                bot = self.guild.me
-                perms = channel.permissions_for(bot)
-                if not (perms.send_messages and perms.embed_links and perms.read_messages):
-                    continue
-
-                await channel.send(
-                    content=mes.content,
-                    embed=mes.embed,
-                    embeds=mes.embeds,
-                    file=mes.file,
-                    files=mes.files
-                )
+                asyncio.create_task(send_log(self, mes, channel_id, logs_types))
 
         return wrapped
     return predicte

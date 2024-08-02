@@ -22,7 +22,9 @@ repo = git.Repo(search_parent_directories=True)
 
 release_sha = repo.head.object.hexsha[:8]
 release_date = repo.head.object.committed_date
-release_tag = repo.tags[-1].name
+tags_dt = {tag.commit.committed_date: tag for tag in repo.tags}
+release_tag = tags_dt[max(tags_dt)].name
+
 
 translator = googletrans.Translator()
 
@@ -91,7 +93,9 @@ class MessageEvent(commands.Cog):
                                                           avatar=self.bot.user.display_avatar)
 
         view = AutoTranslateView()
-        files = await asyncio.gather(*[attach.to_file(use_cached=True, spoiler=attach.is_spoiler()) for attach in message.attachments]) if message.attachments else None
+        files = await asyncio.gather(*[attach.to_file(use_cached=True, spoiler=attach.is_spoiler()
+                                                      ) for attach in message.attachments]
+                                     ) if message.attachments else None
         await asyncio.gather(
             bot_wh.send(
                 content=message.content,

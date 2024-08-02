@@ -23,8 +23,15 @@ class Teams(commands.Cog):
 
     @commands.command()
     async def shutdown(self, ctx: commands.Context):
+        await self.bot._LordBot__session.close()
+        await localdb._update_db(__name__)
+        await localdb.cache.close()
+
+        conn = self.bot.engine._DataBase__connection
+        if conn and not conn.closed:
+            conn.close()
+
         await ctx.send("The bot has activated the completion process!")
-        self.bot.dispatch('disconnect')
         await self.bot.close()
 
     @commands.command(aliases=['sudo'])

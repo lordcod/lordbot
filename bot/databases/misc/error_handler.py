@@ -15,7 +15,7 @@ def on_error():
             for i in range(3):
                 try:
                     return func(*args, **kwargs)
-                except Exception as exc:
+                except BaseException as exc:
                     _log.error(f"[ON_ERROR][{func.__name__}][{exc.__class__.__name__}]: Attempt: {i+1}/3, {args}", exc_info=exc)
         return inner
     return wrapped

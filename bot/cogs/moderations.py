@@ -92,7 +92,7 @@ class Moderations(commands.Cog):
         await ctx.send(embed=view.embed, view=view)
 
     @nextcord.slash_command(name="delete-category", default_member_permissions=48)
-    @commands.bot_has_permissions(manage_channels=True)
+    @application_checks.bot_has_permissions(manage_channels=True)
     async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
         view = await DelCatView(interaction.user, category)
 
