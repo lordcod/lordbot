@@ -166,3 +166,6 @@ class GuildDateBases:
 
     def __eq__(self, value: object) -> bool:
         return isinstance(value, GuildDateBases) and value.guild_id == self.guild_id
+
+    def __hash__(self) -> int:
+        return self.guild_id

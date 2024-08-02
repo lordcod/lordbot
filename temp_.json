@@ -1,0 +1,59 @@
+{
+    "t": "MESSAGE_CREATE",
+    "s": 311,
+    "op": 0,
+    "d": {
+        "type": 0,
+        "tts": false,
+        "timestamp": "2024-08-02T20:02:06.175000+00:00",
+        "position": 4,
+        "pinned": false,
+        "nonce": "1269022430823710720",
+        "mentions": [],
+        "mention_roles": [],
+        "mention_everyone": false,
+        "member": {
+            "roles": [
+                "1218236202361159680",
+                "1218237072243163137",
+                "1178294479283814421",
+                "1218235922185850920",
+                "1218236149525512253",
+                "1178294479346749534"
+            ],
+            "premium_since": null,
+            "pending": false,
+            "nick": null,
+            "mute": false,
+            "joined_at": "2023-12-12T13:04:37.689000+00:00",
+            "flags": 0,
+            "deaf": false,
+            "communication_disabled_until": null,
+            "banner": null,
+            "avatar": null
+        },
+        "id": "1269022436570042520",
+        "flags": 0,
+        "embeds": [],
+        "edited_timestamp": null,
+        "content": "ehf",
+        "components": [],
+        "channel_id": "1269022410372550676",
+        "author": {
+            "username": "lordcode",
+            "public_flags": 4194432,
+            "id": "636824998123798531",
+            "global_name": "LordCode",
+            "discriminator": "0",
+            "clan": null,
+            "avatar_decoration_data": {
+                "sku_id": "1232070870093008937",
+                "expires_at": null,
+                "asset": "a_a47890109a231f72dae7b17b27164676"
+            },
+            "avatar": "a2b7ba0e13dd4df0e77e767c5fc31813"
+        },
+        "attachments": [],
+        "guild_id": "1178294479267045466"
+    }
+}
