@@ -1011,13 +1011,18 @@ class GeneratorMessage:
 
         if content is not MISSING:
             ret['content'] = content
-        if plain_text is not MISSING:
+        elif plain_text is not MISSING:
             ret['content'] = plain_text
+        else:
+            ret['content'] = None
 
         if embed is not MISSING:
-            ret['embed'] = embed
-        if embeds is not MISSING:
+            ret['embeds'] = [embed]
+        elif embeds is not MISSING:
             ret['embeds'] = embeds
+        else:
+            ret['embeds'] = []
+
         if flags is not MISSING:
             ret['flags'] = nextcord.MessageFlags._from_value(flags)
 
