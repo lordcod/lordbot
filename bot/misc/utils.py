@@ -153,7 +153,7 @@ class GuildPayload(TempletePayload):
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
 
-        self.color = gdb.get_hash('color')
+        self.color: int = gdb.get_hash('color')
         self.id: int = guild.id
         self.name: str = guild.name
         self.memberCount: int = guild.member_count
@@ -218,7 +218,7 @@ def get_payload(
     voice_count: Optional[dict] = None,
 ):
     bot_payload = None
-    if member is not None and isinstance(member, nextcord.Member) and guild is None:
+    if guild is None and member is not None and isinstance(member, nextcord.Member):
         guild = member.guild
     if guild is not None:
         bot = guild._state.user

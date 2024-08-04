@@ -81,8 +81,6 @@ class LordBot(commands.AutoShardedBot):
 
         self.load_i18n_config()
 
-        self._connection._chunk_tasks
-
         loop = asyncio.get_event_loop()
 
         self.__session = None
@@ -107,7 +105,8 @@ class LordBot(commands.AutoShardedBot):
         i18n.from_file("./bot/languages/localization_any.json")
 
         for lang in ('en',):
-            json_resource = i18n._parse_json(i18n._load_file(f"temp_loc_{lang}.json"))
+            json_resource = i18n._parse_json(
+                i18n._load_file(f"temp_loc_{lang}.json"))
             i18n.resource_dict[lang].update(json_resource)
             i18n.parser(json_resource, lang)
 
@@ -262,8 +261,6 @@ class LordBot(commands.AutoShardedBot):
 
         for event_data in self.__with_ready_events__:
             self.dispatch(event_data[0], *event_data[1], **event_data[2])
-
-        _log.debug(f"{self._connection._background_tasks=} {self._connection._ready_task=} {self._connection._chunk_tasks=} {self._ready=}")
 
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         if not self.__with_ready__.done() and event_name.lower() != 'ready':
