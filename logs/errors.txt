@@ -1,0 +1,52 @@
+[08-05-2024 03:30:52][bot.cogs.events.ready][[1;33mCRITICAL[0m]  Bot is disconnect (ready.py:134)
+[08-05-2024 03:30:52][bot.cogs.events.ready][[1;33mCRITICAL[0m]  Bot is disconnect (ShardId:0) (ready.py:137)
+[08-05-2024 05:06:28][bot.cogs.events.ready][[1;33mCRITICAL[0m]  Bot is disconnect (ready.py:134)
+[08-05-2024 05:06:28][bot.cogs.events.ready][[1;33mCRITICAL[0m]  Bot is disconnect (ShardId:0) (ready.py:137)
+lordbot\bot\cogs\events\message.py", line 113, in add_reactions
+    if (reactions := await gdb.get('reactions', {})) and (
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\handlers\guildHD.py", line 55, in wrapped
+    return await func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\handlers\guildHD.py", line 103, in get
+    data = await self._get_service(self.guild_id, service)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\handlers\guildHD.py", line 81, in _get_service
+    value = await engine.fetchvalue(
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\db_engine.py", line 28, in wrapped
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\db_engine.py", line 119, in fetchvalue
+    cursor.execute(query, vars)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+[08-05-2024 04:50:51][bot.cogs.events.errors][[1;31mERROR[0m]  Ignoring exception in event on_message (errors.py:205)
+Traceback (most recent call last):
+  File "c:\Users\2008d\bot_venv\Lib\site-packages\nextcord\client.py", line 497, in _run_event
+    await coro(*args, **kwargs)
+  File "C:\Users\2008d\git\lordbot\bot\cogs\events\message.py", line 67, in on_message
+    await asyncio.gather(
+  File "C:\Users\2008d\git\lordbot\bot\cogs\events\message.py", line 113, in add_reactions
+    if (reactions := await gdb.get('reactions', {})) and (
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\handlers\guildHD.py", line 55, in wrapped
+    return await func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\handlers\guildHD.py", line 103, in get
+    data = await self._get_service(self.guild_id, service)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\handlers\guildHD.py", line 81, in _get_service
+    value = await engine.fetchvalue(
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\db_engine.py", line 28, in wrapped
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\2008d\git\lordbot\bot\databases\db_engine.py", line 119, in fetchvalue
+    cursor.execute(query, vars)
+psycopg2.OperationalError: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+

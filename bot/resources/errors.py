@@ -40,6 +40,10 @@ class MissingChannel(commands.CheckFailure):
     pass
 
 
+class AuthorizationError(commands.CheckFailure):
+    pass
+
+
 def attach_exception(*errors: type[ExceptionT]
                      ) -> Callable[['CallbackCommandError', ExceptionT],
                                    Coroutine[Any, Any, None]]:
@@ -77,7 +81,7 @@ class CallbackCommandError:
         self.locale = await self.gdb.get('language')
 
         for item in self.queue:
-            allow_errors = getattr(item, "__attachment_errors__", None)
+            allow_errors = getattr(item, "__attachment_errors__")
             if isinstance(error, allow_errors):
                 await item(self, error)
                 break
@@ -215,6 +219,10 @@ class CallbackCommandError:
 
         await self.ctx.send(content)
 
+    @attach_exception(AuthorizationError)
+    async def parse_auth_error(self, error):
+        pass
+
     @attach_exception(commands.CheckFailure)
     async def parse_check_failure(self, error):
         _log.trace("Verification conditions are not met",
@@ -225,9 +233,8 @@ class CallbackCommandError:
             "Ignoring exception in command %s", self.ctx.command, exc_info=error)
 
         await self.ctx.author.send(
-            "There's been some kind of mistake!\n"
-            "Check if the bot has the necessary permissions to execute this command!\n"
-            f"Error ID (required for support): specify the name of the commands\n"
-            f"If you couldn't figure out what's going on, contact the [support server]({DISCORD_SUPPORT_SERVER})!",
-            flags=nextcord.MessageFlags(suppress_embeds=True, suppress_notifications=True)
+            i18n.t(self.locale, 'interaction.error.command',
+                   DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+            flags=nextcord.MessageFlags(
+                suppress_embeds=True, suppress_notifications=True)
         )
