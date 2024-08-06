@@ -174,7 +174,7 @@ class LordLogger(logging.Logger):
 
         file_formatter = ColoredFormatter(
             self.NO_COLOR_FORMAT, use_color=False)
-        self.file_handler = logging.FileHandler('logs/errors.txt', mode='w+')
+        self.file_handler = logging.FileHandler('logs/errors.log', mode='w+')
         self.file_handler.setFormatter(file_formatter)
         self.file_handler.setLevel(DEFAULT_FILE_LOG)
         self.addHandler(self.file_handler)
