@@ -21,11 +21,12 @@ class GuildCache:
     def set(self, guild_id, key, value) -> None:
         self._cache[guild_id][key] = (time.time()+self._timeout, value)
 
-    def get(self, guild_id, key) -> Any:
+    def is_rate_limited(self, guild_id, key) -> Any:
         with contextlib.suppress(KeyError):
-            timestamp, value = self._cache[guild_id][key]
+            timestamp, _ = self._cache[guild_id][key]
             if timestamp > time.time():
-                return value
+                return True
+        return False
 
     def get_hash(self, guild_id, key) -> Any:
         with contextlib.suppress(KeyError):
@@ -43,6 +44,7 @@ engine: DataBase = None
 reserved = []
 cache = GuildCache(timeout=10)
 seat_cache = GuildCache(timeout=60)
+settings_limits = ('score_state', 'message_state', )
 collectable_hashable_data: List[str] = ['language', 'color']
 hashable_data: Dict[int, Dict[str, Any]] = defaultdict(dict)
 T = TypeVar("T")
@@ -90,15 +92,11 @@ class GuildDateBases:
     @on_error()
     @check_registration
     async def get(self, service: str, default: T | None = None) -> Union[T, Any]:
-        cch = cache.get(self.guild_id, service)
+        if cache.is_rate_limited(self.guild_id, service):
+            return cache.get_hash(self.guild_id, service)
 
-        if cch is not None:
-            return cch
-
-        if service in ('score_state', 'message_state'):
-            ok = seat_cache.get(self.guild_id, service)
-            if ok:
-                return cache.get_hash(self.guild_id, service)
+        if service in settings_limits and seat_cache.is_rate_limited(self.guild_id, service):
+            return cache.get_hash(self.guild_id, service)
 
         data = await self._get_service(self.guild_id, service)
 
@@ -120,9 +118,8 @@ class GuildDateBases:
     async def set(self, service, value):
         cache.set_hash(self.guild_id, service, value)
 
-        if service in ('score_state', 'message_state'):
-            ok = seat_cache.get(self.guild_id, service)
-            if ok:
+        if service in settings_limits:
+            if seat_cache.is_rate_limited(self.guild_id, service):
                 return
             seat_cache.set(self.guild_id, service, True)
 

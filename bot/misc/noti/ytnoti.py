@@ -24,11 +24,15 @@ _log = logging.getLogger(__name__)
 
 
 class YtNoti:
-    def __init__(self, bot: LordBot, apikey: str = os.getenv('YOUTUBE_API_KEY')) -> None:
+    def __init__(
+        self,
+        bot: LordBot,
+        apikey: str = os.getenv('YOUTUBE_API_KEY')
+    ) -> None:
         self.bot = bot
         self.apikey = apikey
 
-        self.running = True
+        self.__running = False
         self.channel_ids = set()
         self.video_history = VideoHistory()
         self.directed_data = {}
@@ -36,6 +40,16 @@ class YtNoti:
 
         self.heartbeat_timeout = 180
         self.last_heartbeat = time.time()
+
+    @property
+    def running(self) -> bool:
+        return self.__running and self.last_heartbeat > time.time() - self.heartbeat_timeout
+
+    @running.setter
+    def running(self, __value: bool) -> None:
+        if not isinstance(__value, bool):
+            raise TypeError('The %s type is not supported' % (type(__value).__name__,))
+        self.__running = __value
 
     async def callback(self, video: Video) -> None:
         _log.debug('%s publish new video: %s (%s)',
@@ -51,6 +65,20 @@ class YtNoti:
                     payload = get_payload(guild=guild, video=video)
                     mes_data = generate_message(lord_format(data.get('message', DEFAULT_YOUTUBE_MESSAGE), payload))
                     await channel.send(**mes_data)
+
+    async def request(self, method: str, url: str, **kwargs):
+        async with self.bot.session.request(method, url, **kwargs) as response:
+            content_type = response.headers.get('Content-Type')
+            if content_type == 'application/json' or 'application/json' in content_type:
+                data = await response.json()
+            else:
+                data = await response.read()
+
+        if not response.ok:
+            _log.error('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
+            return None
+
+        return data
 
     def parse_channel(self, data: dict) -> Channel:
         channel_id = data['id']
@@ -127,10 +155,9 @@ class YtNoti:
 
     async def get_video_history(self, channel_id: str) -> List[Video]:
         url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
-        async with self.bot.session.get(url) as res:
-            body = await res.read()
+        body = await self.request('GET', url)
 
-        if not res.ok:
+        if body is None:
             return []
 
         json = xmltodict.parse(body.decode())
@@ -148,10 +175,9 @@ class YtNoti:
             'key': self.apikey
         }
 
-        async with self.bot.session.get(url, params=params) as res:
-            json = await res.json()
+        json = await self.request('GET', url, params=params)
 
-        if not res.ok:
+        if json is None:
             return []
 
         for data in json['items']:
@@ -173,10 +199,9 @@ class YtNoti:
         for id in ids:
             params.append(('id', id))
 
-        async with self.bot.session.get(url, params=params) as res:
-            json = await res.json()
+        json = await self.request('GET', url, params=params)
 
-        if not res.ok:
+        if json is None:
             return []
 
         for data in json['items']:
@@ -190,16 +215,21 @@ class YtNoti:
         return geted_result
 
     async def parse_youtube(self) -> None:
+        if self.__running:
+            return
+
+        _log.debug('Started youtube parsing')
+
         for cid in self.channel_ids:
             videos = await self.get_video_history(cid)
             _, diff = self.video_history.get_diff(videos)
             self.video_history.extend(diff)
 
-        _log.trace('Started youtube parsing, cheking: %s, count of videos found: %s',
-                   self.channel_ids,  len(self.video_history.videos))
-
-        while self.running:
+        self.__running = True
+        while True:
             await asyncio.sleep(self.heartbeat_timeout)
+            if not self.__running:
+                return
             self.last_heartbeat = time.time()
 
             gvhd = []
@@ -216,5 +246,4 @@ class YtNoti:
                 self.video_history.extend(diff)
                 gvhd.extend(vhd)
 
-                _log.trace('Fetched from %s data %s', cid, vhd)
             await asyncio.gather(*[self.callback(v) for v in gvhd])

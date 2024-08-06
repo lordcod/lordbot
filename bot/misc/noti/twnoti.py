@@ -35,14 +35,41 @@ class TwNoti:
         self.client_id = client_id
         self.client_secret = client_secret
 
-        self.running = True
         self.usernames = set()
         self.twitch_streaming = set()
         self.user_info = {}
         self.directed_data = {}
 
+        self.__running: bool = False
+
         self.heartbeat_timeout = 180
         self.last_heartbeat = time.time()
+
+    @property
+    def running(self) -> bool:
+        return self.__running and self.last_heartbeat > time.time() - self.heartbeat_timeout
+
+    @running.setter
+    def running(self, __value: bool) -> None:
+        if not isinstance(__value, bool):
+            raise TypeError('The %s type is not supported' % (type(__value).__name__,))
+        self.__running = __value
+
+    async def request(self, method: str, url: str, with_auth: bool = True, **kwargs):
+        async with self.bot.session.request(method, url, **kwargs) as response:
+            content_type = response.headers.get('Content-Type')
+            if content_type == 'application/json' or 'application/json' in content_type:
+                data = await response.json()
+            else:
+                data = await response.read()
+
+        if with_auth and response.status == 401:
+            await self.get_oauth_token()
+        if not response.ok:
+            _log.error('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
+            return None
+
+        return data
 
     async def callback_on_start(self, stream: Stream):
         _log.debug('%s started stream', stream.user_name)
@@ -87,10 +114,9 @@ class TwNoti:
             'client_secret': self.client_secret,
             'grant_type': 'client_credentials'
         }
-        async with self.bot.session.post(url, data=data) as response:
-            json = await response.json()
+        json = await self.request('POST', url, with_auth=False, data=data)
 
-        if not response.ok:
+        if json is None:
             return
 
         self.twitch_api_access_token_end = json['expires_in']+time.time()
@@ -107,15 +133,10 @@ class TwNoti:
             'Client-ID': self.client_id,
             'Authorization': 'Bearer ' + self.twitch_api_access_token
         }
-        async with self.bot.session.get(url, params=params, headers=headers) as response:
-            data = await response.json()
-            if response.status == 401:
-                await self.get_oauth_token()
-            if not response.ok:
-                _log.trace('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
-                return
 
-        if len(data['data']) > 0:
+        data = await self.request('GET', url, params=params, headers=headers)
+
+        if data is not None and len(data['data']) > 0:
             user = User(**data['data'][0])
             self.user_info[username] = user
             return user
@@ -131,34 +152,33 @@ class TwNoti:
             'Client-ID': self.client_id,
             'Authorization': 'Bearer ' + self.twitch_api_access_token
         }
-        async with self.bot.session.get(url, params=params, headers=headers) as response:
-            data = await response.json()
-            if response.status == 401:
-                await self.get_oauth_token()
-            if not response.ok:
-                _log.trace('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
-                return False, None
+        data = await self.request('GET', url, params=params, headers=headers)
 
-        if len(data['data']) > 0:
+        if data is not None and len(data['data']) > 0:
             return True, Stream(**data['data'][0])
         else:
             return False, None
 
     async def parse_twitch(self) -> None:
+        if self.__running:
+            return
+
         if self.client_id is None or self.client_secret is None:
             return
         await self.check_token()
+
+        _log.debug('Started twitch parsing')
 
         for uid in self.usernames:
             with_started, _ = await self.is_streaming(uid)
             if with_started:
                 self.twitch_streaming.add(uid)
 
-        _log.trace('Started twitch parsing, cheking: %s, current strems: %s',
-                   self.usernames,  self.twitch_streaming)
-
-        while self.running:
+        self.__running = True
+        while True:
             await asyncio.sleep(self.heartbeat_timeout)
+            if not self.__running:
+                return
             self.last_heartbeat = time.time()
 
             tasks = []
@@ -170,9 +190,6 @@ class TwNoti:
                                uid,
                                exc_info=exp)
                     with_started, data = False, None
-
-                _log.trace('Fetched from %s data %s %s',
-                           uid, with_started, data)
 
                 if with_started and uid not in self.twitch_streaming:
                     self.twitch_streaming.add(uid)

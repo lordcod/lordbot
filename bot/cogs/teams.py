@@ -1,4 +1,6 @@
-from os import environ
+import asyncio
+import time
+from typing import Literal
 import nextcord
 from nextcord.ext import commands
 
@@ -14,7 +16,6 @@ class Teams(commands.Cog):
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         app_info = await self.bot.application_info()
-        self.bot.owner_ids
         member_teams = [member.id for member in (
             app_info.team.members)] if app_info.team else [app_info.owner]
         if ctx.author.id not in member_teams:
@@ -107,6 +108,36 @@ class Teams(commands.Cog):
     ):
         await localdb._update_db(__name__)
         await ctx.message.add_reaction(Emoji.success)
+
+    @commands.command(aliases=['notifi_info'])
+    async def get_notifi_info(self, ctx: commands.Context):
+        twnoti = self.bot.twnoti
+        ytnoti = self.bot.ytnoti
+
+        await ctx.send(
+            'Notification is worked\n'
+            f'Twitch: {twnoti.running} (<t:{twnoti.last_heartbeat :.0f}:R>)\n'
+            f'Youtube: {ytnoti.running} (<t:{ytnoti.last_heartbeat :.0f}:R>)'
+        )
+
+    @commands.command()
+    async def restart_notifi(self, ctx: commands.Context, service: Literal['twnoti', 'ytnoti']):
+        noti = getattr(self.bot, service)
+        noti.running = False
+
+        if noti.last_heartbeat >= time.time()-5:
+            await asyncio.sleep(10-time.time()+noti.last_heartbeat)
+
+        match service:
+            case 'ytnoti':
+                parse_name = 'parse_youtube'
+            case 'twnoti':
+                parse_name = 'parse_twitch'
+
+        parser = getattr(noti, parse_name)()
+        asyncio.create_task(parser, name=f'{service}:parser')
+
+        await ctx.send(f"{service} successful restart!")
 
 
 def setup(bot):
