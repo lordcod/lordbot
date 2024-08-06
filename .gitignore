@@ -6,4 +6,3 @@ __pycache__/
 *.log
 *.db
 tests
-emojis.json
