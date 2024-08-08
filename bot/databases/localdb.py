@@ -8,7 +8,6 @@ import time
 from typing import Dict, Optional
 import aiocache
 from aiocache.base import SENTINEL
-import orjson
 from bot.databases.misc.adapter_dict import FullJson
 from redis.asyncio import ConnectionPool, StrictRedis
 
@@ -91,6 +90,24 @@ cache = StrictRedis(connection_pool=POOL)
 cache_data: Dict[str, UpdatedCache] = {}
 
 
+def load_from_backup(tablename: str) -> None:
+    with open('assets/db_backups.json', 'rb+') as file:
+        backups = FullJson().loads(file.read())
+
+    try:
+        last_bup = list(backups)[-1]
+    except IndexError:
+        return
+
+    try:
+        data = backups[last_bup][tablename]
+        cache = cache_data[tablename]
+    except KeyError:
+        return
+
+    cache._cache = data
+
+
 async def save_db() -> None:
     with open('assets/db_backups.json', 'rb+') as file:
         backups = FullJson().loads(file.read())
@@ -143,7 +160,7 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         return cache_data[table_name]
 
     data = {}
-    db = UpdatedCache(table_name, namespace=None, timeout=None)
+    db = UpdatedCache(table_name, namespace=namespace, timeout=timeout)
     cache_data[table_name] = db
     last_exc: Exception = None
 
@@ -161,6 +178,7 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
             break
         await asyncio.sleep(1)
     else:
+        load_from_backup(table_name)
         _log.trace('Getting the database %s ended with an error %s',
                    table_name, type(last_exc).__name__, exc_info=last_exc)
     db._cache = data

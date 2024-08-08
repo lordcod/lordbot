@@ -121,6 +121,8 @@ class TwNoti:
         json = await self.request('POST', url, with_auth=False, data=data)
 
         if json is None:
+            self.twitch_api_access_token_end = 0
+            self.twitch_api_access_token = ''
             return
 
         self.twitch_api_access_token_end = json['expires_in']+time.time()
@@ -182,7 +184,7 @@ class TwNoti:
         while True:
             await asyncio.sleep(self.heartbeat_timeout)
             if not self.__running:
-                return
+                break
             self.last_heartbeat = time.time()
 
             tasks = []
@@ -202,3 +204,5 @@ class TwNoti:
                     self.twitch_streaming.remove(uid)
                     tasks.append(self.callback_on_stop(uid))
             await asyncio.gather(*tasks)
+
+        _log.debug('Parsing %s ending', type(self).__name__)

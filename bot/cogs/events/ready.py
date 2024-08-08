@@ -1,4 +1,3 @@
-
 import logging
 from typing import Dict
 from nextcord.ext import commands
