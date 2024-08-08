@@ -3,6 +3,7 @@ import asyncio
 import contextlib
 from enum import Enum
 import logging
+import os
 import time
 from typing import Optional
 import aiocache
@@ -81,9 +82,9 @@ class UpdatedCache(aiocache.SimpleMemoryCache):
 
 cache = aiocache.RedisCache(
     FullJson(),
-    endpoint='redis-12239.c245.us-east-1-3.ec2.redns.redis-cloud.com',
-    port='12239',
-    password='FJ6-D9x-Mj8-RGR',
+    endpoint=os.environ.get('REDIS_HOST'),
+    port=os.environ.get('REDIS_PORT'),
+    password=os.environ.get('REDIS_PASSWORD'),
     pool_max_size=100,
 )
 cache_data = {}
