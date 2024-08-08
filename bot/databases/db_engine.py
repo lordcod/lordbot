@@ -30,14 +30,14 @@ def on_lock_complete(func):
 
 
 class DataBase:
-    conn_kwargs: dict
+    conn_url: str
 
     def __init__(self) -> None:
         self.__connection: Optional[psycopg2.extensions.connection] = None
 
     async def get_connection(self):
         if not self.__connection or self.__connection.closed:
-            self.__connection = psycopg2.connect(**self.conn_kwargs)
+            self.__connection = psycopg2.connect(self.conn_url)
             self.__connection.autocommit = True
             _log.debug('Database pool connection opened')
         return self.__connection
@@ -45,22 +45,11 @@ class DataBase:
     @classmethod
     async def create_engine(
         cls,
-        host: str,
-        port: int,
-        user: str,
-        password: str,
-        database: str
+        url: str
     ) -> DataBase:
         _log.debug("Load DataBases")
-        conn_kwargs = {
-            "host": host,
-            "port": port,
-            "user": user,
-            "password": password,
-            "database": database
-        }
         self = cls()
-        self.conn_kwargs = conn_kwargs
+        self.conn_url = url
         await self.get_connection()
         return self
 

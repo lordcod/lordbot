@@ -14,7 +14,7 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases
 from bot.databases import db
 from bot.databases.db import DataBase, establish_connection
-from bot.databases.config import host, port, user, password, db_name
+from bot.databases.config import config
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
@@ -244,8 +244,7 @@ class LordBot(commands.AutoShardedBot):
 
         await self.register_jino()
         try:
-            self.engine = engine = await DataBase.create_engine(
-                host, port, user, password, db_name)
+            self.engine = engine = await DataBase.create_engine(config)
         except Exception as exc:
             _log.error("Couldn't connect to the database", exc_info=exc)
             await self.close()
