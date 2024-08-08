@@ -110,8 +110,8 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
     cache_data[table_name] = db
     last_exc: Exception = None
 
-    for _ in range(5):
-        _log.trace('A request for fetched database %s was received', table_name)
+    for i in range(5):
+        _log.trace('[%d] A request for fetched database %s was received', i, table_name)
         try:
             data = await cache.get(table_name, {})
         except Exception as exc:
@@ -123,6 +123,6 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         await asyncio.sleep(1)
     else:
         _log.trace('Getting the database %s ended with an error %s',
-                   table_name, type(last_exc).__name__)
+                   table_name, type(last_exc).__name__, exc_info=last_exc)
     db._cache = data
     return db
