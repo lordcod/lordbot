@@ -86,7 +86,7 @@ POOL = ConnectionPool(
     password=os.environ.get('REDIS_PASSWORD'),
     db=0
 )
-cache = StrictRedis(connection_pool=POOL)
+cache = StrictRedis(connection_pool=POOL, health_check_interval=30)
 cache_data: Dict[str, UpdatedCache] = {}
 
 
