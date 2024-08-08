@@ -5,9 +5,10 @@ import nextcord
 from nextcord.ext import commands
 
 from bot.languages import help as help_info, i18n
-from bot.languages.help import CommandOption, get_command
+from bot.languages.help import get_command
 from bot.databases import GuildDateBases
 from bot.misc.lordbot import LordBot
+from bot.misc.utils import get_emoji_wrap
 from bot.views.help import HelpView
 
 
@@ -65,6 +66,7 @@ class Help(commands.Cog):
 
         locale = await gdb.get('language')
         color = await gdb.get('color')
+        get_emoji = await get_emoji_wrap(gdb)
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.title"),
@@ -75,8 +77,10 @@ class Help(commands.Cog):
             text = ''
             for cmd in coms:
                 text += f"`{cmd.get('name')}` "
+
+            category_emoji = get_emoji(help_info.categories_emoji.get(category))
             embed.add_field(
-                name=f'{help_info.categories_emoji.get(category)}{help_info.categories_name.get(category).get(locale)}',
+                name=f'{category_emoji} {help_info.categories_name.get(category).get(locale)}',
                 value=text,
                 inline=False
             )
@@ -90,7 +94,9 @@ class Help(commands.Cog):
 
         locale = await gdb.get('language')
         color = await gdb.get('color')
+        get_emoji = await get_emoji_wrap(gdb)
         aliases = command_data.get('aliases')
+        category_emoji = get_emoji(help_info.categories_emoji.get(command_data.get('category')))
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.command-embed.title",
@@ -105,7 +111,7 @@ class Help(commands.Cog):
             name=i18n.t(
                 locale, 'help.command-embed.info'),
             value=(
-                f"{i18n.t(locale, 'help.command-embed.category', category_emoji=help_info.categories_emoji.get(command_data.get('category')), category_name=help_info.categories_name.get(command_data.get('category')).get(locale))}"
+                f"{i18n.t(locale, 'help.command-embed.category', category_emoji=category_emoji, category_name=help_info.categories_name.get(command_data.get('category')).get(locale))}"
                 f"{i18n.t(locale, 'help.command-embed.aliases', aliases=', '.join([f'`{al}`' for al in aliases])) if aliases else ''}"
                 f"{get_using(locale, command_data)}"
                 f"{i18n.t(locale, 'help.command-embed.disable_command', value=get_disable_command_value(locale, command_data))}"

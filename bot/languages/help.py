@@ -57,10 +57,13 @@ with open("bot/languages/commands_data.json", "rb") as file:
     categories_emoji = _commands["categories_emoji"]
     categories_name = _commands["categories_name"]
     commands = _commands["commands"]
-    categories = {}
+
+    categories = categories_emoji.fromkeys(categories_emoji)
     for cmd in _commands["commands"]:
-        categories.setdefault(cmd["category"], [])
-        categories[cmd["category"]].append(CommandOption(cmd))
+        cmd_category = cmd["category"]
+        if categories.get(cmd_category) is None:
+            categories[cmd_category] = []
+        categories[cmd_category].append(CommandOption(cmd))
 
 if __name__ == "__main__":
     translator = googletrans.Translator()

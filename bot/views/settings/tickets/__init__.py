@@ -1,3 +1,5 @@
+import asyncio
+from typing import List
 import nextcord
 
 from bot.databases.varstructs import TicketsPayload
@@ -30,18 +32,22 @@ class TicketsDropDown(nextcord.ui.StringSelect):
         tickets: TicketsPayload = await gdb.get('tickets', {})
 
         options = []
+        deleted_tickets = []
+
         for message_id, item in tickets.items():
             channel = guild.get_channel(item.get('channel_id'))
 
             if channel is None:
+                deleted_tickets.append(message_id)
                 continue
 
+            index = len(options)+1
             options.append(nextcord.SelectOption(
                 label=i18n.t(locale, 'settings.tickets.init.ticket',
-                             index=len(options)+1),
+                             index=index),
                 value=message_id,
                 description=f"#{channel}{get_category_name(channel)}",
-                emoji=get_emoji('tic')
+                emoji=get_emoji(f'circle{index}')
             ))
 
         disabled = len(options) == 0
@@ -50,6 +56,22 @@ class TicketsDropDown(nextcord.ui.StringSelect):
 
         super().__init__(placeholder=i18n.t(locale, 'settings.tickets.init.dropdown'),
                          options=options, disabled=disabled)
+
+        if len(deleted_tickets) > 0:
+            self.process_delete_tickets(gdb, tickets, deleted_tickets)
+
+    def process_delete_tickets(
+        self,
+        gdb: GuildDateBases,
+        tickets: TicketsPayload,
+        deleted_tickets: List[int]
+    ) -> None:
+        async def wrapped():
+            for message_id in deleted_tickets:
+                tickets.pop(message_id, None)
+            await gdb.set('tickets', tickets)
+
+        asyncio.create_task(wrapped())
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         message_id = int(self.values[0])

@@ -11,6 +11,7 @@ from .standart import OptionItem
 class TicketNameModal(nextcord.ui.Modal, OptionItem):
     label = 'settings.tickets.name.label'
     description = 'settings.tickets.name.description'
+    emoji = 'ticname'
 
     async def __init__(self, guild: nextcord.Guild, message_id: int):
         self.message_id = message_id

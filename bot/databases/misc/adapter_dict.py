@@ -74,7 +74,6 @@ class Json:
         try:
             return orjson.dumps(data).decode()
         except orjson.JSONEncodeError:
-            print(f'Decode error {data!r}')
             return data
 
 

@@ -2,6 +2,7 @@ import functools
 import nextcord
 from nextcord.ext import commands
 
+from bot.databases.varstructs import AutoRolesPayload
 from bot.misc import utils
 from bot.databases import GuildDateBases
 
@@ -58,10 +59,22 @@ class MembersEvent(commands.Cog):
         )
 
     async def auto_roles(self, member: nextcord.Member, gdb: GuildDateBases):
-        roles_ids = await gdb.get('auto_roles')
+        roles_data: AutoRolesPayload = await gdb.get('auto_roles')
 
-        if not roles_ids:
+        if not roles_data:
             return
+
+        if isinstance(roles_data, list):
+            roles_data = {'every': roles_data}
+        if not (isinstance(roles_data, dict) and {'every', 'bot', 'human'} & set(roles_data.keys())):
+            roles_data = {'every': roles_data}
+
+        roles_ids = roles_data.get('every')
+
+        if member.bot and (bot_roles_ids := roles_data.get('bot')):
+            roles_ids.extend(bot_roles_ids)
+        if not member.bot and (human_roles_ids := roles_data.get('human')):
+            roles_ids.extend(human_roles_ids)
 
         roles = filter(lambda item: item is not None,
                        map(member.guild.get_role, roles_ids))

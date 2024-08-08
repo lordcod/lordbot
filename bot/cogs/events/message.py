@@ -9,6 +9,7 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases, localdb
 from bot.misc import logstool
 from bot.misc.lordbot import LordBot
+from bot.misc.moderation.spam import parse_message
 from bot.misc.tickettools import ModuleTicket
 from bot.misc.utils import is_emoji
 from bot.languages import i18n
@@ -70,7 +71,8 @@ class MessageEvent(commands.Cog):
             self.process_mention(message),
             self.give_score(message),
             self.give_message_score(message),
-            self.process_auto_translation(message)
+            self.process_auto_translation(message),
+            parse_message(message)
         )
 
     @create_delay_at_pat(15)

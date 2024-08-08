@@ -155,10 +155,10 @@ class CommandEvent(commands.Cog):
         item: nextcord.ui.Item,
         interaction: nextcord.Interaction,
     ) -> None:
-        if not interaction.is_expired() and not interaction.response.is_done():
+        if not (interaction.is_expired() or interaction.response.is_done()):
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')
-            with contextlib.suppress(Exception):
+            with contextlib.suppress(nextcord.NotFound):
                 await interaction.response.send_message(
                     i18n.t(locale, 'interaction.error.item',
                            custom_id=item.custom_id[:8], DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
@@ -184,7 +184,7 @@ class CommandEvent(commands.Cog):
         if cog and cog.has_application_command_error_handler():
             return
 
-        if not interaction.response.is_done():
+        if not (interaction.is_expired() or interaction.response.is_done()):
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')
             with contextlib.suppress(nextcord.NotFound):

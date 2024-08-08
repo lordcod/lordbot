@@ -1,13 +1,24 @@
+from typing import Dict
 import nextcord
-from nextcord.ext import commands
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
-commands.has_permissions
+from bot.misc.utils import AsyncSterilization
 
 
+def has_permissions(**kwargs):
+    def wrapped(cls: AsyncSterilization['DefaultSettingsView'] | type['DefaultSettingsView']):
+        if isinstance(cls, AsyncSterilization):
+            cls.cls.permission = kwargs
+        else:
+            cls.permission = kwargs
+        return cls
+    return wrapped
+
+
+@has_permissions(manage_guild=True)
 class DefaultSettingsView(nextcord.ui.View):
-    permission: dict = {'manage_guild': True}
+    permission: Dict[str, bool]
 
     async def interaction_check(
         self,

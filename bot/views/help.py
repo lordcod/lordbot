@@ -2,7 +2,7 @@ import nextcord
 
 from bot.languages import help as help_info
 from bot.databases import GuildDateBases
-from bot.misc.utils import AsyncSterilization
+from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
 
 @AsyncSterilization
@@ -10,12 +10,13 @@ class HelpDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int) -> None:
         self.gdb = GuildDateBases(guild_id)
         locale = await self.gdb.get('language')
+        get_emoji = await get_emoji_wrap(self.gdb)
 
         options = [
             nextcord.SelectOption(
                 label=help_info.categories_name.get(category).get(locale),
                 value=category,
-                emoji=help_info.categories_emoji.get(category),
+                emoji=get_emoji(help_info.categories_emoji.get(category)),
             )
             for category in help_info.categories.keys()
         ]
@@ -28,7 +29,8 @@ class HelpDropDown(nextcord.ui.StringSelect):
 
         category_key = self.values[0]
         category_data = help_info.categories.get(category_key)
-        category_name = (f"{help_info.categories_emoji.get(category_key)}"
+        get_emoji = await get_emoji_wrap(self.gdb)
+        category_name = (f"{get_emoji(help_info.categories_emoji.get(category_key))} "
                          f"{help_info.categories_name.get(category_key).get(locale)}")
 
         text = ''
@@ -50,5 +52,4 @@ class HelpView(nextcord.ui.View):
         super().__init__()
 
         HDD = await HelpDropDown(guild_id)
-
         self.add_item(HDD)

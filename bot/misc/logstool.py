@@ -112,7 +112,9 @@ async def _wait_change_role(future: asyncio.Future, member: nextcord.Member):
 
     _added, _removed = map(set, _roles_db[key])
     _missing = _added & _removed
-    added, removed = map(list, (_added-_missing, _removed-_missing))
+    added, removed = map(lambda roles: [role for role in roles
+                                        if member.guild.get_role(role.id)],
+                         (_added-_missing, _removed-_missing))
     if added or removed:
         await Logs(member.guild).change_role(member, added, removed)
 

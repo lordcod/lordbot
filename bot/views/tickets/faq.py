@@ -16,7 +16,6 @@ class FAQDropDown(nextcord.ui.StringSelect):
         if guild_id is None:
             super().__init__(custom_id='tickets:faq')
             return
-        print(buttons)
         faq_placeholder = buttons.get('faq_placeholder')
         options = [
             nextcord.SelectOption(

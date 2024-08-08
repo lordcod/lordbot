@@ -990,12 +990,13 @@ class GeneratorMessage:
             "content": content
         }
 
+    @lru_cache()
     def parse(self, with_empty: bool = False):
         data = self.decode_data()
         ret = {}
 
         if isinstance(data, str):
-            return {'content': data}
+            data = {'content': data}
 
         data.pop('attachments', MISSING)
         plain_text = data.pop('plainText', MISSING)
@@ -1048,8 +1049,8 @@ class GeneratorMessage:
                     data["timestamp"] = datetime.fromtimestamp(
                         float(timestamp)//1000).isoformat()
 
-        with contextlib.suppress(KeyError):
-            color = data["color"]
+        with contextlib.suppress(KeyError, ValueError):
+            color = data.pop("color")
             if isinstance(color, str):
                 if color.startswith(('0x', '#')):
                     color = int(color.removeprefix('#').removeprefix('0x'), 16)

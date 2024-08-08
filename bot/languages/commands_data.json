@@ -1,10 +1,10 @@
 {
     "categories_emoji": {
-        "economy": "💎",
-        "major": "👑",
-        "music": "🎵",
-        "moderation": "⚠",
-        "interactions": "🎭"
+        "major": "main",
+        "economy": "economy",
+        "moderation": "moderation",
+        "music": "music",
+        "interactions": "reactions"
     },
     "categories_name": {
         "economy": {
@@ -30,8 +30,8 @@
             "tr": "Büyük"
         },
         "music": {
-            "ru": "Голос",
-            "en": "Voice",
+            "ru": "Музыка",
+            "en": "Music",
             "id": "Suara",
             "da": "Stemme",
             "de": "Stimme",

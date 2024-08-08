@@ -37,6 +37,7 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
     tickets: TicketsPayload = await gdb.get('tickets')
     ticket_data = tickets[message_id]
     ticket_index = list(tickets.keys()).index(message_id)+1
+    emoji = nextcord.PartialEmoji.from_str(get_emoji_as_color(system_emoji, f'circle{ticket_index}'))
 
     enabled = ticket_data.get('enabled')
     ticket_type = ticket_data.get('type', DEFAULT_TICKET_TYPE)
@@ -105,11 +106,14 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
                                        category=closed_category.mention)
 
     embed = nextcord.Embed(
-        title=i18n.t(locale, 'settings.tickets.init.ticket',
-                             index=ticket_index),
         color=color,
         description=i18n.t(locale, 'settings.tickets.embeds.description',
                            info=description_info),
+    )
+    embed.set_author(
+        name=i18n.t(locale, 'settings.tickets.init.ticket',
+                    index=ticket_index),
+        icon_url=emoji.url
     )
 
     embed.add_field(

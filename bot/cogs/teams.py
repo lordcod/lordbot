@@ -6,6 +6,7 @@ from nextcord.ext import commands
 
 from bot.databases import localdb
 from bot.misc.lordbot import LordBot
+from bot.misc.moderation import spam
 from bot.resources import errors
 from bot.resources.ether import Emoji
 
@@ -138,6 +139,42 @@ class Teams(commands.Cog):
         asyncio.create_task(parser, name=f'{service}:parser')
 
         await ctx.send(f"{service} successful restart!")
+
+    @commands.command()
+    async def disable_autmod(self, ctx: commands.Context):
+        spam.RUNNING = False
+        await ctx.send(f'{Emoji.success} I have disabled automod!')
+
+    @commands.command()
+    async def parse_roles(self, ctx: commands.Context):
+        auto_role = ctx.guild.get_role(1181629138138832976)
+        human = ctx.guild.get_role(1270883951917010985)
+        bots = ctx.guild.get_role(1270874041074585762)
+
+        for member in ctx.guild.humans:
+            added_roles = [auto_role, human]
+
+            if not set(added_roles) - set(member.roles):
+                continue
+
+            await member.add_roles(*added_roles, atomic=False)
+
+        for bot in ctx.guild.bots:
+            added_roles = [auto_role, bots]
+
+            if not set(added_roles) - set(bot.roles):
+                continue
+
+            await bot.add_roles(*added_roles, atomic=False)
+
+    @commands.command()
+    async def get_apps(self, ctx: commands.Context, page: int = 0):
+        await ctx.send(
+            '\n'.join([
+                f'{bot.mention} - [reinvite](https://discord.com/oauth2/authorize?client_id={bot.id}&scope=bot+applications.commands)'
+                for bot in ctx.guild.bots
+            ][page*10:page*10+10]) or '...'
+        )
 
 
 def setup(bot):

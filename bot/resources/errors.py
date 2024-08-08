@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from asyncio import iscoroutinefunction
+import inspect
 import logging
 import nextcord
 from nextcord.ext import commands
@@ -10,7 +9,7 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.languages.help import CommandOption, get_command
 
-from typing import Any, Callable, Coroutine, List, TypeVar, Union
+from typing import Any, Callable, Coroutine, List, TypeVar, Union, get_args, get_origin
 
 from bot.resources.info import DISCORD_SUPPORT_SERVER
 
@@ -48,6 +47,20 @@ def attach_exception(*errors: type[ExceptionT]
                      ) -> Callable[['CallbackCommandError', ExceptionT],
                                    Coroutine[Any, Any, None]]:
     def inner(func):
+        nonlocal errors
+
+        if len(errors) == 0:
+            sign = inspect.signature(func)
+            if isinstance(func, staticmethod):
+                params = list(sign.parameters.values())
+            else:
+                params = list(sign.parameters.values())[1:]
+            error = params[0].annotation
+            if get_origin(error) is Union:
+                errors = get_args(error)
+            else:
+                errors = (error, )
+
         func.__attachment_errors__ = errors
         return func
     return inner
@@ -129,8 +142,8 @@ class CallbackCommandError:
 
         await self.ctx.send(content)
 
-    @attach_exception(commands.BadArgument)
-    async def parse_bad_argument(self, error):
+    @attach_exception()
+    async def parse_bad_argument(self, error: commands.BadArgument):
         title = i18n.t(self.locale, 'errors.BadArgument')
         color = await self.gdb.get('color')
 
@@ -161,8 +174,12 @@ class CallbackCommandError:
 
         await self.ctx.send(embed=embed)
 
-    @attach_exception(commands.MissingRequiredArgument)
-    async def parse_missing_required_argument(self, error):
+    @attach_exception()
+    async def parse_missing_required_argument(self, error: commands.MissingRequiredArgument):
+        param = error.param
+        annot = self.ctx.command.callback.__annotations__
+        index = list(annot.keys())[1:].index(param.name)
+
         title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
         color = await self.gdb.get('color')
 
@@ -171,7 +188,10 @@ class CallbackCommandError:
         if cmd_data is None:
             return
 
-        using = f"`{cmd_data.get('name')}{' '+' '.join(CommandOption.get_arguments(cmd_data ,self.locale)) if cmd_data.get('arguments') else ''}`"
+        using = (
+            f"`{cmd_data.get('name')}"
+            f"{' '+' '.join(CommandOption.get_arguments(cmd_data, self.locale)) if cmd_data.get('arguments') else ''}`"
+        )
 
         embed = nextcord.Embed(
             title=title,

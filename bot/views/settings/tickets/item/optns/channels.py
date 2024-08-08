@@ -107,6 +107,7 @@ class TicketClosedCategoryDropDown(nextcord.ui.ChannelSelect):
 class TicketChannelsView(ViewOptionItem):
     label: str = 'settings.tickets.channels.title'
     description: str = 'settings.tickets.channels.description'
+    emoji = 'ticfolder'
 
     async def __init__(
         self,

@@ -211,8 +211,6 @@ class YoutubeItemView(nextcord.ui.View):
             cid = data['yt_id']
             bot: LordBot = guild._state._get_client()
 
-            print(cid)
-
             if cid in bot.ytnoti.user_info:
                 userinfo = bot.ytnoti.user_info[cid]
             else:

@@ -243,6 +243,7 @@ class TicketFAQView(ViewOptionItem):
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.add.label = i18n.t(locale, 'settings.button.add')
         self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.remove.label = i18n.t(locale, 'settings.button.remove')
         self.clear.label = i18n.t(locale, 'settings.button.clear')
 
     @nextcord.ui.button(label='Add', style=nextcord.ButtonStyle.green)

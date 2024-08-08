@@ -27,7 +27,7 @@ class DropDown(nextcord.ui.StringSelect):
                 description=i18n.t(
                     locale, f'settings.ideas.init.dropdown.{value}.description')
             )
-            for value in {'approved', 'mod_roles', 'offers', 'suggest', 'cooldown'}
+            for value in distrubuters
         ]
 
         super().__init__(

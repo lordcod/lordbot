@@ -1,3 +1,25 @@
 {
-    "settings.button.delete_with_chls": "Delete from channels"
+    "settings.button.delete_with_chls": "Delete from channels",
+    "interaction.error.expired.title": "The interaction time has expired",
+    "interaction.error.expired.description": "If you need to use the interaction, call the associated command",
+    "interaction.error.expired.support": "If necessary, contact [support]({DISCORD_SUPPORT_SERVER})",
+    "settings.auto-role.button.delete": "Clear roles",
+    "settings.auto-role.button.delete_every": "Clear all roles",
+    "settings.auto-role.placeholder.select": "Select the roles to add",
+    "settings.auto-role.placeholder.remove": "Select the role to delete",
+
+    "settings.auto-role.mods.every.label": "Everybody",
+    "settings.auto-role.mods.every.description": "Everyone will get roles",
+
+    "settings.auto-role.mods.human.label": "Members",
+    "settings.auto-role.mods.human.description": "Everyone will get roles except for apps",
+
+    "settings.auto-role.mods.bot.label": "Apps",
+    "settings.auto-role.mods.bot.description": "Only apps will receive roles",
+
+    
+    "settings.tickets.modals.dropdown.style.short.label": "Short",
+    "settings.tickets.modals.dropdown.style.short.description": "Indicates the short style of the form.",
+    "settings.tickets.modals.dropdown.style.paragraph.label": "Paragraph",
+    "settings.tickets.modals.dropdown.style.paragraph.description": "Displays the paragraph style of the form."
 }
