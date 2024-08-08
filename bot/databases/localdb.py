@@ -8,7 +8,6 @@ import time
 from typing import Dict, Optional
 import aiocache
 from aiocache.base import SENTINEL
-import orjson
 from bot.databases.misc.adapter_dict import FullJson
 from redis.asyncio import ConnectionPool, StrictRedis
 
@@ -161,7 +160,7 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         return cache_data[table_name]
 
     data = {}
-    db = UpdatedCache(table_name, namespace=None, timeout=None)
+    db = UpdatedCache(table_name, namespace=namespace, timeout=timeout)
     cache_data[table_name] = db
     last_exc: Exception = None
 
@@ -170,7 +169,6 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         try:
             data = await cache.get(table_name)
         except Exception as exc:
-            load_from_backup(table_name)
             last_exc = exc
         else:
             if data is None:
@@ -180,6 +178,7 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
             break
         await asyncio.sleep(1)
     else:
+        load_from_backup(table_name)
         _log.trace('Getting the database %s ended with an error %s',
                    table_name, type(last_exc).__name__, exc_info=last_exc)
     db._cache = data

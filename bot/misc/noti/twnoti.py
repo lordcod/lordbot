@@ -121,6 +121,8 @@ class TwNoti:
         json = await self.request('POST', url, with_auth=False, data=data)
 
         if json is None:
+            self.twitch_api_access_token_end = 0
+            self.twitch_api_access_token = ''
             return
 
         self.twitch_api_access_token_end = json['expires_in']+time.time()
