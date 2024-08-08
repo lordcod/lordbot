@@ -83,7 +83,7 @@ cache = aiocache.RedisCache(
     FullJson(),
     endpoint='redis-12239.c245.us-east-1-3.ec2.redns.redis-cloud.com',
     port='12239',
-    password='t5y-cRN-5AG-Sx2',
+    password='FJ6-D9x-Mj8-RGR',
     pool_max_size=100,
 )
 cache_data = {}
