@@ -91,6 +91,24 @@ cache = StrictRedis(connection_pool=POOL)
 cache_data: Dict[str, UpdatedCache] = {}
 
 
+def load_from_backup(tablename: str) -> None:
+    with open('assets/db_backups.json', 'rb+') as file:
+        backups = FullJson().loads(file.read())
+
+    try:
+        last_bup = list(backups)[-1]
+    except IndexError:
+        return
+
+    try:
+        data = backups[last_bup][tablename]
+        cache = cache_data[tablename]
+    except KeyError:
+        return
+
+    cache._cache = data
+
+
 async def save_db() -> None:
     with open('assets/db_backups.json', 'rb+') as file:
         backups = FullJson().loads(file.read())
@@ -152,6 +170,7 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         try:
             data = await cache.get(table_name)
         except Exception as exc:
+            load_from_backup(table_name)
             last_exc = exc
         else:
             if data is None:
