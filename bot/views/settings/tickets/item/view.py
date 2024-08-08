@@ -60,6 +60,8 @@ class TicketsItemView(DefaultSettingsView):
 
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
+        self.delete_with_chls.label = i18n.t(
+            locale, 'settings.button.delete_with_chls')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,

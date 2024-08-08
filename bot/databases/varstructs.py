@@ -7,6 +7,7 @@ from typing import (
     Literal,
     Optional,
     List,
+    Required,
     TypedDict,
     Dict,
     Tuple,
@@ -227,3 +228,9 @@ class YoutubeNotifiItemPayload(TypedDict):
 
 
 YoutubeNotifiPayload = Dict[str, YoutubeNotifiItemPayload]
+
+
+class AutoRolesPayload(TypedDict, total=False):
+    every: List[int]
+    bot: List[int]
+    human: List[int]

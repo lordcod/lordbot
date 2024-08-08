@@ -1,4 +1,3 @@
-import asyncio
 import contextlib
 import logging
 import sys
@@ -11,7 +10,7 @@ from bot.misc.lordbot import LordBot
 from bot.misc.ratelimit import Cooldown
 from bot.resources import errors
 from bot.databases import CommandDB
-from bot.resources.errors import (CallbackCommandError,
+from bot.resources.errors import (AuthorizationError, CallbackCommandError,
                                   MissingRole,
                                   MissingChannel,
                                   CommandOnCooldown)
@@ -156,17 +155,19 @@ class CommandEvent(commands.Cog):
         item: nextcord.ui.Item,
         interaction: nextcord.Interaction,
     ) -> None:
-        if not interaction.is_expired() and not interaction.response.is_done():
+        if not (interaction.is_expired() or interaction.response.is_done()):
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')
-            with contextlib.suppress(Exception):
+            with contextlib.suppress(nextcord.NotFound):
                 await interaction.response.send_message(
-                    i18n.t(locale, 'interaction.error.item', custom_id=item.custom_id[:8], DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+                    i18n.t(locale, 'interaction.error.item',
+                           custom_id=item.custom_id[:8], DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
                     ephemeral=True,
                     flags=nextcord.MessageFlags(suppress_embeds=True)
                 )
 
-        _log.error("Ignoring exception in item %s with custom id %s:", item, item.custom_id, exc_info=exception)
+        _log.error("Ignoring exception in item %s with custom id %s:",
+                   item, item.custom_id, exc_info=exception)
 
     async def on_application_command_error(
         self,
@@ -183,17 +184,19 @@ class CommandEvent(commands.Cog):
         if cog and cog.has_application_command_error_handler():
             return
 
-        if not interaction.response.is_done():
+        if not (interaction.is_expired() or interaction.response.is_done()):
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')
             with contextlib.suppress(nextcord.NotFound):
                 await interaction.response.send_message(
-                    i18n.t(locale, 'interaction.error.command', DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+                    i18n.t(locale, 'interaction.error.command',
+                           DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
                     ephemeral=True,
                     flags=nextcord.MessageFlags(suppress_embeds=True)
                 )
 
-        _log.error("Ignoring exception in command %s:", interaction.application_command, exc_info=exception)
+        _log.error("Ignoring exception in command %s:",
+                   interaction.application_command, exc_info=exception)
 
     async def on_command_error(self, ctx: commands.Context, error):
         await CallbackCommandError.process(ctx, error)
@@ -205,7 +208,8 @@ class CommandEvent(commands.Cog):
     async def permission_check(self, ctx: commands.Context):
         permission = ctx.channel.permissions_for(ctx.guild.me)
         if not (permission.read_messages and permission.send_messages and permission.embed_links):
-            return False
+            raise AuthorizationError(
+                'Authorization of rights has not been completed')
 
         perch = PermissionChecker(ctx)
         answer = await perch.process()

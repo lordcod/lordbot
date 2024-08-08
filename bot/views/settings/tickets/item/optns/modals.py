@@ -8,16 +8,15 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import ModalItemPayload, TicketsPayload
 from bot.languages import i18n
-from bot.misc.utils import AsyncSterilization
-from bot.resources.ether import Emoji
+from bot.misc.utils import AsyncSterilization, get_emoji_as_color, get_emoji_wrap
 from .standart import ViewOptionItem
 
 
-def get_emoji(value: Any) -> Literal[Emoji.online, Emoji.offline]:
+def get_emoji(system_emoji: int, value: Any) -> str:
     if value:
-        return Emoji.online
+        return get_emoji_as_color(system_emoji, 'ticon')
     else:
-        return Emoji.offline
+        return get_emoji_as_color(system_emoji, 'ticoff')
 
 
 def get_style(locale: str, value: Literal[1, 2]) -> str:
@@ -139,6 +138,7 @@ class TicketFormsDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, modals: Optional[List[ModalItemPayload]] = None, selected_item: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(gdb)
 
         if modals is None:
             modals = []
@@ -148,7 +148,7 @@ class TicketFormsDropDown(nextcord.ui.StringSelect):
                 label=item['label'],
                 value=i,
                 description=item.get('placeholder'),
-                emoji=get_emoji(item.get('required', True)),
+                emoji=get_emoji(f'circle{i+1}'),
                 default=selected_item == i
             )
             for i, item in enumerate(modals)
@@ -176,6 +176,7 @@ class TicketFormsRequiredDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, modal: Optional[ModalItemPayload], selected_item: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(gdb)
 
         self.selected_item = selected_item
 
@@ -194,7 +195,7 @@ class TicketFormsRequiredDropDown(nextcord.ui.StringSelect):
                 value=1,
                 description=i18n.t(
                     locale, 'settings.tickets.modals.dropdown.required.required.description'),
-                emoji=Emoji.online,
+                emoji=get_emoji('ticon'),
                 default=required
             ),
             nextcord.SelectOption(
@@ -203,7 +204,7 @@ class TicketFormsRequiredDropDown(nextcord.ui.StringSelect):
                 value=0,
                 description=i18n.t(
                     locale, 'settings.tickets.modals.dropdown.required.optional.description'),
-                emoji=Emoji.offline,
+                emoji=get_emoji('ticoff'),
                 default=not required
             ),
         ]
@@ -234,6 +235,7 @@ class TicketFormsStyleDropDown(nextcord.ui.StringSelect):
     async def __init__(self, guild_id: int, modal: Optional[ModalItemPayload], selected_item: Optional[int] = None) -> None:
         gdb = GuildDateBases(guild_id)
         locale = await gdb.get('language')
+        get_emoji = await get_emoji_wrap(gdb)
 
         self.selected_item = selected_item
 
@@ -249,20 +251,20 @@ class TicketFormsStyleDropDown(nextcord.ui.StringSelect):
         options = [
             nextcord.SelectOption(
                 label=i18n.t(
-                    locale, 'settings.tickets.modals.dropdown.style.paragraph.label'),
+                    locale, 'settings.tickets.modals.dropdown.style.short.label'),
                 value=1,
                 description=i18n.t(
-                    locale, 'settings.tickets.modals.dropdown.style.paragraph.description'),
-                emoji=Emoji.online,
+                    locale, 'settings.tickets.modals.dropdown.style.short.description'),
+                emoji=get_emoji('textsmall'),
                 default=style == 1
             ),
             nextcord.SelectOption(
                 label=i18n.t(
-                    locale, 'settings.tickets.modals.dropdown.style.short.label'),
+                    locale, 'settings.tickets.modals.dropdown.style.paragraph.label'),
                 value=2,
                 description=i18n.t(
-                    locale, 'settings.tickets.modals.dropdown.style.short.description'),
-                emoji=Emoji.offline,
+                    locale, 'settings.tickets.modals.dropdown.style.paragraph.description'),
+                emoji=get_emoji('textbig'),
                 default=style == 2
             ),
         ]
@@ -301,10 +303,11 @@ class TicketFormsView(ViewOptionItem):
         gdb = GuildDateBases(guild.id)
         color = await gdb.get('color')
         locale = await gdb.get('language')
+        system_emoji = await gdb.get('system_emoji')
         tickets: TicketsPayload = await gdb.get('tickets')
         ticket_data = tickets[self.message_id]
         ticket_index = list(tickets.keys()).index(message_id)+1
-        created_embed = ticket_data.get('creating_embed_inputs')
+        created_embed = ticket_data.get('creating_embed_inputs', True)
         modals = ticket_data.get('modals')
         item = None
 
@@ -321,8 +324,9 @@ class TicketFormsView(ViewOptionItem):
             self.embed.add_field(
                 name='',
                 value=join_args(
-                    (i18n.t(locale, 'settings.tickets.modals.info.embed'), get_emoji(
-                        ticket_data.get('creating_embed_inputs', True))),
+                    (i18n.t(locale, 'settings.tickets.modals.info.embed'),
+                     get_emoji(system_emoji,
+                               created_embed)),
                     (i18n.t(locale, 'settings.tickets.modals.info.label'),
                      item.get('label')),
                     (i18n.t(locale, 'settings.tickets.modals.info.placeholder'),
@@ -332,7 +336,8 @@ class TicketFormsView(ViewOptionItem):
                     (i18n.t(locale, 'settings.tickets.modals.info.style'),
                      get_style(locale, item.get('style', 1))),
                     (i18n.t(locale, 'settings.tickets.modals.info.required'),
-                     get_emoji(item.get('required', True)))
+                     get_emoji(system_emoji,
+                               item.get('required', True)))
                 )
             )
 

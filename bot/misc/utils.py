@@ -153,7 +153,7 @@ class GuildPayload(TempletePayload):
     def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
 
-        self.color = gdb.get_hash('color')
+        self.color: int = gdb.get_hash('color')
         self.id: int = guild.id
         self.name: str = guild.name
         self.memberCount: int = guild.member_count
@@ -218,7 +218,7 @@ def get_payload(
     voice_count: Optional[dict] = None,
 ):
     bot_payload = None
-    if member is not None and isinstance(member, nextcord.Member) and guild is None:
+    if guild is None and member is not None and isinstance(member, nextcord.Member):
         guild = member.guild
     if guild is not None:
         bot = guild._state.user
@@ -990,12 +990,13 @@ class GeneratorMessage:
             "content": content
         }
 
+    @lru_cache()
     def parse(self, with_empty: bool = False):
         data = self.decode_data()
         ret = {}
 
         if isinstance(data, str):
-            return {'content': data}
+            data = {'content': data}
 
         data.pop('attachments', MISSING)
         plain_text = data.pop('plainText', MISSING)
@@ -1011,13 +1012,18 @@ class GeneratorMessage:
 
         if content is not MISSING:
             ret['content'] = content
-        if plain_text is not MISSING:
+        elif plain_text is not MISSING:
             ret['content'] = plain_text
+        else:
+            ret['content'] = None
 
         if embed is not MISSING:
-            ret['embed'] = embed
-        if embeds is not MISSING:
+            ret['embeds'] = [embed]
+        elif embeds is not MISSING:
             ret['embeds'] = embeds
+        else:
+            ret['embeds'] = []
+
         if flags is not MISSING:
             ret['flags'] = nextcord.MessageFlags._from_value(flags)
 
@@ -1043,8 +1049,8 @@ class GeneratorMessage:
                     data["timestamp"] = datetime.fromtimestamp(
                         float(timestamp)//1000).isoformat()
 
-        with contextlib.suppress(KeyError):
-            color = data["color"]
+        with contextlib.suppress(KeyError, ValueError):
+            color = data.pop("color")
             if isinstance(color, str):
                 if color.startswith(('0x', '#')):
                     color = int(color.removeprefix('#').removeprefix('0x'), 16)

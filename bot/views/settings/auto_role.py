@@ -1,6 +1,8 @@
+from typing import Any
 import nextcord
 
-from bot.misc.utils import AsyncSterilization
+from bot.databases.varstructs import AutoRolesPayload
+from bot.misc.utils import AsyncSterilization, find_color_emoji
 
 from bot.views.settings._view import DefaultSettingsView
 
@@ -9,19 +11,105 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
+def parse_roles_data(data: Any) -> AutoRolesPayload:
+    if not data:
+        return {}
+    if isinstance(data, list):
+        return {'every': data}
+    if not (isinstance(data, dict) and {'every', 'bot', 'human'} & set(data.keys())):
+        return {'every': data}
+    return data
+
+
+@AsyncSterilization
+class RolesModeDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild: nextcord.Guild, mode: str) -> None:
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+
+        options = [
+            nextcord.SelectOption(
+                label=i18n.t(locale, f'settings.auto-role.mods.{cur_mode}.label'),
+                description=i18n.t(locale, f'settings.auto-role.mods.{cur_mode}.description'),
+                value=cur_mode,
+                default=cur_mode == mode
+            )
+            for cur_mode in {'every', 'human', 'bot'}
+        ]
+        disabled = len(options) == 0
+        if disabled:
+            options.append(
+                nextcord.SelectOption(label='SelectOption')
+            )
+
+        super().__init__(options=options)
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        value = self.values[0]
+
+        view = await AutoRoleView(interaction.guild, value)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+
+@AsyncSterilization
+class RolesDeleteDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild: nextcord.Guild, mode: str) -> None:
+        self.mode = mode
+
+        gdb = GuildDateBases(guild.id)
+        locale = await gdb.get('language')
+        roles_data: AutoRolesPayload = parse_roles_data(await gdb.get('auto_roles'))
+        roles_ids = roles_data.get(mode, [])
+
+        options = [
+            nextcord.SelectOption(
+                label=f'@{role.name}',
+                value=role.id,
+                emoji=find_color_emoji(role.color.to_rgb())
+            )
+            for role_id in roles_ids
+            if (role := guild.get_role(role_id))
+        ]
+        disabled = len(options) == 0
+        if disabled:
+            options.append(
+                nextcord.SelectOption(label='SelectOption')
+            )
+
+        super().__init__(
+            placeholder=i18n.t(locale, 'settings.auto-role.placeholder.remove'),
+            options=options[:25],
+            max_values=min(25, len(options)),
+            disabled=disabled
+        )
+
+    async def callback(self, interaction: nextcord.Interaction) -> None:
+        gdb = GuildDateBases(interaction.guild_id)
+
+        roles_data: AutoRolesPayload = parse_roles_data(await gdb.get('auto_roles', {}))
+        roles_data[self.mode] = list(
+            set(roles_data.get(self.mode, [])) - set(map(int, self.values)))
+        await gdb.set('auto_roles', roles_data)
+
+        view = await AutoRoleView(interaction.guild, self.mode)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+
 @AsyncSterilization
 class RolesDropDown(nextcord.ui.RoleSelect):
     async def __init__(
         self,
-        guild: nextcord.Guild
+        guild: nextcord.Guild,
+        mode: str
     ) -> None:
+        self.mode = mode
         self.gdb = GuildDateBases(guild.id)
         locale = await self.gdb.get('language')
 
         super().__init__(
-            placeholder=i18n.t(locale, 'settings.auto-role.placeholder'),
+            placeholder=i18n.t(locale, 'settings.auto-role.placeholder.select'),
             min_values=1,
-            max_values=25,
+            max_values=25
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -44,17 +132,24 @@ class RolesDropDown(nextcord.ui.RoleSelect):
                     ephemeral=True
                 )
             elif not role.is_assignable():
+                self_role = interaction.guild.self_role
+                if self_role is None:
+                    self_role = interaction.guild.me.top_role
+
                 await interaction.response.send_message(
-                    content=i18n.t(locale, 'settings.roles.error.assignable', role=role.mention, bot_role=interaction.guild.self_role.mention),
+                    content=i18n.t(locale, 'settings.roles.error.assignable', role=role.mention, bot_role=self_role.mention),
                     ephemeral=True
                 )
             else:
                 continue
             break
         else:
-            await self.gdb.set('auto_roles', self.values.ids)
+            roles_data: AutoRolesPayload = parse_roles_data(await self.gdb.get('auto_roles', {}))
+            roles_data[self.mode] = list(
+                set(roles_data.get(self.mode, [])) | set(self.values.ids))
+            await self.gdb.set('auto_roles', roles_data)
 
-            view = await AutoRoleView(interaction.guild)
+            view = await AutoRoleView(interaction.guild, self.mode)
             await interaction.response.edit_message(embed=view.embed, view=view)
 
 
@@ -62,19 +157,22 @@ class RolesDropDown(nextcord.ui.RoleSelect):
 class AutoRoleView(DefaultSettingsView):
     embed: nextcord.Embed
 
-    async def __init__(self, guild: nextcord.Guild) -> None:
+    async def __init__(self, guild: nextcord.Guild, mode: str = 'every') -> None:
         self.gdb = GuildDateBases(guild.id)
+        self.mode = mode
         color = await self.gdb.get('color')
         locale = await self.gdb.get('language')
-        roles_ids = await self.gdb.get('auto_roles')
+        roles_data = parse_roles_data(await self.gdb.get('auto_roles', {}))
+        roles_ids = roles_data.get(mode, [])
 
         super().__init__()
 
-        DDB = await RolesDropDown(guild)
+        DDB = await RolesModeDropDown(guild, mode)
         self.add_item(DDB)
-
-        self.back.label = i18n.t(locale, 'settings.button.back')
-        self.delete.label = i18n.t(locale, 'settings.auto-role.button.delete')
+        DDB = await RolesDeleteDropDown(guild, mode)
+        self.add_item(DDB)
+        DDB = await RolesDropDown(guild, mode)
+        self.add_item(DDB)
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.auto-role.embed.title'),
@@ -82,16 +180,14 @@ class AutoRoleView(DefaultSettingsView):
             color=color
         )
 
-        if roles_ids:
-            roles = filter(lambda item: item is not None,
-                           [guild.get_role(role_id) for role_id in roles_ids])
-
-            self.embed.add_field(
-                name=i18n.t(locale, 'settings.auto-role.embed.field'),
-                value=', '.join([role.mention for role in roles])
-            )
-        else:
+        if not roles_data:
+            self.delete_every.disabled = True
+        if not roles_ids:
             self.delete.disabled = True
+
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.delete.label = i18n.t(locale, 'settings.auto-role.button.delete')
+        self.delete_every.label = i18n.t(locale, 'settings.auto-role.button.delete_every')
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -101,7 +197,16 @@ class AutoRoleView(DefaultSettingsView):
 
     @nextcord.ui.button(label='Clear roles', style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await self.gdb.set('auto_roles', [])
+        roles_data: AutoRolesPayload = parse_roles_data(await self.gdb.get('auto_roles'))
+        roles_data.pop(self.mode)
+        await self.gdb.set('auto_roles', roles_data)
 
-        view = await AutoRoleView(interaction.guild)
+        view = await AutoRoleView(interaction.guild, self.mode)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Clear all roles', style=nextcord.ButtonStyle.red)
+    async def delete_every(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.gdb.set('auto_roles', {})
+
+        view = await AutoRoleView(interaction.guild, self.mode)
         await interaction.response.edit_message(embed=view.embed, view=view)

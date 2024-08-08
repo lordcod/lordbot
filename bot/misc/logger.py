@@ -9,6 +9,7 @@ import aiohttp
 import asyncio
 import getopt
 
+
 log_webhook = os.environ.get('log_webhook')
 loop = asyncio.get_event_loop()
 
@@ -21,13 +22,18 @@ CORE = logging.INFO + 5
 
 DEFAULT_LOG = TRACE
 DEFAULT_DISCORD_LOG = logging.INFO
+DEFAULT_FILE_LOG = logging.ERROR
+
+
+_ofter_default_log = getattr(logging, flags.get(
+    'log_level', 'ERROR'), logging.ERROR)
 DEFAULT_LOGS = {
-    'nextcord': getattr(logging, flags.get('log_level', 'ERROR'), logging.ERROR),
-    'pyngrok': logging.ERROR,
-    'git': logging.ERROR,
-    'httpx': logging.ERROR,
-    'aiocache': logging.ERROR,
-    'colormath': logging.ERROR
+    'nextcord': _ofter_default_log,
+    'pyngrok': _ofter_default_log,
+    'git': _ofter_default_log,
+    'httpx': _ofter_default_log,
+    'aiocache': _ofter_default_log,
+    'colormath': _ofter_default_log
 }
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -64,7 +70,8 @@ def _is_internal_frame(frame):
 
 def formatter_message(message, use_color=True):
     if use_color:
-        message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
+        message = message.replace(
+            "$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
     else:
         message = message.replace("$RESET", "").replace("$BOLD", "")
     return message
@@ -72,7 +79,8 @@ def formatter_message(message, use_color=True):
 
 def formatter_discord_message(message, use_color=True):
     if use_color:
-        message = message.replace("$RESET", RESET_SEQD).replace("$BOLD", BOLD_SEQD)
+        message = message.replace(
+            "$RESET", RESET_SEQD).replace("$BOLD", BOLD_SEQD)
     else:
         message = message.replace("$RESET", "").replace("$BOLD", "")
     return message
@@ -104,7 +112,8 @@ class DiscordColoredFormatter(StandartFormatter):
     def format(self, record):
         levelname = record.levelname
         if self.use_color and levelname in COLORS:
-            levelname_color = COLOR_SEQD % (30 + COLORS[levelname]) + levelname + RESET_SEQD
+            levelname_color = COLOR_SEQD % (
+                30 + COLORS[levelname]) + levelname + RESET_SEQD
             record.levelname = levelname_color
         return logging.Formatter.format(self, record)
 
@@ -117,7 +126,8 @@ class ColoredFormatter(StandartFormatter):
     def format(self, record):
         levelname = record.levelname
         if self.use_color and levelname in COLORS:
-            levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
+            levelname_color = COLOR_SEQ % (
+                30 + COLORS[levelname]) + levelname + RESET_SEQ
             record.levelname = levelname_color
         return logging.Formatter.format(self, record)
 
@@ -142,6 +152,7 @@ class DiscordHandler(logging.Handler):
 class LordLogger(logging.Logger):
     FORMAT = "[$BOLD%(asctime)s$RESET][$BOLD%(name)s$RESET][%(levelname)s]  %(message)s ($BOLD%(filename)s$RESET:%(lineno)d)"
     COLOR_FORMAT = formatter_message(FORMAT, True)
+    NO_COLOR_FORMAT = formatter_message(FORMAT, False)
 
     def __init__(self, name: str, level: int = DEFAULT_LOG):
         for dfl_log, dfl_level in DEFAULT_LOGS.items():
@@ -160,6 +171,13 @@ class LordLogger(logging.Logger):
         self.discord_handler.setFormatter(color_formatter)
         self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
         self.addHandler(self.discord_handler)
+
+        file_formatter = ColoredFormatter(
+            self.NO_COLOR_FORMAT, use_color=False)
+        self.file_handler = logging.FileHandler('logs/errors.log', mode='w+')
+        self.file_handler.setFormatter(file_formatter)
+        self.file_handler.setLevel(DEFAULT_FILE_LOG)
+        self.addHandler(self.file_handler)
 
     def _findCaller(self, stack_info=False, stacklevel=1):
         """

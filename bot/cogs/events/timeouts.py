@@ -5,6 +5,7 @@ import time
 import asyncio
 from typing import Optional
 
+from bot.databases import localdb
 from bot.misc.lordbot import LordBot
 
 
@@ -20,46 +21,82 @@ class MemberTimeoutEvent(commands.Cog):
                 and hasattr(entry.before, "communication_disabled_until")):
             return
 
-        loctime = time.time()-self.bot.latency
+        guild_id = entry.guild.id
+        user_id = entry.target.id
+        timeout_db = await localdb.get_table('timeout')
+        timeout_data = await timeout_db.get(guild_id, {})
+        loctime = time.time()
 
         if (entry.before.communication_disabled_until is None and
                 entry.after.communication_disabled_until is not None):
 
-            timing = entry.target.communication_disabled_until.timestamp()
-            temp = timing-loctime
+            mute_time = entry.target.communication_disabled_until.timestamp()
+            duration = mute_time-loctime
 
             self.bot.dispatch(
-                "timeout", entry.target, temp, entry.user, entry.reason)
+                "timeout", entry.target, duration, entry.user, entry.reason)
 
-            th = self.bot.loop.call_later(
-                temp, asyncio.create_task, self.process_untimeout(entry.target))
+            self.bot.lord_handler_timer.create(
+                duration,
+                self.process_untimeout(entry.target),
+                f'timeout:{guild_id}:{user_id}'
+            )
 
-            self.bot.timeouts[entry.target.id] = (
-                temp, timing, th, loctime)
+            timeout_data[user_id] = (loctime, mute_time, duration)
+            await timeout_db.set(guild_id, timeout_data)
         if (entry.before.communication_disabled_until is not None and
                 entry.after.communication_disabled_until is None):
             try:
-                _data = self.bot.timeouts[entry.target.id]
-                duration = loctime-_data[3]
-                th = _data[2]
-                th._args[0].close()
-                th.cancel()
+                data = timeout_data[user_id]
+                duration = data[2]
+                self.bot.lord_handler_timer.close(f'timeout:{guild_id}:{entry.user.id}')
             except (KeyError, IndexError, AttributeError):
                 duration = None
+
             self.bot.dispatch("untimeout", entry.target,
                               duration, entry.user, entry.reason)
-            self.bot.timeouts.pop(entry.target.id, None)
+
+            timeout_data.pop(user_id)
+            await timeout_db.set(guild_id, timeout_data)
 
     async def process_untimeout(self, member: nextcord.Member):
-        loctime = time.time()
+        timeout_db = await localdb.get_table('timeout')
+        timeout_data = await timeout_db.get(member.guild.id, {})
         try:
-            _data = self.bot.timeouts[member.id]
-            duration = loctime-_data[3]
+            data = timeout_data[member.id]
+            duration = data[2]
         except (KeyError, IndexError, AttributeError):
             duration = None
-        self.bot.timeouts.pop(member.id, None)
+
+        timeout_data.pop(member.id, None)
+        await timeout_db.set(member.guild.id, timeout_data)
+
         setattr(member, '_timeout', None)
         self.bot.dispatch("untimeout", member, duration, None, None)
+
+    @commands.Cog.listener()
+    async def on_ready(self) -> None:
+        timeout_db = await localdb.get_table('timeout')
+
+        for guild_id, data in await timeout_db.fetch():
+            guild = self.bot.get_guild(guild_id)
+
+            if guild is None:
+                continue
+
+            for user_id, timeout_data in data.items():
+                member = guild.get_member(user_id)
+
+                if member is None:
+                    continue
+
+                data = timeout_data[user_id]
+                duration = data[2]
+                self.bot.lord_handler_timer.create(
+                    duration,
+                    self.process_untimeout(member),
+                    f'timeout:{guild_id}:{user_id}'
+                )
 
 
 def setup(bot):

@@ -58,7 +58,6 @@ class DenyRolesView(DefaultSettingsView):
 
         cdb = CommandDB(guild.id)
         command_data = await cdb.get(self.command_name, {})
-        print(command_data)
         command_data.setdefault("distribution", {})
         role_ids = command_data["distribution"].get(
             "deny-role", [])

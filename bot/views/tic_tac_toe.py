@@ -58,6 +58,7 @@ class TicTacToeButton(nextcord.ui.Button['TicTacToe']):
                 x, y = view.motion_board[view.X][0]
                 view.board[y][x] = view.DEFAULT
                 but = view.button_board[(x, y)]
+
                 but.style = nextcord.ButtonStyle.secondary
                 but.label = "\u200b"
                 but.emoji = None
@@ -77,7 +78,7 @@ class TicTacToeButton(nextcord.ui.Button['TicTacToe']):
                 x, y = view.motion_board[view.O][0]
                 view.board[y][x] = view.DEFAULT
                 but = view.button_board[(x, y)]
-                but.refresh_component
+
                 but.style = nextcord.ButtonStyle.secondary
                 but.label = "\u200b"
                 but.emoji = None

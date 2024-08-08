@@ -37,7 +37,7 @@ class UserLimitModal(nextcord.ui.Modal, OptionItem):
         self.add_item(self.global_limit)
 
         self.limit = nextcord.ui.TextInput(
-            label=i18n.t(locale, 'settings.tickets.limit.user_limit.label'),
+            label=i18n.t(locale, 'settings.tickets.lzimit.user_limit.label'),
             placeholder=i18n.t(
                 locale, 'settings.tickets.limit.user_limit.placeholder'),
             default_value=user_limit,

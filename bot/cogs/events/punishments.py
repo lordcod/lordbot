@@ -14,15 +14,18 @@ class PunishmentsEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_audit_log_entry_create(self, entry: nextcord.AuditLogEntry):
+        if entry.action not in {nextcord.AuditLogAction.ban,  nextcord.AuditLogAction.unban, nextcord.AuditLogAction.kick}:
+            return
+
+        # global -> local
         get_user = entry._state.get_user
-        if entry.action in {nextcord.AuditLogAction.ban,  nextcord.AuditLogAction.unban, nextcord.AuditLogAction.kick}:
-            wrap = getattr(logstool.Logs(entry.guild), entry.action.name, None)
-            await wrap(
-                entry.guild,
-                get_user(int(entry._target_id)),
-                entry.user,
-                entry.reason
-            )
+        wrap = getattr(logstool.Logs(entry.guild), entry.action.name, None)
+        await wrap(
+            entry.guild,
+            get_user(int(entry._target_id)),
+            entry.user,
+            entry.reason
+        )
 
     @commands.Cog.listener()
     async def on_timeout(self,

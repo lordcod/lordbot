@@ -1,0 +1,6 @@
+{
+    "settings.tickets.modals.dropdown.style.short.label": "Короткий",
+    "settings.tickets.modals.dropdown.style.short.description": "Указывает короткий стиль формы.",
+    "settings.tickets.modals.dropdown.style.paragraph.label": "Параграф",
+    "settings.tickets.modals.dropdown.style.paragraph.description": "Отображает стиль параграфа формы."
+}

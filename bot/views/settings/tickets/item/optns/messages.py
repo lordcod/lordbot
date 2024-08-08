@@ -150,7 +150,7 @@ class TicketMessagesView(ViewOptionItem):
         if message_data is not None and len(message_data) > 0:
             payload = get_payload(member=interaction.user)
             message = generate_message(lord_format(message_data, payload))
-        if message_data is None or len(message) == 0:
+        else:
             message = {'content': i18n.t(
                 locale, 'settings.tickets.messages.error.null')}
 

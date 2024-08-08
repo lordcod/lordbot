@@ -1,7 +1,4 @@
-from __future__ import annotations
-
 from asyncio import iscoroutinefunction
-import functools
 import inspect
 import logging
 import nextcord
@@ -12,7 +9,7 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.languages.help import CommandOption, get_command
 
-from typing import TypeVar, Union
+from typing import Any, Callable, Coroutine, List, TypeVar, Union, get_args, get_origin
 
 from bot.resources.info import DISCORD_SUPPORT_SERVER
 
@@ -42,13 +39,29 @@ class MissingChannel(commands.CheckFailure):
     pass
 
 
-def attach_exception(*errors: type[ExceptionT]):
-    def inner(func):
-        func.__attachment_errors__ = errors
+class AuthorizationError(commands.CheckFailure):
+    pass
 
-        @functools.wraps(func)
-        def wrapped(self: CallbackCommandError, error: ExceptionT):
-            return func(self, error)
+
+def attach_exception(*errors: type[ExceptionT]
+                     ) -> Callable[['CallbackCommandError', ExceptionT],
+                                   Coroutine[Any, Any, None]]:
+    def inner(func):
+        nonlocal errors
+
+        if len(errors) == 0:
+            sign = inspect.signature(func)
+            if isinstance(func, staticmethod):
+                params = list(sign.parameters.values())
+            else:
+                params = list(sign.parameters.values())[1:]
+            error = params[0].annotation
+            if get_origin(error) is Union:
+                errors = get_args(error)
+            else:
+                errors = (error, )
+
+        func.__attachment_errors__ = errors
         return func
     return inner
 
@@ -59,71 +72,78 @@ class CommandOnCooldown(commands.CommandError):
         super().__init__("Cooldown")
 
 
+def wrap_queue(cls: 'CallbackCommandError'):
+    cls.queue = [item for _, item in cls.__dict__.items()
+                 if getattr(item, "__attachment_errors__", None) and iscoroutinefunction(item)]
+    return cls
+
+
+@wrap_queue
 class CallbackCommandError:
+    queue: List[Callable[['CallbackCommandError', Exception],
+                         Coroutine[Any, Any, None]]]
+
     def __init__(self, ctx: commands.Context) -> None:
         self.ctx = ctx
         self.gdb = GuildDateBases(ctx.guild.id)
-        self.locale = None
+        self.locale = self.gdb.get_hash('language', 'en')
 
     @classmethod
     async def process(cls, ctx: commands.Context, error):
         self = cls(ctx)
         self.locale = await self.gdb.get('language')
 
-        for name, item in inspect.getmembers(self):
-            allow_errors = getattr(item, "__attachment_errors__", None)
-            if allow_errors is None or not iscoroutinefunction(item):
-                continue
-
+        for item in self.queue:
+            allow_errors = getattr(item, "__attachment_errors__")
             if isinstance(error, allow_errors):
-                await item(error)
+                await item(self, error)
                 break
         else:
-            await self.OfterError(error)
+            await self.parse_ofter_error(error)
 
     @attach_exception(commands.MissingPermissions)
-    async def MissingPermissions(self, error):
+    async def parse_missing_permissions(self, error):
         content = i18n.t(self.locale, 'errors.MissingPermissions')
 
         await self.ctx.send(content)
 
     @attach_exception(commands.BotMissingPermissions)
-    async def BotMissingPermissions(self, error):
+    async def parse_bot_missing_permissions(self, error):
 
         content = i18n.t(self.locale, 'errors.BotMissingPermissions')
 
         await self.ctx.send(content)
 
     @attach_exception(MissingRole)
-    async def MissingRole(self, error):
+    async def parse_missing_role(self, error):
         content = i18n.t(self.locale, 'errors.MissingRole')
 
         await self.ctx.send(content)
 
     @attach_exception(MissingChannel)
-    async def MissingChannel(self, error):
+    async def parse_missing_channel(self, error):
         content = i18n.t(self.locale, 'errors.MissingChannel')
 
         await self.ctx.send(content)
 
     @attach_exception(commands.CommandNotFound)
-    async def CommandNotFound(self, error):
+    async def parse_command_not_found(self, error):
         pass
 
     @attach_exception(commands.NotOwner)
-    async def NotOwner(self, error):
+    async def parse_not_owner(self, error):
         content = i18n.t(self.locale, 'errors.NotOwner')
 
         await self.ctx.send(content=content)
 
     @attach_exception(OnlyTeamError)
-    async def OnlyTeamError(self, error):
+    async def parse_only_team_error(self, error):
         content = i18n.t(self.locale, 'errors.OnlyTeamError')
 
         await self.ctx.send(content)
 
-    @attach_exception(commands.BadArgument)
-    async def BadArgument(self, error):
+    @attach_exception()
+    async def parse_bad_argument(self, error: commands.BadArgument):
         title = i18n.t(self.locale, 'errors.BadArgument')
         color = await self.gdb.get('color')
 
@@ -154,8 +174,12 @@ class CallbackCommandError:
 
         await self.ctx.send(embed=embed)
 
-    @attach_exception(commands.MissingRequiredArgument)
-    async def MissingRequiredArgument(self, error):
+    @attach_exception()
+    async def parse_missing_required_argument(self, error: commands.MissingRequiredArgument):
+        param = error.param
+        annot = self.ctx.command.callback.__annotations__
+        index = list(annot.keys())[1:].index(param.name)
+
         title = i18n.t(self.locale, 'errors.MissingRequiredArgument')
         color = await self.gdb.get('color')
 
@@ -164,7 +188,10 @@ class CallbackCommandError:
         if cmd_data is None:
             return
 
-        using = f"`{cmd_data.get('name')}{' '+' '.join(CommandOption.get_arguments(cmd_data ,self.locale)) if cmd_data.get('arguments') else ''}`"
+        using = (
+            f"`{cmd_data.get('name')}"
+            f"{' '+' '.join(CommandOption.get_arguments(cmd_data, self.locale)) if cmd_data.get('arguments') else ''}`"
+        )
 
         embed = nextcord.Embed(
             title=title,
@@ -187,7 +214,7 @@ class CallbackCommandError:
         await self.ctx.send(embed=embed)
 
     @attach_exception(CommandOnCooldown)
-    async def CommandOnCooldown(self, error):
+    async def parse_command_on_cooldown(self, error: CommandOnCooldown):
         color = await self.gdb.get('color')
 
         embed = nextcord.Embed(
@@ -201,25 +228,33 @@ class CallbackCommandError:
         await self.ctx.send(embed=embed, delete_after=5.0)
 
     @attach_exception(InactiveEconomy)
-    async def InactiveEconomy(self, error):
+    async def parse_inactive_economy(self, error: InactiveEconomy):
         content = i18n.t(self.locale, 'errors.InactiveEconomy')
 
         await self.ctx.send(content)
 
     @attach_exception(DisabledCommand, commands.DisabledCommand)
-    async def DisabledCommand(self, error):
+    async def parse_disabled_command(self, error):
         content = i18n.t(self.locale, 'errors.DisabledCommand')
 
         await self.ctx.send(content)
 
-    async def OfterError(self, error):
+    @attach_exception(AuthorizationError)
+    async def parse_auth_error(self, error):
+        pass
+
+    @attach_exception(commands.CheckFailure)
+    async def parse_check_failure(self, error):
+        _log.trace("Verification conditions are not met",
+                   exc_info=error)
+
+    async def parse_ofter_error(self, error):
         _log.error(
             "Ignoring exception in command %s", self.ctx.command, exc_info=error)
 
         await self.ctx.author.send(
-            "There's been some kind of mistake!\n"
-            "Check if the bot has the necessary permissions to execute this command!\n"
-            f"Error ID (required for support): specify the name of the commands\n"
-            f"If you couldn't figure out what's going on, contact the [support server]({DISCORD_SUPPORT_SERVER})!",
-            flags=nextcord.MessageFlags(suppress_embeds=True, suppress_notifications=True)
+            i18n.t(self.locale, 'interaction.error.command',
+                   DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+            flags=nextcord.MessageFlags(
+                suppress_embeds=True, suppress_notifications=True)
         )

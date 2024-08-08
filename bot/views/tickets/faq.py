@@ -85,7 +85,7 @@ class FAQButtonOpen(nextcord.ui.Button):
 @AsyncSterilization
 class FAQCreateDropDown(FAQDropDown.cls):
     async def __init__(self, guild_id: Optional[int] = None, faq_items: List[FaqItemPayload] = [], buttons: Optional[TicketsButtonsPayload] = None):
-        await super().__init__(guild_id, faq_items)
+        await super().__init__(guild_id, faq_items, buttons)
         self.custom_id = 'tickets:faq:dropdown:create'
         if guild_id is None:
             return

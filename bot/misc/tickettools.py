@@ -300,6 +300,7 @@ class ModuleTicket:
 
         channel: nextcord.TextChannel = self.guild.get_channel(channel_id)
 
+        msg_embeds = message.pop('embeds', [])
         if self.input_answer and get_data('creating_embed_inputs'):
             embed = nextcord.Embed(
                 title=i18n.t(locale, 'tickets.modal'),
@@ -309,7 +310,6 @@ class ModuleTicket:
                     for label, res in self.input_answer.items()
                 )
             )
-            msg_embeds = message.pop('embeds', [])
             msg_embeds.append(embed)
             if msg_embed := message.pop('embed', None):
                 message['embeds'].insert(0, msg_embed)
@@ -335,7 +335,7 @@ class ModuleTicket:
                 type=nextcord.ChannelType.private_thread,
                 invitable=False,
             )
-            msg = await thread.send(**message, view=view)
+            msg = await thread.send(**message, embeds=msg_embeds, view=view)
             if mod_roles := [role.mention for role_id in get_data('moderation_roles', [])
                              if (role := self.guild.get_role(role_id))]:
                 await thread.send(' '.join(mod_roles),
@@ -397,7 +397,7 @@ class ModuleTicket:
 
         def send_message(content: str):
             if not modals or categories_data:
-                return self.settings_message.edit(content)
+                return self.settings_message.edit(content=content, view=None, embed=None)
             else:
                 return interaction.response.send_message(content, ephemeral=True)
 

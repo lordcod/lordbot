@@ -9,6 +9,7 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases, localdb
 from bot.misc import logstool
 from bot.misc.lordbot import LordBot
+from bot.misc.moderation.spam import parse_message
 from bot.misc.tickettools import ModuleTicket
 from bot.misc.utils import is_emoji
 from bot.languages import i18n
@@ -22,7 +23,9 @@ repo = git.Repo(search_parent_directories=True)
 
 release_sha = repo.head.object.hexsha[:8]
 release_date = repo.head.object.committed_date
-release_tag = repo.tags[-1].name
+tags_dt = {tag.commit.committed_date: tag for tag in repo.tags}
+release_tag = tags_dt[max(tags_dt)].name
+
 
 
 translator = googletrans.Translator()
@@ -69,7 +72,8 @@ class MessageEvent(commands.Cog):
             self.process_mention(message),
             self.give_score(message),
             self.give_message_score(message),
-            self.process_auto_translation(message)
+            self.process_auto_translation(message),
+            parse_message(message)
         )
 
     @create_delay_at_pat(15)
@@ -92,7 +96,9 @@ class MessageEvent(commands.Cog):
                                                           avatar=self.bot.user.display_avatar)
 
         view = AutoTranslateView()
-        files = await asyncio.gather(*[attach.to_file(use_cached=True, spoiler=attach.is_spoiler()) for attach in message.attachments]) if message.attachments else None
+        files = await asyncio.gather(*[attach.to_file(use_cached=True, spoiler=attach.is_spoiler()
+                                                      ) for attach in message.attachments]
+                                     ) if message.attachments else None
         await asyncio.gather(
             bot_wh.send(
                 content=message.content,

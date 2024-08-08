@@ -133,14 +133,6 @@ class ReadyEvent(commands.Cog):
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def on_disconnect(self):
-        await self.bot._LordBot__session.close()
-        await localdb._update_db(__name__)
-        await localdb.cache.close()
-
-        conn = self.bot.engine._DataBase__connection
-        if conn and not conn.closed:
-            await conn.close()
-
         _log.critical("Bot is disconnect")
 
     async def on_shard_disconnect(self, shard_id: int):

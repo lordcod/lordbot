@@ -1,7 +1,7 @@
 import nextcord
 from bot.databases import GuildDateBases
 import re
-from bot.misc.utils import AsyncSterilization, get_emoji_wrap
+from bot.misc.utils import AsyncSterilization
 
 from bot.resources.ether import ColorType
 from bot.views import settings_menu

@@ -70,6 +70,7 @@ class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
                     locale, 'settings.tempvoice.panel.type_message.panel.label'),
                 description=i18n.t(
                     locale, 'settings.tempvoice.panel.type_message.panel.description'),
+                emoji=get_emoji('advanced'),
                 value=1,
                 default=type_message_panel == 1
             ),
@@ -78,6 +79,7 @@ class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
                     locale, 'settings.tempvoice.panel.type_message.voice.label'),
                 description=i18n.t(
                     locale, 'settings.tempvoice.panel.type_message.voice.description'),
+                emoji=get_emoji('micon'),
                 value=2,
                 default=type_message_panel == 2
             ),
@@ -86,6 +88,7 @@ class TypeMessagePanelDropDown(nextcord.ui.StringSelect):
                     locale, 'settings.tempvoice.panel.type_message.every.label'),
                 description=i18n.t(
                     locale, 'settings.tempvoice.panel.type_message.every.description'),
+                emoji=get_emoji('ticforms'),
                 value=3,
                 default=type_message_panel == 3
             ),

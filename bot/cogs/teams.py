@@ -1,9 +1,12 @@
-from os import environ
+import asyncio
+import time
+from typing import Literal
 import nextcord
 from nextcord.ext import commands
 
 from bot.databases import localdb
 from bot.misc.lordbot import LordBot
+from bot.misc.moderation import spam
 from bot.resources import errors
 from bot.resources.ether import Emoji
 
@@ -14,7 +17,6 @@ class Teams(commands.Cog):
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         app_info = await self.bot.application_info()
-        self.bot.owner_ids
         member_teams = [member.id for member in (
             app_info.team.members)] if app_info.team else [app_info.owner]
         if ctx.author.id not in member_teams:
@@ -23,8 +25,15 @@ class Teams(commands.Cog):
 
     @commands.command()
     async def shutdown(self, ctx: commands.Context):
+        await self.bot._LordBot__session.close()
+        await localdb._update_db(__name__)
+        await localdb.cache.close()
+
+        conn = self.bot.engine._DataBase__connection
+        if conn and not conn.closed:
+            conn.close()
+
         await ctx.send("The bot has activated the completion process!")
-        self.bot.dispatch('disconnect')
         await self.bot.close()
 
     @commands.command(aliases=['sudo'])
@@ -100,6 +109,72 @@ class Teams(commands.Cog):
     ):
         await localdb._update_db(__name__)
         await ctx.message.add_reaction(Emoji.success)
+
+    @commands.command(aliases=['notifi_info'])
+    async def get_notifi_info(self, ctx: commands.Context):
+        twnoti = self.bot.twnoti
+        ytnoti = self.bot.ytnoti
+
+        await ctx.send(
+            'Notification is worked\n'
+            f'Twitch: {twnoti.running} (<t:{twnoti.last_heartbeat :.0f}:R>)\n'
+            f'Youtube: {ytnoti.running} (<t:{ytnoti.last_heartbeat :.0f}:R>)'
+        )
+
+    @commands.command()
+    async def restart_notifi(self, ctx: commands.Context, service: Literal['twnoti', 'ytnoti']):
+        noti = getattr(self.bot, service)
+        noti.running = False
+
+        if noti.last_heartbeat >= time.time()-5:
+            await asyncio.sleep(10-time.time()+noti.last_heartbeat)
+
+        match service:
+            case 'ytnoti':
+                parse_name = 'parse_youtube'
+            case 'twnoti':
+                parse_name = 'parse_twitch'
+
+        parser = getattr(noti, parse_name)()
+        asyncio.create_task(parser, name=f'{service}:parser')
+
+        await ctx.send(f"{service} successful restart!")
+
+    @commands.command()
+    async def disable_autmod(self, ctx: commands.Context):
+        spam.RUNNING = False
+        await ctx.send(f'{Emoji.success} I have disabled automod!')
+
+    @commands.command()
+    async def parse_roles(self, ctx: commands.Context):
+        auto_role = ctx.guild.get_role(1181629138138832976)
+        human = ctx.guild.get_role(1270883951917010985)
+        bots = ctx.guild.get_role(1270874041074585762)
+
+        for member in ctx.guild.humans:
+            added_roles = [auto_role, human]
+
+            if not set(added_roles) - set(member.roles):
+                continue
+
+            await member.add_roles(*added_roles, atomic=False)
+
+        for bot in ctx.guild.bots:
+            added_roles = [auto_role, bots]
+
+            if not set(added_roles) - set(bot.roles):
+                continue
+
+            await bot.add_roles(*added_roles, atomic=False)
+
+    @commands.command()
+    async def get_apps(self, ctx: commands.Context, page: int = 0):
+        await ctx.send(
+            '\n'.join([
+                f'{bot.mention} - [reinvite](https://discord.com/oauth2/authorize?client_id={bot.id}&scope=bot+applications.commands)'
+                for bot in ctx.guild.bots
+            ][page*10:page*10+10]) or '...'
+        )
 
 
 def setup(bot):
