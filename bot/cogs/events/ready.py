@@ -65,8 +65,8 @@ class ReadyEvent(commands.Cog):
             if isinstance(view, AsyncSterilization):
                 rs = await view()
             else:
-                channel = guild.get_channel(ticket_payload['channel_id'])
-                await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
+                rs = view()
+            self.bot.add_view(rs)
 
     async def get_emojis(self):
         values = {}
