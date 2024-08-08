@@ -184,7 +184,7 @@ class TwNoti:
         while True:
             await asyncio.sleep(self.heartbeat_timeout)
             if not self.__running:
-                return
+                break
             self.last_heartbeat = time.time()
 
             tasks = []
@@ -204,3 +204,5 @@ class TwNoti:
                     self.twitch_streaming.remove(uid)
                     tasks.append(self.callback_on_stop(uid))
             await asyncio.gather(*tasks)
+
+        _log.debug('Parsing %s ending', type(self).__name__)

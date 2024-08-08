@@ -233,7 +233,7 @@ class YtNoti:
         while True:
             await asyncio.sleep(self.heartbeat_timeout)
             if not self.__running:
-                return
+                break
             self.last_heartbeat = time.time()
 
             gvhd = []
@@ -251,3 +251,5 @@ class YtNoti:
                 gvhd.extend(vhd)
 
             await asyncio.gather(*[self.callback(v) for v in gvhd])
+
+        _log.debug('Parsing %s ending', type(self).__name__)
