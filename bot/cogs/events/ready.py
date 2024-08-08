@@ -1,3 +1,4 @@
+
 import logging
 from typing import Dict
 from nextcord.ext import commands
@@ -6,12 +7,11 @@ import orjson
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import GiveawayData
 from bot.languages.help import get_command
-from bot.databases import RoleDateBases, BanDateBases, localdb
-from bot.misc import tickettools
+from bot.databases import RoleDateBases, BanDateBases
 from bot.misc.giveaway import Giveaway
 from bot.misc.lordbot import LordBot
 from bot.misc.utils import AsyncSterilization
-from bot.resources import info, ether
+from bot.resources import ether
 from bot.resources.ether import ColorType
 from bot.views.giveaway import GiveawayView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
@@ -34,43 +34,40 @@ class ReadyEvent(commands.Cog):
         bot.set_event(self.on_disconnect)
         super().__init__()
 
-    async def process_tickets(self):
-        with open('tickets_data.json', 'rb') as file:
-            tickets_data = orjson.loads(file.read())
+    async def on_disconnect(self):
+        _log.critical("Bot is disconnect")
 
-        for guild_id, ticket_payload in tickets_data.items():
-            guild_id = int(guild_id)
-            guild = self.bot.get_guild(guild_id)
+    async def on_shard_disconnect(self, shard_id: int):
+        _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
 
-            if guild is None:
-                continue
+    @commands.Cog.listener()
+    async def on_ready(self):
+        try:
+            await asyncio.wait_for(self.bot.__with_ready__, timeout=30)
+        except asyncio.TimeoutError:
+            return
 
-            _log.trace('Set config %s (%d) for tickets', guild.name, guild_id)
+        await asyncio.gather(
+            self.add_views(),
+            self.get_emojis(),
+            self.find_not_data_commands(),
+            self.process_temp_roles(),
+            self.process_temp_bans(),
+            self.process_giveaways(),
+            self.process_guild_delete_tasks(),
+        )
 
-            gdb = GuildDateBases(guild_id)
-            tickets = await gdb.get('tickets')
+        _log.info(f"The bot is registered as {self.bot.user}")
 
-            if ticket_payload.pop('total', True) is False:
-                locale = ticket_payload.pop('locale', 'ru')
-                ticket_payload.update(info.DEFAULT_TICKET_PAYLOAD_RU.copy(
-                ) if locale == 'ru' else info.DEFAULT_TICKET_PAYLOAD.copy())
-
-            ticket_id = None
-            for message_id, ticket in tickets.items():
-                if ticket['channel_id'] == ticket_payload['channel_id']:
-                    ticket_id = message_id
-                    break
-
-            if ticket_id:
-                ticket_payload.update({
-                    'message_id': ticket_id,
-                    'category_id': ticket.get('category_id')
-                })
-                await gdb.set_on_json('tickets', ticket_id, ticket_payload)
-                await tickettools.ModuleTicket.update_ticket_panel(guild, ticket_id)
+    async def add_views(self):
+        views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
+                 ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView, AdvancedTempVoiceView]
+        for view in views:
+            if isinstance(view, AsyncSterilization):
+                rs = await view()
             else:
-                channel = guild.get_channel(ticket_payload['channel_id'])
-                await tickettools.ModuleTicket.create_ticket_panel(channel, ticket_payload)
+                rs = view()
+            self.bot.add_view(rs)
 
     async def get_emojis(self):
         values = {}
@@ -101,40 +98,6 @@ class ReadyEvent(commands.Cog):
             missing = set(names)-set(emojis.keys())
             if missing:
                 _log.trace('Emojis were not found in %s: %s', name, missing)
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        try:
-            await asyncio.wait_for(self.bot.__with_ready__, timeout=30)
-        except asyncio.TimeoutError:
-            return
-
-        await asyncio.gather(
-            self.get_emojis(),
-            self.find_not_data_commands(),
-            # self.process_tickets(),
-            self.process_temp_roles(),
-            self.process_temp_bans(),
-            self.process_giveaways(),
-            self.process_guild_delete_tasks(),
-        )
-
-        views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
-                 ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView, AdvancedTempVoiceView]
-        for view in views:
-            if isinstance(view, AsyncSterilization):
-                rs = await view()
-            else:
-                rs = view()
-            self.bot.add_view(rs)
-
-        _log.info(f"The bot is registered as {self.bot.user}")
-
-    async def on_disconnect(self):
-        _log.critical("Bot is disconnect")
-
-    async def on_shard_disconnect(self, shard_id: int):
-        _log.critical("Bot is disconnect (ShardId:%d)", shard_id)
 
     async def find_not_data_commands(self):
         cmd_wnf = []
