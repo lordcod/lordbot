@@ -67,12 +67,16 @@ class YtNoti:
                     await channel.send(**mes_data)
 
     async def request(self, method: str, url: str, **kwargs):
-        async with self.bot.session.request(method, url, **kwargs) as response:
-            content_type = response.headers.get('Content-Type')
-            if content_type == 'application/json' or 'application/json' in content_type:
-                data = await response.json()
-            else:
-                data = await response.read()
+        try:
+            async with self.bot.session.request(method, url, **kwargs) as response:
+                content_type = response.headers.get('Content-Type')
+                if content_type == 'application/json' or 'application/json' in content_type:
+                    data = await response.json()
+                else:
+                    data = await response.read()
+        except Exception as exc:
+            _log.error('It was not possible to get data from the api', exc_info=exc)
+            return None
 
         if not response.ok:
             _log.error('It was not possible to get data from the api, status: %s, data: %s', response.status, data)

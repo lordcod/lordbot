@@ -5,11 +5,12 @@ from enum import Enum
 import logging
 import os
 import time
-from typing import Optional
+from typing import Dict, Optional
 import aiocache
 from aiocache.base import SENTINEL
+import orjson
 from bot.databases.misc.adapter_dict import FullJson
-
+from redis.asyncio import ConnectionPool, StrictRedis
 
 _log = logging.getLogger(__name__)
 
@@ -80,14 +81,40 @@ class UpdatedCache(aiocache.SimpleMemoryCache):
         await _update_db(self.__tablename__)
 
 
-cache = aiocache.RedisCache(
-    FullJson(),
-    endpoint=os.environ.get('REDIS_HOST'),
+POOL = ConnectionPool(
+    host=os.environ.get('REDIS_HOST'),
     port=os.environ.get('REDIS_PORT'),
     password=os.environ.get('REDIS_PASSWORD'),
-    pool_max_size=100,
+    db=0
 )
-cache_data = {}
+cache = StrictRedis(connection_pool=POOL)
+cache_data: Dict[str, UpdatedCache] = {}
+
+
+async def save_db() -> None:
+    with open('assets/db_backups.json', 'rb+') as file:
+        backups = FullJson().loads(file.read())
+
+    try:
+        last_bup = list(backups)[-1]
+    except IndexError:
+        last_bup = 0
+
+    if 1800 > time.time()-last_bup:
+        return
+
+    data = {}
+    for key, cache in cache_data.items():
+        data[key] = await cache.fetch()
+
+    backups[time.time()] = data
+    backups = dict(list(backups.items())[:48])
+    backups = FullJson().dumps(backups).encode()
+
+    with open('assets/db_backups.json', 'wb+') as file:
+        file.write(backups)
+
+    _log.debug('Save backup %d', time.time())
 
 
 async def _update_db(tablename) -> None:
@@ -96,8 +123,18 @@ async def _update_db(tablename) -> None:
     handler = None
     _log.trace('Updated %s databases requests from %s',
                ', '.join(current_updated_task.keys()), tablename)
+
+    for key, data in current_updated_task.copy().items():
+        data = FullJson().dumps(data)
+        current_updated_task[key] = data
+
+    asyncio.create_task(save_db())
+
+    if not current_updated_task:
+        return
+
     with contextlib.suppress(BaseException):
-        await cache.multi_set(current_updated_task.items())
+        await cache.mset(current_updated_task)
         current_updated_task.clear()
 
 
@@ -113,12 +150,14 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
     for i in range(5):
         _log.trace('[%d] A request for fetched database %s was received', i, table_name)
         try:
-            data = await cache.get(table_name, {})
+            data = await cache.get(table_name)
         except Exception as exc:
             last_exc = exc
         else:
-            _log.trace('Fetched databases %s', table_name)
+            if data is None:
+                data = '{}'
             data = FullJson().loads(data)
+            _log.trace('Fetched databases %s: %s', table_name, data)
             break
         await asyncio.sleep(1)
     else:

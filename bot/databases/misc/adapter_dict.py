@@ -60,7 +60,7 @@ class FullJson:
 class Json:
     @staticmethod
     def loads(data) -> dict:
-        if not isinstance(data, str):
+        if not isinstance(data, (bytes, bytearray, memoryview, str)):
             return data
         try:
             return orjson.loads(data)
@@ -69,8 +69,6 @@ class Json:
 
     @staticmethod
     def dumps(data):
-        if not isinstance(data, (dict, list)):
-            return data
         try:
             return orjson.dumps(data).decode()
         except orjson.JSONEncodeError:

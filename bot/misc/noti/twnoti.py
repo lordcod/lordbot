@@ -56,12 +56,16 @@ class TwNoti:
         self.__running = __value
 
     async def request(self, method: str, url: str, with_auth: bool = True, **kwargs):
-        async with self.bot.session.request(method, url, **kwargs) as response:
-            content_type = response.headers.get('Content-Type')
-            if content_type == 'application/json' or 'application/json' in content_type:
-                data = await response.json()
-            else:
-                data = await response.read()
+        try:
+            async with self.bot.session.request(method, url, **kwargs) as response:
+                content_type = response.headers.get('Content-Type')
+                if content_type == 'application/json' or 'application/json' in content_type:
+                    data = await response.json()
+                else:
+                    data = await response.read()
+        except Exception as exc:
+            _log.error('It was not possible to get data from the api', exc_info=exc)
+            return None
 
         if with_auth and response.status == 401:
             await self.get_oauth_token()
