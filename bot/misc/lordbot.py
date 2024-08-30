@@ -24,6 +24,7 @@ from bot.misc.noti import TwitchNotification, YoutubeNotification
 
 
 _log = logging.getLogger(__name__)
+token = 'NjM2ODI0OTk4MTIzNzk4NTMx.GewihA.oc-hFKqHl4xIkwbJ2nkp7q9ADcRywEQ19Imk0Q'
 
 
 def get_shard_list(shard_ids: str):
@@ -201,7 +202,7 @@ class LordBot(commands.AutoShardedBot):
 
     async def update_api_config(self):
         api = self.apisite
-        url = 'http://127.0.0.1:5000/api-config'
+        url = 'https://api.lordcord.fun/api-config'
         headers = {
             'Authorization': os.environ.get('API_SECRET_TOKEN')
         }

@@ -90,32 +90,6 @@ cache = StrictRedis(connection_pool=POOL, health_check_interval=30)
 cache_data: Dict[str, UpdatedCache] = {}
 
 
-async def save_db() -> None:
-    with open('assets/db_backups.json', 'rb+') as file:
-        backups = FullJson().loads(file.read())
-
-    try:
-        last_bup = list(backups)[-1]
-    except IndexError:
-        last_bup = 0
-
-    if 1800 > time.time()-last_bup:
-        return
-
-    data = {}
-    for key, cache in cache_data.items():
-        data[key] = await cache.fetch()
-
-    backups[time.time()] = data
-    backups = dict(list(backups.items())[:48])
-    backups = FullJson().dumps(backups).encode()
-
-    with open('assets/db_backups.json', 'wb+') as file:
-        file.write(backups)
-
-    _log.debug('Save backup %d', time.time())
-
-
 async def _update_db(tablename) -> None:
     global last_updated, handler
     last_updated = time.time()+HEARTBEAT_UPDATE
@@ -126,8 +100,6 @@ async def _update_db(tablename) -> None:
     for key, data in current_updated_task.copy().items():
         data = FullJson.dumps(data)
         current_updated_task[key] = data
-
-    asyncio.create_task(save_db())
 
     if not current_updated_task:
         return
