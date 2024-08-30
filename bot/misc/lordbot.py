@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+from collections import deque
 import getopt
 import logging
 import sys
@@ -69,7 +70,6 @@ class LordBot(commands.AutoShardedBot):
             command_prefix=self.get_command_prefixs,
             intents=intents,
             help_command=None,
-            max_messages=None,
             shard_ids=shard_ids,
             enable_debug_events=True,
             shard_count=shard_count,
@@ -78,6 +78,12 @@ class LordBot(commands.AutoShardedBot):
             rollout_register_new=rollout_functions,
             rollout_update_known=rollout_functions
         )
+
+        _messages = deque(
+            self._connection._messages,
+            maxlen=None
+        )
+        self._connection._messages = _messages
 
         self.load_i18n_config()
 

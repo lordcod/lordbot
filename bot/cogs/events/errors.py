@@ -158,7 +158,7 @@ class CommandEvent(commands.Cog):
         if not (interaction.is_expired() or interaction.response.is_done()):
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')
-            with contextlib.suppress(nextcord.NotFound):
+            with contextlib.suppress(nextcord.HTTPException):
                 await interaction.response.send_message(
                     i18n.t(locale, 'interaction.error.item',
                            custom_id=item.custom_id[:8], DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),

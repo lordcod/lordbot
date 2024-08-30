@@ -67,9 +67,14 @@ class GuildDateBases:
         if self.guild_id in reserved:
             return
         reserved.append(self.guild_id)
-        if not await self._get(self.guild_id):
+        if not await self._exists(self.guild_id):
             await self._insert(self.guild_id)
             _log.trace(f"Guild {self.guild_id} registration completed")
+
+    @on_error()
+    async def _exists(self, guild_id):
+        return await engine.fetchone(
+            'SELECT EXISTS (SELECT true FROM guilds WHERE id=%s);', (guild_id,))
 
     @on_error()
     async def _get(self, guild_id):

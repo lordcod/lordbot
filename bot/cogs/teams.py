@@ -27,7 +27,7 @@ class Teams(commands.Cog):
     async def shutdown(self, ctx: commands.Context):
         await self.bot._LordBot__session.close()
         await localdb._update_db(__name__)
-        await localdb.cache.close()
+        await localdb.cache.close(close_connection_pool=True)
 
         conn = self.bot.engine._DataBase__connection
         if conn and not conn.closed:

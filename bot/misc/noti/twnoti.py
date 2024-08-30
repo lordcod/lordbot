@@ -6,6 +6,8 @@ import time
 import logging
 from typing import TYPE_CHECKING, Optional, Tuple
 
+from aiohttp import ClientConnectionError
+
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_TWITCH_MESSAGE
@@ -63,6 +65,9 @@ class TwNoti:
                     data = await response.json()
                 else:
                     data = await response.read()
+        except (asyncio.TimeoutError, ClientConnectionError) as exc:
+            _log.debug('Temporary error in the request', exc_info=exc)
+            return None
         except Exception as exc:
             _log.error('It was not possible to get data from the api', exc_info=exc)
             return None

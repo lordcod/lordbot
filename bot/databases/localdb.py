@@ -90,24 +90,6 @@ cache = StrictRedis(connection_pool=POOL, health_check_interval=30)
 cache_data: Dict[str, UpdatedCache] = {}
 
 
-def load_from_backup(tablename: str) -> None:
-    with open('assets/db_backups.json', 'rb+') as file:
-        backups = FullJson().loads(file.read())
-
-    try:
-        last_bup = list(backups)[-1]
-    except IndexError:
-        return
-
-    try:
-        data = backups[last_bup][tablename]
-        cache = cache_data[tablename]
-    except KeyError:
-        return
-
-    cache._cache = data
-
-
 async def save_db() -> None:
     with open('assets/db_backups.json', 'rb+') as file:
         backups = FullJson().loads(file.read())
@@ -142,7 +124,7 @@ async def _update_db(tablename) -> None:
                ', '.join(current_updated_task.keys()), tablename)
 
     for key, data in current_updated_task.copy().items():
-        data = FullJson().dumps(data)
+        data = FullJson.dumps(data)
         current_updated_task[key] = data
 
     asyncio.create_task(save_db())
@@ -172,14 +154,17 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
             last_exc = exc
         else:
             if data is None:
-                data = '{}'
+                data = {}
             data = FullJson().loads(data)
             _log.trace('Fetched databases %s: %s', table_name, data)
             break
         await asyncio.sleep(1)
     else:
-        load_from_backup(table_name)
         _log.trace('Getting the database %s ended with an error %s',
                    table_name, type(last_exc).__name__, exc_info=last_exc)
+
+    if not isinstance(data, dict):
+        data = {}
+
     db._cache = data
     return db

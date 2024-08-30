@@ -1,13 +1,14 @@
-
 import contextlib
 from enum import StrEnum
 import orjson
-from typing import Any,  Union
+from typing import Any,  Union, overload, TypeVar
 import psycopg2
 from psycopg2._psycopg import ISQLQuote, QuotedString
 import psycopg2._psycopg
 
 from bot.databases.misc.error_handler import on_error
+
+T = TypeVar('T')
 
 
 class NumberFormatType(StrEnum):
@@ -46,12 +47,39 @@ class FullJson:
         self.overnumber = overnumber
         self.encoding = 'utf-8'
 
-    def loads(self, dict_var):
+    @overload
+    def loads(self, data: Union[bytes, bytearray, memoryview, str]) -> dict:
+        pass
+
+    @overload
+    def loads(self, data: T) -> T:
+        pass
+
+    @overload
+    @staticmethod
+    def loads(data: Union[bytes, bytearray, memoryview, str]) -> dict:
+        pass
+
+    @overload
+    @staticmethod
+    def loads(data: T) -> T:
+        pass
+
+    def loads(*args):
+        if len(args) == 1:
+            dict_var = args[0]
+            overnumber = False
+        elif len(args) == 2:
+            self = args[0]
+            dict_var = args[1]
+            overnumber = self.overnumber
+
         data = Json.loads(dict_var)
-        data = NumberFormating.loads(data, self.overnumber)
+        data = NumberFormating.loads(data, overnumber)
         return data
 
-    def dumps(self, dict_var):
+    @staticmethod
+    def dumps(dict_var):
         data = NumberFormating.dumps(dict_var)
         data = Json.dumps(data)
         return data
