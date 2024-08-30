@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 import random
 import string
-from typing import TYPE_CHECKING
+import time
+from typing import TYPE_CHECKING, Dict
+from aiohttp import ContentTypeError
 import orjson
 import asyncio
 from uvicorn import Config, Server
@@ -32,6 +34,7 @@ class ApiSite:
                  handlers: list) -> None:
         self.bot = bot
         self.handlers = handlers
+        self._cache: Dict[str, int] = {}
 
     async def on_ready(self):
         _log.info('ApiSite is ready, public url: %s, password: %s', self.callback_url, self.password)
@@ -61,7 +64,7 @@ class ApiSite:
     def _setup(self, endpoint: str, port: int):
         self.endpoint = endpoint
         self.password = ''.join([random.choice(string.hexdigits) for _ in range(25)])
-        self.app = FastAPI()
+        self.app = FastAPI(debug=True)
         self.callback_url = ngrok.connect(str(port), pyngrok_config=pyngrok_config).public_url
         self.app.include_router(self._get_router())
         self.app.add_event_handler("startup", lambda: asyncio.create_task(self.on_ready()))
@@ -85,18 +88,35 @@ class ApiSite:
             return Response(status_code=401)
 
         try:
-            body = await request.body()
-            json = orjson.loads(body)
+            json = await request.json()
 
             endpoint = json['endpoint']
             data = json['data']
 
             func = self.handlers[endpoint]
-        except (KeyError, orjson.JSONDecodeError):
+        except ContentTypeError:
+            return Response(status_code=400)
+        except KeyError:
             return Response(status_code=400)
         else:
+            limit = func.__limit__
+
+            if limit is not None and self._cache.get(endpoint, 0)+limit > time.time():
+                return Response(
+                    status_code=429,
+                    headers={
+                        'X-After-Request': str(self._cache.get(endpoint, 0)+limit-time.time())
+                    }
+                )
+
+            self._cache[endpoint] = time.time()
             result = await func(self.bot, data)
-            return Response(result)
+            return Response(
+                orjson.dumps(result),
+                headers={
+                    'Content-Type': 'application/json'
+                }
+            )
 
     def _is_authorization(self, request: Request) -> bool:
         password = request.headers.get('Authorization')

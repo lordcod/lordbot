@@ -15,7 +15,6 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases
 from bot.databases import db
 from bot.databases.db import DataBase, establish_connection
-from bot.databases.config import config
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
@@ -49,10 +48,15 @@ class LordBot(commands.AutoShardedBot):
         self,
         *,
         rollout_functions: bool = True,
-        allow_bot_command: bool = False,
-        test_bot: bool = False
+        allow_bot_command: Optional[bool] = None,
+        release_bot: Optional[bool] = None
     ) -> None:
-        self.test_bot = test_bot
+        if release_bot is None:
+            release_bot = sys.platform == 'win32'
+        if allow_bot_command is None:
+            allow_bot_command = not release_bot
+
+        self.release_bot = release_bot
         self.allow_bot_command = allow_bot_command
 
         flags = dict(map(lambda item: (item[0].removeprefix(
@@ -100,7 +104,7 @@ class LordBot(commands.AutoShardedBot):
 
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(loop)
 
-        if not test_bot:
+        if release_bot:
             self.add_listener(self.apisite._ApiSite__run, 'on_ready')
         self.add_listener(self.listen_on_ready, 'on_ready')
         self.add_listener(self.twnoti.parse_twitch, 'on_ready')
@@ -195,39 +199,9 @@ class LordBot(commands.AutoShardedBot):
 
         setattr(self, name, coro)
 
-    async def register_jino(self):
-        if not self.test_bot:
-            return
-
-        async with self.session.get('https://ifconfig.me/ip') as response:
-            ipb = await response.read()
-            ip = ipb.decode()
-
-        query = "mutation addPostgreSQLRemoteSubnet($subnet: String!, $comment: String, $accountId: String) {\n  me {\n    legacy {\n      addPostgreSQLRemoteSubnet(\n        subnet: $subnet\n        comment: $comment\n        accountId: $accountId\n        validateAll: true\n        camelCaseErrors: true\n      )\n      __typename\n    }\n    __typename\n  }\n}\n"
-        data = {
-            'operationName': "addPostgreSQLRemoteSubnet",
-            'query': query,
-            'variables': {'subnet': ip, 'comment': None, 'accountId': "pmeyj"}
-        }
-        headers = {
-            'Authorization': 'Bearer ' + os.getenv('JINO_TOKEN', '')
-        }
-
-        async with self.session.post('https://graphql.jino.ru/user/', json=data, headers=headers) as res:
-            json = await res.json()
-
-        with_auth = len(json.get('errors', [])) > 0
-
-        if with_auth:
-            _log.trace(
-                'Successfully adding the IP address %s to the database', ip)
-        else:
-            _log.warning(
-                'The JINO token needs to be updated. The IP address was not added to the database.')
-
     async def update_api_config(self):
         api = self.apisite
-        url = 'https://api.lordcord.fun/post-api-config'
+        url = 'http://127.0.0.1:5000/api-config'
         headers = {
             'Authorization': os.environ.get('API_SECRET_TOKEN')
         }
@@ -245,12 +219,11 @@ class LordBot(commands.AutoShardedBot):
     async def listen_on_ready(self) -> None:
         _log.debug('Listen on ready')
 
-        if not self.test_bot:
+        if self.release_bot:
             await self.update_api_config()
 
-        await self.register_jino()
         try:
-            self.engine = engine = await DataBase.create_engine(config)
+            self.engine = engine = await DataBase.create_engine(os.getenv('POSTGRESQL_DNS'))
         except Exception as exc:
             _log.error("Couldn't connect to the database", exc_info=exc)
             await self.close()

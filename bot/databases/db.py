@@ -1,8 +1,6 @@
-from .handlers import establish_connection
+from bot.databases.db_engine import DataBase
+from bot.databases.handlers import establish_connection
 from .settings import Table, Colum, PostType
-from .db_engine import DataBase
-from .config import (host, port, user, password, db_name)
-
 from bot.resources import info
 
 

@@ -20,7 +20,7 @@ flags = dict(map(lambda item: (item[0].removeprefix(
 TRACE = logging.DEBUG - 5
 CORE = logging.INFO + 5
 
-DEFAULT_LOG = TRACE
+DEFAULT_LOG = logging.DEBUG
 DEFAULT_DISCORD_LOG = logging.INFO
 DEFAULT_FILE_LOG = logging.ERROR
 

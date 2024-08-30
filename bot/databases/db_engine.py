@@ -46,6 +46,11 @@ class MyLoggingConnection(LoggingConnection):
         kwargs.setdefault('cursor_factory', MyLoggingCursor)
         return LoggingConnection.cursor(self, *args, **kwargs)
 
+    def _logtologger(self, msg, curs):
+        msg = self.filter(msg, curs)
+        if msg:
+            self._logobj.trace(msg)
+
 
 def on_lock_complete(func):
     @functools.wraps(func)
