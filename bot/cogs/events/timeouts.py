@@ -78,7 +78,7 @@ class MemberTimeoutEvent(commands.Cog):
     async def on_ready(self) -> None:
         timeout_db = await localdb.get_table('timeout')
 
-        for guild_id, data in await timeout_db.fetch():
+        for guild_id, data in (await timeout_db.fetch()).items():
             guild = self.bot.get_guild(guild_id)
 
             if guild is None:
