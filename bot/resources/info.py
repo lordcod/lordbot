@@ -437,7 +437,7 @@ DEFAULT_IDEAS_PAYLOAD: IdeasPayload = {
 }
 
 
-DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
+DEFAULT_IDEAS_MESSAGES_RU: IdeasMessagesPayload = {
     'suggestion': {
         "title": 'Идеи',
         "description": (
@@ -545,17 +545,17 @@ DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
         ],
     },
 }
-DEFAULT_IDEAS_MESSAGES['approved'] = DEFAULT_IDEAS_MESSAGES['accept']
-DEFAULT_IDEAS_MESSAGES['approved_with_reason'] = DEFAULT_IDEAS_MESSAGES['accept_with_reason']
+DEFAULT_IDEAS_MESSAGES_RU['approved'] = DEFAULT_IDEAS_MESSAGES['accept']
+DEFAULT_IDEAS_MESSAGES_RU['approved_with_reason'] = DEFAULT_IDEAS_MESSAGES['accept_with_reason']
 
-DEFAULT_IDEAS_MESSAGES['reject'] = DEFAULT_IDEAS_MESSAGES['deny']
-DEFAULT_IDEAS_MESSAGES['reject_with_reason'] = DEFAULT_IDEAS_MESSAGES['deny_with_reason']
+DEFAULT_IDEAS_MESSAGES_RU['reject'] = DEFAULT_IDEAS_MESSAGES['deny']
+DEFAULT_IDEAS_MESSAGES_RU['reject_with_reason'] = DEFAULT_IDEAS_MESSAGES['deny_with_reason']
 
-DEFAULT_IDEAS_REACTIONS: IdeasReactionsPayload = {
+DEFAULT_IDEAS_REACTIONS_RU: IdeasReactionsPayload = {
     'success': Emoji.tickmark,
     'crossed': Emoji.cross
 }
-DEFAULT_IDEAS_COMPONENTS: IdeasComponentsPayload = {
+DEFAULT_IDEAS_COMPONENTS_RU: IdeasComponentsPayload = {
     'suggest': {
         'label': 'Предложить идею',
         'style': nextcord.ButtonStyle.green
@@ -581,7 +581,14 @@ DEFAULT_IDEAS_COMPONENTS: IdeasComponentsPayload = {
 }
 DEFAULT_THREAD_NAME_RU = 'Обсуждение идеи от {member.username}'
 
-DEFAULT_IDEAS_PAYLOAD_RU: IdeasPayload = DEFAULT_IDEAS_PAYLOAD
+DEFAULT_IDEAS_PAYLOAD_RU: IdeasPayload = {
+    'messages': DEFAULT_IDEAS_MESSAGES_RU,
+    'reactions': DEFAULT_IDEAS_REACTIONS_RU,
+    'components': DEFAULT_IDEAS_COMPONENTS_RU,
+    'thread_name': DEFAULT_THREAD_NAME_RU,
+    'revoting': DEFAULT_IDEAS_REVOTING_RU
+}
+
 
 activities_list = [
     {
