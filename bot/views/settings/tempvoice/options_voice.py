@@ -5,7 +5,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.views.settings.tempvoice.optns.panel_type import TypePanelView
-from .optns.standart import FunctionOptionItem, OptionItem, ViewOptionItem
+from .optns.base import FunctionOptionItem, OptionItem, ViewOptionItem
 from .optns.limit import LimitModal
 from .optns.name import NameModal
 

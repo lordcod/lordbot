@@ -1,14 +1,13 @@
-import getopt
-import sys
-
 import nextcord
 from bot.misc import env
 from bot.misc.lordbot import LordBot
 
 import os
 
+from bot.misc.utils import get_parser_args
 
-bot = LordBot(rollout_functions=True, release_bot=True)
+
+bot = LordBot()
 
 
 def load_dir(dirpath: str) -> None:
@@ -24,8 +23,7 @@ def load_dir(dirpath: str) -> None:
 
 
 def start_bot():
-    flags = dict(map(lambda item: (item[0].removeprefix(
-        '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards=', 'log_level='])[0]))
+    flags = get_parser_args()
 
     load_dir("./bot/cogs")
 

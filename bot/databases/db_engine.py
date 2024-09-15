@@ -39,6 +39,15 @@ class MyLoggingCursor(LoggingCursor):
 
 
 class MyLoggingConnection(LoggingConnection):
+    def __init__(
+        self,
+        dsn: str,
+        *, async_: int = 0,
+        debug_logs: bool = False
+    ) -> None:
+        super().__init__(dsn, async_=async_)
+        self.debug_logs = debug_logs
+
     def filter(self, msg: bytes, curs: MyLoggingCursor):
         return msg.decode() + "   %d ms" % int((time.time() - curs.timestamp) * 1000)
 
@@ -48,7 +57,7 @@ class MyLoggingConnection(LoggingConnection):
 
     def _logtologger(self, msg, curs):
         msg = self.filter(msg, curs)
-        if msg:
+        if msg and self.debug_logs:
             self._logobj.trace(msg)
 
 
@@ -62,6 +71,7 @@ def on_lock_complete(func):
 
 class DataBase:
     conn_dns: str
+    debug_logs: bool
 
     def __init__(self) -> None:
         self.__connection: Optional[psycopg2.extensions.connection] = None
@@ -70,6 +80,7 @@ class DataBase:
         if not self.__connection or self.__connection.closed:
             self.__connection = psycopg2.connect(self.conn_dns, connection_factory=MyLoggingConnection)
             self.__connection.autocommit = True
+            self.__connection.debug_logs = self.debug_logs
             self.__connection.initialize(_log)
             _log.debug('Database pool connection opened')
         return self.__connection
@@ -77,11 +88,16 @@ class DataBase:
     @classmethod
     async def create_engine(
         cls,
-        dns: str
+        dns: str,
+        *,
+        debug_logs: bool = False
     ) -> DataBase:
         _log.debug("Load DataBases")
+
         self = cls()
+        self.debug_logs = debug_logs
         self.conn_dns = dns
+
         await self.get_connection()
         return self
 

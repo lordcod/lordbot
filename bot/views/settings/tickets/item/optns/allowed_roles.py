@@ -1,5 +1,4 @@
 from typing import Optional
-from httpx import delete
 import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
@@ -7,7 +6,7 @@ from bot.databases.varstructs import TicketsPayload
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization,  find_color_emoji
 
-from .standart import ViewOptionItem
+from .base import ViewOptionItem
 
 
 @AsyncSterilization

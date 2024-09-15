@@ -118,7 +118,7 @@ class MusicPlayer:
         self.message = message
 
     @property
-    def voice(self) -> nextcord.VoiceClient:
+    def voice(self) -> Optional[nextcord.VoiceClient]:
         return self.guild.voice_client
 
     async def process(self, index: Optional[int] = None):
@@ -173,18 +173,21 @@ class MusicPlayer:
     async def stop(self):
         self.with_stopped = True
 
-        if self.voice.is_playing():
+        if self.voice and self.voice.is_playing():
             self.voice.stop()
         queue.clear(self.guild_id)
-        current_players.pop(self.guild_id)
-        sessions_volume.pop(self.guild_id)
-        await self.voice.disconnect()
+        current_players.pop(self.guild_id, None)
+        sessions_volume.pop(self.guild_id, None)
+
+        if self.voice:
+            await self.voice.disconnect()
 
         gdb = GuildDateBases(self.guild_id)
         locale = await gdb.get('language')
-        await self.message.edit(i18n.t(locale, 'music.player.out.last'),
-                                embeds=[],
-                                view=None)
+        with contextlib.suppress(Exception):
+            await self.message.edit(i18n.t(locale, 'music.player.out.last'),
+                                    embeds=[],
+                                    view=None)
 
     def get_leaved_task(self) -> Task:
         async def inner():
@@ -258,7 +261,10 @@ class MusicPlayer:
                              fulltime=convert_time(self.data.diration))
             )
 
-        volume = self.voice.source.volume * 100
+        if self.voice.source:
+            volume = self.voice.source.volume * 100
+        else:
+            volume = 0
         embed.add_field(
             name=i18n.t(locale, 'music.player.message.volume'),
             value=f'{await get_emoji(gdb, volume)} {volume:.0f}%'
@@ -276,7 +282,7 @@ class MusicPlayer:
     async def callback(self, err):
         with contextlib.suppress(AttributeError):
             sessions_volume[self.guild_id] = self.voice.source.volume
-        if not self.updated_task.done():
+        if self.updated_task and not self.updated_task.done():
             self.updated_task.cancel()
         if self.with_stopped:
             return
@@ -306,7 +312,12 @@ class MusicPlayer:
         if indent_song:
             options['options'] += f" -ss {indent_song}"
 
-        music_url = await self.data.download_link()
+        try:
+            music_url = await self.data.download_link()
+        except Exception as exc:
+            await self.callback(exc)
+            return
+
         source = nextcord.FFmpegPCMAudio(
             music_url, pipe=False, executable=ffmpeg_path, **options)
         source = nextcord.PCMVolumeTransformer(source, volume=sessions_volume[self.guild_id])

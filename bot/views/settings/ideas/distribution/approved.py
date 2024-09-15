@@ -1,14 +1,11 @@
-from httpx import delete
 import nextcord
 
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.views.information_dd import get_info_dd
+from .base import ViewOptionItem
 
 
-from ... import ideas
-
-from bot.views.settings._view import DefaultSettingsView
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
 
@@ -16,7 +13,7 @@ from typing import Optional
 
 
 @AsyncSterilization
-class DropDown(nextcord.ui.ChannelSelect):
+class ApprovedDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
         guild_id: int
@@ -36,8 +33,10 @@ class DropDown(nextcord.ui.ChannelSelect):
 
 
 @AsyncSterilization
-class ApprovedView(DefaultSettingsView):
-    embed: nextcord.Embed = None
+class ApprovedView(ViewOptionItem):
+    label: str = 'settings.ideas.dropdown.approved.title'
+    description: str = 'settings.ideas.dropdown.approved.description'
+    emoji: str = 'ideaapproved'
 
     async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -58,10 +57,6 @@ class ApprovedView(DefaultSettingsView):
 
         super().__init__()
 
-        self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = i18n.t(locale, 'settings.button.edit')
-        self.delete.label = i18n.t(locale, 'settings.button.delete')
-
         if channel is not None:
             self.channel = channel
             self.edit.disabled = False
@@ -70,36 +65,25 @@ class ApprovedView(DefaultSettingsView):
 
         if channel or (channel := guild.get_channel(channel_approved_id)):
             self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.init.value.approved',
+                placeholder=i18n.t(locale, 'settings.ideas.value.approved',
                                    channel=f"#{channel.name}")
             ))
         else:
             self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.init.value.approved',
+                placeholder=i18n.t(locale, 'settings.ideas.value.approved',
                                    channel=i18n.t(locale, 'settings.ideas.init.unspecified'))
             ))
 
-        cdd = await DropDown(guild.id)
+        cdd = await ApprovedDropDown(guild.id)
         self.add_item(cdd)
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await ideas.IdeasView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
-
-    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        idea_data = self.idea_data
-        idea_data['channel_approved_id'] = self.channel.id
-        await self.gdb.set('ideas', idea_data)
-
-        view = await ApprovedView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         idea_data = self.idea_data
-        idea_data.pop('channel_approved_id')
+        idea_data.pop('channel_approved_id', None)
         await self.gdb.set('ideas', idea_data)
 
         view = await ApprovedView(interaction.guild)

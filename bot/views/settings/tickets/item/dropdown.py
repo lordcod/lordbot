@@ -14,7 +14,7 @@ from .optns.allowed_roles import TicketAllowedRolesView
 from .optns.faq import TicketFAQView
 from .optns.modals import TicketFormsView
 from .optns.moderation_roles import TicketModRolesView
-from .optns.standart import OptionItem,  FunctionOptionItem, ViewOptionItem
+from .optns.base import OptionItem,  FunctionOptionItem, ViewOptionItem
 from .optns.ticket_type import TicketTypeView
 
 #

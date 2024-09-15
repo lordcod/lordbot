@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 
+from asyncio.constants import ACCEPT_RETRY_DELAY
 from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    Optional,
+    NotRequired,
     List,
+    Optional,
     Required,
+    NotRequired,
     TypedDict,
     Dict,
     Tuple,
@@ -23,45 +26,76 @@ class GiveawayData(TypedDict):
     channel_id: int
     sponsor_id: int
     prize: str
-    description: Optional[str]
+    description: NotRequired[str]
     quantity: int
     date_end: int | float
     types: List[int]
     entries_ids: List[int]
     completed: bool
-    winners: Optional[List[int]]
+    winners: NotRequired[List[int]]
     key: str
     token: str
 
 
-class PartialIdeasPayload(TypedDict):
+class IdeasMessagesPayload(TypedDict, total=False):
+    suggestion: Message
+    created: Message
+
+    accept: Message
+    accept_with_reason: Message
+    approved: Message
+    approved_with_reason: Message
+
+    deny: Message
+    deny_with_reason: Message
+    reject: Message
+    reject_with_reason: Message
+
+
+class IdeasReactionsPayload(TypedDict, total=False):
+    success: str
+    crossed: str
+
+
+class IdeasComponentsPayload(TypedDict, total=False):
+    suggest: ButtonPayload
+    approve: ButtonPayload
+    deny: ButtonPayload
+    like: ButtonPayload
+    dislike: ButtonPayload
+
+
+class IdeasPayload(TypedDict, total=False):
     enabled: bool
     channel_suggest_id: int
     message_suggest_id: int
     channel_offers_id: int
-
-
-class IdeasPayload(PartialIdeasPayload, total=True):
-    cooldown: Optional[int]
-    channel_approved_id: Optional[int]
-    channel_denied_id: Optional[int]
-    moderation_role_ids: Optional[List[int]]
-    reaction_system: Optional[int]
-    thread_delete: Optional[bool]
-    allow_image: Optional[bool]
+    cooldown: int
+    channel_approved_id: int
+    channel_denied_id: int
+    moderation_role_ids: List[int]
+    reaction_system: int
+    revoting: bool
+    thread_name: str
+    thread_open: bool
+    thread_delete: bool
+    allow_image: bool
+    messages: IdeasMessagesPayload
+    reactions: Optional[IdeasReactionsPayload]
+    components: IdeasComponentsPayload
     # User id,  moderator_id, reason
-    ban_users: Optional[List[Tuple[int, int, str]]]
+    ban_users: List[Tuple[int, int, str]]
     # User id, moderator_id, Timestamp, reason
-    muted_users: Optional[List[Tuple[int, int, float, str]]]
+    muted_users: List[Tuple[int, int, float, str]]
 
 
 class RoleShopPayload(TypedDict):
     role_id: int
     amount: int
-    limit: Optional[int]
-    name: Optional[str]
-    description: Optional[str]
-    using_limit: Optional[int]
+    limit: NotRequired[int]
+    name: NotRequired[str]
+    description: NotRequired[str]
+    using_limit: NotRequired[int]
 
 
 LogsPayload = Dict[int, List['LogType']]
@@ -80,7 +114,7 @@ Message = Union[str, Dict[str, Any]]
 class TicketsMessagesPayload(TypedDict):
     panel: Message
     open: Message
-    category: Optional[Message]
+    category: NotRequired[Message]
     controller: Message
     close: Message
     reopen: Message
@@ -88,20 +122,20 @@ class TicketsMessagesPayload(TypedDict):
 
 
 class TicketsNamesPayload(TypedDict):
-    open: Optional[str]
-    close: Optional[str]
+    open: NotRequired[str]
+    close: NotRequired[str]
 
 
-class ButtonPayload(TypedDict):
-    label: Optional[str]
-    emoji: Optional[str]
-    style: Optional[Literal[1, 2, 3, 4, 5]]
+class ButtonPayload(TypedDict, total=False):
+    label: str
+    emoji: str
+    style: Literal[1, 2, 3, 4, 5]
 
 
 class SelectOptionPayload(TypedDict):
     label: str
-    description: Optional[str]
-    emoji: Optional[str]
+    description: NotRequired[str]
+    emoji: NotRequired[str]
 
 
 class TicketsButtonsPayload(TypedDict):
@@ -121,18 +155,18 @@ class FaqItemPayload(SelectOptionPayload, total=True):
 
 
 class FaqPayload(TypedDict):
-    type: Optional[Literal[1, 2]]
+    type: NotRequired[Literal[1, 2]]
     items:  List[FaqItemPayload]
 
 
 class ModalItemPayload(TypedDict):
     label: str
-    style: Optional[Literal[1, 2]]
-    required: Optional[bool]
-    placeholder: Optional[str]
-    default_value: Optional[str]
-    min_lenght: Optional[int]
-    max_lenght: Optional[int]
+    style: NotRequired[Literal[1, 2]]
+    required: NotRequired[bool]
+    placeholder: NotRequired[str]
+    default_value: NotRequired[str]
+    min_lenght: NotRequired[int]
+    max_lenght: NotRequired[int]
 
 
 class ButtonActionPayload(ButtonPayload, total=True):
@@ -145,33 +179,33 @@ class PartialCategoryPayload(TypedDict):
     messages: TicketsMessagesPayload
     buttons: TicketsButtonsPayload
     actions_buttons: List[ButtonActionPayload]
-    type: Optional[Literal[1, 2]]
-    permissions: Optional[Dict[int, Tuple[int, int]]]
-    category_id: Optional[int]
-    closed_category_id: Optional[int]
-    moderation_roles: Optional[List[int]]
-    user_closed: Optional[bool]
-    approved_roles: Optional[List[int]]
-    saving_history: Optional[bool]
-    auto_archived: Optional[int]
-    modals: Optional[List[ModalItemPayload]]
-    creating_embed_inputs: Optional[bool]
-    user_tickets_limit: Optional[int]
+    type: NotRequired[Literal[1, 2]]
+    permissions: NotRequired[Dict[int, Tuple[int, int]]]
+    category_id: NotRequired[int]
+    closed_category_id: NotRequired[int]
+    moderation_roles: NotRequired[List[int]]
+    user_closed: NotRequired[bool]
+    approved_roles: NotRequired[List[int]]
+    saving_history: NotRequired[bool]
+    auto_archived: NotRequired[int]
+    modals: NotRequired[List[ModalItemPayload]]
+    creating_embed_inputs: NotRequired[bool]
+    user_tickets_limit: NotRequired[int]
 
 
 class CategoryPayload(PartialCategoryPayload, ButtonPayload, total=True):
-    channel_id: Optional[int] = None
-    description: Optional[str] = None
+    channel_id: NotRequired[int] = None
+    description: NotRequired[str] = None
 
 
 class TicketsItemPayload(PartialCategoryPayload, total=True):
     channel_id: int
     message_id: int
-    enabled: Optional[bool]
-    faq: Optional[FaqPayload]
-    category_type: Optional[int]
-    categories: Optional[List[CategoryPayload]]
-    global_user_tickets_limit: Optional[int]
+    enabled: NotRequired[bool]
+    faq: NotRequired[FaqPayload]
+    category_type: NotRequired[int]
+    categories: NotRequired[List[CategoryPayload]]
+    global_user_tickets_limit: NotRequired[int]
 
 
 TicketsPayload = Dict[int, TicketsItemPayload]
@@ -185,28 +219,28 @@ class UserTicketPayload(TypedDict):
     inputs: Dict[str, str]
     status: int
     index: int
-    messages: Optional[List[dict]]
+    messages: NotRequired[List[dict]]
 
 
 class TempChannelsPayload(TypedDict):
     channel_id: int
     category_id: int
-    panel_channel_id: Optional[int]
-    panel_message_id: Optional[int]
-    enabled: Optional[bool]
-    channel_name: Optional[str]
-    channel_limit: Optional[int]
-    advance_panel: Optional[bool]
-    type_panel: Optional[int]
-    type_message_panel: Optional[int]
-    removed_mutes:  Optional[List[int]]
+    panel_channel_id: NotRequired[int]
+    panel_message_id: NotRequired[int]
+    enabled: NotRequired[bool]
+    channel_name: NotRequired[str]
+    channel_limit: NotRequired[int]
+    advance_panel: NotRequired[bool]
+    type_panel: NotRequired[int]
+    type_message_panel: NotRequired[int]
+    removed_mutes:  NotRequired[List[int]]
 
 
 class TempChannelsItemPayload(TypedDict):
     channel_id: int
     owner_id: int
     status: int
-    mutes: Optional[Dict[int, bool]]
+    mutes: NotRequired[Dict[int, bool]]
 
 
 class TwitchNotifiItemPayload(TypedDict):

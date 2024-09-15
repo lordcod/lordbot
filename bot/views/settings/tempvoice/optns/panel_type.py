@@ -3,7 +3,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
-from bot.views.settings.tempvoice.optns.standart import ViewOptionItem
+from bot.views.settings.tempvoice.optns.base import ViewOptionItem
 
 
 @AsyncSterilization

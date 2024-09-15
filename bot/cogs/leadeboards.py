@@ -1,24 +1,28 @@
 
 import nextcord
-import inspect
 from nextcord.ext import commands
 
-from typing import List, Self, Tuple, TypeVar
+from typing import List, Optional, Self, TypeVar
 
+from bot.languages import i18n
 from bot.misc.lordbot import LordBot
-from bot.misc.utils import get_award,  AsyncSterilization, parse_fission
+from bot.misc.utils import get_award,  AsyncSterilization,  parse_fission
 
 from bot.misc.time_transformer import display_time
-from bot.resources.ether import Emoji
 from bot.views import menus
 from bot.databases import GuildDateBases, EconomyMemberDB
-from bot.databases import localdb
 
 PEDESTAL_IMAGE_URL = 'https://i.postimg.cc/CKGc5k1d/pedestal.png'
 T = TypeVar("T")
 
+state_parameters = {
+    'messages': 'message_state',
+    'score': 'score_state',
+    'voicetime': 'voice_time_state',
+}
 
-def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
+
+def clear_empty_leaderboard_economy(guild: nextcord.Guild, leaderboard: list):
     for (member_id, balance, bank, total) in leaderboard.copy():
         member = guild._state.get_user(member_id)
         if not member or 0 >= total:
@@ -29,7 +33,7 @@ def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: list):
                 pass
 
 
-def clear_empty_leaderboard_adt(guild: nextcord.Guild, leaderboard: dict):
+def clear_empty_leaderboard(guild: nextcord.Guild, leaderboard: dict):
     get_user = guild._state.get_user
     for member_id, value in leaderboard.copy().items():
         member = get_user(member_id)
@@ -41,11 +45,12 @@ def clear_empty_leaderboard_adt(guild: nextcord.Guild, leaderboard: dict):
 class PartialLeaderboardView(menus.Menus):
     embed: nextcord.Embed
 
-    async def __init__(self, member: nextcord.Member, leaderboards: list, leaderboard_indexs: List[int]) -> Self:
+    async def __init__(self, member: nextcord.Member, leaderboards: list, leaderboard_indexs: List[int], model: str) -> Self:
         guild = member.guild
 
         self.gdb = GuildDateBases(guild.id)
         self.color = await self.gdb.get('color')
+        self.locale = await self.gdb.get('language')
 
         self.member = member
         self.guild = guild
@@ -63,7 +68,7 @@ class PartialLeaderboardView(menus.Menus):
         self.remove_item(self.button_previous)
         self.remove_item(self.button_next)
 
-        self.add_item(LeaderboardDropDown(guild.id))
+        self.add_item(await LeaderboardDropDown(guild.id, model))
 
         return self
 
@@ -77,7 +82,7 @@ class PartialLeaderboardView(menus.Menus):
 @AsyncSterilization
 class EconomyLeaderboardView(PartialLeaderboardView.cls):
     async def __init__(self, *args) -> None:
-        await super().__init__(*args)
+        await super().__init__(*args, 'balance')
 
         economic_settings: dict = await self.gdb.get('economic_settings')
         self.currency_emoji = economic_settings.get('emoji')
@@ -85,8 +90,9 @@ class EconomyLeaderboardView(PartialLeaderboardView.cls):
     @property
     def embed(self) -> nextcord.Embed:
         embed = nextcord.Embed(
-            title="List of leaders by balance",
-            description=f"**{self.member.display_name}**, Your position in the top: **{self.user_index}**",
+            title=i18n.t(self.locale, 'leaderboard.balance.embed.title'),
+            description=i18n.t(self.locale, 'leaderboard.balance.embed.description',
+                               member=self.member, user_index=self.user_index),
             color=self.color
         )
         embed.set_thumbnail(PEDESTAL_IMAGE_URL)
@@ -104,10 +110,9 @@ class EconomyLeaderboardView(PartialLeaderboardView.cls):
             award = get_award(index)
             embed.add_field(
                 name=f"{award}. {member.display_name}",
-                value=(
-                    f"Cash: {balance}{currency_emoji} | In bank: {bank}{currency_emoji}\n"
-                    f"Total balance: {total}{currency_emoji}"
-                ),
+                value=i18n.t(self.locale, 'leaderboard.balance.embed.field.value',
+                             balance=balance, bank=bank,
+                             total=total, currency_emoji=currency_emoji),
                 inline=False
             )
 
@@ -117,15 +122,16 @@ class EconomyLeaderboardView(PartialLeaderboardView.cls):
 @AsyncSterilization
 class StateLeaderboardView(PartialLeaderboardView.cls):
     async def __init__(self, state: str, *args) -> None:
-        await super().__init__(*args)
+        await super().__init__(*args, state)
 
         self.state = state
 
     @property
     def embed(self) -> nextcord.Embed:
+        name = i18n.t(self.locale, f'leaderboard.{self.state}.name')
         embed = nextcord.Embed(
-            title=f"List of leaders by {self.state.replace('_', ' ').capitalize()}",
-            description=f"**{self.member.display_name}**, Your position in the top: **{self.user_index}**",
+            title=i18n.t(self.locale, 'leaderboard.state.embed.title', name=name),
+            description=i18n.t(self.locale, 'leaderboard.state.embed.description', member=self.member, user_index=self.user_index),
             color=self.color
         )
         embed.set_thumbnail(PEDESTAL_IMAGE_URL)
@@ -141,7 +147,8 @@ class StateLeaderboardView(PartialLeaderboardView.cls):
             member = get_user(member_id)
             index = leaderboard_indexs.index(member_id)+1
             award = get_award(index)
-            results.append(f"{award}. **{member.display_name}**: {self.parse_value(value)}\n")
+            parsed_value = self.parse_value(value)
+            results.append(i18n.t(self.locale, 'leaderboard.state.embed.field.value', award=award, parsed_value=parsed_value, member=member))
         embed.add_field(
             name='',
             value=''.join(results)
@@ -150,11 +157,11 @@ class StateLeaderboardView(PartialLeaderboardView.cls):
         return embed
 
     def parse_value(self, value: float | int):
-        if self.state == 'voice_time_state':
+        if self.state == 'voicetime':
             return display_time(value, max_items=1, with_rounding=True)
-        if self.state == 'message_state':
+        if self.state == 'messages':
             return f'{value} messages'
-        if self.state == 'score_state':
+        if self.state == 'score':
             return f'{value:.0f} points'
         raise TypeError("invalid state")
 
@@ -169,7 +176,7 @@ class LeaderboardTypes:
         emdb = EconomyMemberDB(self.guild.id, self.member.id)
         leaderboard = await emdb.get_leaderboards()
 
-        clear_empty_leaderboard(self.guild, leaderboard)
+        clear_empty_leaderboard_economy(self.guild, leaderboard)
         fission_leaderboards = parse_fission(leaderboard, 6)
         leaderboard_indexs = [self.member_id for (self.member_id, *_) in leaderboard]
 
@@ -178,48 +185,56 @@ class LeaderboardTypes:
             fission_leaderboards,
             leaderboard_indexs
         )
-
         await self.message.edit(content=None, embed=view.embed, view=view)
 
     async def parse_voicetime_lb(self):
-        await self._parse_score_state('voice_time_state')
+        await self._parse_state('voicetime')
 
     async def parse_messages_lb(self):
-        await self._parse_score_state('self.message_state')
+        await self._parse_state('messages')
 
     async def parse_score_lb(self):
-        await self._parse_score_state('score_state')
+        await self._parse_state('score')
 
-    async def _parse_score_state(self, state: str):
+    async def _parse_state(self, state: str):
         gdb = GuildDateBases(self.guild.id)
-        state_db = await gdb.get(state)
+        state_db = await gdb.get(state_parameters[state])
 
-        clear_empty_leaderboard_adt(self.guild, state_db)
+        clear_empty_leaderboard(self.guild, state_db)
         fission_leaderboards = parse_fission(state_db.items(), 6)
         leaderboard_indexs = list(state_db.keys())
+
         view = await StateLeaderboardView(
             state,
             self.member,
             fission_leaderboards,
             leaderboard_indexs
         )
-
         await self.message.edit(content=None, embed=view.embed, view=view)
 
 
+@AsyncSterilization
 class LeaderboardDropDown(nextcord.ui.StringSelect):
-    def __init__(self, guild_id: int) -> None:
+    async def __init__(self, guild_id: int, selected_value: Optional[str] = None) -> None:
+        gdb = GuildDateBases(guild_id)
+        locale = await gdb.get('language')
+        states = ['balance', 'voicetime', 'messages', 'score']
+
         super().__init__(
             options=[
-                nextcord.SelectOption(label="Economy", value='balance'),
-                nextcord.SelectOption(label="Voice Time", value='voicetime'),
-                nextcord.SelectOption(label="Messages", value='messages'),
-                nextcord.SelectOption(label="Score", value='score')
+                nextcord.SelectOption(
+                    label=i18n.t(locale, f'leaderboard.{state}.name'),
+                    value=state,
+                    default=selected_value == state
+                )
+                for state in states
             ]
         )
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
-        await interaction.response.edit_message(content=f"{Emoji.loading} Uploading data...", embed=None, view=None)
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
+        await interaction.response.edit_message(content=i18n.t(locale, 'leaderboard.loading'), embed=None, view=None)
 
         value = self.values[0]
         lbt = LeaderboardTypes(interaction.user, interaction.message)
@@ -233,8 +248,9 @@ class Leaderboards(commands.Cog):
 
     @commands.command(name="leaderboard", aliases=["lb", "leaders", "top"])
     async def leaderboard(self, ctx: commands.Context):
-        message = await ctx.send(f"{Emoji.loading} Uploading data...")
-
+        gdb = GuildDateBases(ctx.guild.id)
+        locale = await gdb.get('language')
+        message = await ctx.send(i18n.t(locale, 'leaderboard.loading'))
         await LeaderboardTypes(ctx.author, message).parse_balance_lb()
 
 

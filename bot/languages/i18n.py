@@ -1,19 +1,15 @@
+from functools import lru_cache
 import os
 import random
+import shutil
 import string
-from threading import local
 import googletrans
 import orjson
 from typing import Optional, Dict, List
 
-try:
-    from .translator import translate_dict as _translate_dict
-except ImportError:
-    from translator import translate_dict as _translate_dict
 
 try:
     from bot.resources.ether import Emoji
-    from bot.misc.utils import AdditEmoji
 except ImportError:
     Emoji = None
 
@@ -25,6 +21,11 @@ resource_dict = {}
 translator = googletrans.Translator()
 
 
+class DictMissing(dict):
+    def __missing__(self, key: str) -> str:
+        return '{'+key+'}'
+
+
 def translate(text, dest, src='auto'):
     return translator.translate(text, dest, src).text
 
@@ -34,7 +35,7 @@ def _load_file(filename: str) -> bytes:
         return f.read()
 
 
-def _parse_json(content: str) -> dict:
+def _parse_json(content: str | bytes) -> dict:
     return orjson.loads(content)
 
 
@@ -54,14 +55,12 @@ def add_res_translation(key: str, value: str, locale: str):
 def add_translation(
     key: str,
     value: str,
-    locale: Optional[str] = None,
-    loadable: bool = False
+    locale: Optional[str] = None
 ) -> None:
     locale = locale or config.get("locale")
     memoization_dict.setdefault(locale, {})
     memoization_dict[locale][key] = value
-    if not loadable:
-        add_res_translation(key, value, locale)
+    add_res_translation(key, value, locale)
 
 
 def add_dict_translations(path: str, data: Dict[str, str]):
@@ -143,11 +142,9 @@ def to_folder(foldername: str) -> str:
 
 
 def from_file(filename: str) -> None:
-    global resource_dict
     filecontent = _load_file(filename)
     json_resource = _parse_json(filecontent)
-    resource_dict = json_resource
-    for lang, data in resource_dict.items():
+    for lang, data in json_resource.items():
         parser(data, lang)
 
 
@@ -176,26 +173,101 @@ def to_zip(filename: str) -> str:
     os.rmdir(dirname)
 
 
+category_names = {
+    'mods': ['captcha', 'clone-role', 'delcat', 'errors', 'giveaway', 'purge', 'tempban', 'temprole'],
+    'main': ['activiti', 'basic', 'bot-info', 'help', 'ideas', 'interaction', 'music', 'reminder', 'tempvoice', 'tickets', 'translate']
+}
+
+
+@lru_cache()
+def get_category(path) -> str:
+    for category, names in category_names.items():
+        if path in names:
+            return category
+    print('not found category for path', path)
+    return input('> ')
+
+
+def to_folders(folder_name: str, lang: str):
+    if not os.path.exists(folder_name):
+        os.mkdir(folder_name)
+
+    for path, value in memoization_dict[lang].items():
+        pathes: list[str] = path.split('.')
+
+        if pathes[0] in ('settings', 'economy'):
+            folder_path = os.path.join(folder_name, pathes[0])
+            if not os.path.exists(folder_path):
+                os.mkdir(folder_path)
+
+            file_path = os.path.join(folder_path, pathes[1]+'.json')
+        else:
+            folder_path = os.path.join(folder_name, get_category(pathes[0]))
+            if not os.path.exists(folder_path):
+                os.mkdir(folder_path)
+
+            file_path = os.path.join(folder_path, pathes[0]+'.json')
+
+        if not os.path.exists(file_path):
+            open(file_path, 'x').close()
+
+        with open(file_path, 'rb+') as file:
+            data = file.read()
+
+        if data:
+            data = orjson.loads(data)
+        else:
+            data = {}
+
+        data[path] = value
+
+        with open(file_path, 'wb+') as file:
+            file.write(orjson.dumps(data))
+
+
 def parser(
     json_resource: dict,
     locale: Optional[str] = None,
     prefix: Optional[str] = None,
-    loadable: bool = True,
 ) -> None:
     for key, value in list(json_resource.items()):
         if isinstance(value, dict):
             parser(
-                value, locale, f"{prefix+'.' if prefix else ''}{key}", loadable=loadable
+                value,
+                locale,
+                f"{prefix+'.' if prefix else ''}{key}"
             )
         else:
             add_translation(
-                f"{prefix+'.' if prefix else ''}{key}", value, locale, loadable=loadable
+                f"{prefix+'.' if prefix else ''}{key}",
+                value,
+                locale
             )
 
 
-def t(locale: Optional[str] = None, path: Optional[str] = None, **kwargs) -> str:
+def get_dict(path: str):
+    data = {}
+
+    for lang in default_languages:
+        text = memoization_dict[lang][path]
+        data[lang] = text
+
+    return data
+
+
+def t_dict(path: str, mapping: Optional[dict] = None, **kwargs):
+    data = {}
+
+    for lang in default_languages:
+        text = t(lang, path, mapping, **kwargs)
+        data[lang] = text
+
+    return data
+
+
+def t(locale: Optional[str] = None, path: Optional[str] = None, mapping: Optional[dict] = None, **kwargs) -> str:
     if path is None:
-        return
+        return ''
 
     lang = locale
 
@@ -210,16 +282,23 @@ def t(locale: Optional[str] = None, path: Optional[str] = None, **kwargs) -> str
     if not data:
         return data
 
-    if 'emoji' in kwargs and isinstance(kwargs['emoji'], AdditEmoji):
-        kwargs['Emoji'] = kwargs.pop('emoji')
-    else:
-        kwargs['Emoji'] = Emoji
+    kwargs['Emoji'] = Emoji
+    if mapping is not None:
+        kwargs.update(mapping)
 
-    return data.format(**kwargs)
+    return data.format_map(DictMissing(kwargs))
 
 
 if __name__ == "__main__":
-    # from_file("./bot/languages/localization.json")
+    shutil.make_archive('ideas', 'zip', 'ideas')
+
+    # from_file("./bot/languages/localization_any.json")
+
+    # for lang in ['es', 'pl']:
+    #     memoization_dict[lang]['music.selector.placeholder'] = memoization_dict[lang].pop('music-selector.placeholder')
+    #     if lang == 'en':
+    #         continue
+    #     to_folders(f'languages/{lang}', lang)
 
     # load i18n key
     # filecontent = _load_file("./bot/languages/localization_any.json")
@@ -237,7 +316,7 @@ if __name__ == "__main__":
     #     add_translation(key, value, 'en')
 
     # with open(r'bot\languages\localization_any.json', 'wb') as file:
-    #     file.write(orjson.dumps(memoization_dict))
+    # file.write(orjson.dumps(memoization_dict))
 
     # for locale, data in _parse_json(_load_file(("./bot/languages/localization.json"))).items():
     #     with open(f'localization/{locale}.json', 'wb+') as file:
@@ -277,4 +356,4 @@ if __name__ == "__main__":
     # To i18n format as any locales format
     # to_i18n_translation(_parse_json(_load_file("test_loc.json")))
 
-    to_file("localization_test.json")
+    # to_file("localization_test.json")

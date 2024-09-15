@@ -103,6 +103,9 @@ class RoleReactionSelectorView(DefaultSettingsView):
         if message_id:
             self.next.disabled = False
 
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.next.label = i18n.t(locale, 'settings.button.next')
+
     @nextcord.ui.button(label="Back", style=nextcord.ButtonStyle.red)
     async def back(self,
                    button: nextcord.ui.Button,

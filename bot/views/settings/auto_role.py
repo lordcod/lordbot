@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal, Tuple
 import nextcord
 
 from bot.databases.varstructs import AutoRolesPayload
@@ -11,19 +11,21 @@ from bot.databases import GuildDateBases
 from bot.languages import i18n
 
 
+RoleMod = Literal['every', 'human', 'bot']
+role_modes: Tuple[RoleMod, ...] = ('every', 'human', 'bot')
+
+
 def parse_roles_data(data: Any) -> AutoRolesPayload:
     if not data:
         return {}
-    if isinstance(data, list):
-        return {'every': data}
-    if not (isinstance(data, dict) and {'every', 'bot', 'human'} & set(data.keys())):
+    if not isinstance(data, dict) or not set(role_modes) & set(data.keys()):
         return {'every': data}
     return data
 
 
 @AsyncSterilization
 class RolesModeDropDown(nextcord.ui.StringSelect):
-    async def __init__(self, guild: nextcord.Guild, mode: str) -> None:
+    async def __init__(self, guild: nextcord.Guild, mode: RoleMod) -> None:
         gdb = GuildDateBases(guild.id)
         locale = await gdb.get('language')
 
@@ -34,7 +36,7 @@ class RolesModeDropDown(nextcord.ui.StringSelect):
                 value=cur_mode,
                 default=cur_mode == mode
             )
-            for cur_mode in {'every', 'human', 'bot'}
+            for cur_mode in role_modes
         ]
         disabled = len(options) == 0
         if disabled:
@@ -53,7 +55,7 @@ class RolesModeDropDown(nextcord.ui.StringSelect):
 
 @AsyncSterilization
 class RolesDeleteDropDown(nextcord.ui.StringSelect):
-    async def __init__(self, guild: nextcord.Guild, mode: str) -> None:
+    async def __init__(self, guild: nextcord.Guild, mode: RoleMod) -> None:
         self.mode = mode
 
         gdb = GuildDateBases(guild.id)
@@ -167,18 +169,27 @@ class AutoRoleView(DefaultSettingsView):
 
         super().__init__()
 
-        DDB = await RolesModeDropDown(guild, mode)
-        self.add_item(DDB)
-        DDB = await RolesDeleteDropDown(guild, mode)
-        self.add_item(DDB)
-        DDB = await RolesDropDown(guild, mode)
-        self.add_item(DDB)
+        self.add_item(await RolesModeDropDown(guild, mode))
+        self.add_item(await RolesDeleteDropDown(guild, mode))
+        self.add_item(await RolesDropDown(guild, mode))
 
         self.embed = nextcord.Embed(
             title=i18n.t(locale, 'settings.auto-role.embed.title'),
             description=i18n.t(locale, 'settings.auto-role.embed.description'),
             color=color
         )
+        for mode in role_modes:
+            role_ids = roles_data.get(mode, [])
+            data = '・'.join([role.mention
+                            for role_id in role_ids
+                            if (role := guild.get_role(role_id))])
+            if not data:
+                continue
+            self.embed.add_field(
+                name=i18n.t(locale, f'settings.auto-role.mods.{mode}.label'),
+                value=data,
+                inline=False
+            )
 
         if not roles_data:
             self.delete_every.disabled = True

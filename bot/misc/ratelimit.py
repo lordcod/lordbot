@@ -78,7 +78,8 @@ class Cooldown:
         rate: int = cooldata.get('rate', 0)
         per: float = cooldata.get('per', 0)
 
-        datarate = 0 if 0 >= rate-1 else rate-1
+        datarate = (0 if 0 >= rate-1
+                    else rate-1)
 
         data[self.command_name][self.token] = {
             'rate': datarate,

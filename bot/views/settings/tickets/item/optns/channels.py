@@ -4,7 +4,7 @@ import nextcord
 from bot.databases.varstructs import TicketsPayload
 from bot.misc.tickettools import ModuleTicket
 from bot.misc.utils import AsyncSterilization, replace_dict_key
-from bot.views.settings.tickets.item.optns.standart import ViewOptionItem
+from bot.views.settings.tickets.item.optns.base import ViewOptionItem
 
 from bot.databases import GuildDateBases
 from bot.languages import i18n

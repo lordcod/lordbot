@@ -8,7 +8,7 @@ from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, generate_message, get_payload, lord_format
 from bot.resources.ether import Emoji
 from bot.resources.info import DEFAULT_TICKET_PAYLOAD, DEFAULT_TICKET_PAYLOAD_RU
-from .standart import OptionItem, ViewOptionItem
+from .base import OptionItem, ViewOptionItem
 
 messages_data = {
     'panel': {

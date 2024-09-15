@@ -64,21 +64,37 @@ class ApiSite:
     def _setup(self, endpoint: str, port: int):
         self.endpoint = endpoint
         self.password = ''.join([random.choice(string.hexdigits) for _ in range(25)])
-        self.app = FastAPI(debug=True)
         self.callback_url = ngrok.connect(str(port), pyngrok_config=pyngrok_config).public_url
-        self.app.include_router(self._get_router())
+
+        self.app = FastAPI(debug=True)
+        for router in self._get_routers():
+            self.app.include_router(router)
         self.app.add_event_handler("startup", lambda: asyncio.create_task(self.on_ready()))
 
         config = Config(self.app, "0.0.0.0", port, log_config=None, log_level=logging.CRITICAL)
         server = Server(config)
         return server
 
-    def _get_router(self) -> APIRouter:
+    def _get_routers(self) -> APIRouter:
+        routers = []
+
         router = APIRouter()
         router.add_api_route(self.endpoint, self._get, methods=["HEAD", "GET"])
         router.add_api_route(self.endpoint, self._post, methods=["POST"])
+        routers.append(router)
 
-        return router
+        router = APIRouter()
+        router.add_api_route(self.endpoint+'update/', self._post_update, methods=["POST"])
+        routers.append(router)
+
+        return routers
+
+    async def _post_update(self, request: Request):
+        result = await self.bot.update_api_config()
+        if result:
+            return Response(status_code=204)
+        else:
+            return Response(status_code=500)
 
     async def _get(self, request: Request):
         return Response(status_code=204)

@@ -4,7 +4,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
-from .standart import OptionItem
+from .base import OptionItem
 
 
 @AsyncSterilization

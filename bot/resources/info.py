@@ -1,5 +1,6 @@
 import nextcord
 import orjson
+from bot.databases.varstructs import IdeasComponentsPayload, IdeasMessagesPayload, IdeasPayload, IdeasReactionsPayload
 from bot.resources.ether import ColorType, Emoji
 
 DISCORD_SUPPORT_SERVER = 'https://discord.com/invite/np6RhahkZH'
@@ -147,7 +148,6 @@ DEFAULT_TICKET_PAYLOAD = {
             'emoji': '⛔',
             'style': nextcord.ButtonStyle.red,
         },
-
     }
 }
 
@@ -273,16 +273,315 @@ DEFAULT_TICKET_PERMISSIONS_OVER = {
     ).pair(),
     'everyone': nextcord.PermissionOverwrite(view_channel=False).pair()
 }
-DEFAULT_TICKET_PERMISSIONS = {k: (v[0].value, v[1].value)
-                              for k, v in DEFAULT_TICKET_PERMISSIONS_OVER.items()}
+DEFAULT_TICKET_PERMISSIONS = {k: (allow.value, deny.value)
+                              for k, (allow, deny) in DEFAULT_TICKET_PERMISSIONS_OVER.items()}
 
-DEFAULT_TWITCH_MESSAGE = '🎥 У {stream.username} начался новый стрим!\nПрисоединяйтесь к нам сейчас: {stream.url}'
+DEFAULT_TWITCH_MESSAGE = '🎥 У __{stream.username}__ начался новый стрим!\nПрисоединяйтесь к нам сейчас: {stream.url}'
 DEFAULT_YOUTUBE_MESSAGE = '🎥 Новое видео на YouTube от {video.username}!\nСмотрите прямо сейчас: {video.url}'
 
 DEFAULT_TICKET_TYPE = 2
 DEFAULT_TICKET_FAQ_TYPE = 2
 DEFAULT_TICKET_LIMIT = 5
 
+DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
+    'suggestion': {
+        "title": 'Ideas',
+        "description": (
+            'Do you have a good idea?\n'
+            'And you are sure that everyone will like it!\n'
+            'Before you write it, make sure that there have been no such ideas yet!'
+        ),
+        "color": "{guild.color}"
+    },
+    'created': {
+        "title": "AN OPEN IDEA",
+        "description": ("An suggest from {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.orange().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        }
+    },
+
+    'accept': {
+        "title": "APPROVED IDEA",
+        "description": ("An suggest from {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.green().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "footer": {
+            "text": "Approved | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        }
+    },
+    'accept_with_reason': {
+        "title": "APPROVED IDEA",
+        "description": ("An suggest from {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.green().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "fields": [
+            {
+                "name": 'Reason:',
+                "value": "{idea.reason}",
+                "inline": False
+            }
+        ],
+        "footer": {
+            "text": "Approved | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        }
+    },
+
+    'deny': {
+        "title": "A REJECTED IDEA",
+        "description": ("An suggest from {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.red().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "footer": {
+            "text": "Refused |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        }
+    },
+    'deny_with_reason': {
+        "title": "A REJECTED IDEA",
+        "description": ("An suggest from {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.red().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "footer": {
+            "text": "Refused |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        },
+        "fields": [
+            {
+                "name": 'Reason:',
+                "value": "{idea.reason}",
+                "inline": False
+            }
+        ],
+    },
+}
+DEFAULT_IDEAS_MESSAGES['approved'] = DEFAULT_IDEAS_MESSAGES['accept']
+DEFAULT_IDEAS_MESSAGES['approved_with_reason'] = DEFAULT_IDEAS_MESSAGES['accept_with_reason']
+
+DEFAULT_IDEAS_MESSAGES['reject'] = DEFAULT_IDEAS_MESSAGES['deny']
+DEFAULT_IDEAS_MESSAGES['reject_with_reason'] = DEFAULT_IDEAS_MESSAGES['deny_with_reason']
+
+DEFAULT_IDEAS_REACTIONS: IdeasReactionsPayload = {
+    'success': Emoji.tickmark,
+    'crossed': Emoji.cross
+}
+DEFAULT_IDEAS_COMPONENTS: IdeasComponentsPayload = {
+    'suggest': {
+        'label': 'Suggest an idea',
+        'style': nextcord.ButtonStyle.green
+    },
+    'approve': {
+        'label': 'Approve',
+        'style': nextcord.ButtonStyle.green
+    },
+    'deny': {
+        'label': 'Deny',
+        'style': nextcord.ButtonStyle.red
+    },
+    'like': {
+        'emoji': '👍',
+        'label': '{idea.promotedCount | 0}',
+        'style': nextcord.ButtonStyle.gray
+    },
+    'dislike': {
+        'emoji': '👎',
+        'label': '{idea.demotedCount | 0}',
+        'style': nextcord.ButtonStyle.gray
+    },
+}
+DEFAULT_THREAD_NAME = 'Discussion of the idea from {member.username}'
+DEFAULT_IDEAS_REVOTING = True
+
+DEFAULT_IDEAS_PAYLOAD: IdeasPayload = {
+    'messages': DEFAULT_IDEAS_MESSAGES,
+    'reactions': DEFAULT_IDEAS_REACTIONS,
+    'components': DEFAULT_IDEAS_COMPONENTS,
+    'thread_name': DEFAULT_THREAD_NAME,
+    'revoting': DEFAULT_IDEAS_REVOTING
+}
+
+
+DEFAULT_IDEAS_MESSAGES: IdeasMessagesPayload = {
+    'suggestion': {
+        "title": 'Идеи',
+        "description": (
+            'У вас есть хорошая идея?\n'
+            'И вы уверены, что она всем понравится!\n'
+            'Прежде чем писать, убедитесь, что таких идей еще не было!'
+        ),
+        "color": "{guild.color}"
+    },
+    'created': {
+        "title": "ОТКРЫТАЯ ИДЕЯ",
+        "description": ("Предложение от {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.orange().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        }
+    },
+
+    'accept': {
+        "title": "ОДОБРЕННАЯ ИДЕЯ",
+        "description": ("Предложение от {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.green().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "footer": {
+            "text": "Одобренно | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        }
+    },
+    'accept_with_reason': {
+        "title": "ОДОБРЕННАЯ ИДЕЯ",
+        "description": ("Предложение от {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.green().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "fields": [
+            {
+                "name": 'Причина:',
+                "value": "{idea.reason}",
+                "inline": False
+            }
+        ],
+        "footer": {
+            "text": "Одобренно | {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        }
+    },
+
+    'deny': {
+        "title": "ОТВЕРГНУТАЯ ИДЕЯ",
+        "description": ("Предложение от {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.red().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "footer": {
+            "text": "Отказано |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        }
+    },
+    'deny_with_reason': {
+        "title": "ОТВЕРГНУТАЯ ИДЕЯ",
+        "description": ("Предложение от {member.mention}\n\n"
+                        "{idea.content}"),
+        "color": nextcord.Color.red().value,
+        "author": {
+            "name": "{member.displayName}",
+            "icon_url": "{member.avatar}"
+        },
+        "image": {
+            "url": "{idea.image}"
+        },
+        "footer": {
+            "text": "Отказано |  {idea.mod.displayName} | 👍 - {idea.promotedCount} | 👎 - {idea.demotedCount}",
+            "icon_url": "{idea.mod.avatar}"
+        },
+        "fields": [
+            {
+                "name": 'Причина:',
+                "value": "{idea.reason}",
+                "inline": False
+            }
+        ],
+    },
+}
+DEFAULT_IDEAS_MESSAGES['approved'] = DEFAULT_IDEAS_MESSAGES['accept']
+DEFAULT_IDEAS_MESSAGES['approved_with_reason'] = DEFAULT_IDEAS_MESSAGES['accept_with_reason']
+
+DEFAULT_IDEAS_MESSAGES['reject'] = DEFAULT_IDEAS_MESSAGES['deny']
+DEFAULT_IDEAS_MESSAGES['reject_with_reason'] = DEFAULT_IDEAS_MESSAGES['deny_with_reason']
+
+DEFAULT_IDEAS_REACTIONS: IdeasReactionsPayload = {
+    'success': Emoji.tickmark,
+    'crossed': Emoji.cross
+}
+DEFAULT_IDEAS_COMPONENTS: IdeasComponentsPayload = {
+    'suggest': {
+        'label': 'Предложить идею',
+        'style': nextcord.ButtonStyle.green
+    },
+    'approve': {
+        'label': 'Одобрить',
+        'style': nextcord.ButtonStyle.green
+    },
+    'deny': {
+        'label': 'Отказать',
+        'style': nextcord.ButtonStyle.red
+    },
+    'like': {
+        'emoji': '👍',
+        'label': '{idea.promotedCount | 0}',
+        'style': nextcord.ButtonStyle.gray
+    },
+    'dislike': {
+        'emoji': '👎',
+        'label': '{idea.demotedCount | 0}',
+        'style': nextcord.ButtonStyle.gray
+    },
+}
+DEFAULT_THREAD_NAME_RU = 'Обсуждение идеи от {member.username}'
+
+DEFAULT_IDEAS_PAYLOAD_RU: IdeasPayload = DEFAULT_IDEAS_PAYLOAD
 
 activities_list = [
     {

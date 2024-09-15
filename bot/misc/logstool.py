@@ -464,8 +464,8 @@ class Logs:
         embed = nextcord.Embed(
             title='Created new idea',
             description=(
-                f'> Member: {member} ({member.id})\n'
-                f'> Idea: {idea}'
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'>>> Idea: {idea}'
             ),
             color=nextcord.Colour.orange(),
             timestamp=datetime.datetime.today()
@@ -475,18 +475,19 @@ class Logs:
         return Message(embed=embed)
 
     @on_logs(LogType.ideas)
-    async def approve_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, reason: Optional[str] = None, image: Optional[str] = None):
+    async def approve_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, image: Optional[str] = None, reason: Optional[str] = None):
         embed = nextcord.Embed(
             title='Approved idea',
-            description='\n'.join(filter_bool([
-                f'> Member: **{member.name}** (**{member.id}**)',
-                f'> Moderator: **{moderator.name}** (**{moderator.id}**)',
-                '> Reason: '+reason if reason else '',
-                f'> Idea: {idea}'
-            ])),
+            description=(
+                f'> Member: **{member.name}** (**{member.id}**)\n'
+                f'> Moderator: **{moderator.name}** (**{moderator.id}**)\n'
+                f'>>> Idea: {idea}'
+            ),
             color=nextcord.Colour.brand_green(),
             timestamp=datetime.datetime.today()
         )
+        if reason:
+            embed.description += f'\nReason: {reason}'
         embed.set_thumbnail(member.display_avatar)
         if image:
             embed.set_image(image)
@@ -495,17 +496,19 @@ class Logs:
         return Message(embed=embed)
 
     @on_logs(LogType.ideas)
-    async def deny_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, image: Optional[str] = None):
+    async def deny_idea(self, moderator: nextcord.Member, member: nextcord.Member, idea: str, image: Optional[str] = None, reason: Optional[str] = None):
         embed = nextcord.Embed(
             title='Denied idea',
             description=(
                 f'> Member: **{member.name}** (**{member.id}**)\n'
                 f'> Moderator: **{moderator.name}** (**{moderator.id}**)'
-                f'> Idea: {idea}'
+                f'>>> Idea: {idea}'
             ),
             color=nextcord.Colour.red(),
             timestamp=datetime.datetime.today()
         )
+        if reason:
+            embed.description += f'\nReason: {reason}'
         embed.set_thumbnail(member.display_avatar)
         if image:
             embed.set_image(image)

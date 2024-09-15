@@ -30,7 +30,7 @@ class GuildsDB(Table):
     ideas = Colum(data_type=PostType.JSON, default="{}")
     logs = Colum(data_type=PostType.JSON, default="{}")
     role_reactions = Colum(data_type=PostType.JSON, default="{}")
-    delete_task = Colum(data_type=PostType.BIGINT, default="0")
+    delete_task = Colum(data_type=PostType.BIGINT, default=0)
     tempvoice = Colum(data_type=PostType.JSON, default="{}")
     twitch_notification = Colum(data_type=PostType.JSON, default="{}")
     youtube_notification = Colum(data_type=PostType.JSON, default="{}")
@@ -39,6 +39,8 @@ class GuildsDB(Table):
     voice_time_state = Colum(data_type=PostType.JSON, default="{}")
     score_state = Colum(data_type=PostType.JSON, default="{}")
     level_state = Colum(data_type=PostType.JSON, default="{}")
+    thread_roles = Colum(data_type=PostType.JSON, default="{}")
+    thread_open = Colum(data_type=PostType.JSON, default="{}")
 
 
 class EconomicDB(Table):

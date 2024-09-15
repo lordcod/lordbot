@@ -1,6 +1,7 @@
 import contextlib
 import logging
 import sys
+import traceback
 import nextcord
 from nextcord.ext import commands
 from bot.databases.handlers.guildHD import GuildDateBases
@@ -14,6 +15,7 @@ from bot.resources.errors import (AuthorizationError, CallbackCommandError,
                                   MissingRole,
                                   MissingChannel,
                                   CommandOnCooldown)
+from bot.resources.ether import Emoji
 from bot.resources.info import DISCORD_SUPPORT_SERVER
 
 _log = logging.getLogger(__name__)
@@ -158,10 +160,12 @@ class CommandEvent(commands.Cog):
         if not (interaction.is_expired() or interaction.response.is_done()):
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')
+            custom_id = (item.custom_id if item._provided_custom_id
+                         else item.custom_id[:8])
             with contextlib.suppress(nextcord.HTTPException):
                 await interaction.response.send_message(
                     i18n.t(locale, 'interaction.error.item',
-                           custom_id=item.custom_id[:8], DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
+                           custom_id=custom_id, DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER),
                     ephemeral=True,
                     flags=nextcord.MessageFlags(suppress_embeds=True)
                 )
@@ -198,14 +202,29 @@ class CommandEvent(commands.Cog):
         _log.error("Ignoring exception in command %s:",
                    interaction.application_command, exc_info=exception)
 
-    async def on_command_error(self, ctx: commands.Context, error):
-        await CallbackCommandError.process(ctx, error)
+    async def on_command_error(self, ctx: commands.Context, error: Exception):
+        if self.bot.release_bot:
+            await CallbackCommandError.process(ctx, error)
+            return
+
+        emoji_url = nextcord.PartialEmoji.from_str(Emoji.cross).url
+        embed = nextcord.Embed(
+            description='```' + '\n'.join(traceback.format_exception(error)) + '```',
+            color=nextcord.Colour.brand_red()
+        )
+        embed.set_author(
+            name='Error',
+            icon_url=emoji_url
+        )
+        await ctx.send(embed=embed)
 
     async def on_error(self, event, *args, **kwargs):
         _log.error(
             "Ignoring exception in event %s", event, exc_info=sys.exc_info())
 
     async def permission_check(self, ctx: commands.Context):
+        if ctx.guild is None or ctx.channel is None:
+            return
         permission = ctx.channel.permissions_for(ctx.guild.me)
         if not (permission.read_messages and permission.send_messages and permission.embed_links):
             raise AuthorizationError(

@@ -8,6 +8,7 @@ import time
 from typing import Dict, Optional
 import aiocache
 from aiocache.base import SENTINEL
+import redis
 from bot.databases.misc.adapter_dict import FullJson
 from redis.asyncio import ConnectionPool, StrictRedis
 
@@ -122,6 +123,11 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         _log.trace('[%d] A request for fetched database %s was received', i, table_name)
         try:
             data = await cache.get(table_name)
+        except redis.AuthenticationError:
+            if i == 0:
+                POOL.connection_kwargs.pop('password', None)
+                cache.connection_pool = POOL
+                continue
         except Exception as exc:
             last_exc = exc
         else:

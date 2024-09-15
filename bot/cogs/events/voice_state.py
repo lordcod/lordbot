@@ -30,7 +30,7 @@ class VoiceStateEvent(commands.Cog):
         if before.channel is not None and after.channel is None:
             tasks.extend((
                 self.disconnect_from_voice(member),
-                self.check_bot_player(before.channel),
+                self.check_bot_player(member, before.channel),
                 logstool.Logs(member.guild).disconnect_voice(member, before.channel)
             ))
         if before.channel != after.channel:
@@ -44,7 +44,9 @@ class VoiceStateEvent(commands.Cog):
 
         await asyncio.gather(*tasks)
 
-    async def check_bot_player(self, channel: nextcord.VoiceChannel):
+    async def check_bot_player(self, member: nextcord.Member, channel: nextcord.VoiceChannel):
+        if channel.guild.id in current_players and self.bot.user.id == member.id:
+            await current_players[channel.guild.id].stop()
         if (1 == len(channel.members)
             and self.bot.user == channel.members[0]
                 and channel.guild.id in current_players):

@@ -4,8 +4,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
-from bot.resources.ether import Emoji
-from .standart import OptionItem
+from .base import OptionItem
 
 
 @AsyncSterilization
@@ -37,7 +36,7 @@ class UserLimitModal(nextcord.ui.Modal, OptionItem):
         self.add_item(self.global_limit)
 
         self.limit = nextcord.ui.TextInput(
-            label=i18n.t(locale, 'settings.tickets.lzimit.user_limit.label'),
+            label=i18n.t(locale, 'settings.tickets.limit.user_limit.label'),
             placeholder=i18n.t(
                 locale, 'settings.tickets.limit.user_limit.placeholder'),
             default_value=user_limit,

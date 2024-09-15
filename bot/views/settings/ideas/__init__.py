@@ -1,8 +1,11 @@
 import nextcord
 
-from bot.misc.utils import AsyncSterilization
+from bot.misc.utils import AsyncSterilization, generate_message, get_payload, lord_format
 
+from bot.resources.info import DEFAULT_IDEAS_MESSAGES
 from bot.views.settings._view import DefaultSettingsView
+from bot.views.settings.ideas.distribution.base import FunctionOptionItem, ViewOptionItem
+from bot.views.settings.ideas.embeds import get_embed
 from .distribution import distrubuters
 
 from bot.databases.varstructs import IdeasPayload
@@ -14,25 +17,30 @@ from bot.misc.time_transformer import display_time
 
 
 @AsyncSterilization
-class DropDown(nextcord.ui.StringSelect):
-    async def __init__(self, guild_id):
-        self.gdb = GuildDateBases(guild_id)
+class IdeasDropDown(nextcord.ui.StringSelect):
+    async def __init__(self, guild: nextcord.Guild):
+        self.gdb = GuildDateBases(guild.id)
         locale = await self.gdb.get('language')
+        system_emoji = await self.gdb.get('system_emoji')
+
+        self.distrubuters = {
+            k: await v(guild)
+            for k, v in distrubuters.items()
+        }
 
         options = [
             nextcord.SelectOption(
-                label=i18n.t(
-                    locale, f'settings.ideas.init.dropdown.{value}.title'),
-                value=value,
-                description=i18n.t(
-                    locale, f'settings.ideas.init.dropdown.{value}.description')
+                label=i18n.t(locale, value.label),
+                value=key,
+                description=i18n.t(locale, value.description),
+                emoji=value.get_emoji(system_emoji)
             )
-            for value in distrubuters
+            for key, value in self.distrubuters.items()
         ]
 
         super().__init__(
             placeholder=i18n.t(
-                locale, 'settings.ideas.init.dropdown.placeholder'),
+                locale, 'settings.ideas.dropdown.placeholder'),
             min_values=1,
             max_values=1,
             options=options,
@@ -40,8 +48,11 @@ class DropDown(nextcord.ui.StringSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         catalog = self.values[0]
-        view = await distrubuters[catalog](interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
+        item = self.distrubuters[catalog]
+        if isinstance(item, ViewOptionItem):
+            await interaction.response.edit_message(embed=item.embed, view=item)
+        elif isinstance(item, FunctionOptionItem):
+            await item.callback(interaction)
 
 
 @AsyncSterilization
@@ -50,73 +61,24 @@ class IdeasView(DefaultSettingsView):
 
     async def __init__(self, guild: nextcord.Guild) -> None:
         gdb = GuildDateBases(guild.id)
-        color: int = await gdb.get('color')
         locale: str = await gdb.get('language')
         ideas: IdeasPayload = await gdb.get('ideas', {})
         enabled = ideas.get('enabled')
 
-        self.embed = nextcord.Embed(
-            title=i18n.t(locale, 'settings.ideas.init.title'),
-            description=i18n.t(locale, 'settings.ideas.init.description'),
-            color=color
-        )
+        self.embed = await get_embed(guild)
 
         super().__init__()
 
-        description = ''
-
-        if channel_suggest := guild.get_channel(ideas.get("channel_suggest_id")):
-            description += i18n.t(locale, 'settings.ideas.init.value.suggest',
-                                  channel=channel_suggest.mention)
-
-        if channel_offers := guild.get_channel(ideas.get("channel_offers_id")):
-            description += i18n.t(locale, 'settings.ideas.init.value.offers',
-                                  channel=channel_offers.mention)
-
-        if channel_approved := guild.get_channel(
-                ideas.get("channel_approved_id")):
-            description += i18n.t(locale, 'settings.ideas.init.value.approved',
-                                  channel=channel_approved.mention)
-
-        if cooldown := ideas.get('cooldown'):
-            description += i18n.t(locale, 'settings.ideas.init.value.cooldown',
-                                  cooldown=display_time(cooldown, locale, max_items=2))
-
-        if moderation_role_ids := ideas.get("moderation_role_ids"):
-            moderation_roles = filter(lambda item: item is not None,
-                                      map(guild.get_role,
-                                          moderation_role_ids))
-            if moderation_roles:
-                description += i18n.t(locale, 'settings.ideas.init.value.mod_roles',
-                                      roles=', '.join([role.mention for role in moderation_roles]))
-
-        if description:
-            self.embed.add_field(
-                name='',
-                value=description.removesuffix('\n')
-            )
-
-        self.allow_image.style = nextcord.ButtonStyle.green if ideas.get(
-            'allow_image', True) else nextcord.ButtonStyle.red
-        self.thread_delete.style = nextcord.ButtonStyle.green if ideas.get(
-            'thread_delete', True) else nextcord.ButtonStyle.red
+        self.add_item(await IdeasDropDown(guild))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.enable.label = i18n.t(locale, 'settings.button.enable')
         self.disable.label = i18n.t(locale, 'settings.button.disable')
-        self.allow_image.label = i18n.t(
-            locale, 'settings.ideas.button.allow_image')
-        self.thread_delete.label = i18n.t(
-            locale, 'settings.ideas.button.thread_delete')
 
         if enabled:
             self.remove_item(self.enable)
         else:
             self.remove_item(self.disable)
-            self.allow_image.disabled = True
-            self.thread_delete.disabled = True
-
-        self.add_item(await DropDown(guild.id))
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self,
@@ -131,7 +93,6 @@ class IdeasView(DefaultSettingsView):
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
-        color = await gdb.get('color')
         locale = await gdb.get('language')
         ideas: IdeasPayload = await gdb.get('ideas')
 
@@ -148,8 +109,11 @@ class IdeasView(DefaultSettingsView):
             )
             return
 
-        view = await IdeaView(interaction.guild_id)
-        message_suggest = await channel_suggest.send(embed=view.embed, view=view)
+        suggestion_message_data = ideas.get('messages', DEFAULT_IDEAS_MESSAGES).get('suggestion')
+        suggestion_message = generate_message(lord_format(suggestion_message_data, get_payload(guild=interaction.guild)))
+
+        view = await IdeaView(interaction.guild)
+        message_suggest = await channel_suggest.send(**suggestion_message, view=view)
 
         ideas['message_suggest_id'] = message_suggest.id
         ideas['enabled'] = True
@@ -179,30 +143,6 @@ class IdeasView(DefaultSettingsView):
 
         ideas['enabled'] = False
 
-        await gdb.set('ideas', ideas)
-
-        view = await IdeasView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
-
-    @nextcord.ui.button(label="Allow image")
-    async def allow_image(self,
-                          button: nextcord.ui.Button,
-                          interaction: nextcord.Interaction):
-        gdb = GuildDateBases(interaction.guild_id)
-        ideas: IdeasPayload = await gdb.get('ideas')
-        ideas['allow_image'] = not ideas.get('allow_image', True)
-        await gdb.set('ideas', ideas)
-
-        view = await IdeasView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
-
-    @nextcord.ui.button(label="Thread delete")
-    async def thread_delete(self,
-                            button: nextcord.ui.Button,
-                            interaction: nextcord.Interaction):
-        gdb = GuildDateBases(interaction.guild_id)
-        ideas: IdeasPayload = await gdb.get('ideas')
-        ideas['thread_delete'] = not ideas.get('thread_delete', False)
         await gdb.set('ideas', ideas)
 
         view = await IdeasView(interaction.guild)

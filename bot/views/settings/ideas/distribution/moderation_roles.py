@@ -3,11 +3,9 @@ import nextcord
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 
-from ... import ideas
-from bot.views.settings._view import DefaultSettingsView
-
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
+from .base import ViewOptionItem
 
 
 @AsyncSterilization
@@ -44,8 +42,10 @@ class RolesDropDown(nextcord.ui.RoleSelect):
 
 
 @AsyncSterilization
-class ModerationRolesView(DefaultSettingsView):
-    embed: nextcord.Embed = None
+class ModerationRolesView(ViewOptionItem):
+    label: str = 'settings.ideas.dropdown.mod_roles.title'
+    description: str = 'settings.ideas.dropdown.mod_roles.description'
+    emoji: str = 'ideamod'
 
     async def __init__(self, guild: nextcord.Guild) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -59,12 +59,10 @@ class ModerationRolesView(DefaultSettingsView):
             description=i18n.t(locale, 'settings.ideas.init.description'),
             color=color
         )
-        self.embed.add_field(
-            name='',
-            value=i18n.t(locale, 'settings.ideas.mod_role.field')
-        )
 
         super().__init__()
+
+        field_roles = i18n.t(locale, 'settings.ideas.init.unspecified')
 
         if mod_role_ids:
             self.delete.disabled = False
@@ -73,32 +71,25 @@ class ModerationRolesView(DefaultSettingsView):
                                       map(guild.get_role,
                                           mod_role_ids))
             if moderation_roles:
-                self.embed.add_field(
-                    name='',
-                    value=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
-                                 roles=', '.join([role.mention for role in moderation_roles]))
-                )
-            else:
-                self.embed.add_field(
-                    name='',
-                    value=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
-                                 roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
-                )
-        else:
-            self.embed.add_field(
-                name='',
-                value=i18n.t(locale, 'settings.ideas.init.value.mod_roles',
-                             roles=i18n.t(locale, 'settings.ideas.init.unspecified'))
-            )
+                field_roles = ', '.join([role.mention for role in moderation_roles])
+
+        self.embed.add_field(
+            name='',
+            value=i18n.t(locale, 'settings.ideas.value.mod_roles',
+                         roles=field_roles),
+            inline=False
+        )
+        self.embed.add_field(
+            name='',
+            value=i18n.t(locale, 'settings.ideas.mod_role.field'),
+            inline=False
+        )
 
         cdd = await RolesDropDown(guild)
         self.add_item(cdd)
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await ideas.IdeasView(interaction.guild)
-
-        await interaction.response.edit_message(embed=view.embed, view=view)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
     @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
