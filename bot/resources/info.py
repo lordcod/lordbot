@@ -586,7 +586,7 @@ DEFAULT_IDEAS_PAYLOAD_RU: IdeasPayload = {
     'reactions': DEFAULT_IDEAS_REACTIONS_RU,
     'components': DEFAULT_IDEAS_COMPONENTS_RU,
     'thread_name': DEFAULT_THREAD_NAME_RU,
-    'revoting': DEFAULT_IDEAS_REVOTING_RU
+    'revoting': DEFAULT_IDEAS_REVOTING
 }
 
 
