@@ -40,6 +40,7 @@ async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
     channel_offers = guild.get_channel(ideas.get("channel_offers_id"))
     channel_approved = guild.get_channel(
         ideas.get("channel_approved_id"))
+    enabled = ideas.get('enabled')
     cooldown = ideas.get('cooldown')
     revoting = ideas.get('revoting')
     allow_image = ideas.get('allow_image')
@@ -61,6 +62,7 @@ async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
         (i18n.t(locale, 'settings.ideas.value.offers'), channel_offers and channel_offers.mention),
         (i18n.t(locale, 'settings.ideas.value.approved'), channel_approved and channel_approved.mention),
         ('',),
+        (i18n.t(locale, 'settings.ideas.value.enabled'),  get_emoji(system_emoji, enabled)),
         (i18n.t(locale, 'settings.ideas.value.cooldown'), display_time(cooldown, locale, max_items=2)),
         (i18n.t(locale, 'settings.ideas.value.mod_roles'), '・'.join([role.mention for role in moderation_roles])),
         (i18n.t(locale, 'settings.ideas.value.revoting'), get_emoji(system_emoji, revoting)),

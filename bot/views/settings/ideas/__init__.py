@@ -11,7 +11,7 @@ from .distribution import distrubuters
 from bot.databases.varstructs import IdeasPayload
 from bot.databases import GuildDateBases
 from bot.views import settings_menu
-from bot.views.ideas import IdeaView
+from bot.views.ideas import IdeaView, get_default_payload
 from bot.languages import i18n
 from bot.misc.time_transformer import display_time
 
@@ -69,7 +69,8 @@ class IdeasView(DefaultSettingsView):
 
         super().__init__()
 
-        self.add_item(await IdeasDropDown(guild))
+        idd = await IdeasDropDown(guild)
+        self.add_item(idd)
 
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.enable.label = i18n.t(locale, 'settings.button.enable')
@@ -78,6 +79,7 @@ class IdeasView(DefaultSettingsView):
         if enabled:
             self.remove_item(self.enable)
         else:
+            idd.disabled = True
             self.remove_item(self.disable)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
@@ -109,8 +111,9 @@ class IdeasView(DefaultSettingsView):
             )
             return
 
-        suggestion_message_data = ideas.get('messages', DEFAULT_IDEAS_MESSAGES).get('suggestion')
-        suggestion_message = generate_message(lord_format(suggestion_message_data, get_payload(guild=interaction.guild)))
+        suggestion_message_data = ideas.get('messages', get_default_payload(locale)['messages']).get('suggestion')
+        suggestion_message = generate_message(lord_format(suggestion_message_data,
+                                                          get_payload(guild=interaction.guild)))
 
         view = await IdeaView(interaction.guild)
         message_suggest = await channel_suggest.send(**suggestion_message, view=view)

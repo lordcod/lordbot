@@ -104,11 +104,14 @@ class ThreadsNameModal(nextcord.ui.Modal):
         default_thread_name = DEFAULT_THREAD_NAME_RU if locale == 'ru' else DEFAULT_THREAD_NAME
         thread_name = ideas.get('thread_name', default_thread_name)
 
+        super().__init__(i18n.t(locale, 'settings.ideas.threads.name.title'))
+
         self.name = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.ideas.threads.name.label'),
             max_length=100,
             placeholder=thread_name
         )
+        self.add_item(self.name)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = self.name.value
@@ -137,6 +140,7 @@ class IdeasThreadsView(ViewOptionItem):
         thread_open = ideas.get('thread_open')
         thread_delete = ideas.get('thread_delete')
         default_thread_name = DEFAULT_THREAD_NAME_RU if locale == 'ru' else DEFAULT_THREAD_NAME
+        print(default_thread_name)
         thread_name = ideas.get('thread_name', default_thread_name)
 
         self.embed = nextcord.Embed(
@@ -162,8 +166,8 @@ class IdeasThreadsView(ViewOptionItem):
             self.reset.disabled = False
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = 'Edit thread name'
-        self.reset.label = 'Reset thread name'
+        self.edit.label = i18n.t(locale, 'settings.ideas.button.edit_thread')
+        self.reset.label = i18n.t(locale, 'settings.ideas.button.reset_thread')
 
     @nextcord.ui.button(label='Edit thread name', style=nextcord.ButtonStyle.green, disabled=True)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
@@ -175,4 +179,5 @@ class IdeasThreadsView(ViewOptionItem):
         gdb = GuildDateBases(interaction.guild_id)
         locale = await gdb.get('language')
         thread_name = DEFAULT_THREAD_NAME_RU if locale == 'ru' else DEFAULT_THREAD_NAME
+        print(thread_name)
         await gdb.set_on_json('ideas', 'thread_name', thread_name)

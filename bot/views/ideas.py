@@ -7,7 +7,7 @@ import logging
 import nextcord
 import time
 
-from typing import Dict, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
 import re
 import jmespath
@@ -395,6 +395,9 @@ class ConfirmView(nextcord.ui.View):
 
 @AsyncSterilization
 class ReactionConfirmView(nextcord.ui.View):
+    promoted_data: List[int]
+    demoted_data: List[int]
+
     async def __init__(self, guild: Optional[nextcord.Guild] = None):
         super().__init__(timeout=None)
 
@@ -427,23 +430,20 @@ class ReactionConfirmView(nextcord.ui.View):
         })
         await mdb.set(message_id, idea_data)
 
-    async def load_data(self, message_id) -> None:
+    async def load_data(self, guild_id: int, message_id: int) -> None:
+        gdb = GuildDateBases(guild_id)
+        self.locale = await gdb.get('language')
+
         mdb = await localdb.get_table('ideas')
         idea_data = await mdb.get(message_id)
         self.promoted_data = idea_data.get('promoted', [])
         self.demoted_data = idea_data.get('demoted', [])
 
-    async def check_data(self, message_id) -> None:
-        promoted_data = getattr(self, "promoted_data", None)
-        demoted_data = getattr(self, "demoted_data", None)
-        if promoted_data is None or demoted_data is None:
-            await self.load_data(message_id)
-
     @nextcord.ui.button(label="0", emoji="👍", row=1, custom_id="reactions-ideas-confirm:promote")
     async def promote(self, button: nextcord.ui.Button,
                       interaction: nextcord.Interaction):
         await interaction.response.defer()
-        await self.check_data(interaction.message.id)
+        await self.load_data(interaction.guild_id, interaction.message.id)
 
         gdb = GuildDateBases(interaction.guild.id)
         ideas_data: IdeasPayload = await gdb.get('ideas')
@@ -466,7 +466,10 @@ class ReactionConfirmView(nextcord.ui.View):
     async def demote(self, button: nextcord.ui.Button,
                      interaction: nextcord.Interaction):
         await interaction.response.defer()
-        await self.check_data(interaction.message.id)
+        await self.load_data(interaction.guild_id, interaction.message.id)
+
+        gdb = GuildDateBases(interaction.guild.id)
+        ideas_data: IdeasPayload = await gdb.get('ideas')
 
         if interaction.user.id in self.demoted_data:
             self.demoted_data.remove(interaction.user.id)
@@ -476,7 +479,8 @@ class ReactionConfirmView(nextcord.ui.View):
         else:
             self.demoted_data.append(interaction.user.id)
 
-        self.change_votes()
+        payload = get_payload_idea(interaction.user, None, None, len(self.promoted_data), len(self.demoted_data))
+        self.change_votes(ideas_data, payload)
 
         await self.save_data(interaction.message.id)
         await interaction.message.edit(view=self)
@@ -558,9 +562,10 @@ class IdeaModal(nextcord.ui.Modal):
     async def create_thread(locale: str, message: nextcord.Message, ideas_data: IdeasPayload, payload: dict) -> None:
         if ideas_data.get('thread_open'):
             DEFAULT_THREAD_NAME = get_default_payload(locale)['thread_name']
-            thread_name = ideas_data.get('thread_name', DEFAULT_THREAD_NAME)
-            await message.create_thread(name=lord_format(thread_name,
-                                                         payload))
+            print(DEFAULT_THREAD_NAME)
+        thread_name = ideas_data.get('thread_name', DEFAULT_THREAD_NAME)
+        await message.create_thread(name=lord_format(thread_name,
+                                                     payload))
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
@@ -610,7 +615,7 @@ class IdeaView(nextcord.ui.View):
 
         gdb = GuildDateBases(guild.id)
         ideas_data: IdeasPayload = await gdb.get('ideas')
-        locale = await gdb.get('locale')
+        locale = await gdb.get('language')
 
         DEFAULT_IDEAS_COMPONENTS = get_default_payload(locale)['components']
         components = ideas_data.get('components', DEFAULT_IDEAS_COMPONENTS)

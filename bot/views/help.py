@@ -30,8 +30,8 @@ class HelpDropDown(nextcord.ui.StringSelect):
         category = self.values[0]
         category_data = help_info.categories.get(category)
         get_emoji = await get_emoji_wrap(self.gdb)
-        category_name = (f"{get_emoji(help_info.categories_emoji.get(category))} "
-                         f"{i18n.t(locale, f'commands.category.{category}')}")
+        emoji = get_emoji(help_info.categories_emoji.get(category))
+        category_name = i18n.t(locale, f'commands.category.{category}')
 
         texts = []
         for command in category_data:
@@ -39,10 +39,11 @@ class HelpDropDown(nextcord.ui.StringSelect):
             texts.append(f"`{cmd_name}` - {i18n.t(locale, f'commands.command.{cmd_name}.brief')}")
 
         embed = nextcord.Embed(
-            title=category_name,
             description='\n'.join(texts),
             color=color
         )
+        embed.set_author(icon_url=nextcord.PartialEmoji.from_str(emoji).url,
+                         name=category_name)
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
