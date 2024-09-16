@@ -23,6 +23,9 @@ class ReactionsEvent(commands.Cog):
         gdb = GuildDateBases(payload.guild_id)
         role_reaction = await gdb.get('role_reactions')
 
+        if role_reaction is None:
+            return
+
         try:
             role_id = role_reaction[payload.message_id]['reactions'][str(
                 payload.emoji)]

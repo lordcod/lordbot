@@ -1,7 +1,5 @@
 from abc import ABC
 
-import copy
-from functools import partial
 from typing import Any, Optional, overload
 import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
@@ -33,7 +31,7 @@ class OptionItem(ABC):
             return self.emoji
 
     async def get_ticket_data(self, guild: Optional[nextcord.Guild] = None) -> TicketsItemPayload:
-        guild = getattr(self, 'guild', None) or guild
+        guild = guild or getattr(self, 'guild', None)
         gdb = GuildDateBases(guild.id)
         tickets: TicketsPayload = await gdb.get('tickets', {})
         ticket_data = tickets[self.message_id]

@@ -4,7 +4,9 @@ import asyncio
 import os
 import time
 import logging
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional, Tuple
+
+from aiohttp import ClientConnectionError
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.misc.utils import get_payload, generate_message, lord_format
@@ -55,7 +57,7 @@ class TwNoti:
             raise TypeError('The %s type is not supported' % (type(__value).__name__,))
         self.__running = __value
 
-    async def request(self, method: str, url: str, with_auth: bool = True, **kwargs):
+    async def try_request(self, method: str, url: str, with_auth: bool = True, **kwargs) -> Tuple[Any, bool]:
         try:
             async with self.bot.session.request(method, url, **kwargs) as response:
                 content_type = response.headers.get('Content-Type')
@@ -63,17 +65,20 @@ class TwNoti:
                     data = await response.json()
                 else:
                     data = await response.read()
+        except (asyncio.TimeoutError, ClientConnectionError) as exc:
+            _log.debug('Temporary error in the request', exc_info=exc)
+            return None, False
         except Exception as exc:
             _log.error('It was not possible to get data from the api', exc_info=exc)
-            return None
+            return None, False
 
         if with_auth and response.status == 401:
-            await self.get_oauth_token()
+            await self.try_get_oauth_token()
         if not response.ok:
             _log.error('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
-            return None
+            return None, False
 
-        return data
+        return data, True
 
     async def callback_on_start(self, stream: Stream):
         _log.debug('%s started stream', stream.user_name)
@@ -97,9 +102,17 @@ class TwNoti:
     async def callback_on_stop(self, username: str):
         ...
 
-    async def add_channel(self, guild_id: int, username: str) -> None:
+    async def try_add_channel(self, guild_id: int, username: str, retry: bool = False) -> None:
         if username not in self.usernames:
-            with_started, _ = await self.is_streaming(username)
+            with_started, _, success = await self.try_is_streaming(username)
+            if not success:
+                async def _wrap_task():
+                    await asyncio.sleep(15)
+                    await self.try_add_channel(guild_id, username, True)
+                if retry:
+                    _log.warning("It was not possible to add the user %s to the list", username)
+                    return
+                asyncio.create_task(_wrap_task)
             if with_started:
                 self.twitch_streaming.add(username)
             self.usernames.add(username)
@@ -109,26 +122,27 @@ class TwNoti:
 
     async def check_token(self) -> None:
         if self.twitch_api_access_token is None or time.time() > self.twitch_api_access_token_end:
-            await self.get_oauth_token()
+            await self.try_get_oauth_token()
 
-    async def get_oauth_token(self) -> None:
+    async def try_get_oauth_token(self) -> bool:
         url = 'https://id.twitch.tv/oauth2/token'
         data = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'grant_type': 'client_credentials'
         }
-        json = await self.request('POST', url, with_auth=False, data=data)
+        json, success = await self.try_request('POST', url, with_auth=False, data=data)
 
-        if json is None:
+        if not success:
             self.twitch_api_access_token_end = 0
             self.twitch_api_access_token = ''
-            return
+            return False
 
         self.twitch_api_access_token_end = json['expires_in']+time.time()
         self.twitch_api_access_token = json['access_token']
+        return True
 
-    async def get_user_info(self, username: str) -> Optional[User]:
+    async def try_get_user_info(self, username: str) -> Tuple[Optional[User], bool]:
         await self.check_token()
 
         url = 'https://api.twitch.tv/helix/users'
@@ -140,14 +154,17 @@ class TwNoti:
             'Authorization': 'Bearer ' + self.twitch_api_access_token
         }
 
-        data = await self.request('GET', url, params=params, headers=headers)
+        data, success = await self.try_request('GET', url, params=params, headers=headers)
+
+        if not success:
+            return None, False
 
         if data is not None and len(data['data']) > 0:
             user = User(**data['data'][0])
             self.user_info[username] = user
-            return user
+            return user, True
 
-    async def is_streaming(self, username: str) -> Tuple[bool, Optional[Stream]]:
+    async def try_is_streaming(self, username: str) -> Tuple[bool, Optional[Stream], bool]:
         await self.check_token()
 
         url = 'https://api.twitch.tv/helix/streams'
@@ -158,12 +175,15 @@ class TwNoti:
             'Client-ID': self.client_id,
             'Authorization': 'Bearer ' + self.twitch_api_access_token
         }
-        data = await self.request('GET', url, params=params, headers=headers)
+        data, success = await self.try_request('GET', url, params=params, headers=headers)
+
+        if not success:
+            return False, None, False
 
         if data is not None and len(data['data']) > 0:
-            return True, Stream(**data['data'][0])
+            return True, Stream(**data['data'][0]), True
         else:
-            return False, None
+            return False, None, True
 
     async def parse_twitch(self) -> None:
         if self.__running:
@@ -171,14 +191,18 @@ class TwNoti:
 
         if self.client_id is None or self.client_secret is None:
             return
+
         await self.check_token()
 
         _log.debug('Started twitch parsing')
 
         for uid in self.usernames:
-            with_started, _ = await self.is_streaming(uid)
-            if with_started:
-                self.twitch_streaming.add(uid)
+            with_started, _, success = await self.try_is_streaming(uid)
+            for _ in range(3):
+                if not success:
+                    await asyncio.sleep(15)
+                if with_started:
+                    self.twitch_streaming.add(uid)
 
         self.__running = True
         while True:
@@ -190,13 +214,15 @@ class TwNoti:
             tasks = []
             for uid in self.usernames:
                 try:
-                    with_started, data = await self.is_streaming(uid)
+                    with_started, data, success = await self.try_is_streaming(uid)
                 except Exception as exp:
                     _log.error('An error was received when executing the request (%s)',
                                uid,
                                exc_info=exp)
-                    with_started, data = False, None
-
+                    with_started, data, success = False, None, False
+                if not success:
+                    _log.debug('Failed to process user %s', uid)
+                    continue
                 if with_started and uid not in self.twitch_streaming:
                     self.twitch_streaming.add(uid)
                     tasks.append(self.callback_on_start(data))

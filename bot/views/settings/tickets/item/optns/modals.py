@@ -9,7 +9,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import ModalItemPayload, TicketsPayload
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, get_emoji_as_color, get_emoji_wrap
-from .standart import ViewOptionItem
+from .base import ViewOptionItem
 
 
 def get_emoji(system_emoji: int, value: Any) -> str:
@@ -67,17 +67,16 @@ class TicketFormsModal(nextcord.ui.Modal):
 
         self.label = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tickets.modals.modal.label'),
-            max_length=128,
-            placeholder=get_data('label')
+            max_length=45,
+            placeholder=get_data('label'),
+            required=not get_data('label')
         )
-        if get_data('label'):
-            self.label.required = False
         self.add_item(self.label)
 
         self.placeholder = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tickets.modals.modal.placeholder'),
             style=style,
-            max_length=128,
+            max_length=100,
             required=False,
             placeholder=get_data('placeholder')
         )
@@ -86,9 +85,8 @@ class TicketFormsModal(nextcord.ui.Modal):
         self.default_value = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tickets.modals.modal.default'),
             style=style,
-            max_length=128,
             required=False,
-            placeholder=get_data('default_value')
+            default_value=get_data('default_value')
         )
         self.add_item(self.default_value)
 
@@ -145,9 +143,9 @@ class TicketFormsDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=item['label'],
+                label=item['label'][:100],
                 value=i,
-                description=item.get('placeholder'),
+                description=item.get('placeholder', '')[:100],
                 emoji=get_emoji(f'circle{i+1}'),
                 default=selected_item == i
             )
@@ -332,7 +330,7 @@ class TicketFormsView(ViewOptionItem):
                     (i18n.t(locale, 'settings.tickets.modals.info.placeholder'),
                      item.get('placeholder')),
                     (i18n.t(locale, 'settings.tickets.modals.info.default'),
-                     item.get('default_value')),
+                     item.get('default_value')[:250]),
                     (i18n.t(locale, 'settings.tickets.modals.info.style'),
                      get_style(locale, item.get('style', 1))),
                     (i18n.t(locale, 'settings.tickets.modals.info.required'),

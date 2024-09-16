@@ -1,36 +1,17 @@
-from typing import Dict
 import nextcord
 
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
-from bot.misc.utils import AsyncSterilization
 
 
-def has_permissions(**kwargs):
-    def wrapped(cls: AsyncSterilization['DefaultSettingsView'] | type['DefaultSettingsView']):
-        if isinstance(cls, AsyncSterilization):
-            cls.cls.permission = kwargs
-        else:
-            cls.permission = kwargs
-        return cls
-    return wrapped
-
-
-@has_permissions(manage_guild=True)
 class DefaultSettingsView(nextcord.ui.View):
-    permission: Dict[str, bool]
+    def __init__(self, *, timeout: float | None = 180, auto_defer: bool = True, prevent_update: bool = True) -> None:
+        super().__init__(timeout=timeout, auto_defer=auto_defer, prevent_update=prevent_update)
 
     async def interaction_check(
         self,
         interaction: nextcord.Interaction
     ) -> bool:
-        permissions = interaction.guild.me.guild_permissions
-        missing = [perm for perm, value in self.permission.items() if getattr(permissions, perm) != value]
-
-        if missing:
-            await interaction.response.defer()
-            return False
-
         if not interaction.user.guild_permissions.manage_guild:
             gdb = GuildDateBases(interaction.guild_id)
             locale = await gdb.get('language')

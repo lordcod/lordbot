@@ -27,8 +27,10 @@ def get_using(
     locale: str,
     command: help_info.CommandOption
 ) -> str:
-    arguments = help_info.CommandOption.get_arguments(command, locale)
-    return i18n.t(locale, 'help.command-embed.using_command', using=f"{command.get('name')}{' '+' '.join(arguments) if arguments else ''}")
+    arguments = [i18n.t(locale, f"commands.command.{command.get('name')}.arguments.{i}")
+                 for i in range(command.get('count_args'))]
+    return i18n.t(locale, 'help.command-embed.using_command',
+                  using=f"{command.get('name')}{' '+' '.join(arguments) if arguments else ''}")
 
 
 def divise_list(iterable: Iterable, count: int) -> list:
@@ -51,7 +53,7 @@ class Help(commands.Cog):
             return
 
         if not REGEXP_COMMAND_NAME.fullmatch(command_name):
-            await self.send_message(ctx)
+            await self.send_not_found(ctx)
             return
 
         command_data = get_command(command_name)
@@ -79,8 +81,9 @@ class Help(commands.Cog):
                 text += f"`{cmd.get('name')}` "
 
             category_emoji = get_emoji(help_info.categories_emoji.get(category))
+            category_name = i18n.t(locale, f'commands.category.{category}')
             embed.add_field(
-                name=f'{category_emoji} {help_info.categories_name.get(category).get(locale)}',
+                name=f'{category_emoji} {category_name}',
                 value=text,
                 inline=False
             )
@@ -97,11 +100,12 @@ class Help(commands.Cog):
         get_emoji = await get_emoji_wrap(gdb)
         aliases = command_data.get('aliases')
         category_emoji = get_emoji(help_info.categories_emoji.get(command_data.get('category')))
+        category_name = i18n.t(locale, f"commands.category.{command_data.get('category')}")
 
         embed = nextcord.Embed(
             title=i18n.t(locale, "help.command-embed.title",
                          name=command_data.get('name')),
-            description=command_data.get('descriptrion').get(locale),
+            description=i18n.t(locale, f"commands.command.{command_data.get('name')}.description"),
             color=color
         )
         embed.set_footer(
@@ -111,37 +115,24 @@ class Help(commands.Cog):
             name=i18n.t(
                 locale, 'help.command-embed.info'),
             value=(
-                f"{i18n.t(locale, 'help.command-embed.category', category_emoji=category_emoji, category_name=help_info.categories_name.get(command_data.get('category')).get(locale))}"
+                f"{i18n.t(locale, 'help.command-embed.category', category_emoji=category_emoji, category_name=category_name)}"
                 f"{i18n.t(locale, 'help.command-embed.aliases', aliases=', '.join([f'`{al}`' for al in aliases])) if aliases else ''}"
                 f"{get_using(locale, command_data)}"
                 f"{i18n.t(locale, 'help.command-embed.disable_command', value=get_disable_command_value(locale, command_data))}"
             ),
             inline=False
         )
-        if examples := command_data.get('examples'):
-            for num, (excmd, descript) in enumerate(examples, start=1):
-                embed.add_field(
-                    name=i18n.t(
-                        locale, 'help.command-embed.example', number=num),
-                    value=f"`{excmd}`\n{descript.get(locale)}",
-                    inline=False
-                )
-
-        if reactions := command_data.get('reactions'):
-            react_embed = nextcord.Embed(
-                title="Reactions",
-                color=color
+        for i in range(command_data.get('count_examples')):
+            using = i18n.t(locale, f"commands.command.{command_data.get('name')}.examples.{i}.use")
+            description = i18n.t(locale, f"commands.command.{command_data.get('name')}.examples.{i}.desc")
+            embed.add_field(
+                name=i18n.t(
+                    locale, 'help.command-embed.example', number=i+1),
+                value=f"`{using}`\n{description}",
+                inline=False
             )
-            for num, reacts in enumerate(divise_list(reactions.items(), count=3), start=1):
-                react_embed.add_field(
-                    name=num,
-                    value='\n'.join([
-                        f"{name} - {react.get(locale)}" for name, react in reacts])
-                )
 
-            await ctx.send(embeds=[embed, react_embed])
-        else:
-            await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
     async def send_not_found(self, ctx: commands.Context):
         gdb = GuildDateBases(ctx.guild.id)

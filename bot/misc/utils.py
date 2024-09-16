@@ -17,6 +17,7 @@ import asyncio
 import time
 import emoji
 import orjson
+import argparse
 
 from asyncio import TimerHandle
 from collections import namedtuple
@@ -100,12 +101,16 @@ colors = {
 
 
 class TempletePayload:
-    _prefix = None
+    _prefix: Optional[str] = MISSING
     _as_prefix: bool = False
 
+    def _get_prefix(self, prefix: Optional[str], name: str) -> str:
+        return (f"{prefix}.{name}"
+                if prefix else name)
+
     def _to_dict(self):
-        if self._prefix is not None:
-            prefix = str(self._prefix)
+        if self._prefix is not MISSING:
+            prefix = self._prefix
         else:
             prefix = self.__class__.__name__
 
@@ -118,7 +123,12 @@ class TempletePayload:
             if name.startswith("_"):
                 continue
 
-            base[f"{prefix}.{name}"] = arg
+            self_prefix = self._get_prefix(prefix, name)
+            if isinstance(arg, dict):
+                base.update(parse_prefix(self_prefix, arg))
+                continue
+
+            base[self_prefix] = arg
 
         return base
 
@@ -158,7 +168,7 @@ class GuildPayload(TempletePayload):
         self.name: str = guild.name
         self.memberCount: int = guild.member_count
         self.createdAt: int = guild.created_at.timestamp()
-        self.createdAt_dt: datetime = guild.created_at.isoformat()
+        self.createdDt: str = guild.created_at.isoformat()
         self.premiumSubscriptionCount: int = guild.premium_subscription_count
 
         if not (guild.icon and guild.icon.url):
@@ -188,6 +198,31 @@ class MemberPayload(TempletePayload):
         return self.mention
 
 
+class IdeaPayload(TempletePayload):
+    _prefix = 'idea'
+    _as_prefix = False
+
+    def __init__(
+        self,
+        content: str,
+        image: Optional[str],
+        promoted_count: Optional[int] = None,
+        demoted_count: Optional[int] = None,
+        moderator: Optional[nextcord.Member] = None,
+        reason: Optional[str] = None,
+    ) -> None:
+        self.content = content
+        self.image = image
+        self.reason = reason
+        self.promotedCount = promoted_count
+        self.demotedCount = demoted_count
+
+        if moderator is not None:
+            mod = MemberPayload(moderator)
+            mod._prefix = None
+            self.mod = mod._to_dict()
+
+
 def parse_prefix(
     prefix: str,
     iterable: Union[Iterable[Tuple[Union[str, int], Any]],
@@ -201,6 +236,9 @@ def parse_prefix(
 
     ret = {}
     for key, value in iterable:
+        if isinstance(value, (dict, list)):
+            ret.update(parse_prefix(f'{prefix}.{key}', value))
+            continue
         ret[f'{prefix}.{key}'] = value
     return ret
 
@@ -216,7 +254,8 @@ def get_payload(
     inputs: Optional[Dict[str, str]] = None,
     ticket_count: Optional[dict] = None,
     voice_count: Optional[dict] = None,
-):
+    idea: Optional[IdeaPayload] = None
+) -> dict:
     bot_payload = None
     if guild is None and member is not None and isinstance(member, nextcord.Member):
         guild = member.guild
@@ -228,7 +267,6 @@ def get_payload(
     data = {
         'today_dt': datetime.today().isoformat()
     }
-
     if member is not None:
         data.update(MemberPayload(member)._to_dict())
     if guild is not None:
@@ -239,14 +277,16 @@ def get_payload(
         data.update(VideoPayload(video)._to_dict())
     if bot_payload is not None:
         data.update(bot_payload._to_dict())
-    if inputs is not None and inputs:
-        data.update(parse_prefix('ticket.forms', list(inputs.values())))
-    if category is not None and category:
-        data['ticket.category.name'] = category['label']
-    if ticket_count is not None:
-        data.update(parse_prefix('ticket.count', ticket_count))
+    if idea is not None:
+        data.update(idea._to_dict())
     if voice_count is not None:
         data.update(parse_prefix('voice.count', voice_count))
+    if inputs is not None and inputs:
+        data.update(parse_prefix('ticket.forms', list(inputs.values())))
+    if ticket_count is not None:
+        data.update(parse_prefix('ticket.count', ticket_count))
+    if category is not None and category:
+        data['ticket.category.name'] = category['label']
 
     return data
 
@@ -398,14 +438,12 @@ class BlackjackGame:
         while True:
             win_cards = []
             for card in self.cards:
-                # if card in self.your_cards[1:]:
-                #     continue
                 res = self.calculate_result(self.dealer_cards + [card])
                 if 21 >= res:
                     win_cards.append(card)
             _log.debug('Win cards: %s, Chance: %s', len(
                 win_cards), len(win_cards) / len(self.cards))
-            if len(win_cards) / len(self.cards) >= 0.5:
+            if len(win_cards) / len(self.cards) >= 0.4:
                 self.add_dealer_card()
             else:
                 break
@@ -460,6 +498,17 @@ class LordTemplate:
                 data[every] = forms[key]
                 if not data[every] and default is not None:
                     data[every] = default
+            elif '.' in key and key.split('.')[1] and key.split('.')[0] in forms:
+                value = forms[key.split('.')[0]]
+
+                for v in key.split('.')[1:]:
+                    if value is None:
+                        break
+                    value = getattr(value, v, None)
+
+                data[every] = value
+                if not value and default is not None:
+                    data[every] = default
             elif default is not None:
                 data[every] = default
         return data
@@ -498,17 +547,6 @@ class TranslatorFlags:
         return cls(args)
 
 
-class AdditEmoji:
-    ...
-
-
-def get_emojis_class(system_emoji: int):
-    obj = AdditEmoji()
-    for name, data in ether.every_emojis.items():
-        setattr(obj, name, data[system_emoji])
-    return obj
-
-
 async def get_emoji(guild_id: int, name: str):
     gdb = GuildDateBases(guild_id)
     system_emoji = await gdb.get('system_emoji')
@@ -517,6 +555,19 @@ async def get_emoji(guild_id: int, name: str):
 
 def get_emoji_as_color(system_emoji: int, name: str):
     return ether.every_emojis[name][system_emoji]
+
+
+@lru_cache()
+def get_parser_args():
+    parser = argparse.ArgumentParser(description='Starting a bot with arguments.', exit_on_error=False)
+    parser.add_argument('--token')
+    parser.add_argument('--log_level', choices=['DEBUG', 'INFO', 'ERROR'])
+    parser.add_argument('--dev', action='store_true')
+    parser.add_argument('--api', action='store_true')
+
+    args = parser.parse_args()
+    return {k: v for k, v in args._get_kwargs()
+            if v is not None}
 
 
 @overload
@@ -1059,7 +1110,11 @@ class GeneratorMessage:
         for arg in ('thumbnail', 'image'):
             with contextlib.suppress(KeyError):
                 url = data[arg]
-                if not url:
+                if (
+                    not url
+                    or (isinstance(url, str) and url.lower() == 'none')
+                    or (isinstance(url, dict) and url.get('url').lower() == 'none')
+                ):
                     del data[arg]
                     continue
                 if isinstance(url, str):
@@ -1069,7 +1124,7 @@ class GeneratorMessage:
 
         embed = nextcord.Embed.from_dict(new_data)
 
-        if new_data.data:
+        if data:
             _log.trace('Exclude embed data: %s', new_data.data)
 
         if embed:

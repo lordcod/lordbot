@@ -1,49 +1,40 @@
+from collections import defaultdict
 from typing import List, Dict, Tuple, TypedDict, Union, NotRequired
-import googletrans
 import jmespath
 import orjson
+import os
 
 
 class CommandOption(TypedDict):
     name: str
     category: str
     aliases: List[str]
-    arguments: List[Union[Dict[str, str], str]]
-    examples: NotRequired[List[Tuple[str, Dict[str, str]]]]
-    descriptrion: Dict[str, str]
-    brief_descriptrion: Dict[str, str]
     allowed_disabled: bool
-    reactions: NotRequired[Dict[str, Dict[str, str]]]
-    with_group: NotRequired[bool]
-    commands_group: NotRequired[List[str]]
+    count_args: int
+    count_examples: int
 
-    def get_arguments(self, locale: str) -> List[str]:
-        arguments = []
-        for arg in self.get('arguments', []):
-            if isinstance(arg, dict):
-                arguments.append(arg.get(locale, arg['en']))
-            else:
-                arguments.append(arg)
-        return arguments
+
+class ReactionOption(TypedDict):
+    name: str
+    description: str
+    with_user: str
 
 
 class CommandsPayload(TypedDict):
     categories_emoji: Dict[str, str]
-    categories_name: Dict[str, Dict[str, str]]
     commands: List[CommandOption]
 
 
 categories_emoji: Dict[str, str]
-categories_name: Dict[str, Dict[str, str]]
 categories: Dict[str, List[CommandOption]]
 commands: List[CommandOption]
 
-all_reactions_command = ["airkiss", "angrystare", "bite", "bleh", "blush", "brofist", "celebrate", "cheers", "clap", "confused", "cool", "cry", "cuddle", "dance", "drool", "evillaugh", "facepalm", "handhold", "happy", "headbang", "hug", "kiss", "laugh", "lick", "love", "mad", "nervous", "no", "nom", "nosebleed", "nuzzle",
-                         "nyah", "pat", "peek", "pinch", "poke", "pout", "punch", "roll", "run", "sad", "scared", "shout", "shrug", "shy", "sigh", "sip", "slap", "sleep", "slowclap", "smack", "smile", "smug", "sneeze", "sorry", "stare", "stop", "surprised", "sweat", "thumbsup", "tickle", "tired", "wave", "wink", "woah", "yawn", "yay", "yes"]
+reactions_command = ['airkiss', 'angrystare', 'bite', 'bleh', 'blush', 'brofist', 'celebrate', 'cheers', 'clap', 'confused', 'cool', 'cry', 'cuddle', 'dance', 'drool', 'evillaugh', 'facepalm', 'handhold', 'happy', 'headbang', 'hug', 'kiss', 'laugh', 'lick', 'love', 'mad', 'nervous', 'no', 'nom', 'nosebleed', 'nuzzle',
+                     'nyah', 'pat', 'peek', 'pinch', 'poke', 'pout', 'punch', 'roll', 'run', 'sad', 'scared', 'shout', 'shrug', 'shy', 'sigh', 'sip', 'slap', 'sleep', 'slowclap', 'smack', 'smile', 'smug', 'sneeze', 'sorry', 'stare', 'surprised', 'sweat', 'thumbsup', 'tickle', 'tired', 'wave', 'wink', 'woah', 'yawn', 'yay', 'yes']
 
 
-def get_command(name: str) -> CommandOption:
-    if name in all_reactions_command:
+def get_command(name: str, with_reactions: bool = False) -> CommandOption:
+    if not with_reactions and name in reactions_command:
         name = 'reactions'
     expression = f"[?name == '{name}'||contains(aliases, '{name}')]|[0]"
     result = jmespath.search(expression, commands)
@@ -55,38 +46,35 @@ with open("bot/languages/commands_data.json", "rb") as file:
     content = file.read()
     _commands: CommandsPayload = orjson.loads(content)
     categories_emoji = _commands["categories_emoji"]
-    categories_name = _commands["categories_name"]
     commands = _commands["commands"]
 
-    categories = categories_emoji.fromkeys(categories_emoji)
+    categories = {}
     for cmd in _commands["commands"]:
         cmd_category = cmd["category"]
-        if categories.get(cmd_category) is None:
+        if cmd_category not in categories:
             categories[cmd_category] = []
         categories[cmd_category].append(CommandOption(cmd))
 
+
 if __name__ == "__main__":
-    translator = googletrans.Translator()
+    folder = 'interactions'
 
-    def translate(text: str, lang: str) -> str:
-        return translator.translate(text, lang, "en").text
+    with open('reactions.json', 'rb+') as file:
+        reactions = orjson.loads(file.read())
 
-    locales = ["ru", "id", "da", "de", "es", "fr", "pl", "tr"]
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+    new_reactions = defaultdict(dict)
 
-    for num, cmd_data in enumerate(commands, start=1):
-        if not cmd_data.get("examples"):
-            continue
-        print(
-            f"The process of translating the {cmd_data.get('name')} command({num}/{len(commands)})"
-        )
-        examples = cmd_data.get("examples")
-        for exp in examples:
-            new_examples = {}
-            text = exp[1]
-            new_examples["en"] = text
-            for loc in locales:
-                new_examples[loc] = translate(text, loc)
-            exp[1] = new_examples
+    for name, data in reactions.items():
+        for lang, desc in data.items():
+            new_reactions[lang][name] = desc
 
-    with open("new_commands_lang.json", "+wb") as file:
-        file.write(orjson.dumps(commands))
+    with open('new_reactions.json', 'wb+') as file:
+        file.write(orjson.dumps(new_reactions))
+
+    for lang, data in new_reactions.items():
+        if not os.path.exists(os.path.join(folder, lang)):
+            os.mkdir(os.path.join(folder, lang))
+        for name, desc in data.items():
+            cmd_data = {}

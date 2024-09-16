@@ -1,6 +1,6 @@
 import nextcord
 
-from bot.languages import help as help_info
+from bot.languages import help as help_info, i18n
 from bot.databases import GuildDateBases
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 
@@ -14,7 +14,7 @@ class HelpDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=help_info.categories_name.get(category).get(locale),
+                label=i18n.t(locale, f'commands.category.{category}'),
                 value=category,
                 emoji=get_emoji(help_info.categories_emoji.get(category)),
             )
@@ -27,22 +27,23 @@ class HelpDropDown(nextcord.ui.StringSelect):
         color = await self.gdb.get('color')
         locale = await self.gdb.get('language')
 
-        category_key = self.values[0]
-        category_data = help_info.categories.get(category_key)
+        category = self.values[0]
+        category_data = help_info.categories.get(category)
         get_emoji = await get_emoji_wrap(self.gdb)
-        category_name = (f"{get_emoji(help_info.categories_emoji.get(category_key))} "
-                         f"{help_info.categories_name.get(category_key).get(locale)}")
+        emoji = get_emoji(help_info.categories_emoji.get(category))
+        category_name = i18n.t(locale, f'commands.category.{category}')
 
-        text = ''
+        texts = []
         for command in category_data:
-            text += f"`{command.get('name')}` - {command.get('brief_descriptrion').get(locale)}\n"
+            cmd_name = command.get('name')
+            texts.append(f"`{cmd_name}` - {i18n.t(locale, f'commands.command.{cmd_name}.brief')}")
 
         embed = nextcord.Embed(
-            title=category_name,
-            description=text,
+            description='\n'.join(texts),
             color=color
         )
-
+        embed.set_author(icon_url=nextcord.PartialEmoji.from_str(emoji).url,
+                         name=category_name)
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
 

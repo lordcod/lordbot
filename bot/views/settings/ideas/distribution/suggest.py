@@ -6,16 +6,15 @@ from bot.views.information_dd import get_info_dd
 
 
 from ... import ideas
-from bot.views.settings._view import DefaultSettingsView
-
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
+from .base import ViewOptionItem
 
 from typing import Optional
 
 
 @AsyncSterilization
-class DropDown(nextcord.ui.ChannelSelect):
+class ChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
         guild_id: int
@@ -34,8 +33,10 @@ class DropDown(nextcord.ui.ChannelSelect):
 
 
 @AsyncSterilization
-class SuggestView(DefaultSettingsView):
-    embed: nextcord.Embed = None
+class SuggestView(ViewOptionItem):
+    label: str = 'settings.ideas.dropdown.suggest.title'
+    description: str = 'settings.ideas.dropdown.suggest.description'
+    emoji: str = 'ideacreate'
 
     async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -55,35 +56,51 @@ class SuggestView(DefaultSettingsView):
         )
 
         super().__init__()
-
-        self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = i18n.t(locale, 'settings.button.edit')
-
+        channel_value = i18n.t(locale, 'settings.ideas.init.unspecified')
         if channel or (channel := guild.get_channel(channel_suggest_id)):
             self.channel = channel
             self.edit.disabled = False
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.init.value.suggest',
-                                   channel=f"#{channel.name}")
-            ))
-        else:
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.init.value.suggest',
-                                   channel=i18n.t(locale, 'settings.ideas.init.unspecified'))
-            ))
+            channel_value = f"#{channel.name}"
+        self.add_item(get_info_dd(
+            placeholder=i18n.t(locale, 'settings.ideas.value.suggest',
+                               channel=channel_value)
+        ))
 
-        cdd = await DropDown(guild.id)
+        cdd = await ChannelsDropDown(guild.id)
         self.add_item(cdd)
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await ideas.IdeasView(interaction.guild)
-
-        await interaction.response.edit_message(embed=view.embed, view=view)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
+        self.delete.label = i18n.t(locale, 'settings.button.delete')
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.gdb.set_on_json('ideas', 'channel_suggest_id', self.channel.id)
+
+        view = await SuggestView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
+
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        gdb = GuildDateBases(interaction.guild_id)
+        ideas: IdeasPayload = await gdb.get('ideas')
+
+        channel_suggest_id = ideas.get("channel_suggest_id")
+        channel_suggest = interaction.guild.get_channel(channel_suggest_id)
+        message_suggest_id = ideas.get("message_suggest_id")
+
+        if channel_suggest and message_suggest_id:
+            message_suggest = channel_suggest.get_partial_message(
+                message_suggest_id)
+            try:
+                await message_suggest.delete()
+            except nextcord.errors.HTTPException:
+                pass
+
+        ideas['channel_suggest_id'] = None
+        ideas['message_suggest_id'] = None
+
+        await gdb.set('ideas', ideas)
 
         view = await SuggestView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

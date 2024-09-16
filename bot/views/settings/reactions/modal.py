@@ -57,6 +57,7 @@ class ModalBuilder(nextcord.ui.Modal):
 
         for num, emo in enumerate(emojis, start=1):
             if not is_emoji(emo):
+                # TODO LOCALIZATION
                 await interaction.response.send_message(
                     f"You have entered an incorrect emoji into the form number {num}", ephemeral=True)
                 return

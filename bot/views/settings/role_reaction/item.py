@@ -165,7 +165,10 @@ class RoleReactionItemView(DefaultSettingsView):
                      button: nextcord.ui.Button,
                      interaction: nextcord.Interaction
                      ):
-        value = await fetch_reaction(interaction, content=f"Send a reaction for role {self.selected_role.mention} by message")
+        gdb = GuildDateBases(interaction.guild_id)
+        locale = await gdb.get('language')
+        value = await fetch_reaction(interaction, content=i18n.t(locale, 'settings.role-reaction.item.fetch_reaction',
+                                                                 role=self.selected_role))
 
         for _emoji, _role_id in list(self.role_reaction['reactions'].items()):
             if _role_id == self.selected_role.id:

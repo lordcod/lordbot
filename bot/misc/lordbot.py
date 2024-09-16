@@ -1,6 +1,6 @@
 from __future__ import annotations
 import asyncio
-import getopt
+from collections import deque
 import logging
 import sys
 import os
@@ -14,11 +14,10 @@ from nextcord.ext import commands
 from bot.databases import GuildDateBases
 from bot.databases import db
 from bot.databases.db import DataBase, establish_connection
-from bot.databases.config import config
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
 from bot.resources.info import DEFAULT_PREFIX
-from bot.misc.utils import LordTimeHandler
+from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
 from bot.misc.noti import TwitchNotification, YoutubeNotification
 
@@ -38,6 +37,7 @@ def get_shard_list(shard_ids: str):
 
 
 class LordBot(commands.AutoShardedBot):
+    API_URL: str
     engine: DataBase
     ya_requests: Any = None
     invites_data: Dict[int, List[nextcord.Invite]] = {}
@@ -48,19 +48,21 @@ class LordBot(commands.AutoShardedBot):
         self,
         *,
         rollout_functions: bool = True,
-        allow_bot_command: bool = False,
-        test_bot: bool = False
+        allow_bot_command: Optional[bool] = None,
+        release_bot: Optional[bool] = None
     ) -> None:
-        self.test_bot = test_bot
+        if release_bot is None:
+            release_bot = sys.platform != 'win32' or not get_parser_args().get('dev')
+        if allow_bot_command is None:
+            allow_bot_command = not release_bot
+
+        if release_bot or get_parser_args().get('api'):
+            self.API_URL = 'https://api.lordcord.fun'
+        else:
+            self.API_URL = 'http://localhost:5000'
+
+        self.release_bot = release_bot
         self.allow_bot_command = allow_bot_command
-
-        flags = dict(map(lambda item: (item[0].removeprefix(
-            '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards=', 'log_level='])[0]))
-
-        shard_ids, shard_count = (flags.get(
-            'shards') or os.getenv('shards') or input("Shared info: ")).split("/")
-        shard_count = int(shard_count)
-        shard_ids = get_shard_list(shard_ids)
 
         intents = nextcord.Intents.all()
         intents.presences = False
@@ -69,15 +71,19 @@ class LordBot(commands.AutoShardedBot):
             command_prefix=self.get_command_prefixs,
             intents=intents,
             help_command=None,
-            max_messages=None,
-            shard_ids=shard_ids,
             enable_debug_events=True,
-            shard_count=shard_count,
             rollout_associate_known=rollout_functions,
             rollout_delete_unknown=rollout_functions,
             rollout_register_new=rollout_functions,
             rollout_update_known=rollout_functions
         )
+
+        _messages = deque(
+            self._connection._messages,
+            maxlen=None
+        )
+        self._connection._messages = _messages
+        self._connection.max_messages = None
 
         self.load_i18n_config()
 
@@ -94,8 +100,7 @@ class LordBot(commands.AutoShardedBot):
 
         self.lord_handler_timer: LordTimeHandler = LordTimeHandler(loop)
 
-        if not test_bot:
-            self.add_listener(self.apisite._ApiSite__run, 'on_ready')
+        self.add_listener(self.apisite._ApiSite__run, 'on_ready')
         self.add_listener(self.listen_on_ready, 'on_ready')
         self.add_listener(self.twnoti.parse_twitch, 'on_ready')
         self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
@@ -104,13 +109,13 @@ class LordBot(commands.AutoShardedBot):
         i18n.config['locale'] = 'en'
         i18n.from_file("./bot/languages/localization_any.json")
 
-        for lang in i18n.default_languages:
-            if not os.path.isfile(f"temp_loc_{lang}.json"):
+        temps_dir = './bot/languages/temp'
+        for filename in os.listdir(temps_dir):
+            if not filename.endswith('.json'):
                 continue
-            json_resource = i18n._parse_json(
-                i18n._load_file(f"temp_loc_{lang}.json"))
-            i18n.resource_dict[lang].update(json_resource)
-            i18n.parser(json_resource, lang)
+            data = i18n._parse_json(i18n._load_file(os.path.join(temps_dir, filename)))
+            i18n.parser(data)
+        _log.trace(i18n.t(path='settings.ideas.value.suggest'))
 
     @property
     def session(self) -> aiohttp.ClientSession:
@@ -189,39 +194,9 @@ class LordBot(commands.AutoShardedBot):
 
         setattr(self, name, coro)
 
-    async def register_jino(self):
-        if not self.test_bot:
-            return
-
-        async with self.session.get('https://ifconfig.me/ip') as response:
-            ipb = await response.read()
-            ip = ipb.decode()
-
-        query = "mutation addPostgreSQLRemoteSubnet($subnet: String!, $comment: String, $accountId: String) {\n  me {\n    legacy {\n      addPostgreSQLRemoteSubnet(\n        subnet: $subnet\n        comment: $comment\n        accountId: $accountId\n        validateAll: true\n        camelCaseErrors: true\n      )\n      __typename\n    }\n    __typename\n  }\n}\n"
-        data = {
-            'operationName': "addPostgreSQLRemoteSubnet",
-            'query': query,
-            'variables': {'subnet': ip, 'comment': None, 'accountId': "pmeyj"}
-        }
-        headers = {
-            'Authorization': 'Bearer ' + os.getenv('JINO_TOKEN', '')
-        }
-
-        async with self.session.post('https://graphql.jino.ru/user/', json=data, headers=headers) as res:
-            json = await res.json()
-
-        with_auth = len(json.get('errors', [])) > 0
-
-        if with_auth:
-            _log.trace(
-                'Successfully adding the IP address %s to the database', ip)
-        else:
-            _log.warning(
-                'The JINO token needs to be updated. The IP address was not added to the database.')
-
-    async def update_api_config(self):
+    async def update_api_config(self) -> bool:
         api = self.apisite
-        url = 'https://api.lordcord.fun/post-api-config'
+        url = self.API_URL + '/api-config'
         headers = {
             'Authorization': os.environ.get('API_SECRET_TOKEN')
         }
@@ -233,18 +208,21 @@ class LordBot(commands.AutoShardedBot):
         async with self.session.post(url, json=data, headers=headers) as response:
             if response.status == 204:
                 _log.debug('Successful api update')
+                return True
             else:
                 _log.warning('Failed api update')
+                return False
 
     async def listen_on_ready(self) -> None:
+        if not self.release_bot:
+            _log.debug("A test bot has been launched")
         _log.debug('Listen on ready')
 
-        if not self.test_bot:
+        if self.release_bot:
             await self.update_api_config()
 
-        await self.register_jino()
         try:
-            self.engine = engine = await DataBase.create_engine(config)
+            self.engine = engine = await DataBase.create_engine(os.getenv('POSTGRESQL_DNS'))
         except Exception as exc:
             _log.error("Couldn't connect to the database", exc_info=exc)
             await self.close()
@@ -259,6 +237,9 @@ class LordBot(commands.AutoShardedBot):
 
         if not self.__with_ready__.done():
             self.__with_ready__.set_result(None)
+
+        if not self.release_bot:
+            _log.debug('Load started events %d', len(self.__with_ready_events__))
 
         for event_data in self.__with_ready_events__:
             self.dispatch(event_data[0], *event_data[1], **event_data[2])

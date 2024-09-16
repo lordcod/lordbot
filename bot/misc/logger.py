@@ -7,15 +7,10 @@ import sys
 import traceback
 import aiohttp
 import asyncio
-import getopt
 
 
 log_webhook = os.environ.get('log_webhook')
 loop = asyncio.get_event_loop()
-
-
-flags = dict(map(lambda item: (item[0].removeprefix(
-    '--'), item[1]), getopt.getopt(sys.argv[1:], '', ['token=', 'shards=', 'log_level='])[0]))
 
 TRACE = logging.DEBUG - 5
 CORE = logging.INFO + 5
@@ -24,16 +19,16 @@ DEFAULT_LOG = TRACE
 DEFAULT_DISCORD_LOG = logging.INFO
 DEFAULT_FILE_LOG = logging.ERROR
 
-
-_ofter_default_log = getattr(logging, flags.get(
-    'log_level', 'ERROR'), logging.ERROR)
+DEFAULT_HTTP_LOGS = (
+    'bot'
+)
 DEFAULT_LOGS = {
-    'nextcord': _ofter_default_log,
-    'pyngrok': _ofter_default_log,
-    'git': _ofter_default_log,
-    'httpx': _ofter_default_log,
-    'aiocache': _ofter_default_log,
-    'colormath': _ofter_default_log
+    'nextcord': logging.INFO,
+    'pyngrok': logging.NOTSET,
+    'git': logging.INFO,
+    'httpx': logging.INFO,
+    'aiocache': logging.ERROR,
+    'colormath': logging.INFO
 }
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -55,6 +50,8 @@ COLORS = {
     'TRACE': CYAN,
     'CORE': MAGENTA
 }
+
+task_lock = asyncio.Lock()
 
 
 def currentframe(): return sys._getframe(3)
@@ -86,18 +83,38 @@ def formatter_discord_message(message, use_color=True):
     return message
 
 
-posters_tasks = []
-task_lock = asyncio.Lock()
+def __debug_log(level: int, msg: object, *args, **kwargs) -> None:
+    from bot.main import bot
+
+    if bot.release_bot:
+        return
+
+    _log = logging.getLogger(__name__)
+    _log.removeHandler(_log.discord_handler)
+    _log._log(level, msg, *args, **kwargs)
 
 
 async def post_mes(webhook_url: str, text: str) -> None:
     async with task_lock:
-        async with aiohttp.ClientSession() as session:
-            data = {
-                'content': '```ansi\n' + text + '```'
-            }
-            async with session.post(webhook_url, data=data):
-                pass
+        for _ in range(3):
+            async with aiohttp.ClientSession() as session:
+                data = {
+                    'content': '```ansi\n' + text + '```'
+                }
+                async with session.post(webhook_url, data=data) as response:
+                    if response.ok:
+                        break
+
+                    if response.status == 429:
+                        seconds = int(response.headers.get('X-RateLimit-Reset-After', 0))
+                        __debug_log(logging.WARNING, 'Sending the log was delayed for %d seconds', seconds)
+                        await asyncio.sleep(seconds)
+                        continue
+
+                    try:
+                        response.raise_for_status()
+                    except Exception as exc:
+                        __debug_log(logging.ERROR, "The log could not be sent", exc_info=exc)
 
 
 class StandartFormatter(logging.Formatter):
@@ -135,13 +152,14 @@ class ColoredFormatter(StandartFormatter):
 class DiscordHandler(logging.Handler):
     def __init__(self, webhook_url: str) -> None:
         self.webhook_url = webhook_url
+        self.posters_tasks = []
         super().__init__()
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
             msg = self.format(record)
             task = loop.create_task(post_mes(self.webhook_url, msg))
-            posters_tasks.append(task)
+            self.posters_tasks.append(task)
             self.flush()
         except RecursionError:
             raise
@@ -170,7 +188,8 @@ class LordLogger(logging.Logger):
         self.discord_handler = DiscordHandler(log_webhook)
         self.discord_handler.setFormatter(color_formatter)
         self.discord_handler.setLevel(DEFAULT_DISCORD_LOG)
-        self.addHandler(self.discord_handler)
+        if name.startswith(DEFAULT_HTTP_LOGS):
+            self.addHandler(self.discord_handler)
 
         file_formatter = ColoredFormatter(
             self.NO_COLOR_FORMAT, use_color=False)
@@ -248,6 +267,7 @@ class LordLogger(logging.Logger):
 
         logger.trace("Houston, we have a %s", "interesting problem", exc_info=1)
         """
+        self.debug
         if self.isEnabledFor(TRACE):
             self._adt_log(TRACE, msg, *args, **kwargs)
 

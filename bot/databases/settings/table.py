@@ -1,10 +1,13 @@
 from __future__ import annotations
 import asyncio
+import logging
 from typing import List
 from nextcord import utils
 import re
 from .column import Colum
 from ..db_engine import DataBase
+
+_log = logging.getLogger(__name__)
 
 
 def convert_default(default_text: str) -> str:
@@ -24,6 +27,10 @@ class TableAPI:
     def register_colums(self, *columns: Colum):
         for c in columns:
             c.set_engine(self.engine)
+
+    async def create(self) -> None:
+        await self.engine.execute(
+            f"CREATE TABLE IF NOT EXISTS {self.table_name} ()")
 
     async def get_colums(self) -> List[Colum]:
         colums = []
@@ -56,11 +63,14 @@ class TableAPI:
         if colum_with_name := utils.get(colums, name=colum.name):
             if colum.default != colum_with_name.default:
                 await colum_with_name.change_default(self.table_name, colum.default)
+                _log.debug("The default value of column %s has been changed in %s (%s-%s)", colum.name, self.table_name, colum.default, colum_with_name.default)
 
             if colum.data_type != colum_with_name.data_type:
                 await colum_with_name.change_type(self.table_name, colum.data_type)
+                _log.debug("The type of column %s has been changed in %s", colum.name, self.table_name)
             return
 
+        _log.debug("Add column %s in %s", colum, self.table_name)
         await colum.add_colum(self.table_name)
         colums.append(colum)
 
@@ -107,11 +117,13 @@ class Table:
     @classmethod
     async def create(cls):
         tapi = TableAPI(cls.engine, cls.__tablename__)
-        await cls.engine.execute(
-            f"CREATE TABLE IF NOT EXISTS {cls.__tablename__} ()")
+        await tapi.create()
+
         cls.colums = await tapi.get_colums()
         tapi.register_colums(*cls.__columns__)
+
         for item in cls.__columns__:
             await tapi.add_colum(item, cls.colums)
+
         if cls.__force_columns__ is True:
             await tapi.delete_ofter_colums(cls.colums, cls.__reserved_columns__)

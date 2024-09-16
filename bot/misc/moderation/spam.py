@@ -168,6 +168,8 @@ class SpamCache(BaseCache):
 
 
 async def parse_message(message: nextcord.Message):
+    return
+
     if message.author.bot:
         return
 

@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from bot.databases.varstructs import LogsPayload
 from bot.languages import i18n
-from bot.databases import GuildDateBases, localdb
+from bot.databases import GuildDateBases
 import nextcord
 from bot.misc import logstool
 from bot.misc.lordbot import LordBot
@@ -111,7 +111,6 @@ class LogsDropDown(nextcord.ui.StringSelect):
 @AsyncSterilization
 class LogsView(DefaultSettingsView):
     embed: nextcord.Embed
-    permission: dict = {'manage_webhooks': True}
 
     async def __init__(
         self,

@@ -8,6 +8,7 @@ import time
 from typing import Dict, Optional
 import aiocache
 from aiocache.base import SENTINEL
+import redis
 from bot.databases.misc.adapter_dict import FullJson
 from redis.asyncio import ConnectionPool, StrictRedis
 
@@ -86,52 +87,8 @@ POOL = ConnectionPool(
     password=os.environ.get('REDIS_PASSWORD'),
     db=0
 )
-cache = StrictRedis(connection_pool=POOL)
+cache = StrictRedis(connection_pool=POOL, health_check_interval=30)
 cache_data: Dict[str, UpdatedCache] = {}
-
-
-def load_from_backup(tablename: str) -> None:
-    with open('assets/db_backups.json', 'rb+') as file:
-        backups = FullJson().loads(file.read())
-
-    try:
-        last_bup = list(backups)[-1]
-    except IndexError:
-        return
-
-    try:
-        data = backups[last_bup][tablename]
-        cache = cache_data[tablename]
-    except KeyError:
-        return
-
-    cache._cache = data
-
-
-async def save_db() -> None:
-    with open('assets/db_backups.json', 'rb+') as file:
-        backups = FullJson().loads(file.read())
-
-    try:
-        last_bup = list(backups)[-1]
-    except IndexError:
-        last_bup = 0
-
-    if 1800 > time.time()-last_bup:
-        return
-
-    data = {}
-    for key, cache in cache_data.items():
-        data[key] = await cache.fetch()
-
-    backups[time.time()] = data
-    backups = dict(list(backups.items())[:48])
-    backups = FullJson().dumps(backups).encode()
-
-    with open('assets/db_backups.json', 'wb+') as file:
-        file.write(backups)
-
-    _log.debug('Save backup %d', time.time())
 
 
 async def _update_db(tablename) -> None:
@@ -142,10 +99,8 @@ async def _update_db(tablename) -> None:
                ', '.join(current_updated_task.keys()), tablename)
 
     for key, data in current_updated_task.copy().items():
-        data = FullJson().dumps(data)
+        data = FullJson.dumps(data)
         current_updated_task[key] = data
-
-    asyncio.create_task(save_db())
 
     if not current_updated_task:
         return
@@ -168,18 +123,26 @@ async def get_table(table_name: str, /, *, namespace=None, timeout=None) -> Upda
         _log.trace('[%d] A request for fetched database %s was received', i, table_name)
         try:
             data = await cache.get(table_name)
+        except redis.AuthenticationError:
+            if i == 0:
+                POOL.connection_kwargs.pop('password', None)
+                cache.connection_pool = POOL
+                continue
         except Exception as exc:
             last_exc = exc
         else:
             if data is None:
-                data = '{}'
+                data = {}
             data = FullJson().loads(data)
             _log.trace('Fetched databases %s: %s', table_name, data)
             break
         await asyncio.sleep(1)
     else:
-        load_from_backup(table_name)
         _log.trace('Getting the database %s ended with an error %s',
                    table_name, type(last_exc).__name__, exc_info=last_exc)
+
+    if not isinstance(data, dict):
+        data = {}
+
     db._cache = data
     return db

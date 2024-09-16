@@ -1,4 +1,7 @@
 import asyncio
+import os
+import subprocess
+import sys
 import time
 from typing import Literal
 import nextcord
@@ -24,10 +27,14 @@ class Teams(commands.Cog):
         return True
 
     @commands.command()
+    async def send_exc(self, ctx: commands.Context):
+        raise TypeError("test exc")
+
+    @commands.command()
     async def shutdown(self, ctx: commands.Context):
         await self.bot._LordBot__session.close()
         await localdb._update_db(__name__)
-        await localdb.cache.close()
+        await localdb.cache.close(close_connection_pool=True)
 
         conn = self.bot.engine._DataBase__connection
         if conn and not conn.closed:
@@ -166,6 +173,10 @@ class Teams(commands.Cog):
                 continue
 
             await bot.add_roles(*added_roles, atomic=False)
+
+    @commands.command()
+    async def update_localization(self, ctx: commands.Context):
+        self.bot.load_i18n_config()
 
     @commands.command()
     async def get_apps(self, ctx: commands.Context, page: int = 0):

@@ -5,17 +5,15 @@ from bot.misc.utils import AsyncSterilization
 from bot.views.information_dd import get_info_dd
 
 
-from ... import ideas
-from bot.views.settings._view import DefaultSettingsView
-
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
+from .base import ViewOptionItem
 
 from typing import Optional
 
 
 @AsyncSterilization
-class DropDown(nextcord.ui.ChannelSelect):
+class ChannelsDropDown(nextcord.ui.ChannelSelect):
     async def __init__(
         self,
         guild_id: int
@@ -34,8 +32,10 @@ class DropDown(nextcord.ui.ChannelSelect):
 
 
 @AsyncSterilization
-class OffersView(DefaultSettingsView):
-    embed: nextcord.Embed = None
+class OffersView(ViewOptionItem):
+    label: str = 'settings.ideas.dropdown.offers.title'
+    description: str = 'settings.ideas.dropdown.offers.description'
+    emoji: str = 'ideas'
 
     async def __init__(self, guild: nextcord.Guild, channel: Optional[nextcord.TextChannel] = None) -> None:
         self.gdb = GuildDateBases(guild.id)
@@ -56,30 +56,21 @@ class OffersView(DefaultSettingsView):
 
         super().__init__()
 
-        self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = i18n.t(locale, 'settings.button.edit')
-
+        channel_value = i18n.t(locale, 'settings.ideas.init.unspecified')
         if channel or (channel := guild.get_channel(channel_offers_id)):
             self.channel = channel
             self.edit.disabled = False
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.init.value.offers',
-                                   channel=f"#{channel.name}")
-            ))
-        else:
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.init.value.offers',
-                                   channel=i18n.t(locale, 'settings.ideas.init.unspecified'))
-            ))
+            channel_value = f"#{channel.name}"
+        self.add_item(get_info_dd(
+            placeholder=i18n.t(locale, 'settings.ideas.value.offers',
+                               channel=channel_value)
+        ))
 
-        cdd = await DropDown(guild.id)
+        cdd = await ChannelsDropDown(guild.id)
         self.add_item(cdd)
 
-    @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
-    async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        view = await ideas.IdeasView(interaction.guild)
-
-        await interaction.response.edit_message(embed=view.embed, view=view)
+        self.back.label = i18n.t(locale, 'settings.button.back')
+        self.edit.label = i18n.t(locale, 'settings.button.edit')
 
     @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):

@@ -1,9 +1,6 @@
-from datetime import timedelta
 import nextcord
 from nextcord.ext import commands
 import time
-import asyncio
-from typing import Optional
 
 from bot.databases import localdb
 from bot.misc.lordbot import LordBot
@@ -56,16 +53,17 @@ class MemberTimeoutEvent(commands.Cog):
             self.bot.dispatch("untimeout", entry.target,
                               duration, entry.user, entry.reason)
 
-            timeout_data.pop(user_id)
+            timeout_data.pop(user_id, None)
             await timeout_db.set(guild_id, timeout_data)
 
     async def process_untimeout(self, member: nextcord.Member):
         timeout_db = await localdb.get_table('timeout')
         timeout_data = await timeout_db.get(member.guild.id, {})
+
         try:
             data = timeout_data[member.id]
             duration = data[2]
-        except (KeyError, IndexError, AttributeError):
+        except (KeyError, IndexError):
             duration = None
 
         timeout_data.pop(member.id, None)
@@ -78,7 +76,7 @@ class MemberTimeoutEvent(commands.Cog):
     async def on_ready(self) -> None:
         timeout_db = await localdb.get_table('timeout')
 
-        for guild_id, data in await timeout_db.fetch():
+        for guild_id, data in (await timeout_db.fetch()).items():
             guild = self.bot.get_guild(guild_id)
 
             if guild is None:
@@ -91,9 +89,9 @@ class MemberTimeoutEvent(commands.Cog):
                     continue
 
                 data = timeout_data[user_id]
-                duration = data[2]
+                mute_time = data[1]
                 self.bot.lord_handler_timer.create(
-                    duration,
+                    mute_time-time.time(),
                     self.process_untimeout(member),
                     f'timeout:{guild_id}:{user_id}'
                 )

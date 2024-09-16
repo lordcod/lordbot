@@ -3,7 +3,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
 from bot.misc.utils import AsyncSterilization
-from .standart import FunctionOptionItem
+from .base import FunctionOptionItem
 
 
 @AsyncSterilization

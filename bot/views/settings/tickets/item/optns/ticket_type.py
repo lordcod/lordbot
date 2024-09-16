@@ -5,7 +5,7 @@ from bot.databases.varstructs import TicketsPayload
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
 from bot.resources.info import DEFAULT_TICKET_TYPE
-from .standart import ViewOptionItem
+from .base import ViewOptionItem
 
 
 @AsyncSterilization

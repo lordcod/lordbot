@@ -10,7 +10,7 @@ from bot.databases.varstructs import FaqPayload, TicketsPayload
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization, get_emoji_wrap
 from bot.resources.info import DEFAULT_TICKET_FAQ_TYPE
-from .standart import OptionItem, ViewOptionItem
+from .base import OptionItem, ViewOptionItem
 
 
 @AsyncSterilization
@@ -42,11 +42,10 @@ class TicketFAQModal(nextcord.ui.Modal):
 
         self.label = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tickets.faq.modal.label'),
-            max_length=128,
-            placeholder=get_data('label')
+            max_length=100,
+            placeholder=get_data('label'),
+            required=not get_data('label')
         )
-        if get_data('label'):
-            self.label.required = False
         self.add_item(self.label)
 
         self.emoji = nextcord.ui.TextInput(
@@ -61,7 +60,7 @@ class TicketFAQModal(nextcord.ui.Modal):
             label=i18n.t(locale, 'settings.tickets.faq.modal.description'),
             style=nextcord.TextInputStyle.paragraph,
             required=False,
-            max_length=1024,
+            max_length=100,
             placeholder=get_data('description')
         )
         self.add_item(self.description)
@@ -69,10 +68,10 @@ class TicketFAQModal(nextcord.ui.Modal):
         self.response = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tickets.faq.modal.answer'),
             style=nextcord.TextInputStyle.paragraph,
-            placeholder=get_data('response')
+            max_length=2000,
+            default_value=get_data('response'),
+            required=not get_data('response')
         )
-        if get_data('response'):
-            self.response.required = False
         self.add_item(self.response)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
@@ -181,9 +180,9 @@ class TicketFAQItemsDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=item['label'],
+                label=item['label'][:100],
                 value=i,
-                description=item.get('description'),
+                description=item.get('description', '')[:100],
                 emoji=item.get('emoji'),
                 default=selected_faq_item == i
             )

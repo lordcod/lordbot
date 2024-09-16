@@ -73,13 +73,13 @@ class Colum:
             """
         )
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return (f"<Colums name=\"{self.name}\" data_type=\"{self.data_type}\" "
                 f"default=\"{self.default}\" primary_key={self.primary_key} "
                 f"nullable={self.nullable}>")
 
-    def __repr__(self) -> str:
-        return str(self)
+    def __hash__(self) -> int:
+        return hash(self.name)
 
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, Colum):

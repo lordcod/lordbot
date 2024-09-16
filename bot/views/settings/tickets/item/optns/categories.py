@@ -6,7 +6,7 @@ from bot.databases.handlers.guildHD import GuildDateBases
 from bot.databases.varstructs import TicketsPayload
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
-from .standart import ViewOptionItem
+from .base import ViewOptionItem
 
 
 @AsyncSterilization
@@ -34,17 +34,16 @@ class TicketCategoriesModal(nextcord.ui.Modal):
 
         self.label = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tickets.categories.modal.label'),
-            max_length=128,
-            placeholder=get_data('label')
+            max_length=45,
+            placeholder=get_data('label'),
+            required=not get_data('label')
         )
-        if get_data('label'):
-            self.label.required = False
         self.add_item(self.label)
 
         self.emoji = nextcord.ui.TextInput(
             label=i18n.t(locale, 'settings.tickets.categories.modal.emoji'),
             required=False,
-            max_length=128,
+            max_length=100,
             placeholder=get_data('emoji')
         )
         self.add_item(self.emoji)
@@ -54,7 +53,7 @@ class TicketCategoriesModal(nextcord.ui.Modal):
                 locale, 'settings.tickets.categories.modal.description'),
             style=nextcord.TextInputStyle.paragraph,
             required=False,
-            max_length=1024,
+            max_length=100,
             placeholder=get_data('description')
         )
         self.add_item(self.description)
@@ -116,11 +115,11 @@ class TicketCategoriesDropDown(nextcord.ui.StringSelect):
 
         options = [
             nextcord.SelectOption(
-                label=data['label'],
+                label=data['label'][:100],
                 value=i,
                 default=i == selected_value,
                 emoji=data.get('emoji'),
-                description=data.get('description')
+                description=data.get('description', '')[:100]
             )
             for i, data in enumerate(categories)
         ]

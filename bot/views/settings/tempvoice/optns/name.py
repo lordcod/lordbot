@@ -3,7 +3,7 @@ import nextcord
 from bot.databases.handlers.guildHD import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
-from bot.views.settings.tempvoice.optns.standart import OptionItem
+from bot.views.settings.tempvoice.optns.base import OptionItem
 
 
 @AsyncSterilization

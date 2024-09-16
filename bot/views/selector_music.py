@@ -26,7 +26,7 @@ class SelectMusicDropDown(nextcord.ui.Select):
         self.player = player
 
         super().__init__(
-            placeholder=i18n.t(locale, 'music-selector.placeholder'),
+            placeholder=i18n.t(locale, 'music.selector.placeholder'),
             min_values=1,
             max_values=1,
             options=[

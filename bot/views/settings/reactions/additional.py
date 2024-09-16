@@ -55,6 +55,7 @@ class InstallEmojiView(DefaultSettingsView):
             description=i18n.t(locale, 'settings.reactions.init.description'),
             color=color
         )
+        # TODO LOCALIZATION
         self.embed.add_field(
             name='',
             value='> Select a channel and then click set reactions'
