@@ -267,6 +267,7 @@ class LordLogger(logging.Logger):
 
         logger.trace("Houston, we have a %s", "interesting problem", exc_info=1)
         """
+        self.debug
         if self.isEnabledFor(TRACE):
             self._adt_log(TRACE, msg, *args, **kwargs)
 

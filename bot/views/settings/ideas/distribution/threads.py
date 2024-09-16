@@ -140,7 +140,6 @@ class IdeasThreadsView(ViewOptionItem):
         thread_open = ideas.get('thread_open')
         thread_delete = ideas.get('thread_delete')
         default_thread_name = DEFAULT_THREAD_NAME_RU if locale == 'ru' else DEFAULT_THREAD_NAME
-        print(default_thread_name)
         thread_name = ideas.get('thread_name', default_thread_name)
 
         self.embed = nextcord.Embed(
@@ -179,5 +178,7 @@ class IdeasThreadsView(ViewOptionItem):
         gdb = GuildDateBases(interaction.guild_id)
         locale = await gdb.get('language')
         thread_name = DEFAULT_THREAD_NAME_RU if locale == 'ru' else DEFAULT_THREAD_NAME
-        print(thread_name)
         await gdb.set_on_json('ideas', 'thread_name', thread_name)
+
+        view = await IdeasThreadsView(interaction.guild)
+        await interaction.response.edit_message(embed=view.embed, view=view)
