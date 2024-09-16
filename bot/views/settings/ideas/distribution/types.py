@@ -161,10 +161,6 @@ class IdeasThreadsView(ViewOptionItem):
             self.edit.disabled = False
             self.reset.disabled = False
 
-        self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = 'Edit thread name'
-        self.reset.label = 'Reset thread name'
-
     @nextcord.ui.button(label='Edit thread name', style=nextcord.ButtonStyle.green, disabled=True)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await ThreadsNameModal(interaction.guild_id)
