@@ -39,8 +39,7 @@ class ThreadsOpenDropdown(nextcord.ui.StringSelect):
             ),
         ]
 
-        super().__init__(placeholder=i18n.t(locale,
-                                            'settings.tickets.modals.dropdown.required.placeholder'), options=options)
+        super().__init__(options=options)
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         value = bool(int(self.values[0]))
@@ -48,7 +47,7 @@ class ThreadsOpenDropdown(nextcord.ui.StringSelect):
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set_on_json('ideas', 'thread_open', value)
 
-        view = await IdeasThreadsView(interaction.guild)
+        view = await ThreadsView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
@@ -91,7 +90,7 @@ class ThreadsDeleteDropdown(nextcord.ui.StringSelect):
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set_on_json('ideas', 'thread_delete', value)
 
-        view = await IdeasThreadsView(interaction.guild)
+        view = await ThreadsView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
@@ -119,12 +118,12 @@ class ThreadsNameModal(nextcord.ui.Modal):
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set_on_json('ideas', 'thread_name', value)
 
-        view = await IdeasThreadsView(interaction.guild)
+        view = await ThreadsView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)
 
 
 @AsyncSterilization
-class IdeasThreadsView(ViewOptionItem):
+class ThreadsView(ViewOptionItem):
     label: str = 'settings.ideas.dropdown.threads.title'
     description: str = 'settings.ideas.dropdown.threads.description'
     emoji: str = 'ticpanelmes'
@@ -180,5 +179,5 @@ class IdeasThreadsView(ViewOptionItem):
         thread_name = DEFAULT_THREAD_NAME_RU if locale == 'ru' else DEFAULT_THREAD_NAME
         await gdb.set_on_json('ideas', 'thread_name', thread_name)
 
-        view = await IdeasThreadsView(interaction.guild)
+        view = await ThreadsView(interaction.guild)
         await interaction.response.edit_message(embed=view.embed, view=view)

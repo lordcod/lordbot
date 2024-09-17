@@ -27,6 +27,7 @@ class ApprovedDropDown(nextcord.ui.ChannelSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
+        await self.gdb.set_on_json('ideas', 'channel_approved_id', channel.id)
 
         view = await ApprovedView(interaction.guild, channel)
         await interaction.response.edit_message(embed=view.embed, view=view)
@@ -50,29 +51,20 @@ class ApprovedView(ViewOptionItem):
             description=i18n.t(locale, 'settings.ideas.init.description'),
             color=color
         )
-        self.embed.add_field(
-            name='',
-            value=i18n.t(locale, 'settings.ideas.approved')
-        )
-
         super().__init__()
+
+        self.edit_row_back(1)
 
         if channel is not None:
             self.channel = channel
-            self.edit.disabled = False
         if channel_approved_id is not None:
             self.delete.disabled = False
 
         if channel or (channel := guild.get_channel(channel_approved_id)):
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.value.approved',
-                                   channel=f"#{channel.name}")
-            ))
-        else:
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.value.approved',
-                                   channel=i18n.t(locale, 'settings.ideas.init.unspecified'))
-            ))
+            self.embed.add_field(
+                name='',
+                value=i18n.t(locale, 'settings.ideas.value.approved')+channel.mention
+            )
 
         cdd = await ApprovedDropDown(guild.id)
         self.add_item(cdd)
@@ -80,7 +72,7 @@ class ApprovedView(ViewOptionItem):
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
 
-    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, row=1, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         idea_data = self.idea_data
         idea_data.pop('channel_approved_id', None)

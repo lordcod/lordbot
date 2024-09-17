@@ -49,6 +49,15 @@ class OptionItem(ABC):
 class ViewOptionItem(DefaultSettingsView, OptionItem):
     embed: Optional[nextcord.Embed] = None
 
+    def edit_row_back(self, row: int) -> None:
+        old_row = self.back._rendered_row
+        self.back.row = row
+        self.back._rendered_row = row
+        if old_row is not None:
+            weights = self._View__weights
+            weights.weights[old_row] -= 1
+            weights.weights[row] += 1
+
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)
     async def back(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.update(interaction)

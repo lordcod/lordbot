@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-from asyncio.constants import ACCEPT_RETRY_DELAY
+from enum import IntEnum
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -9,12 +9,10 @@ from typing import (
     NotRequired,
     List,
     Optional,
-    Required,
-    NotRequired,
     TypedDict,
     Dict,
     Tuple,
-    Union,
+    Union
 )
 
 if TYPE_CHECKING:
@@ -65,6 +63,17 @@ class IdeasComponentsPayload(TypedDict, total=False):
     dislike: ButtonPayload
 
 
+class IdeasReactionSystem(IntEnum):
+    REACTIONS = 0
+    BUTTONS = 1
+
+
+class IdeasSuggestSystem(IntEnum):
+    BUTTONS = 0
+    COMMANDS = 1
+    EVERYTHING = 2
+
+
 class IdeasPayload(TypedDict, total=False):
     enabled: bool
     channel_suggest_id: int
@@ -74,7 +83,8 @@ class IdeasPayload(TypedDict, total=False):
     channel_approved_id: int
     channel_denied_id: int
     moderation_role_ids: List[int]
-    reaction_system: int
+    reaction_system: IdeasReactionSystem
+    suggest_system: IdeasSuggestSystem
     revoting: bool
     thread_name: str
     thread_open: bool

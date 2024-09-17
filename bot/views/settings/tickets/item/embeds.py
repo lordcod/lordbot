@@ -107,13 +107,13 @@ async def get_embed(guild: nextcord.Guild, message_id: int) -> nextcord.Embed:
         closed_category = guild.get_channel(
             ticket_data.get('closed_category_id'))
         if category is not None:
-            description_info += i18n.t(locale,
-                                       'settings.tickets.embeds.category',
-                                       category=category.mention)
+            description_info += '\n'+i18n.t(locale,
+                                            'settings.tickets.embeds.category',
+                                            category=category.mention)
         if closed_category is not None:
-            description_info += i18n.t(locale,
-                                       'settings.tickets.embeds.closed_category',
-                                       category=closed_category.mention)
+            description_info += '\n'+i18n.t(locale,
+                                            'settings.tickets.embeds.closed_category',
+                                            category=closed_category.mention)
 
     embed = nextcord.Embed(
         color=color,

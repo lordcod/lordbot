@@ -43,7 +43,7 @@ async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
     enabled = ideas.get('enabled')
     cooldown = ideas.get('cooldown')
     revoting = ideas.get('revoting')
-    allow_image = ideas.get('allow_image')
+    allow_image = ideas.get('allow_image', True)
     thread_open = ideas.get('thread_open')
     thread_delete = ideas.get('thread_delete')
     moderation_role_ids = ideas.get("moderation_role_ids")

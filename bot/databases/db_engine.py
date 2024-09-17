@@ -42,7 +42,7 @@ class MyLoggingConnection(LoggingConnection):
     def __init__(
         self,
         dsn: str,
-        *, async_: int = 0,
+        async_: int = 0,
         debug_logs: bool = False
     ) -> None:
         super().__init__(dsn, async_=async_)
@@ -79,8 +79,8 @@ class DataBase:
     async def get_connection(self):
         if not self.__connection or self.__connection.closed:
             self.__connection = psycopg2.connect(self.conn_dns, connection_factory=MyLoggingConnection)
-            self.__connection.autocommit = True
             self.__connection.debug_logs = self.debug_logs
+            self.__connection.autocommit = True
             self.__connection.initialize(_log)
             _log.debug('Database pool connection opened')
         return self.__connection

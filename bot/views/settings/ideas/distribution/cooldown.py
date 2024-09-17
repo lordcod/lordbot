@@ -55,29 +55,19 @@ class CooldownView(ViewOptionItem):
             description=i18n.t(locale, 'settings.ideas.init.description'),
             color=color
         )
-        self.embed.add_field(
-            name='',
-            value=i18n.t(locale, 'settings.ideas.cooldown.field')
-        )
 
         super().__init__()
 
         if cooldown is not None:
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.value.cooldown',
-                                   cooldown=display_time(cooldown, locale, max_items=2))
-            ))
-        else:
-            self.add_item(get_info_dd(
-                placeholder=i18n.t(locale, 'settings.ideas.value.cooldown',
-                                   cooldown=i18n.t(locale, 'settings.ideas.init.unspecified'))
-            ))
-
+            self.embed.add_field(
+                name='',
+                value=i18n.t(locale, 'settings.ideas.value.cooldown')+display_time(cooldown, locale, max_items=2)
+            )
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.reset.label = i18n.t(locale, 'settings.button.reset')
 
-    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.success)
+    @nextcord.ui.button(label='Edit',  style=nextcord.ButtonStyle.success)
     async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         modal = await CooldownModal(interaction.guild_id)
         await interaction.response.send_modal(modal)

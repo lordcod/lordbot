@@ -9,7 +9,7 @@ class AllowImageFunc(FunctionOptionItem):
         await super().__init__(guild)
 
         ideas = await self.get_ideas_data()
-        self.allow_image = ideas.get('allow_image')
+        self.allow_image = ideas.get('allow_image', True)
 
         if self.allow_image:
             self.label = 'settings.ideas.dropdown.allow_image.disable.label'
