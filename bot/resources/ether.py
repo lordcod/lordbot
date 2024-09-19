@@ -52,6 +52,15 @@ class Emoji(StrEnum):
     playlist = '<:playlist:1207675618322550804>'
     volume_up = '<:volume_up:1207676856300478525>'
 
+    # Statuses
+    status_dnd = "<:status_dnd:596576774364856321>"
+    status_idle = "<:status_idle:596576773488115722>"
+    status_offline = "<:status_offline:596576752013279242>"
+    status_online = "<:status_online:596576749790429200>"
+    status_streaming = "<:status_streaming:596576747294818305>"
+
+    typingstatus = "<a:typingstatus:393836741272010752>"
+
     # Music
     yandex_music = '<:yandex_music:1259622734132936784>'
 

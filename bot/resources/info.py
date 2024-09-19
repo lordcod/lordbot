@@ -1,11 +1,12 @@
 import nextcord
 import orjson
-from bot.databases.varstructs import IdeasComponentsPayload, IdeasMessagesPayload, IdeasPayload, IdeasReactionsPayload
+from bot.databases.varstructs import IdeasComponentsPayload, IdeasMessagesPayload, IdeasPayload, IdeasReactionsPayload, TicketsItemPayload
 from bot.resources.ether import ColorType, Emoji
 
 DISCORD_SUPPORT_SERVER = 'https://discord.com/invite/np6RhahkZH'
 SITE = 'https://lordcord.fun'
 
+DEFAULT_MAPPING_LANGUAGE = {'en': 'en-US', 'es': 'es-ES'}
 
 DEFAULT_BOT_COLOR = ColorType.sliv
 
@@ -61,7 +62,7 @@ DEFAULT_GUILD_DATA = {
 
 COUNT_ROLES_PAGE = 5
 
-DEFAULT_TICKET_PAYLOAD = {
+DEFAULT_TICKET_PAYLOAD: TicketsItemPayload = {
     'names': {
         'open': '{ticket.count.total}-ticket',
         'close': None
@@ -151,7 +152,7 @@ DEFAULT_TICKET_PAYLOAD = {
     }
 }
 
-DEFAULT_TICKET_PAYLOAD_RU = {
+DEFAULT_TICKET_PAYLOAD_RU: TicketsItemPayload = {
     'names': {
         'open': '{ticket.count.total}-ticket',
         'close': None,
@@ -363,6 +364,7 @@ DEFAULT_IDEAS_MESSAGES['reject_with_reason'] = DEFAULT_IDEAS_MESSAGES['deny_with
 
 DEFAULT_THREAD_NAME = 'Discussion of the idea from {member.username}'
 DEFAULT_IDEAS_REVOTING = True
+DEFAULT_IDEAS_ALLOW_IMAGE = True
 
 DEFAULT_IDEAS_PAYLOAD: IdeasPayload = {
     'messages': DEFAULT_IDEAS_MESSAGES,

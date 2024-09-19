@@ -19,7 +19,7 @@ from bot.databases.varstructs import (ButtonPayload, IdeasPayload, IdeasReaction
                                       IdeasReactionSystem as ReactionSystemType, IdeasSuggestSystem)
 from bot.databases import localdb, GuildDateBases
 from bot.languages import i18n
-from bot.resources.info import DEFAULT_IDEAS_PAYLOAD, DEFAULT_IDEAS_PAYLOAD_RU, DEFAULT_IDEAS_REVOTING
+from bot.resources.info import DEFAULT_IDEAS_ALLOW_IMAGE, DEFAULT_IDEAS_PAYLOAD, DEFAULT_IDEAS_PAYLOAD_RU, DEFAULT_IDEAS_REVOTING
 
 
 _log = logging.getLogger(__name__)
@@ -513,7 +513,7 @@ class IdeaModal(nextcord.ui.Modal):
         gdb = GuildDateBases(guild_id)
         self.locale = locale = await gdb.get('language')
         ideas_data: IdeasPayload = await gdb.get('ideas')
-        allow_image = ideas_data.get('allow_image', True)
+        allow_image = ideas_data.get('allow_image', DEFAULT_IDEAS_ALLOW_IMAGE)
 
         super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
@@ -565,7 +565,6 @@ class IdeaModal(nextcord.ui.Modal):
     async def create_thread(locale: str, message: nextcord.Message, ideas_data: IdeasPayload, payload: dict) -> None:
         if ideas_data.get('thread_open'):
             DEFAULT_THREAD_NAME = get_default_payload(locale)['thread_name']
-            print(DEFAULT_THREAD_NAME)
         thread_name = ideas_data.get('thread_name', DEFAULT_THREAD_NAME)
         await message.create_thread(name=lord_format(thread_name,
                                                      payload))

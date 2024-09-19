@@ -27,7 +27,6 @@ tags_dt = {tag.commit.committed_date: tag for tag in repo.tags}
 release_tag = tags_dt[max(tags_dt)].name
 
 
-
 translator = googletrans.Translator()
 
 BETWEEN_MESSAGES_TIME = {}

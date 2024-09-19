@@ -83,7 +83,7 @@ class TwitchItemModal(nextcord.ui.Modal):
                                             ephemeral=True)
             return
 
-        user = await interaction.client.twnoti.get_user_info(username)
+        user = await interaction.client.twnoti.try_get_user_info(username)
         if user is None:
             await interaction.followup.send(i18n.t(locale, 'settings.notifi.twitch.modal.error'),
                                             ephemeral=True)
@@ -141,7 +141,10 @@ class TwitchItemView(nextcord.ui.View):
             if username in bot.twnoti.user_info:
                 userinfo = bot.twnoti.user_info[username]
             else:
-                userinfo = await bot.twnoti.get_user_info(username)
+                userinfo, success = await bot.twnoti.try_get_user_info(username)
+
+        if not success:
+            raise TypeError
 
         user = f'{userinfo.display_name} ({userinfo.login})' if userinfo else i18n.t(
             'settings.notifi.unspecified')
@@ -193,7 +196,7 @@ class TwitchItemView(nextcord.ui.View):
         gdb = GuildDateBases(interaction.guild_id)
         await gdb.set_on_json('twitch_notification', self.selected_id, self.data)
 
-        await interaction.client.twnoti.add_channel(interaction.guild_id, self.data['username'])
+        await interaction.client.twnoti.try_add_channel(interaction.guild_id, self.data['username'])
 
         view = await TwitchItemView(interaction.guild, self.selected_id)
         await interaction.response.edit_message(embed=view.embed, view=view)

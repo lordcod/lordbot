@@ -2,6 +2,7 @@ from typing import Dict
 
 from bot.misc.utils import AsyncSterilization
 from bot.views.settings.ideas.distribution.alllow_image import AllowImageFunc
+from bot.views.settings.ideas.distribution.revoting import RevotingFunc
 from bot.views.settings.ideas.distribution.threads import ThreadsView
 from bot.views.settings.ideas.distribution.types import TypesView
 
@@ -20,5 +21,6 @@ distrubuters: Dict[str, AsyncSterilization[OptionItem]] = {
     'cooldown': CooldownView,
     'allow_image': AllowImageFunc,
     'threads': ThreadsView,
-    'types': TypesView
+    'types': TypesView,
+    'revoting': RevotingFunc
 }

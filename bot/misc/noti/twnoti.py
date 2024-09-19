@@ -44,7 +44,7 @@ class TwNoti:
 
         self.__running: bool = False
 
-        self.heartbeat_timeout = 180
+        self.heartbeat_timeout = 30
         self.last_heartbeat = time.time()
 
     @property
@@ -220,6 +220,7 @@ class TwNoti:
                                uid,
                                exc_info=exp)
                     with_started, data, success = False, None, False
+                _log.debug("Notifi get %s: %s %s %s", uid, with_started, success, data)
                 if not success:
                     _log.debug('Failed to process user %s', uid)
                     continue

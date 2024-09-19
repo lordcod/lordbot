@@ -7,7 +7,7 @@ import datetime
 from enum import IntEnum
 import functools
 import logging
-from typing import Any, Dict, List, Optional,  Tuple
+from typing import Any, Callable, Coroutine, Dict, List, Optional,  Tuple, TypeVar
 import nextcord
 
 from bot.databases import GuildDateBases, localdb
@@ -15,6 +15,7 @@ from bot.misc.time_transformer import display_time
 from bot.misc.utils import cut_back
 
 _log = logging.getLogger(__name__)
+LT = TypeVar('LT')
 
 
 @dataclass
@@ -148,7 +149,7 @@ async def pre_remove_role(member: nextcord.Member, role: nextcord.Role) -> None:
     _roles_db[key][1].append(role)
 
 
-async def get_webhook(channel: nextcord.TextChannel) -> nextcord.Webhook:
+async def get_webhook(channel: nextcord.TextChannel) -> Optional[nextcord.Webhook]:
     client = channel._state._get_client()
     webhooks_db = await localdb.get_table('logs_webhooks')
     webhook_data = await webhooks_db.get(channel.id)
@@ -195,7 +196,9 @@ def on_logs(log_type: int):
 
         @functools.wraps(coro)
         async def wrapped(self: Logs, *args, **kwargs) -> None:
-            if self.guild is None or self.gdb is None:
+            tasks = []
+
+            if self.guild is None:
                 return
 
             mes: Optional[Message] = await coro(self, *args, **kwargs)
@@ -205,20 +208,20 @@ def on_logs(log_type: int):
                 return
 
             for channel_id, logs_types in guild_data.items():
-                asyncio.create_task(send_log(self, mes, channel_id, logs_types))
+                tasks.append(asyncio.create_task(send_log(self, mes, channel_id, logs_types)))
 
+            for task in tasks:
+                await task
         return wrapped
     return predicte
 
 
 class Logs:
     def __init__(self, guild: Optional[nextcord.Guild]):
-        if guild is not None:
-            self.guild = guild
-            self.gdb = GuildDateBases(guild.id)
-        else:
-            self.guild = None
-            self.gdb = None
+        if guild is None:
+            return
+        self.guild = guild
+        self.gdb = GuildDateBases(guild.id)
 
     @on_logs(LogType.delete_message)
     async def delete_message(self, message: nextcord.Message, moderator: Optional[nextcord.Member] = None):

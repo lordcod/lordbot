@@ -8,12 +8,14 @@ from bot.misc import utils
 from bot.misc.utils import TimeCalculator
 from bot.misc.lordbot import LordBot
 from bot.misc.time_transformer import display_time
+from bot.resources.ether import Emoji
 from bot.views.settings_menu import SettingsView
 from bot.views.delcat import DelCatView
 from bot.databases import RoleDateBases, BanDateBases, GuildDateBases
 
 import time
 from typing import List, Optional
+from bot.resources.info import DEFAULT_MAPPING_LANGUAGE
 
 
 timenow = None
@@ -30,7 +32,38 @@ class Moderations(commands.Cog):
     def __init__(self, bot: LordBot):
         self.bot = bot
 
+    @commands.command(name='give-role-all', aliases=["give-role-everyone", "give-role"], enabled=False)
+    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    async def give_role_all(self, ctx: commands.Context, role: nextcord.Role):
+        if not role.is_assignable():
+            return
+        member_count = ctx.guild.member_count
+        msg = await ctx.send(f"{Emoji.loading} I'm starting to give the {role.name} role to {member_count} participants")
+
+        modificator = 10
+        if member_count > 1000:
+            modificator = member_count // 30
+        elif member_count > 750:
+            modificator = member_count // 23
+        elif member_count > 500:
+            modificator = member_count // 13
+        elif member_count > 250:
+            modificator = member_count // 10
+        elif member_count > 100:
+            modificator = member_count // 5
+
+        for i, member in enumerate(ctx.guild.members, start=1):
+            if i % modificator == 0:
+                msg = await msg.edit(content=f"{Emoji.loading} {i}/{member_count} ({i/member_count*100:.0f}%) participants remained")
+            if role in member.roles:
+                continue
+            await member.add_roles(role)
+
+        await msg.edit(content=f"{Emoji.success} The {role.name} role was given to {member_count} participants")
+
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def say(self, ctx: commands.Context, channel: Optional[nextcord.TextChannel] = None, *, message: str):
         if channel is None and ctx.guild is None:
             return
@@ -63,6 +96,7 @@ class Moderations(commands.Cog):
         await ctx.message.delete()
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def edit(self, ctx: commands.Context, message: nextcord.Message, *, message_data: str):
         guild = message.guild
         channel = message.channel
@@ -84,18 +118,29 @@ class Moderations(commands.Cog):
         await ctx.message.delete()
 
     @commands.command(aliases=["set", "setting"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.bot_has_permissions(manage_guild=True)
+    @commands.has_permissions(administrator=True)
     async def settings(self, ctx: commands.Context):
         view = await SettingsView(ctx.author)
-
         await ctx.send(embed=view.embed, view=view)
 
-    @nextcord.slash_command(name="delete-category", default_member_permissions=48)
+    @nextcord.slash_command(
+        name="delete-category",
+        description=i18n.get('commands.slash.deletecategory.description'),
+        description_localizations=i18n.get_dict('commands.slash.deletecategory.description', DEFAULT_MAPPING_LANGUAGE),
+        default_member_permissions=48
+    )
     @application_checks.bot_has_permissions(manage_channels=True)
-    async def deletecategory(self, interaction: nextcord.Interaction, category: nextcord.CategoryChannel):
+    async def deletecategory(
+        self,
+        interaction: nextcord.Interaction,
+        category: nextcord.CategoryChannel = nextcord.SlashOption(
+            name=i18n.get('commands.slash.deletecategory.arguments.0.name'),
+            description=i18n.get('commands.slash.deletecategory.arguments.0.description'),
+            name_localizations=i18n.get_dict('commands.slash.deletecategory.arguments.0.name', DEFAULT_MAPPING_LANGUAGE),
+            description_localizations=i18n.get_dict('commands.slash.deletecategory.arguments.0.description', DEFAULT_MAPPING_LANGUAGE),
+        )
+    ):
         view = await DelCatView(interaction.user, category)
-
         await interaction.response.send_message(embed=view.embed, view=view)
 
     @commands.group(name='ban', aliases=["tempban"], invoke_without_command=True)
@@ -268,20 +313,24 @@ class Moderations(commands.Cog):
 
     @cmd_clone.subcommand(
         name='role',
-        description='If you want to copy the role but still keep the rights, then this is the command for you'
+        description=i18n.get('commands.slash.clone_role.description'),
+        description_localizations=i18n.get_dict('commands.slash.clone_role.description', DEFAULT_MAPPING_LANGUAGE),
     )
     @application_checks.bot_has_permissions(manage_roles=True)
     async def clone_role(
         self,
         interaction: nextcord.Interaction,
         role: nextcord.Role = nextcord.SlashOption(
-            name='role',
-            description='Select the role you want to copy',
-            required=True
+            name=i18n.get('commands.slash.clone_role.arguments.0.name'),
+            description=i18n.get('commands.slash.clone_role.arguments.0.description'),
+            name_localizations=i18n.get_dict('commands.slash.clone_role.arguments.0.name', DEFAULT_MAPPING_LANGUAGE),
+            description_localizations=i18n.get_dict('commands.slash.clone_role.arguments.0.description', DEFAULT_MAPPING_LANGUAGE),
         ),
         name: str = nextcord.SlashOption(
-            name='name',
-            description='When creating a new role, this name will be specified',
+            name=i18n.get('commands.slash.clone_role.arguments.1.name'),
+            description=i18n.get('commands.slash.clone_role.arguments.1.description'),
+            name_localizations=i18n.get_dict('commands.slash.clone_role.arguments.1.name', DEFAULT_MAPPING_LANGUAGE),
+            description_localizations=i18n.get_dict('commands.slash.clone_role.arguments.1.description', DEFAULT_MAPPING_LANGUAGE),
             required=False
         )
     ) -> None:

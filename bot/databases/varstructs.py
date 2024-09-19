@@ -139,7 +139,7 @@ class TicketsNamesPayload(TypedDict):
 class ButtonPayload(TypedDict, total=False):
     label: str
     emoji: str
-    style: Literal[1, 2, 3, 4, 5]
+    style: Literal[1, 2, 3, 4]
 
 
 class SelectOptionPayload(TypedDict):

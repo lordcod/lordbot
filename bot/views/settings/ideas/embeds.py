@@ -6,6 +6,7 @@ from bot.databases.varstructs import IdeasPayload
 from bot.languages import i18n
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import get_emoji_as_color
+from bot.resources.info import DEFAULT_IDEAS_ALLOW_IMAGE
 
 
 def get_emoji(system_emoji: str, value: Any) -> str:
@@ -43,7 +44,7 @@ async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
     enabled = ideas.get('enabled')
     cooldown = ideas.get('cooldown')
     revoting = ideas.get('revoting')
-    allow_image = ideas.get('allow_image', True)
+    allow_image = ideas.get('allow_image', DEFAULT_IDEAS_ALLOW_IMAGE)
     thread_open = ideas.get('thread_open')
     thread_delete = ideas.get('thread_delete')
     moderation_role_ids = ideas.get("moderation_role_ids")

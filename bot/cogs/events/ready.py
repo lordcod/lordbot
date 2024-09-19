@@ -102,7 +102,7 @@ class ReadyEvent(commands.Cog):
         cmd_wnf = []
         for cmd in self.bot.commands:
             cmd_data = get_command(cmd.qualified_name)
-            if cmd_data is None:
+            if cmd_data is None and cmd.cog_name != 'Teams':
                 cmd_wnf.append(cmd.qualified_name)
 
         if cmd_wnf:
