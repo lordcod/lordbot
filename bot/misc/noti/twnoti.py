@@ -111,8 +111,9 @@ class TwNoti:
                     await self.try_add_channel(guild_id, username, True)
                 if retry:
                     _log.warning("It was not possible to add the user %s to the list", username)
-                    return
-                asyncio.create_task(_wrap_task)
+                else:
+                    asyncio.create_task(_wrap_task)
+                return
             if with_started:
                 self.twitch_streaming.add(username)
             self.usernames.add(username)
