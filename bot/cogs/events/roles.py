@@ -12,11 +12,13 @@ class RolesEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before: nextcord.Member, after: nextcord.Member):
-        if set(before.roles)-set(after.roles):
-            role = list(set(before.roles)-set(after.roles))[0]
+        removed_roles = set(before.roles)-set(after.roles)
+        added_roles = set(after.roles)-set(before.roles)
+        if removed_roles:
+            role = list(removed_roles)[0]
             await logstool.pre_remove_role(after, role)
-        if set(after.roles)-set(before.roles):
-            role = list(set(after.roles)-set(before.roles))[0]
+        if added_roles:
+            role = list(added_roles)[0]
             await logstool.pre_add_role(after, role)
 
 

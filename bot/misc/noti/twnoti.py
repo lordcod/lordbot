@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import asyncio
+from collections import defaultdict
 import os
 import time
 import logging
-from typing import TYPE_CHECKING, Any, Optional, Tuple
-
-from aiohttp import ClientConnectionError
+from typing import TYPE_CHECKING, Dict, Optional, Set, Tuple
+from aiohttp.web_exceptions import HTTPUnauthorized
 
 from bot.databases.handlers.guildHD import GuildDateBases
+from bot.misc.noti.base import Notification, NotificationApi
 from bot.misc.utils import get_payload, generate_message, lord_format
 from bot.resources.info import DEFAULT_TWITCH_MESSAGE
 
@@ -23,9 +24,112 @@ if TYPE_CHECKING:
 _log = logging.getLogger(__name__)
 
 
-class TwNoti:
+def refresh_token(func):
+    if isinstance(func, staticmethod):
+        func = func.__func__
+
+    async def wrapped(self: TwNotiAPI, *args, **kwargs):
+        try:
+            return await func(self, *args, **kwargs)
+        except HTTPUnauthorized:
+            await self.get_oauth_token()
+            raise
+    return wrapped
+
+
+class TwCache:
+    if TYPE_CHECKING:
+        usernames: Set[str]
+        twitch_streaming: Set[str]
+        user_info: Dict[str, User]
+        directed_data: Dict[str, Set[int]]
+
+    def __init__(self) -> None:
+        self.usernames: Set[str] = set()
+        self.twitch_streaming: Set[str] = set()
+        self.user_info: Dict[str, User] = dict()
+        self.directed_data: Dict[str, Set[int]] = defaultdict(set)
+
+
+class TwNotiAPI(NotificationApi):
     twitch_api_access_token: Optional[str] = None
     twitch_api_access_token_end: Optional[int] = None
+    if TYPE_CHECKING:
+        cache: TwCache
+        client_id: str
+        client_secret: str
+
+    def __init__(
+        self,
+        bot: LordBot,
+        cache: TwCache,
+        client_id: str,
+        client_secret: str
+    ) -> None:
+        super().__init__(bot)
+        self.cache = cache
+        self.client_id: str = client_id
+        self.client_secret: str = client_secret
+
+    async def check_token(self) -> None:
+        if self.twitch_api_access_token is None or time.time() > self.twitch_api_access_token_end:
+            try:
+                await self.get_oauth_token()
+            except Exception as exc:
+                _log.warning('The token could not be obtained', exc_info=exc)
+                raise
+
+    async def get_oauth_token(self) -> None:
+        url = 'https://id.twitch.tv/oauth2/token'
+        data = {
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'grant_type': 'client_credentials'
+        }
+        json = await self.request('POST', url,  data=data)
+        self.twitch_api_access_token_end = json['expires_in']+time.time()
+        self.twitch_api_access_token = json['access_token']
+
+    @refresh_token
+    async def get_user_info(self, username: str) -> Optional[User]:
+        await self.check_token()
+
+        url = 'https://api.twitch.tv/helix/users'
+        params = {
+            'login': username
+        }
+        headers = {
+            'Client-ID': self.client_id,
+            'Authorization': 'Bearer ' + self.twitch_api_access_token
+        }
+        data = await self.request('GET', url, params=params, headers=headers)
+
+        if data is not None and len(data['data']) > 0:
+            user = User(**data['data'][0])
+            self.cache.user_info[username] = user
+            return user
+
+    @refresh_token
+    async def is_streaming(self, username: str) -> Tuple[bool, Optional[Stream]]:
+        await self.check_token()
+
+        url = 'https://api.twitch.tv/helix/streams'
+        params = {
+            'user_login': username
+        }
+        headers = {
+            'Client-ID': self.client_id,
+            'Authorization': 'Bearer ' + self.twitch_api_access_token
+        }
+        data = await self.request('GET', url, params=params, headers=headers)
+
+        if data is not None and len(data['data']) > 0:
+            return True, Stream(**data['data'][0])
+        else:
+            return False, None
+
+
+class TwNoti(Notification[TwNotiAPI], TwCache):
 
     def __init__(
         self,
@@ -33,58 +137,14 @@ class TwNoti:
         client_id: str = os.getenv('TWITCH_CLIENT_ID'),
         client_secret: str = os.getenv('TWITCH_CLIENT_SECRET')
     ) -> None:
-        self.bot = bot
-        self.client_id = client_id
-        self.client_secret = client_secret
-
-        self.usernames = set()
-        self.twitch_streaming = set()
-        self.user_info = {}
-        self.directed_data = {}
-
-        self.__running: bool = False
-
-        self.heartbeat_timeout = 30
-        self.last_heartbeat = time.time()
-
-    @property
-    def running(self) -> bool:
-        return self.__running and self.last_heartbeat > time.time() - self.heartbeat_timeout
-
-    @running.setter
-    def running(self, __value: bool) -> None:
-        if not isinstance(__value, bool):
-            raise TypeError('The %s type is not supported' % (type(__value).__name__,))
-        self.__running = __value
-
-    async def try_request(self, method: str, url: str, with_auth: bool = True, **kwargs) -> Tuple[Any, bool]:
-        try:
-            async with self.bot.session.request(method, url, **kwargs) as response:
-                content_type = response.headers.get('Content-Type')
-                if content_type == 'application/json' or 'application/json' in content_type:
-                    data = await response.json()
-                else:
-                    data = await response.read()
-        except (asyncio.TimeoutError, ClientConnectionError) as exc:
-            _log.debug('Temporary error in the request', exc_info=exc)
-            return None, False
-        except Exception as exc:
-            _log.error('It was not possible to get data from the api', exc_info=exc)
-            return None, False
-
-        if with_auth and response.status == 401:
-            await self.try_get_oauth_token()
-        if not response.ok:
-            _log.error('It was not possible to get data from the api, status: %s, data: %s', response.status, data)
-            return None, False
-
-        return data, True
+        TwCache.__init__(self)
+        Notification.__init__(self, bot=bot, api=TwNotiAPI(bot, self, client_id, client_secret))
 
     async def callback_on_start(self, stream: Stream):
         _log.debug('%s started stream', stream.user_name)
 
         if stream.user_name not in self.user_info:
-            user = await self.get_user_info(stream.user_name)
+            user = await self.api.get_user_info(stream.user_name)
         else:
             user = self.user_info[stream.user_name]
 
@@ -100,137 +160,56 @@ class TwNoti:
                     await channel.send(**mes_data)
 
     async def callback_on_stop(self, username: str):
-        ...
+        raise NotImplementedError
 
-    async def try_add_channel(self, guild_id: int, username: str, retry: bool = False) -> None:
+    async def add_channel(self, guild_id: int, username: str) -> None:
         if username not in self.usernames:
-            with_started, _, success = await self.try_is_streaming(username)
-            if not success:
-                async def _wrap_task():
-                    await asyncio.sleep(15)
-                    await self.try_add_channel(guild_id, username, True)
-                if retry:
-                    _log.warning("It was not possible to add the user %s to the list", username)
-                else:
-                    asyncio.create_task(_wrap_task)
-                return
+            with_started, _ = await self.api.is_streaming(username)
             if with_started:
                 self.twitch_streaming.add(username)
             self.usernames.add(username)
-
-        self.directed_data.setdefault(username, set())
         self.directed_data[username].add(guild_id)
 
-    async def check_token(self) -> None:
-        if self.twitch_api_access_token is None or time.time() > self.twitch_api_access_token_end:
-            await self.try_get_oauth_token()
-
-    async def try_get_oauth_token(self) -> bool:
-        url = 'https://id.twitch.tv/oauth2/token'
-        data = {
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-            'grant_type': 'client_credentials'
-        }
-        json, success = await self.try_request('POST', url, with_auth=False, data=data)
-
-        if not success:
-            self.twitch_api_access_token_end = 0
-            self.twitch_api_access_token = ''
-            return False
-
-        self.twitch_api_access_token_end = json['expires_in']+time.time()
-        self.twitch_api_access_token = json['access_token']
-        return True
-
-    async def try_get_user_info(self, username: str) -> Tuple[Optional[User], bool]:
-        await self.check_token()
-
-        url = 'https://api.twitch.tv/helix/users'
-        params = {
-            'login': username
-        }
-        headers = {
-            'Client-ID': self.client_id,
-            'Authorization': 'Bearer ' + self.twitch_api_access_token
-        }
-
-        data, success = await self.try_request('GET', url, params=params, headers=headers)
-
-        if not success:
-            return None, False
-
-        if data is not None and len(data['data']) > 0:
-            user = User(**data['data'][0])
-            self.user_info[username] = user
-            return user, True
-
-    async def try_is_streaming(self, username: str) -> Tuple[bool, Optional[Stream], bool]:
-        await self.check_token()
-
-        url = 'https://api.twitch.tv/helix/streams'
-        params = {
-            'user_login': username
-        }
-        headers = {
-            'Client-ID': self.client_id,
-            'Authorization': 'Bearer ' + self.twitch_api_access_token
-        }
-        data, success = await self.try_request('GET', url, params=params, headers=headers)
-
-        if not success:
-            return False, None, False
-
-        if data is not None and len(data['data']) > 0:
-            return True, Stream(**data['data'][0]), True
-        else:
-            return False, None, True
-
-    async def parse_twitch(self) -> None:
-        if self.__running:
+    async def parse(self) -> None:
+        if self._running:
             return
 
-        if self.client_id is None or self.client_secret is None:
+        if self.api.client_id is None or self.api.client_secret is None:
+            _log.error("It was not possible to get tokens for authorization")
             return
-
-        await self.check_token()
 
         _log.debug('Started twitch parsing')
 
         for uid in self.usernames:
-            with_started, _, success = await self.try_is_streaming(uid)
-            for _ in range(3):
-                if not success:
-                    await asyncio.sleep(15)
-                if with_started:
-                    self.twitch_streaming.add(uid)
+            with_started, _ = await self.api.is_streaming(uid)
+            if with_started:
+                self.twitch_streaming.add(uid)
 
-        self.__running = True
+        self._running = True
         while True:
             await asyncio.sleep(self.heartbeat_timeout)
-            if not self.__running:
+            if not self._running:
                 break
             self.last_heartbeat = time.time()
 
             tasks = []
             for uid in self.usernames:
                 try:
-                    with_started, data, success = await self.try_is_streaming(uid)
+                    with_started, data = await self.api.is_streaming(uid)
                 except Exception as exp:
                     _log.error('An error was received when executing the request (%s)',
                                uid,
                                exc_info=exp)
-                    with_started, data, success = False, None, False
-                _log.debug("Notifi get %s: %s %s %s", uid, with_started, success, data)
-                if not success:
-                    _log.debug('Failed to process user %s', uid)
                     continue
+
                 if with_started and uid not in self.twitch_streaming:
                     self.twitch_streaming.add(uid)
                     tasks.append(self.callback_on_start(data))
                 if not with_started and uid in self.twitch_streaming:
                     self.twitch_streaming.remove(uid)
                     tasks.append(self.callback_on_stop(uid))
+
+                _log.trace('Data about the user %s has been received: %s %s', uid, with_started, data)
             await asyncio.gather(*tasks)
 
         _log.debug('Parsing %s ending', type(self).__name__)

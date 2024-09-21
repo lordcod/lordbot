@@ -105,7 +105,7 @@ class LordBot(commands.AutoShardedBot):
 
         self.add_listener(self.apisite._ApiSite__run, 'on_ready')
         self.add_listener(self.listen_on_ready, 'on_ready')
-        self.add_listener(self.twnoti.parse_twitch, 'on_ready')
+        self.add_listener(self.twnoti.parse, 'on_ready')
         self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
 
     def load_i18n_dir(self, dirname: str) -> None:
