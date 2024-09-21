@@ -1,3 +1,4 @@
+import contextlib
 from functools import lru_cache
 import os
 import random
@@ -245,12 +246,19 @@ def parser(
             )
 
 
-def get_dict(path: str):
+def get(path: str):
+    lang = config.get('locale')
+    return memoization_dict[lang][path]
+
+
+def get_dict(path: str, lang_mapping: Optional[dict] = None):
     data = {}
 
     for lang in default_languages:
-        text = memoization_dict[lang][path]
-        data[lang] = text
+        with contextlib.suppress(KeyError):
+            text = memoization_dict[lang][path]
+            lang = lang_mapping.get(lang, lang)
+            data[lang] = text
 
     return data
 

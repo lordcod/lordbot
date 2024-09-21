@@ -4,6 +4,7 @@ import nextcord
 from bot.databases import GuildDateBases
 from bot.languages import i18n
 from bot.misc.utils import AsyncSterilization
+from bot.views.settings.tickets.item.optns.components import TicketComponentsView
 from .optns.categories import TicketCategoriesView
 from .optns.channels import TicketChannelsView
 from .optns.messages import TicketMessagesView
@@ -37,6 +38,7 @@ distribution: List[AsyncSterilization[OptionItem]] = [
     UserLimitModal,
     TicketModRolesView,
     TicketAllowedRolesView,
+    TicketComponentsView
 ]
 distribution_keys: Dict[str, AsyncSterilization[OptionItem]] = {
     item.cls.__name__.lower(): item for item in distribution}

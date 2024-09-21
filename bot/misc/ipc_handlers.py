@@ -56,7 +56,7 @@ async def get_command_data(bot: LordBot, _: dict):
                     i18n.t(path=f"commands.command.{cmd_name}.examples.{i}.use"),
                     i18n.get_dict(f"commands.command.{cmd_name}.examples.{i}.desc")
                 ])
-            except ValueError as err:
-                print(cmd_name, i, err)
+            except ValueError:
+                pass
         new_commands.append(data)
     return new_commands

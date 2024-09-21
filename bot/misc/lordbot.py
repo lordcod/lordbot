@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 from collections import deque
+from genericpath import isdir
 import logging
 import sys
 import os
@@ -47,6 +48,7 @@ class LordBot(commands.AutoShardedBot):
     def __init__(
         self,
         *,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
         rollout_functions: bool = True,
         allow_bot_command: Optional[bool] = None,
         release_bot: Optional[bool] = None
@@ -68,6 +70,7 @@ class LordBot(commands.AutoShardedBot):
         intents.presences = False
 
         super().__init__(
+            loop=loop,
             command_prefix=self.get_command_prefixs,
             intents=intents,
             help_command=None,
@@ -102,20 +105,26 @@ class LordBot(commands.AutoShardedBot):
 
         self.add_listener(self.apisite._ApiSite__run, 'on_ready')
         self.add_listener(self.listen_on_ready, 'on_ready')
-        self.add_listener(self.twnoti.parse_twitch, 'on_ready')
+        self.add_listener(self.twnoti.parse, 'on_ready')
         self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
+
+    def load_i18n_dir(self, dirname: str) -> None:
+        for filename in os.listdir(dirname):
+            path = os.path.join(dirname, filename)
+            if os.path.isdir(path):
+                self.load_i18n_dir(path)
+            if not os.path.isfile(path) or not filename.endswith('.json'):
+                continue
+            data = i18n._parse_json(i18n._load_file(path))
+            i18n.parser(data)
 
     def load_i18n_config(self) -> None:
         i18n.config['locale'] = 'en'
         i18n.from_file("./bot/languages/localization_any.json")
 
         temps_dir = './bot/languages/temp'
-        for filename in os.listdir(temps_dir):
-            if not filename.endswith('.json'):
-                continue
-            data = i18n._parse_json(i18n._load_file(os.path.join(temps_dir, filename)))
-            i18n.parser(data)
-        _log.trace(i18n.t(path='settings.ideas.value.suggest'))
+        self.load_i18n_dir(temps_dir)
+        _log.trace('The i18n config is loaded')
 
     @property
     def session(self) -> aiohttp.ClientSession:

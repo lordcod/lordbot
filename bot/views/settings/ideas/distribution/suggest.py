@@ -5,7 +5,6 @@ from bot.misc.utils import AsyncSterilization
 from bot.views.information_dd import get_info_dd
 
 
-from ... import ideas
 from bot.databases import GuildDateBases
 from bot.databases.varstructs import IdeasPayload
 from .base import ViewOptionItem
@@ -19,7 +18,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
         self,
         guild_id: int
     ) -> None:
-        gdb = GuildDateBases(guild_id)
+        self.gdb = gdb = GuildDateBases(guild_id)
         self.idea_data = await gdb.get('ideas')
         locale = await gdb.get('language')
 
@@ -27,6 +26,7 @@ class ChannelsDropDown(nextcord.ui.ChannelSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         channel = self.values[0]
+        await self.gdb.set_on_json('ideas', 'channel_suggest_id', channel.id)
 
         view = await SuggestView(interaction.guild, channel)
         await interaction.response.edit_message(embed=view.embed, view=view)
@@ -50,37 +50,23 @@ class SuggestView(ViewOptionItem):
             description=i18n.t(locale, 'settings.ideas.init.description'),
             color=color
         )
-        self.embed.add_field(
-            name='',
-            value=i18n.t(locale, 'settings.ideas.suggest.field')
-        )
-
-        super().__init__()
-        channel_value = i18n.t(locale, 'settings.ideas.init.unspecified')
         if channel or (channel := guild.get_channel(channel_suggest_id)):
             self.channel = channel
-            self.edit.disabled = False
-            channel_value = f"#{channel.name}"
-        self.add_item(get_info_dd(
-            placeholder=i18n.t(locale, 'settings.ideas.value.suggest',
-                               channel=channel_value)
-        ))
+            self.embed.add_field(
+                name='',
+                value=i18n.t(locale, 'settings.ideas.value.suggest')+channel.mention
+            )
+
+        super().__init__()
+        self.edit_row_back(1)
 
         cdd = await ChannelsDropDown(guild.id)
         self.add_item(cdd)
 
         self.back.label = i18n.t(locale, 'settings.button.back')
-        self.edit.label = i18n.t(locale, 'settings.button.edit')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
 
-    @nextcord.ui.button(label='Edit', style=nextcord.ButtonStyle.blurple, disabled=True)
-    async def edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await self.gdb.set_on_json('ideas', 'channel_suggest_id', self.channel.id)
-
-        view = await SuggestView(interaction.guild)
-        await interaction.response.edit_message(embed=view.embed, view=view)
-
-    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
+    @nextcord.ui.button(label='Delete', row=1, style=nextcord.ButtonStyle.red, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         gdb = GuildDateBases(interaction.guild_id)
         ideas: IdeasPayload = await gdb.get('ideas')

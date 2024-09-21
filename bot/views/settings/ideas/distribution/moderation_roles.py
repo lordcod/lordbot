@@ -60,30 +60,26 @@ class ModerationRolesView(ViewOptionItem):
             color=color
         )
 
-        super().__init__()
-
-        field_roles = i18n.t(locale, 'settings.ideas.init.unspecified')
-
+        field_roles = None
         if mod_role_ids:
-            self.delete.disabled = False
-
             moderation_roles = filter(lambda item: item is not None,
                                       map(guild.get_role,
                                           mod_role_ids))
             if moderation_roles:
-                field_roles = ', '.join([role.mention for role in moderation_roles])
+                field_roles = '・'.join([role.mention for role in moderation_roles])
 
-        self.embed.add_field(
-            name='',
-            value=i18n.t(locale, 'settings.ideas.value.mod_roles',
-                         roles=field_roles),
-            inline=False
-        )
-        self.embed.add_field(
-            name='',
-            value=i18n.t(locale, 'settings.ideas.mod_role.field'),
-            inline=False
-        )
+        if field_roles:
+            self.embed.add_field(
+                name='',
+                value=i18n.t(locale, 'settings.ideas.mod_role.field')+field_roles
+            )
+
+        super().__init__()
+
+        if mod_role_ids:
+            self.delete.disabled = False
+
+        self.edit_row_back(1)
 
         cdd = await RolesDropDown(guild)
         self.add_item(cdd)
@@ -91,7 +87,7 @@ class ModerationRolesView(ViewOptionItem):
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.delete.label = i18n.t(locale, 'settings.button.delete')
 
-    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, disabled=True)
+    @nextcord.ui.button(label='Delete', style=nextcord.ButtonStyle.red, row=1, disabled=True)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.gdb.set_on_json('ideas', 'moderation_role_ids', [])
 

@@ -17,17 +17,20 @@ class DelCatView(nextcord.ui.View):
     ) -> None:
         gdb = GuildDateBases(member.guild.id)
         self.locale = await gdb.get('language')
+        emoji = nextcord.PartialEmoji.from_str(Emoji.warn)
 
         self.member = member
         self.category = category
         self.embed = nextcord.Embed(
-            title=Emoji.warn + " " +
-            i18n.t(self.locale, "delcat.issue.title"),
             description=i18n.t(self.locale, "delcat.issue.description",
                                category=self.category.name),
             color=0xED390D
         )
-        super().__init__(timeout=10)
+        self.embed.set_author(
+            name=i18n.t(self.locale, "delcat.issue.title"),
+            icon_url=emoji.url
+        )
+        super().__init__(timeout=60)
 
     @nextcord.ui.button(label="Accept", style=nextcord.ButtonStyle.blurple)
     async def accept(
@@ -39,13 +42,16 @@ class DelCatView(nextcord.ui.View):
                                             for channel in self.category.channels]
         await asyncio.gather(*tasks)
 
+        emoji = nextcord.PartialEmoji.from_str(Emoji.success)
         embed = nextcord.Embed(
-            title=Emoji.success + " " +
-            i18n.t(self.locale, "delcat.accept.title",
-                   category=self.category.name),
             description=i18n.t(
                 self.locale, "delcat.accept.description", count=len(tasks)-1),
             color=0x57F287
+        )
+        self.embed.set_author(
+            name=i18n.t(self.locale, "delcat.accept.title",
+                        category=self.category.name),
+            icon_url=emoji.url
         )
 
         await interaction.response.edit_message(embed=embed, view=None)
@@ -56,10 +62,12 @@ class DelCatView(nextcord.ui.View):
         button: nextcord.ui.Button,
         interaction: nextcord.Interaction
     ) -> None:
-        embed = nextcord.Embed(
-            title=Emoji.success + " " +
-            i18n.t(self.locale, "delcat.cancel.title"),
-            color=0x57F287
+        emoji = nextcord.PartialEmoji.from_str(Emoji.success)
+        embed = nextcord.Embed(color=0x57F287)
+        self.embed.set_author(
+            name=i18n.t(self.locale, "delcat.accept.title",
+                        category=self.category.name),
+            icon_url=emoji.url
         )
 
         await interaction.response.edit_message(embed=embed, view=None)

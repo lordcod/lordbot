@@ -28,7 +28,6 @@ async def get_voice(interaction: nextcord.Interaction) -> Optional[nextcord.Voic
         status = voice_data['status']
         if interaction.user.id == owner_id and status == VoiceStatus.opened:
             return interaction.guild.get_channel(cid)
-    return None
 
 # 'Activity' 'NSFW'
 

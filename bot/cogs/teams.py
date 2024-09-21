@@ -1,7 +1,4 @@
 import asyncio
-import os
-import subprocess
-import sys
 import time
 from typing import Literal
 import nextcord
@@ -25,6 +22,15 @@ class Teams(commands.Cog):
         if ctx.author.id not in member_teams:
             raise errors.OnlyTeamError(author=ctx.author)
         return True
+
+    @commands.command()
+    async def switch_command(self, ctx: commands.Context, flag: bool, *, cmd_name: str):
+        cmd = nextcord.utils.get(self.bot.commands, qualified_name=cmd_name)
+        if cmd is None:
+            await ctx.message.add_reaction(Emoji.cross)
+            return
+        cmd.enabled = flag
+        await ctx.message.add_reaction(Emoji.success)
 
     @commands.command()
     async def send_exc(self, ctx: commands.Context):
@@ -106,7 +112,7 @@ class Teams(commands.Cog):
         *,
         query: str
     ):
-        self.bot.engine.execute(query)
+        await self.bot.engine.execute(query)
         await ctx.message.add_reaction(Emoji.success)
 
     @commands.command(aliases=['update_db'])
@@ -151,28 +157,6 @@ class Teams(commands.Cog):
     async def disable_autmod(self, ctx: commands.Context):
         spam.RUNNING = False
         await ctx.send(f'{Emoji.success} I have disabled automod!')
-
-    @commands.command()
-    async def parse_roles(self, ctx: commands.Context):
-        auto_role = ctx.guild.get_role(1181629138138832976)
-        human = ctx.guild.get_role(1270883951917010985)
-        bots = ctx.guild.get_role(1270874041074585762)
-
-        for member in ctx.guild.humans:
-            added_roles = [auto_role, human]
-
-            if not set(added_roles) - set(member.roles):
-                continue
-
-            await member.add_roles(*added_roles, atomic=False)
-
-        for bot in ctx.guild.bots:
-            added_roles = [auto_role, bots]
-
-            if not set(added_roles) - set(bot.roles):
-                continue
-
-            await bot.add_roles(*added_roles, atomic=False)
 
     @commands.command()
     async def update_localization(self, ctx: commands.Context):

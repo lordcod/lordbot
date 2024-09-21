@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from ast import Tuple
 from dataclasses import dataclass
-from enum import IntEnum
 import logging
 import nextcord
 import time
@@ -16,10 +15,11 @@ from bot.misc import logstool
 from bot.misc.time_transformer import display_time
 from bot.misc.utils import AsyncSterilization, IdeaPayload, generate_message, get_payload, lord_format
 
-from bot.databases.varstructs import ButtonPayload, IdeasPayload, IdeasReactionsPayload
+from bot.databases.varstructs import (ButtonPayload, IdeasPayload, IdeasReactionsPayload,
+                                      IdeasReactionSystem as ReactionSystemType, IdeasSuggestSystem)
 from bot.databases import localdb, GuildDateBases
 from bot.languages import i18n
-from bot.resources.info import DEFAULT_IDEAS_PAYLOAD, DEFAULT_IDEAS_PAYLOAD_RU, DEFAULT_IDEAS_REVOTING
+from bot.resources.info import DEFAULT_IDEAS_ALLOW_IMAGE, DEFAULT_IDEAS_PAYLOAD, DEFAULT_IDEAS_PAYLOAD_RU, DEFAULT_IDEAS_REVOTING
 
 
 _log = logging.getLogger(__name__)
@@ -95,11 +95,6 @@ def get_payload_idea(
                                         demoted_count,
                                         moderator,
                                         reason))
-
-
-class ReactionSystemType(IntEnum):
-    REACTIONS = 0
-    BUTTONS = 1
 
 
 class Timeout:
@@ -352,6 +347,10 @@ class ConfirmView(nextcord.ui.View):
         locale = await gdb.get('language')
         ideas_data: IdeasPayload = await gdb.get('ideas')
 
+        if IdeasSuggestSystem.COMMANDS == ideas_data.get('suggest_system'):
+            self.remove_item(self.approve)
+            self.remove_item(self.deny)
+
         refresh_view(self, locale,  ideas_data, get_payload(guild=guild))
 
     async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
@@ -407,6 +406,10 @@ class ReactionConfirmView(nextcord.ui.View):
         gdb = GuildDateBases(guild.id)
         self.locale = await gdb.get('language')
         ideas_data: IdeasPayload = await gdb.get('ideas')
+
+        if IdeasSuggestSystem.COMMANDS == ideas_data.get('suggest_system'):
+            self.remove_item(self.approve)
+            self.remove_item(self.deny)
 
         payload = get_payload(guild=guild)
         payload['idea.promotedCount'] = payload['idea.demotedCount'] = 0
@@ -510,7 +513,7 @@ class IdeaModal(nextcord.ui.Modal):
         gdb = GuildDateBases(guild_id)
         self.locale = locale = await gdb.get('language')
         ideas_data: IdeasPayload = await gdb.get('ideas')
-        allow_image = ideas_data.get('allow_image', True)
+        allow_image = ideas_data.get('allow_image', DEFAULT_IDEAS_ALLOW_IMAGE)
 
         super().__init__(i18n.t(locale, 'ideas.globals.title'))
 
@@ -562,7 +565,6 @@ class IdeaModal(nextcord.ui.Modal):
     async def create_thread(locale: str, message: nextcord.Message, ideas_data: IdeasPayload, payload: dict) -> None:
         if ideas_data.get('thread_open'):
             DEFAULT_THREAD_NAME = get_default_payload(locale)['thread_name']
-            print(DEFAULT_THREAD_NAME)
         thread_name = ideas_data.get('thread_name', DEFAULT_THREAD_NAME)
         await message.create_thread(name=lord_format(thread_name,
                                                      payload))

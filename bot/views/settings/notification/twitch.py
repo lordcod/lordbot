@@ -83,7 +83,7 @@ class TwitchItemModal(nextcord.ui.Modal):
                                             ephemeral=True)
             return
 
-        user = await interaction.client.twnoti.get_user_info(username)
+        user = await interaction.client.twnoti.api.get_user_info(username)
         if user is None:
             await interaction.followup.send(i18n.t(locale, 'settings.notifi.twitch.modal.error'),
                                             ephemeral=True)
@@ -141,7 +141,7 @@ class TwitchItemView(nextcord.ui.View):
             if username in bot.twnoti.user_info:
                 userinfo = bot.twnoti.user_info[username]
             else:
-                userinfo = await bot.twnoti.get_user_info(username)
+                userinfo = await bot.twnoti.api.get_user_info(username)
 
         user = f'{userinfo.display_name} ({userinfo.login})' if userinfo else i18n.t(
             'settings.notifi.unspecified')

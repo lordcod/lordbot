@@ -93,9 +93,7 @@ class TicketMessagesDropDown(nextcord.ui.StringSelect):
                 label=i18n.t(locale, data['label']),
                 value=key,
                 default=key == selected_value,
-                emoji=data.get('emoji'),
-                description=i18n.t(locale, data.get('description')) if data.get(
-                    'description') else None
+                emoji=data.get('emoji')
             )
             for key, data in messages_data.items()
         ]

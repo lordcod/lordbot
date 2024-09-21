@@ -6,6 +6,8 @@ import logging
 import time
 from typing import Any, Dict, List, Optional, Union, TypeVar
 
+from numpy import isin
+
 
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
@@ -160,6 +162,16 @@ class GuildDateBases:
 
         await engine.execute('DELETE FROM guilds WHERE id = %s',
                              (self.guild_id,))
+
+    @on_error()
+    @staticmethod
+    async def get_all(service: str, *, not_null: bool = False) -> Union[T, Any]:
+        if not isinstance(service, str):
+            raise TypeError
+        return await engine.fetchall(
+            'SELECT id, ' + service + ' FROM guilds'
+            + (' WHERE ' + service + ' IS NOT NULL' if not_null else '')
+        )
 
     @on_error()
     @staticmethod
