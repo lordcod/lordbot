@@ -23,7 +23,7 @@ class GuildsEvent(commands.Cog):
 
         twitch_data = await gdb.get('twitch_notification', {})
         for data in twitch_data.values():
-            await self.bot.twnoti.try_add_channel(guild.id, data['username'])
+            await self.bot.twnoti.add_channel(guild.id, data['username'])
 
         youtube_data = await gdb.get('youtube_notification', {})
         for data in youtube_data.values():
