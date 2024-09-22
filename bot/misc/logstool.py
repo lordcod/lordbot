@@ -219,6 +219,7 @@ def on_logs(log_type: int):
 class Logs:
     def __init__(self, guild: Optional[nextcord.Guild]):
         if guild is None:
+            self.guild = None
             return
         self.guild = guild
         self.gdb = GuildDateBases(guild.id)

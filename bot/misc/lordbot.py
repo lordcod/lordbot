@@ -1,14 +1,14 @@
 from __future__ import annotations
 import asyncio
 from collections import deque
-from genericpath import isdir
+import git
 import logging
 import sys
 import os
 import aiohttp
 import nextcord
 import regex
-from typing import Coroutine, List, Optional, Dict, Any
+from typing import TYPE_CHECKING, Coroutine, List, Optional, Dict, Any
 
 from nextcord.ext import commands
 
@@ -38,12 +38,13 @@ def get_shard_list(shard_ids: str):
 
 
 class LordBot(commands.AutoShardedBot):
-    API_URL: str
-    engine: DataBase
-    ya_requests: Any = None
+    if TYPE_CHECKING:
+        release_sha: str
+        release_date: int
+        release_tag: str
+        API_URL: str
+        engine: DataBase
     invites_data: Dict[int, List[nextcord.Invite]] = {}
-    timeouts = {}
-    guild_timer_handlers = {}
 
     def __init__(
         self,
@@ -73,6 +74,7 @@ class LordBot(commands.AutoShardedBot):
             loop=loop,
             command_prefix=self.get_command_prefixs,
             intents=intents,
+            status=nextcord.Status.idle,
             help_command=None,
             enable_debug_events=True,
             rollout_associate_known=rollout_functions,
@@ -89,6 +91,10 @@ class LordBot(commands.AutoShardedBot):
         self._connection.max_messages = None
 
         self.load_i18n_config()
+        self.get_git_info()
+
+        self.activity = nextcord.Activity(name=f'{DEFAULT_PREFIX}help | {self.release_tag}',
+                                          type=nextcord.ActivityType.competing)
 
         loop = asyncio.get_event_loop()
 
@@ -107,6 +113,14 @@ class LordBot(commands.AutoShardedBot):
         self.add_listener(self.listen_on_ready, 'on_ready')
         self.add_listener(self.twnoti.parse, 'on_ready')
         self.add_listener(self.ytnoti.parse_youtube, 'on_ready')
+
+    def get_git_info(self):
+        repo = git.Repo(search_parent_directories=True)
+
+        self.release_sha = repo.head.object.hexsha[:8]
+        self.release_date = repo.head.object.committed_date
+        tags_dt = {tag.commit.committed_date: tag for tag in repo.tags}
+        self.release_tag = tags_dt[max(tags_dt)].name
 
     def load_i18n_dir(self, dirname: str) -> None:
         for filename in os.listdir(dirname):
