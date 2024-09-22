@@ -72,11 +72,10 @@ def time_convert(timestamp: (int | float)) -> dict[str, int]:
     }
 
 
-def display_time(number: int, lang: str = "en", max_items: int = 3, with_rounding: bool = False) -> str:
+def display_time(number: int, lang: str = "en", max_items: int = 3) -> str:
     if number == 0:
         return distributing.get(lang, distributing['en'])(0, 'seconds')
-    if number % 10 != 0:
-        number = round(number + 5, -1)
+    number = round(number, -1)
 
     func = distributing.get(lang, distributing['en'])
 
@@ -84,14 +83,6 @@ def display_time(number: int, lang: str = "en", max_items: int = 3, with_roundin
     current_time = {key: num
                     for key, num in current_time.items()
                     if num != 0}
-
-    if with_rounding:
-        if max_items > len(current_time):
-            index = list(current_time.keys())[len(current_time)-1]
-            current_time[index] += 1
-        else:
-            index = list(current_time.keys())[max_items-1]
-            current_time[index] += 1
 
     time_strings = [func(num, key)
                     for key, num in current_time.items()]

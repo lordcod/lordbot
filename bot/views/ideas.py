@@ -565,9 +565,9 @@ class IdeaModal(nextcord.ui.Modal):
     async def create_thread(locale: str, message: nextcord.Message, ideas_data: IdeasPayload, payload: dict) -> None:
         if ideas_data.get('thread_open'):
             DEFAULT_THREAD_NAME = get_default_payload(locale)['thread_name']
-        thread_name = ideas_data.get('thread_name', DEFAULT_THREAD_NAME)
-        await message.create_thread(name=lord_format(thread_name,
-                                                     payload))
+            thread_name = ideas_data.get('thread_name', DEFAULT_THREAD_NAME)
+            await message.create_thread(name=lord_format(thread_name,
+                                                         payload))
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)

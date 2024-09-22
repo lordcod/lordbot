@@ -75,4 +75,4 @@ class CooldownView(ViewOptionItem):
     @nextcord.ui.button(label='Reset', style=nextcord.ButtonStyle.blurple)
     async def reset(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.gdb.set_on_json('ideas', 'cooldown', None)
-        self.update(interaction)
+        await self.update(interaction)
