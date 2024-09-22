@@ -64,7 +64,7 @@ async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
         (i18n.t(locale, 'settings.ideas.value.approved'), channel_approved and channel_approved.mention),
         ('',),
         (i18n.t(locale, 'settings.ideas.value.enabled'),  get_emoji(system_emoji, enabled)),
-        (i18n.t(locale, 'settings.ideas.value.cooldown'), display_time(cooldown, locale, max_items=2)),
+        (i18n.t(locale, 'settings.ideas.value.cooldown'), cooldown and display_time(cooldown, locale, max_items=2)),
         (i18n.t(locale, 'settings.ideas.value.mod_roles'), '・'.join([role.mention for role in moderation_roles])),
         (i18n.t(locale, 'settings.ideas.value.revoting'), get_emoji(system_emoji, revoting)),
         (i18n.t(locale, 'settings.ideas.value.allow_image'), get_emoji(system_emoji, allow_image)),
