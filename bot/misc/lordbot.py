@@ -17,6 +17,7 @@ from bot.databases import db
 from bot.databases.db import DataBase, establish_connection
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
+from bot.resources.ether import Emoji
 from bot.resources.info import DEFAULT_PREFIX
 from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
@@ -93,10 +94,7 @@ class LordBot(commands.AutoShardedBot):
         self.load_i18n_config()
         self.get_git_info()
 
-        self.activity = nextcord.Activity(name=f'{DEFAULT_PREFIX}help | {self.release_tag}',
-                                          type=nextcord.ActivityType.competing)
-
-        loop = asyncio.get_event_loop()
+        self.activity = nextcord.CustomActivity(name=f'{DEFAULT_PREFIX}help | {self.release_tag}')
 
         self.__session = None
         self.apisite = ApiSite(self, handlers)
@@ -104,10 +102,10 @@ class LordBot(commands.AutoShardedBot):
         self.twnoti = TwitchNotification(self)
         self.ytnoti = YoutubeNotification(self)
 
-        self.__with_ready__ = loop.create_future()
+        self.__with_ready__ = self.loop.create_future()
         self.__with_ready_events__ = []
 
-        self.lord_handler_timer: LordTimeHandler = LordTimeHandler(loop)
+        self.lord_handler_timer: LordTimeHandler = LordTimeHandler(self.loop)
 
         self.add_listener(self.apisite._ApiSite__run, 'on_ready')
         self.add_listener(self.listen_on_ready, 'on_ready')
