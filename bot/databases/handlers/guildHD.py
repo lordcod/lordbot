@@ -76,7 +76,7 @@ class GuildDateBases:
     @on_error()
     async def _exists(self, guild_id):
         return await engine.fetchone(
-            'SELECT EXISTS (SELECT true FROM guilds WHERE id=%s);', (guild_id,))
+            'SELECT EXISTS (SELECT true FROM guilds WHERE id=%s)', (guild_id,))
 
     @on_error()
     async def _get(self, guild_id):

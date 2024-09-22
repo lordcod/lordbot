@@ -34,8 +34,8 @@ class InteractionsEvent(commands.Cog):
         )
         if set(interaction.data['custom_id']) - set(hexdigits):
             embed.add_field(
-                '',
-                i18n.t(locale, 'interaction.error.expired.support',  DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER)
+                name='',
+                value=i18n.t(locale, 'interaction.error.expired.support',  DISCORD_SUPPORT_SERVER=DISCORD_SUPPORT_SERVER)
             )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 

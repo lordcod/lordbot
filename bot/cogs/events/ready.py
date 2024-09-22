@@ -13,6 +13,7 @@ from bot.misc.utils import AsyncSterilization
 from bot.resources import ether
 from bot.resources.ether import ColorType
 from bot.views.giveaway import GiveawayView
+from bot.views.help import HelpView
 from bot.views.ideas import ConfirmView, IdeaView, ReactionConfirmView
 
 import time
@@ -59,7 +60,7 @@ class ReadyEvent(commands.Cog):
         _log.info(f"The bot is registered as {self.bot.user}")
 
     async def add_views(self):
-        views = [ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
+        views = [HelpView, ControllerTicketView, CloseTicketView, FAQView, ConfirmView,
                  ReactionConfirmView, IdeaView, GiveawayView, TempVoiceView, AdvancedTempVoiceView]
         for view in views:
             if isinstance(view, AsyncSterilization):
