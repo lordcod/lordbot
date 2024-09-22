@@ -47,7 +47,7 @@ async def get_embed(guild: nextcord.Guild) -> nextcord.Embed:
     allow_image = ideas.get('allow_image', DEFAULT_IDEAS_ALLOW_IMAGE)
     thread_open = ideas.get('thread_open')
     thread_delete = ideas.get('thread_delete')
-    moderation_role_ids = ideas.get("moderation_role_ids")
+    moderation_role_ids = ideas.get("moderation_role_ids", [])
     moderation_roles = filter(lambda item: item is not None,
                               map(guild.get_role,
                                   moderation_role_ids))
