@@ -159,8 +159,7 @@ class TwNoti(Notification[TwNotiAPI], TwCache):
                     mes_data = generate_message(lord_format(data.get('message', DEFAULT_TWITCH_MESSAGE), payload))
                     await channel.send(**mes_data)
 
-    async def callback_on_stop(self, username: str):
-        raise NotImplementedError
+    async def callback_on_stop(self, username: str): ...
 
     async def add_channel(self, guild_id: int, username: str) -> None:
         if username not in self.usernames:

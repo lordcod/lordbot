@@ -16,16 +16,6 @@ from bot.languages import i18n
 from bot.views.translate import AutoTranslateView
 
 import googletrans
-import git
-
-
-repo = git.Repo(search_parent_directories=True)
-
-release_sha = repo.head.object.hexsha[:8]
-release_date = repo.head.object.committed_date
-tags_dt = {tag.commit.committed_date: tag for tag in repo.tags}
-release_tag = tags_dt[max(tags_dt)].name
-
 
 translator = googletrans.Translator()
 
@@ -136,7 +126,8 @@ class MessageEvent(commands.Cog):
                 color=color
             )
             embed.add_field(name='Assembly Information', value=i18n.t(
-                locale, 'bot-info.assembly', version=release_tag, hash=release_sha, time=release_date))
+                locale, 'bot-info.assembly', version=self.bot.release_tag,
+                hash=self.bot.release_sha, time=self.bot.release_date))
 
             asyncio.create_task(message.channel.send(embed=embed))
 

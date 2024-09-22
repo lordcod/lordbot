@@ -146,7 +146,7 @@ class Teams(commands.Cog):
             case 'ytnoti':
                 parse_name = 'parse_youtube'
             case 'twnoti':
-                parse_name = 'parse_twitch'
+                parse_name = 'parse'
 
         parser = getattr(noti, parse_name)()
         asyncio.create_task(parser, name=f'{service}:parser')
