@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 from collections import deque
+import contextlib
 import git
 import logging
 import sys
@@ -240,7 +241,8 @@ class LordBot(commands.AutoShardedBot):
         _log.debug('Listen on ready')
 
         if self.release_bot:
-            await self.update_api_config()
+            with contextlib.suppress(Exception):
+                await self.update_api_config()
 
         try:
             self.engine = engine = await DataBase.create_engine(os.getenv('POSTGRESQL_DNS'))
