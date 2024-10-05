@@ -330,7 +330,7 @@ class TicketFormsView(ViewOptionItem):
                     (i18n.t(locale, 'settings.tickets.modals.info.placeholder'),
                      item.get('placeholder')),
                     (i18n.t(locale, 'settings.tickets.modals.info.default'),
-                     item.get('default_value')[:250]),
+                     item.get('default_value', '')[:250]),
                     (i18n.t(locale, 'settings.tickets.modals.info.style'),
                      get_style(locale, item.get('style', 1))),
                     (i18n.t(locale, 'settings.tickets.modals.info.required'),

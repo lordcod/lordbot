@@ -29,7 +29,7 @@ class ReactionsEvent(commands.Cog):
         try:
             role_id = role_reaction[payload.message_id]['reactions'][str(
                 payload.emoji)]
-        except KeyError:
+        except (KeyError, TypeError):
             return
 
         role = guild.get_role(role_id)

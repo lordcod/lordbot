@@ -69,8 +69,7 @@ class IdeasView(DefaultSettingsView):
 
         super().__init__()
 
-        idd = await IdeasDropDown(guild)
-        self.add_item(idd)
+        self.add_item(await IdeasDropDown(guild))
 
         self.back.label = i18n.t(locale, 'settings.button.back')
         self.enable.label = i18n.t(locale, 'settings.button.enable')
@@ -79,7 +78,6 @@ class IdeasView(DefaultSettingsView):
         if enabled:
             self.remove_item(self.enable)
         else:
-            idd.disabled = True
             self.remove_item(self.disable)
 
     @nextcord.ui.button(label='Back', style=nextcord.ButtonStyle.red)

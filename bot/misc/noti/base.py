@@ -52,7 +52,7 @@ class NotificationApi:
             await asyncio.sleep(30)
 
         if exception is not None:
-            raise exception from None
+            raise exception
 
 
 class Notification(Generic[T]):
