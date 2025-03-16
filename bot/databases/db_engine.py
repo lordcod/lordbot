@@ -78,7 +78,11 @@ class DataBase:
 
     async def get_connection(self):
         if not self.__connection or self.__connection.closed:
-            self.__connection = psycopg2.connect(self.conn_dns, connection_factory=MyLoggingConnection)
+            self.__connection = psycopg2.connect(
+                self.conn_dns,
+                connection_factory=MyLoggingConnection,
+                options="-c client_encoding=UTF8"
+            )
             self.__connection.debug_logs = self.debug_logs
             self.__connection.autocommit = True
             self.__connection.initialize(_log)

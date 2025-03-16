@@ -18,7 +18,6 @@ from bot.databases import db
 from bot.databases.db import DataBase, establish_connection
 from bot.misc.api_site import ApiSite
 from bot.misc.ipc_handlers import handlers
-from bot.resources.ether import Emoji
 from bot.resources.info import DEFAULT_PREFIX
 from bot.misc.utils import LordTimeHandler, get_parser_args
 from bot.languages import i18n
@@ -77,8 +76,12 @@ class LordBot(commands.AutoShardedBot):
             command_prefix=self.get_command_prefixs,
             intents=intents,
             status=nextcord.Status.idle,
+            connector=aiohttp.TCPConnector(
+                verify_ssl=False
+            ),
             help_command=None,
             enable_debug_events=True,
+            # proxy=os.getenv('PROXY'),
             rollout_associate_known=rollout_functions,
             rollout_delete_unknown=rollout_functions,
             rollout_register_new=rollout_functions,

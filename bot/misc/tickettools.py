@@ -55,8 +55,6 @@ def parse_permissions_string(permission_data: dict, mod_roles: list, guild_id: i
 
 
 class ModuleTicket:
-    # TODO: Add logs
-
     locale: Optional[str] = None
     settings_message = None
     selected_category: Optional[CategoryPayload] = None
@@ -84,6 +82,7 @@ class ModuleTicket:
             return self.locale
 
         self.locale = await self.gdb.get('language')
+        return self.locale
 
     @classmethod
     async def from_channel_id(cls, member: nextcord.Member, channel: nextcord.TextChannel) -> Self:
@@ -498,25 +497,25 @@ class ModuleTicket:
         await self.ticket_channel.send(**close_message)
         await self.ticket_channel.send(**ctrl_message, view=view)
 
-        editted_data = None
+        edited_data = None
 
         if ticket_type == 1:
             closed_category_id = get_data('closed_category_id')
             closed_category = self.guild.get_channel(closed_category_id)
-            editted_data = dict(
+            edited_data = dict(
                 name=close_name,
                 topic=self.ticket_channel.topic +
                 i18n.t(locale, 'tickets.topic.close', member=self.member.name)
             )
             if closed_category:
-                editted_data['category'] = closed_category
+                edited_data['category'] = closed_category
         elif ticket_type == 2:
-            editted_data = dict(name=close_name)
+            edited_data = dict(name=close_name)
 
         if name is None:
-            editted_data.pop('name')
-        if editted_data:
-            await self.ticket_channel.edit(**editted_data)
+            edited_data.pop('name')
+        if edited_data:
+            await self.ticket_channel.edit(**edited_data)
 
         self.status = TicketStatus.closed
         await self.set_ticket_data()
@@ -563,26 +562,26 @@ class ModuleTicket:
 
         await self.ticket_channel.send(**reopen_message)
 
-        editted_data = None
+        edited_data = None
 
         if ticket_type == 1:
             closed_category_id = get_data('closed_category_id')
             category_id = get_data('category_id')
             category = self.guild.get_channel(category_id)
-            editted_data = dict(
+            edited_data = dict(
                 name=reopen_name,
                 topic=self.ticket_channel.topic +
                 i18n.t(locale, 'tickets.topic.reopen', member=self.member.name)
             )
             if closed_category_id and category:
-                editted_data['category'] = category
+                edited_data['category'] = category
         elif ticket_type == 2:
-            editted_data = dict(name=reopen_name)
+            edited_data = dict(name=reopen_name)
 
         if close_name is None:
-            editted_data.pop('name')
-        if editted_data:
-            await self.ticket_channel.edit(**editted_data)
+            edited_data.pop('name')
+        if edited_data:
+            await self.ticket_channel.edit(**edited_data)
 
         self.status = TicketStatus.opened
         await self.set_ticket_data()

@@ -12,7 +12,7 @@ from bot.misc.utils import get_emoji_wrap
 from bot.views.help import HelpView
 
 
-REGEXP_COMMAND_NAME = re.compile(r'([ _\-\.a-zA-Z0-9]+)')
+REGEXP_COMMAND_NAME = re.compile(r'([\s_\-\.a-zA-Z0-9]+)')
 
 
 def get_disable_command_value(

@@ -280,6 +280,10 @@ class MusicPlayer:
         )
 
     async def callback(self, err):
+        if err is not None:
+            _log.exception('Ignoring exception on start music')
+            return
+
         with contextlib.suppress(AttributeError):
             sessions_volume[self.guild_id] = self.voice.source.volume
         if self.updated_task and not self.updated_task.done():

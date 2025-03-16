@@ -1,7 +1,6 @@
 import asyncio
 import nextcord
 from typing import Coroutine, Any, Dict
-from bot.databases import localdb
 from bot.databases.handlers.economyHD import EconomyMemberDB
 from bot.databases.varstructs import GiveawayData
 from bot.databases import GuildDateBases

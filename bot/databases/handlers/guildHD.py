@@ -6,9 +6,6 @@ import logging
 import time
 from typing import Any, Dict, List, Optional, Union, TypeVar
 
-from numpy import isin
-
-
 from ..db_engine import DataBase
 from ..misc.error_handler import on_error
 
@@ -69,8 +66,11 @@ class GuildDateBases:
         if self.guild_id in reserved:
             return
         reserved.append(self.guild_id)
+        print(reserved)
         if not await self._exists(self.guild_id):
+            print('not exists')
             await self._insert(self.guild_id)
+            print('insert')
             _log.trace(f"Guild {self.guild_id} registration completed")
 
     @on_error()
